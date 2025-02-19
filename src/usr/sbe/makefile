@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2021
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -28,7 +28,6 @@ MODULE = sbe
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/

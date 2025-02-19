@@ -721,21 +721,25 @@ class UpdateProcessorSbes : public UpdateWorkItem
      */
     errlHndl_t secureKeyTransition();
 
-    /**
-     * @brief locate the hbbl ID string buffer
+     /**
+     * @brief Locate the string in the buffer, by searching backwards from the
+     *        end of the buffer to the front. The string must be at least 8 bytes.
+     *
+     * @param[in] i_pStr               String to find
      *
      * @param[in] i_pSourceBfr         Ptr to buffer to search
      *
      * @param[in] i_SourceBfrSize      length (in bytes) of source buffer
      *
-     * @param[out] o_pHbblIdStringBfr  Ptr to Hbbl ID String
-     *                                   NULL if not found
+     * @param[out] o_pString           Ptr to the first byte after i_pStr in i_pSourceBfr
+     *                                 NULL if not found
      *
-     * @return errlHndl_t              Error log handle on failure.
+     * @return bool                    true if string is found
      */
-    errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
-                                      uint32_t i_SourceBfrLen,
-                                      void * & o_pHbblIdStringBfr );
+     bool locateStringInBfr( const char*    i_pStr,
+                             void*          i_pSourceBfr,
+                             uint32_t       i_SourceBfrLen,
+                             void*          &o_pString);
 
     /**
      *  @brief Updates the key transition state for the node

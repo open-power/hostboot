@@ -97,6 +97,9 @@
 #include <secureboot/service.H>
 #include <assert.h>
 #include <securerom/sha512.H>
+#include <p10_ipl_customize_mask.H>
+
+#include <cxxtest/TestInject.H>
 
 // ----------------------------------------------
 // Trace definitions
@@ -178,11 +181,151 @@ using namespace scomt::perv;
 
 namespace SBE
 {
+#if defined(CONFIG_COMPILE_CXXTEST_HOOKS)
+using namespace CxxTest;
+    uint32_t ci_spd_CRC{0}; // use in CI to store the SPD VPD CRC
+
+    /*
+    * @brief Set the mask/unmask XIP section data and update the CRC
+    */
+    void ci_inject_set_sections(sbeTargetState_t &io_sbeState,
+                                void             *i_custImage,
+                                uint32_t          i_custImageSize)
+    {
+        P9XipSection l_xipSection{0};
+        uint64_t     l_section_addr{0};
+        uint8_t      l_value{0};
+
+        if (g_cxxTestInject.isSet(SBE_INJECT_NON_ZERO_SECTIONS))
+        {
+            l_value = 0x7b; // rather than 0, use this value to modify the section data
+        }
+
+        if (g_cxxTestInject.isSet(SBE_INJECT_BZERO_SECTIONS)   || // if inject is
+            g_cxxTestInject.isSet(SBE_INJECT_NON_ZERO_SECTIONS)|| // to modify the
+            g_cxxTestInject.isSet(SBE_INJECT_CHANGE_BYTE))        // custImage
+        {
+            for (const auto& xipMask : g_xipSectionMask)
+            {
+                if (p9_xip_get_section(i_custImage, xipMask.section, &l_xipSection) ||
+                    l_xipSection.iv_size == 0)
+                {
+                    continue; // not found or no size, so skip
+                }
+                if (!xipMask.selectOffsetMarker)
+                {
+                    // this table entry is an offset
+                    l_section_addr = reinterpret_cast<uint64_t>(i_custImage) +
+                                                    l_xipSection.iv_offset +
+                                        *(uint32_t*)xipMask.startOffsetMarker;
+                }
+                else
+                {
+                    // this table entry is a string id
+                    void *pIdStringBfr{nullptr};
+                    if (locateStringInBfr((char*)(xipMask.startOffsetMarker),
+                                        i_custImage,
+                                        i_custImageSize,
+                                        pIdStringBfr))
+                    {
+                        l_section_addr = reinterpret_cast<uint64_t>(pIdStringBfr);
+                    }
+                    if (!l_section_addr) {continue;} // not found, so skip
+
+                    if (g_cxxTestInject.isSet(SBE_INJECT_CHANGE_BYTE))
+                    {
+                        // set one byte, just outside of one table entry
+                        *(uint8_t*)((uint64_t)l_section_addr +
+                                            xipMask.numberOfBytesToMask) = 0x6a;
+                        break;
+                    }
+                }
+
+                // set the section data to value
+                memset(reinterpret_cast<void *>(l_section_addr),
+                    l_value,
+                    xipMask.numberOfBytesToMask);
+            }
+
+            // update the CRC since we modified the custImage
+            io_sbeState.customizedImage_crc = Util::crc32_calc(i_custImage, i_custImageSize);
+        }
+
+        if (g_cxxTestInject.isSet(SBE_INJECT_BZERO_SECTIONS))
+        {
+            ci_spd_CRC = Util::crc32_calc(i_custImage, i_custImageSize);
+        }
+    }
+    /*
+    * @brief Handle injects after the mask/unmask XIP section data
+    */
+    void do_inject(sbeTargetState_t &io_sbeState)
+    {
+        // default, set good values
+        io_sbeState.seeprom_0_ver.struct_version = STRUCT_VERSION_LATEST;
+        io_sbeState.seeprom_1_ver.struct_version = STRUCT_VERSION_LATEST;
+        memcpy( &(io_sbeState.pnorVersion),
+                &(io_sbeState.seeprom_0_ver.image_version),
+                SBE_IMAGE_VERSION_SIZE);
+        memcpy( &(io_sbeState.pnorVersion),
+                &(io_sbeState.seeprom_1_ver.image_version),
+                SBE_IMAGE_VERSION_SIZE);
+
+        // default, set CRC from our local save
+        io_sbeState.seeprom_0_ver.data_crc = ci_spd_CRC;
+        io_sbeState.seeprom_1_ver.data_crc = ci_spd_CRC;
+
+        if (g_cxxTestInject.isSet(SBE_INJECT_CRC_MISMATCH))
+        {
+            // zero the VPD CRC to ensure it is different from custImage CRC
+            io_sbeState.seeprom_0_ver.data_crc = 0;
+            io_sbeState.seeprom_1_ver.data_crc = 0;
+        }
+    }
+#define CI_INJECT_MASK_UNMASK_SET_XIP_SECTIONS(_a,_b,_c) ci_inject_set_sections(_a,_b,_c)
+#define CI_INJECT_MASK_UNMASK(_a) do_inject(_a)
+#define CI_INJECT_MASK_UNMASK_CHECK_FOR_SKIP() \
+    if (g_cxxTestInject.isSet(SBE_INJECT_SKIP_MASK)) {continue;}
+#else
+#define CI_INJECT_MASK_UNMASK_SET_XIP_SECTIONS(_a,_b,_c)
+#define CI_INJECT_MASK_UNMASK(_s)
+#define CI_INJECT_MASK_UNMASK_CHECK_FOR_SKIP()
+
+#endif // CONFIG_COMPILE_CXXTEST_HOOKS
+
+
     // initialize mutex used around access to iv_sbeStates
     mutex_t UpdateProcessorSbes::cv_sbeStateMutex = MUTEX_INITIALIZER;
 
     // type used to divvy up SBE update spaces to a list of SBEs
     typedef std::map<uint64_t, std::vector<TargetHandle_t>> vaddr_sbes_map_t;
+
+    /**
+    * @brief Struct used to save off xipsection data while the
+    * CRC is updated in maskUnmaskMetaData.
+    */
+
+    struct maskedMetaData {
+        void* address;
+        uint8_t* tempDataBfr;
+        size_t size;
+    };
+    // type used to store masked metadata
+    typedef std::vector<maskedMetaData> vaddr_metadata_vector_t;
+
+    /**
+    * @brief Mask xipsection offsets for meta data the could cause spurious sbe updates
+    *
+    * @param[in] i_pSourceBfr         Ptr to buffer to search
+    * @param[in] i_SourceBfrSize      size (in bytes) of source buffer
+    * @param[in] i_maskFlag           True - masks metadata, False - unmasks metadata
+    * @param[out] o_maskedDataVector  Makes a vector of all the metadata that was masked
+    * @return errlHndl_t              Error log handle on failure.
+    */
+    errlHndl_t  maskUnmaskMetaData( void *                    i_pSourceBfr,
+                                    uint32_t                  i_SourceBfrSize,
+                                    bool                      i_maskFlag,
+                                    vaddr_metadata_vector_t & o_maskedDataVector);
 
     // Function prototypes
     /**
@@ -3323,35 +3466,28 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
             // @TODO JIRA:PFHB-802 Add check for SB signing mode
 
-            // save off the hbbl id and remove it from the image
             void * pSearchBfr = pCustomizedBfr;
             uint32_t searchSize = sbeImgSize; // Actual image size
-            void * pHbblIdStringBfr;
+            vaddr_metadata_vector_t tempMetaDataVector;
 
-            err = locateHbblIdStringBfr( pSearchBfr,
-                                         searchSize,
-                                         pHbblIdStringBfr );
-            if(err)
+            CI_INJECT_MASK_UNMASK_SET_XIP_SECTIONS(io_sbeState, pCustomizedBfr, sbeImgSize);
+
+            // Remove specific section data from the image, before the
+            // CRC is calculated.
+            err = maskUnmaskMetaData(pSearchBfr,
+                                     searchSize,
+                                     true,
+                                     tempMetaDataVector);
+
+            if (err)
             {
-                //If string search failure, commit the error and move
-                //   to the next proc
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error searching for HBBL ID string, "
-                           "RC=0x%X, EID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETEID_SAFE(err));
+                TRACFCOMP(g_trac_sbe, ERR_MRK"getSbeInfoState: "
+                          "maskUnmaskMetaData(CustomizedBfr) failed to mask."
+                          "RC=0x%X, EID=0x%lX",
+                          ERRL_GETRC_SAFE(err),
+                          ERRL_GETEID_SAFE(err));
                 break;
             }
-
-            // save off the hbbl ID string and clear the source
-            uint8_t tempHbblStringIdBfr[128];
-            memcpy( &tempHbblStringIdBfr[0],
-                    pHbblIdStringBfr,
-                    sizeof(tempHbblStringIdBfr) );
-
-            memset( pHbblIdStringBfr,
-                    0,
-                    sizeof(tempHbblStringIdBfr) );
 
             // Calculate Data CRC
             io_sbeState.customizedImage_size = sbeImgSize;
@@ -3365,10 +3501,21 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                        io_sbeState.customizedImage_crc,
                        sbe_secure_version, sha512_to_u32(sbe_hash));
 
-            // restore the hbbl ID string
-            memcpy( pHbblIdStringBfr,
-                    &tempHbblStringIdBfr[0],
-                    sizeof(tempHbblStringIdBfr) );
+            // restore each section data that was masked above
+            err = maskUnmaskMetaData(pCustomizedBfr,
+                                     searchSize,
+                                     false,
+                                     tempMetaDataVector);
+
+            if (err)
+            {
+                TRACFCOMP(g_trac_sbe, ERR_MRK"getSbeInfoState: "
+                          "maskUnmaskMetaData(CustomizedBfr) failed to unmask."
+                          "RC=0x%X, EID=0x%lX",
+                          ERRL_GETRC_SAFE(err),
+                          ERRL_GETEID_SAFE(err));
+                break;
+            }
 
             /*******************************************/
             /*  Get MVPD SBE Version Information       */
@@ -3387,6 +3534,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
+            CI_INJECT_MASK_UNMASK(io_sbeState);
 
             // Determine Permanent Side from flag in MVPD
             if(SEEPROM_0_PERMANENT_VALUE ==
@@ -7285,93 +7433,266 @@ errlHndl_t secureKeyTransition()
 
 /////////////////////////////////////////////////////////////////////
 
-errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
-                                  uint32_t i_SourceBfrLen,
-                                  void * & o_pHbblIdStringBfr )
+errlHndl_t maskUnmaskMetaData( void*                     i_pSourceBfr,
+                               uint32_t                  i_SourceBfrSize,
+                               bool                      i_maskFlag,
+                               vaddr_metadata_vector_t & o_maskedDataVector)
 {
     errlHndl_t l_errl = nullptr;
-    o_pHbblIdStringBfr = nullptr;
-    bool found_hbbl = false;
+    P9XipSection xipSection;
 
-
-    // packing of ID string is defined in bl_start.S
-    //   - 16 byte aligned : note, after customize, this may only be
-    //                              8 byte aligned
-    //   - 128 bytes long
-    //   - resides in .data at end of binary
-
-    //  start near end of bfr, minimum of 128 bytes from overflow,
-    //    aligned on 16 byte boundary
-    uint64_t sourceBfrAddr = reinterpret_cast<uint64_t>(i_pSourceBfr);
-    uint64_t bfrOverflowAddr = sourceBfrAddr + i_SourceBfrLen;
-    uint64_t startSearchAddr = ALIGN_DOWN_8(bfrOverflowAddr - 128);
-
-    uint64_t * pBfrUnderflow = reinterpret_cast<uint64_t *>(sourceBfrAddr);
-    uint64_t * pStartSearch = reinterpret_cast<uint64_t *>(startSearchAddr);
-
-    // 'HBBL ID '
-#define SBE_HBBL_ID_MARKER0  0x4842424c20494420ull
-    // 'STRING ='
-#define SBE_HBBL_ID_MARKER1  0x535452494e47203dull
-
-    TRACFCOMP( g_trac_sbe,
-               INFO_MRK"locateHbblIdStringBfr() : start search "
-               "pBfr=0x%X, BfrLen=0x%X, pSearchStart=0x%X",
-               sourceBfrAddr, i_SourceBfrLen, pStartSearch );
-
-    do
+    if(i_maskFlag)
     {
-        for // search for the string, starting from the end of the bfr
-          ( uint64_t * pCurTestPosn = pStartSearch;
-            pCurTestPosn >= pBfrUnderflow;
-            pCurTestPosn-=(8/8) )  // backup 8 bytes, 8-byte ptr math
+        for(const auto& xipMask : g_xipSectionMask)
         {
-            if // current position is hbbl id marker
-              ( ((*(pCurTestPosn)) == SBE_HBBL_ID_MARKER0) &&
-                ((*(pCurTestPosn+1)) == SBE_HBBL_ID_MARKER1) )
+            //Get the section name for debug
+            const char* section_str = P9_XIP_SECTION_NAME(g_sectionNamesSbe, xipMask.section);
+            auto sectionId = xipMask.section;
+
+            //Populate the xipsection struct
+            xipSection = {0};
+            int xip_rc = p9_xip_get_section(i_pSourceBfr, sectionId, &xipSection );
+
+            CI_INJECT_MASK_UNMASK_CHECK_FOR_SKIP();
+
+            // Check the return code
+            if ((xip_rc == 0) && (xipSection.iv_size != 0))
             {
-                // found the string eye catcher, all done
-                //  note : step over 16 byte hdr using 8-byte ptr math
-                o_pHbblIdStringBfr = pCurTestPosn + (16/8);
+                TRACDCOMP(g_trac_sbe, "maskUnmaskMetaData(): "
+                        "p9_xip_get_section %s found of size 0x%X (rc=0x%X)",
+                        section_str, xipSection.iv_size, xip_rc);
+
+            }else
+            {
+
+                if (xip_rc == 0)
+                {
+                    TRACDCOMP(g_trac_sbe, "maskUnmaskMetaData(): "
+                            "p9_xip_get_section %s FOUND but EMPTY (rc=0x%X). Will continue",
+                            section_str, xip_rc);
+                }
+                else
+                {
+                    if ((xip_rc == P9_XIP_ITEM_NOT_FOUND) || (xip_rc == P9_XIP_DATA_NOT_PRESENT))
+                    {
+                        TRACFCOMP(g_trac_sbe, "maskUnmaskMetaData(): p9_xip_get_section %s returned "
+                                "rc=0x%X, which is either ITEM_NOT_FOUND (0x%X) or "
+                                "DATA_NOT_PRESENT (0x%X). Will Continue",
+                                section_str, xip_rc,
+                                P9_XIP_ITEM_NOT_FOUND, P9_XIP_DATA_NOT_PRESENT);
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_sbe, "maskUnmaskMetaData(): p9_xip_get_section %s returned "
+                                "unexpected return code, rc=0x%X",
+                                section_str, xip_rc );
+                    }
+
+                    /*@
+                    * @errortype
+                    * @moduleid     SBE_CUSTOMIZE_IMG
+                    * @reasoncode   ERROR_FROM_XIP_FIND
+                    * @userdata1    rc from p9_xip_get_section
+                    * @userdata2    SBE Section
+                    * @devdesc      Bad RC from p9_xip_get_section
+                    * @custdesc     A problem occurred while updating processor
+                    *               boot code.
+                    */
+                    l_errl = new ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                           SBE_CUSTOMIZE_IMG,
+                                           ERROR_FROM_XIP_FIND,
+                                           xip_rc,
+                                           xipMask.section,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                    ErrlUserDetailsString(section_str).addToLog(l_errl);
+                    l_errl->collectTrace(SBE_COMP_NAME);
+
+                    // exit loop
+                    break;
+                }
+            }
+
+            if (!xipMask.selectOffsetMarker)
+            {
+                //Find metadata based on section offset + given metadata offset
+                uint64_t sourceBfrAddr = reinterpret_cast<uint64_t>(i_pSourceBfr);
+                uint64_t sectionBfrAddr = sourceBfrAddr + xipSection.iv_offset+ *(uint32_t*)xipMask.startOffsetMarker;
+                uint64_t * pSectionBfrAddr = reinterpret_cast<uint64_t *>(sectionBfrAddr);
 
                 TRACFCOMP( g_trac_sbe,
-                           INFO_MRK"locateHbblIdStringBfr() : string found "
-                           "pString=0x%X",
-                           o_pHbblIdStringBfr );
+                    "maskUnmaskMetaData(): section_str:(%-13s) section:%-3d "
+                    "totalOffset:%-8X = iv_offset:%-8X +  startOffset:%-8X "
+                    "size:%d",
+                    section_str, xipMask.section,
+                    xipSection.iv_offset + *(uint32_t*)xipMask.startOffsetMarker,
+                    xipSection.iv_offset, *(uint32_t*)xipMask.startOffsetMarker,
+                    xipMask.numberOfBytesToMask);
 
-                TRACFBIN( g_trac_sbe,
-                          INFO_MRK"locateHbblIdStringBfr() : "
-                                  "Eye Catcher + string Bfr = ",
-                          pCurTestPosn,
-                          (16+128) );
+                //Save and mask out metadata
+                uint8_t* tempMetaDataBfr=new uint8_t[xipMask.numberOfBytesToMask];
 
-                found_hbbl = true;
+                memcpy( tempMetaDataBfr,
+                        pSectionBfrAddr,
+                        xipMask.numberOfBytesToMask );
+
+                memset( pSectionBfrAddr,
+                        0,
+                        xipMask.numberOfBytesToMask);
+
+                //Store address, metadata, and its size in a vector
+                maskedMetaData tempMaskedData={ pSectionBfrAddr,
+                                                tempMetaDataBfr,
+                                                xipMask.numberOfBytesToMask};
+
+                o_maskedDataVector.push_back(tempMaskedData);
+
+            }else
+            {
+                //Find metadata start using a marker string
+                bool found{false};
+                const char* sectionMarker=reinterpret_cast<const char*>(xipMask.startOffsetMarker);
+                void * pIdStringBfr;
+                found = locateStringInBfr( sectionMarker,
+                                           i_pSourceBfr,
+                                           i_SourceBfrSize,
+                                           pIdStringBfr);
+
+                if(!found)
+                {
+                    // If string was not found, exit loop with an error log
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"maskUnmaskMetaData: - "
+                            "Error searching for string(%s), "
+                            "RC=0x%X, EID=0x%lX",
+                            sectionMarker,
+                            ERRL_GETRC_SAFE(l_errl),
+                            ERRL_GETEID_SAFE(l_errl));
+
+                    /*@
+                    * @errortype
+                    * @moduleid    SBE_CUSTOMIZE_IMG
+                    * @reasoncode  SBE_SECTION_MARKER_NOT_FOUND
+                    * @userdata1   i_SourceBfrLen
+                    * @userdata2   Unused
+                    * @devdesc     Did not find a Section Marker string in customized image
+                    * @custdesc    A problem occurred while customizing image
+                    */
+                    l_errl = new ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                            SBE_CUSTOMIZE_IMG,
+                                            SBE_SECTION_MARKER_NOT_FOUND,
+                                            i_SourceBfrSize,
+                                            0,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_errl->collectTrace(SBE_COMP_NAME);
+                    //exit loop
+                    break;
+                }
+
+                uint64_t markerOffset = (uint64_t)pIdStringBfr - (uint64_t)i_pSourceBfr;
+
+                TRACFCOMP( g_trac_sbe,
+                    "maskUnmaskMetaData(): section_str:(%-13s) section:%-3d "
+                    "totalOffset:%-8X = iv_offset:%-8X + markerOffset:%-8X "
+                    "size:%-5d %.14s",
+                    section_str, xipMask.section,
+                    xipSection.iv_offset + markerOffset,
+                    xipSection.iv_offset, markerOffset,
+                    xipMask.numberOfBytesToMask, sectionMarker?sectionMarker:"");
+
+                //Allocate space for metadata then save and mask it out
+                uint8_t* tempMetaDataBfr= new uint8_t[xipMask.numberOfBytesToMask];
+
+                memcpy( tempMetaDataBfr,
+                        pIdStringBfr,
+                        xipMask.numberOfBytesToMask );
+
+                memset( pIdStringBfr,
+                        0,
+                        xipMask.numberOfBytesToMask );
+
+                maskedMetaData tempMaskedData={ pIdStringBfr,
+                                                tempMetaDataBfr,
+                                                xipMask.numberOfBytesToMask};
+
+                o_maskedDataVector.push_back(tempMaskedData);
+            }
+        }
+    }
+    else
+    {
+        for(const auto& metaData : o_maskedDataVector)
+        {
+            //Restore metadata to sbe image
+            memcpy( metaData.address,
+                    metaData.tempDataBfr,
+                    metaData.size);
+
+            //Deallocate temp metadata space
+            delete [] metaData.tempDataBfr;
+        }
+    }
+
+    return l_errl;
+
+}
+/////////////////////////////////////////////////////////////////////
+
+bool locateStringInBfr( const char*    i_pStr,
+                        void*          i_pSourceBfr,
+                        uint32_t       i_SourceBfrLen,
+                        void*          &o_pString )
+{
+    uint64_t l_min_len = 8; // minimum length of i_pStr is 8 bytes
+    bool     l_found   = false;
+    uint64_t l_slen    = strlen(i_pStr);
+
+    o_pString = nullptr;
+
+    if (l_slen < l_min_len)
+    {
+        TRACFCOMP( g_trac_sbe, ERR_MRK"locateStringInBfr() : string (%s) NOT found, "
+                "strlen(%d) < %d bytes", i_pStr, l_slen,l_min_len);
+        return false;
+    }
+
+    uint64_t *s        = (uint64_t*)i_pStr;
+    uint64_t  last     = (uint64_t)i_pSourceBfr + i_SourceBfrLen - 1;
+    uint64_t  curAddr  = last - l_min_len;
+    uint64_t  stopAddr = (uint64_t)i_pSourceBfr;
+    uint64_t *p        = (uint64_t*)curAddr;
+
+    while (curAddr >= stopAddr) // loop from the end of i_pSourceBfr to the beginning
+    {
+        p = (uint64_t*)curAddr--;
+        if (*p == *s) // look for a match in the first 8 bytes
+        {
+            if ((last - (uint64_t)p) < l_slen)
+            {
+                // the first 8 bytes of i_pStr was found, but there is not
+                // enough room from p to the end of i_pSourceBfr to fit the rest
+                // so, the entire string was not found
+                continue;
+            }
+            if (memcmp(p, i_pStr, l_slen) == 0)
+            {
+                l_found = true;
+                // return a ptr to the byte after the search string
+                o_pString = (void*)((uint64_t)p + l_slen);
                 break;
             }
-        } // end reverse bfr search
-
-    } while(0);
-
-    if (! found_hbbl)
-    {
-        /*@
-         * @errortype
-         * @moduleid    SBE_CUSTOMIZE_IMG
-         * @reasoncode  SBE_HBBL_ID_NOT_FOUND
-         * @userdata1   i_SourceBfrLen
-         * @userdata2   Unused
-         * @devdesc     Did not find the HBBL ID signature in customized image
-         * @custdesc    A problem occurred while customizing image
-         */
-        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                            SBE_CUSTOMIZE_IMG,
-                            SBE_HBBL_ID_NOT_FOUND,
-                            i_SourceBfrLen,
-                            0,
-                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        }
     }
-    return l_errl;
+
+    if (!l_found)
+    {
+        TRACDCOMP( g_trac_sbe, ERR_MRK"locateStringInBfr() : string (%s) NOT found ",
+                i_pStr);
+    }
+    return l_found;
 }
+
+
+
 
 /////////////////////////////////////////////////////////////////////
 

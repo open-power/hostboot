@@ -33,6 +33,7 @@
 #include <sys/time.h>
 #include <vector>
 #include <cxxtest/TestSuite.H>
+#include <cxxtest/TestInject.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
@@ -53,6 +54,8 @@ const char SBE_LIBRARY_NAME[16]    = "libsbe.so";
 
 
 using namespace SBE;
+using namespace ERRORLOG;
+using namespace CxxTest;
 
 
 void getTargetList( TARGETING::TYPE i_targetType,
@@ -1174,6 +1177,204 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
 
 
+    void testSbeMaskUnmask ( void )
+    {
+#ifndef __HOSTBOOT_RUNTIME // do not run these tests in HBRT
+
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+        // Compile out this code because it uses CxxTestInject data types. Those data
+        // types are compiled out using this flag in those files, so this code must
+        // be compiled out also.
+
+        // Test Cases
+        //   TC1 - Test no data in XIP table sections, no masking,  no SBE update
+        //   TC2 - Test different CRCs,                             do SBE update
+        //   TC3 - Test new data in XIP table sections, no masking, do SBE update
+        //   TC4 - Test new data in XIP table sections, masking,    no SBE update
+        //   TC5 - Test new data in other XIP area,                 do SBE update
+        //
+        // TC1_ZERO_SECTIONS_NO_UPDATE
+        //     1. write zeroes to custImage XIP table sections
+        //     2. set saved_VPD_CRC to custImage CRC
+        //     3. set inject to SKIP_MASKING
+        //     4. call getSbeInfoState
+        //     5. call getTargetUpdateActions
+        //     6. ensure NOT SBE_UPDATE
+        // TC2_CRC_MISMATCH_DO_UPDATE
+        //     1. write zeroes to custImage XIP table sections
+        //     2. set saved_VPD_CRC to 0
+        //     4. call getSbeInfoState
+        //     5. call getTargetUpdateActions
+        //     6. ensure SBE_UPDATE
+        // TC3_NON_ZERO_SECTIONS_DO_UPDATE
+        //     1. write a value to custImage XIP table sections
+        //     2. set inject to SKIP_MASKING
+        //     3. call getSbeInfoState
+        //     4. call getTargetUpdateActions
+        //     5. ensure SBE_UPDATE
+        // TC4_NON_ZERO_SECTIONS_NO_UPDATE
+        //     1. call getSbeInfoState
+        //     2. call getTargetUpdateActions
+        //     3. ensure NOT SBE_UPDATE
+        // TC5_OUTSIDE_AREA_DO_UPDATE
+        //     1. write a byte to custImage XIP table sections
+        //     2. call getSbeInfoState
+        //     3. call getTargetUpdateActions
+        //     4. ensure SBE_UPDATE
+
+        TRACFCOMP( g_trac_sbe, ENTER_MRK"testSbeMaskUnmask" );
+
+        errlHndl_t       l_errl{nullptr};
+        sbeTargetState_t l_sbeState{};
+
+        TARGETING::Target *l_target = getFunctionalTarget(TARGETING::TYPE_PROC);
+        if (l_target == NULL)
+        {
+            TS_FAIL("testSbeMaskUnmask: No Functional Targets found!");
+            return;
+        }
+
+        memset(&l_sbeState, 0, sizeof(l_sbeState));
+        l_sbeState.sbe_update_space_vaddr = VMM_VADDR_SBE_UPDATE;
+        l_sbeState.target = l_target;
+
+        //----------------------------------------------------------------------
+        // TC1_ZERO_SECTIONS_NO_UPDATE
+        //----------------------------------------------------------------------
+        TS_INFO("testSbeMaskUnmask: TC1_ZERO_SECTIONS_NO_UPDATE");
+
+        g_cxxTestInject.set(SBE_INJECT_BZERO_SECTIONS);
+        g_cxxTestInject.set(SBE_INJECT_SKIP_MASK);
+        l_errl = getSbeInfoState(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC1 - getSbeInfoState() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_errl = getTargetUpdateActions(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC1 - getTargetUpdateActions() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_sbeState.update_actions & UPDATE_SBE)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC1 - SBE update NOT expected");
+        }
+        g_cxxTestInject.clear(SBE_INJECT_BZERO_SECTIONS);
+        g_cxxTestInject.clear(SBE_INJECT_SKIP_MASK);
+
+        //----------------------------------------------------------------------
+        // TC2_CRC_MISMATCH_DO_UPDATE
+        //----------------------------------------------------------------------
+        TS_INFO("testSbeMaskUnmask: TC2_CRC_MISMATCH_DO_UPDATE");
+
+        g_cxxTestInject.set(SBE_INJECT_CRC_MISMATCH);
+        l_errl = getSbeInfoState(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC2 - getSbeInfoState() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_errl = getTargetUpdateActions(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC2 - getTargetUpdateActions() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (!(l_sbeState.update_actions & UPDATE_SBE))
+        {
+            TS_FAIL("testSbeMaskUnmask: TC2 - SBE update expected");
+        }
+        g_cxxTestInject.clear(SBE_INJECT_CRC_MISMATCH);
+
+        //----------------------------------------------------------------------
+        // TC3_NON_ZERO_SECTIONS_DO_UPDATE
+        //----------------------------------------------------------------------
+        TS_INFO("testSbeMaskUnmask: TC3_NON_ZERO_SECTIONS_DO_UPDATE");
+
+        g_cxxTestInject.set(SBE_INJECT_NON_ZERO_SECTIONS);
+        g_cxxTestInject.set(SBE_INJECT_SKIP_MASK);
+        l_errl = getSbeInfoState(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC3 - getSbeInfoState() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_errl = getTargetUpdateActions(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC3 - getTargetUpdateActions() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (!(l_sbeState.update_actions & UPDATE_SBE))
+        {
+            TS_FAIL("testSbeMaskUnmask: TC3 - SBE update is expected");
+        }
+        g_cxxTestInject.clear(SBE_INJECT_NON_ZERO_SECTIONS);
+        g_cxxTestInject.clear(SBE_INJECT_SKIP_MASK);
+
+        //----------------------------------------------------------------------
+        // TC4_NON_ZERO_SECTIONS_NO_UPDATE
+        //----------------------------------------------------------------------
+        TS_INFO("testSbeMaskUnmask: TC4_NON_ZERO_SECTIONS_NO_UPDATE");
+
+        l_errl = getSbeInfoState(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC4 - getSbeInfoState() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_errl = getTargetUpdateActions(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC4 - getTargetUpdateActions() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_sbeState.update_actions & UPDATE_SBE)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC4 - SBE update NOT expected");
+        }
+
+        //----------------------------------------------------------------------
+        // TC5_OUTSIDE_AREA_DO_UPDATE
+        //----------------------------------------------------------------------
+        TS_INFO("testSbeMaskUnmask: TC5_OUTSIDE_AREA_DO_UPDATE");
+
+        g_cxxTestInject.set(SBE_INJECT_CHANGE_BYTE);
+        l_errl = getSbeInfoState(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC5 - getSbeInfoState() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_errl = getTargetUpdateActions(l_sbeState);
+        if (l_errl)
+        {
+            TS_FAIL("testSbeMaskUnmask: TC5 - getTargetUpdateActions() failed");
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (!(l_sbeState.update_actions & UPDATE_SBE))
+        {
+            TS_FAIL("testSbeMaskUnmask: TC5 - SBE update expected");
+        }
+        g_cxxTestInject.clear(SBE_INJECT_CHANGE_BYTE);
+        TRACFCOMP( g_trac_sbe, EXIT_MRK"testSbeMaskUnmask" );
+#endif
+#endif // ifndef __HOSTBOOT_RUNTIME
+
+        return;
+    }
 
     /**
      * @brief Constructor

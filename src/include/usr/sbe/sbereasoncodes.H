@@ -121,6 +121,7 @@ enum sbeReasonCode
     SBE_UPDATE_ALREADY_IN_PROGRESS      = SBE_COMP_ID | 0x27,
     SBE_INVALID_HBBL_DATA               = SBE_COMP_ID | 0x28,
     SBE_INVALID_HBBL_SECURITY_HEADERS   = SBE_COMP_ID | 0x29,
+    SBE_SECTION_MARKER_NOT_FOUND        = SBE_COMP_ID | 0x2A,
 };
 
 enum UserDetailsTypes
@@ -133,3 +134,14 @@ enum UserDetailsTypes
 };  // end SBE
 
 #endif
+
+//graveyard
+/*@
+* @errortype
+* @moduleid    SBE_CUSTOMIZE_IMG
+* @reasoncode  SBE_HBBL_ID_NOT_FOUND
+* @userdata1   i_SourceBfrLen
+* @userdata2   Unused
+* @devdesc     Did not find the HBBL ID signature in customized image
+* @custdesc    A problem occurred while customizing image
+*/
