@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -332,10 +332,14 @@ namespace SECUREBOOT
      * @param[in]  i_size     Size of blob in bytes
      * @param[out] o_hash     SHA512 hash
      * @param[in]  i_signMode Specifies hash algorithm (aka version,
-     *                        like V1 or V3) to use
-     *                        [default = SB_SIGNING_SYSTEM_CONTAINER, use
-     *                        whatever version the system is using to IPL;
-     *                        otherwise, use i_signMode]
+     *                        like V1 or V3) to use. Will assert if it
+     *                        doesn't get 1 of these 3 options:
+     *                        (1) SB_SIGNING_SYSTEM_CONTAINER (default)
+     *                        use whatever version the system is using to IPL;
+     *                        (2) SB_SIGNING_V1_CONTAINER
+     *                        use V1 hash algorighm (aka SHA512)
+     *                        (3) SB_SIGNING_V3_CONTAINER
+     *                        use V3 hash algorithm (aka sha3)
      *
      * @return N/A
      */
@@ -370,11 +374,14 @@ namespace SECUREBOOT
      *                         of the blob to concatenate
      * @param[out] o_buf       SHA512 hash
      * @param[in]  i_signMode  Specifies hash algorithm (aka version,
-     *                         like V1 or V3) to use
-     *                         [default = SB_SIGNING_SYSTEM_CONTAINER, use
-     *                         whatever version the system is using to IPL;
-     *                         otherwise, use i_signMode]
-     *
+     *                         like V1 or V3) to use. Will assert if it
+     *                         doesn't get 1 of these 3 options:
+     *                         (1) SB_SIGNING_SYSTEM_CONTAINER (default)
+     *                         use whatever version the system is using to IPL;
+     *                         (2) SB_SIGNING_V1_CONTAINER
+     *                         use V1 hash algorighm (aka SHA512)
+     *                         (3) SB_SIGNING_V3_CONTAINER
+     *                         use V3 hash algorithm (aka sha3)
      *
      * @return N/A
      */

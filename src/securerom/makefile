@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -41,11 +41,13 @@ LDFLAGS += -N
 ASMFLAGS += -D__ASSEMBLER__
 
 OBJS += ROM.o
+OBJS += ROM_v3.o
 OBJS += sha512.o
 OBJS += ecverify.o
 OBJS += hw_utils.o
 OBJS += rom_entry.o
 OBJS += secureromasm.o
+OBJS += keccak.o
 
 VPATH += contrib
 

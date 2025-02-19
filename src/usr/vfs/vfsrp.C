@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -813,8 +813,13 @@ errlHndl_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
     l_blobs.push_back(std::make_pair<void*,size_t>(
                                         reinterpret_cast<void*>(l_pnorVaddr),
                                         PAGE_SIZE));
+    // Use SHA512 hash routine via SB_SIGNING_V1_CONTAINER parameter
+    // @TODO JIRA PFHB-908 update hash page table to use V3 signing
+    // (aka sha3 hash routine) by providing SB_SIGNING_V3_CONTAINER parameter
     SHA512_t l_curPageHash = {0};
-    SECUREBOOT::hashConcatBlobs(l_blobs, l_curPageHash);
+    SECUREBOOT::hashConcatBlobs(l_blobs,
+                                l_curPageHash,
+                                SB_SIGNING_V1_CONTAINER);
 
     // Compare existing hash page table entry with the derived one.
     if (memcmp(l_pageTableEntry,l_curPageHash,HASH_PAGE_TABLE_ENTRY_SIZE) != 0)

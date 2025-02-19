@@ -280,7 +280,6 @@ errlHndl_t SecureRomManager::initialize()
         l_rc = mm_set_permission( const_cast<void*>(iv_securerom),
                                   g_BlToHbDataManager.getPreservedSize(),
                                   l_access_type);
-
         if (l_rc != 0)
         {
             TRACFCOMP(g_trac_secure,EXIT_MRK"SecureRomManager::initialize():"
@@ -309,6 +308,10 @@ errlHndl_t SecureRomManager::initialize()
             break;
 
         }
+
+        // Useful for looking at SecureROM's start through its jumptabale
+        TRACFBIN(g_trac_secure,"SecureRomManager::initialize(): iv_securerom",
+                 const_cast<void*>(iv_securerom), 128);
 
         /***************************************************************/
         /*  Retrieve HW Hash Keys From The System                      */
@@ -444,23 +447,53 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
         /* Call ROM_verify() function via an assembly call                 */
         /*******************************************************************/
 
-        // Set startAddr to ROM_verify() function at an offset of Secure ROM
-        uint64_t l_rom_verify_startAddr =
-                                reinterpret_cast<uint64_t>(iv_securerom) +
-                                getSecRomFuncOffset(SB_FUNC_TYPES::ECDSA521);
+        uint64_t l_rom_verify_startAddr = 0; // Common for V1 and V3
 
         if (l_signModeToUse == TARGETING::SB_SIGNING_V3_CONTAINER)
         {
-            // Skip V3 verification path for now
-            TRACFCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
-                      "Skipping V3 verification (l_signModeToUse = 0x%.2X)",
-                      l_signModeToUse);
+
+            // V3 verification path
+// @TODO JIRA PFHB-680 put this path back in, but for now, continue to skip
+// V3 verification
+#if 0
+            // Set startAddr to ROM_v3_verify() function at an offset of Secure ROM
+            l_rom_verify_startAddr =
+                                reinterpret_cast<uint64_t>(iv_securerom) +
+                                getSecRomFuncOffset(SB_FUNC_TYPES::MLDSA);
+
+            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                     "Calling ROM_v3_verify() via call_rom_v3_verify: l_rc=0x%x, "
+                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
+                     l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
+                     iv_securerom);
+
+            ROM_v3_container_raw* l_v3_container =
+                                   reinterpret_cast<ROM_v3_container_raw*>(
+                                                                 i_container);
+
+            l_rc = call_rom_v3_verify(reinterpret_cast<void*>
+                                       (l_rom_verify_startAddr),
+                                     l_v3_container,
+                                     &l_hw_parms);
+
+            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                     "Back from ROM_v3_verify() via call_rom_v3_verify: l_rc=0x%x, "
+                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
+                     l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
+                     iv_securerom);
+#endif
         }
         else
         {
             // Normal V1 verification path
+
+            // Set startAddr to ROM_verify() function at an offset of Secure ROM
+            uint64_t l_rom_verify_startAddr =
+                                    reinterpret_cast<uint64_t>(iv_securerom) +
+                                    getSecRomFuncOffset(SB_FUNC_TYPES::ECDSA521);
+
             TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
-                     " Calling ROM_verify() via call_rom_verify: l_rc=0x%x, "
+                     "Calling ROM_verify() via call_rom_verify: l_rc=0x%x, "
                      "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
                      l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
                      iv_securerom);
@@ -523,14 +556,24 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
             }
             else
             {
-                // Measure protected section. Note it starts one page after the
-                // vaddr passed in for verification
+                // Measure protected section. This section starts after the
+                // container's header, which is what i_container points to.
+                // There are different headers sizes based on the container's
+                // version.
+                size_t l_contHdrSize = (l_signModeToUse
+                                        == TARGETING::SB_SIGNING_V3_CONTAINER)
+                                           ? V3_SECURE_HEADER_SIZE
+                                           : PAGESIZE;
+
                 auto l_pProtectedSec =
-                    reinterpret_cast<const uint8_t*>(i_container) + PAGESIZE;
+                    reinterpret_cast<const uint8_t*>(i_container)
+                                                     + l_contHdrSize;
                 SHA512_t l_measuredHash = {0};
                 SECUREBOOT::hashBlob(l_pProtectedSec,
                                      l_conHdr.payloadTextSize(),
-                                     l_measuredHash);
+                                     l_measuredHash,
+                                     l_signModeToUse);
+
                 // Add UD data to errorlog
                 UdVerifyInfo(l_conHdr.componentId(),
                              l_conHdr.payloadTextSize(),
@@ -574,22 +617,66 @@ void SecureRomManager::hashBlob(const void * i_blob,
     // is not the case as system is in a bad state
     assert(iv_securerom != nullptr);
 
-    // Set startAddr to ROM_SHA512() function at an offset of Secure ROM
-    uint64_t l_rom_SHA512_startAddr =
+    assert((i_signMode == SB_SIGNING_V1_CONTAINER)
+           || (i_signMode == SB_SIGNING_V3_CONTAINER)
+           || (i_signMode == SB_SIGNING_SYSTEM_CONTAINER),
+           "SecureRomManager::hashBlob: invalid i_signMode=%d!",
+           i_signMode);
+
+    auto l_signModeToUse = 0;
+    if (i_signMode == SB_SIGNING_SYSTEM_CONTAINER)
+    {
+        // get system signing mode
+        l_signModeToUse = SECUREBOOT::hashSignMode();
+    }
+    else
+    {
+        // Must be V1 or V3 based on assert and if-check above
+        l_signModeToUse = i_signMode;
+    }
+
+    if (l_signModeToUse == SB_SIGNING_V1_CONTAINER)
+    {
+        // V1
+        // Set startAddr to ROM_SHA512() function at an offset of Secure ROM
+        uint64_t l_rom_SHA512_startAddr =
                                 reinterpret_cast<uint64_t>(iv_securerom) +
                                 getSecRomFuncOffset(SB_FUNC_TYPES::SHA512);
 
-    call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
-                    reinterpret_cast<const sha2_byte*>(i_blob),
-                    i_size,
-                    reinterpret_cast<SHA512_t*>(o_buf));
+        call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
+                        reinterpret_cast<const sha2_byte*>(i_blob),
+                        i_size,
+                        reinterpret_cast<SHA512_t*>(o_buf));
 
-    TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
-              "call_rom_SHA512: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
-               i_blob, i_size, l_rom_SHA512_startAddr,
-               iv_securerom);
+        TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
+                  "call_rom_SHA512: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
+                   i_blob, i_size, l_rom_SHA512_startAddr,
+                   iv_securerom);
+    }
+    else
+    {
+        // V3
+        // Set startAddr to ROM_SHA3() function at an offset of Secure ROM
 
-    TRACDCOMP(g_trac_secure,EXIT_MRK"SecureRomManager::hashBlob()");
+        // @TODO JIRA PFHB-677 Until securerom's call_rom_SHA3() function is
+        // working, call the linked sha3() function directly below
+
+        //uint64_t l_rom_SHA3_startAddr =
+        //                        reinterpret_cast<uint64_t>(iv_securerom) +
+        //                        getSecRomFuncOffset(SB_FUNC_TYPES::SHA3);
+
+        //call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
+        //                i_blob,
+        //                i_size,
+        //                reinterpret_cast<sha3_t*>(o_buf));
+        sha3(i_blob, i_size, reinterpret_cast<void*>(o_buf));
+
+        TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
+                  "call_rom_SHA3: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
+                   i_blob, i_size, l_rom_SHA3_startAddr,
+                   iv_securerom);
+
+    }
 }
 
 /**
@@ -643,6 +730,9 @@ void SecureRomManager::getHwKeyHash(SHA512_t o_hash)
     memcpy(o_hash, iv_key_hash, sizeof(SHA512_t));
 }
 
+/**
+ * @brief  Fill out these sections so they can be put into HDAT
+ */
 const SecureRomManager::SecRomFuncTypeOffsetMap_t
             SecureRomManager::iv_SecRomFuncTypeOffset =
 {
@@ -663,6 +753,24 @@ const SecureRomManager::SecRomFuncTypeOffsetMap_t
                 ROM_VERIFY_FUNCTION_OFFSET
             }
         }
+    } ,
+    // SHA53 Hash Function
+    { SB_FUNC_TYPES::SHA3,
+        {
+            { SB_FUNC_VERS::SHA3_INIT,
+              g_BlToHbDataManager.getBranchtableOffset() +
+                SHA3_HASH_FUNCTION_OFFSET
+            }
+        }
+    } ,
+    // MLDSA Verify Function
+    { SB_FUNC_TYPES::MLDSA,
+        {
+            { SB_FUNC_VERS::MLDSA_INIT,
+              g_BlToHbDataManager.getBranchtableOffset() +
+                ROM_V3_VERIFY_FUNCTION_OFFSET
+            }
+        }
     }
 };
 
@@ -678,6 +786,12 @@ sbFuncVer_t SecureRomManager::getSecRomFuncVersion(const sbFuncType_t
             break;
         case SB_FUNC_TYPES::ECDSA521:
             l_funcVer = iv_curECDSA521Ver;
+            break;
+        case SB_FUNC_TYPES::SHA3:
+            l_funcVer = iv_curSHA3Ver;
+            break;
+        case SB_FUNC_TYPES::MLDSA:
+            l_funcVer = iv_curMLDSAVer;
             break;
         default:
             assert(false, "getCurFuncVer:: Function type 0x%X not supported", i_funcType);

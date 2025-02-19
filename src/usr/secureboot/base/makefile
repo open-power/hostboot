@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,13 @@ OBJS += trustedboot_base.o
 OBJS += $(if $(CONFIG_TPMDD),trustedbootMsg.o,)
 OBJS += ${SECUREBOOT_COMMON_OBJS}
 OBJS += targutilbase.o
+
+# @TODO JIRA PFHB-677 Until securerom's call_rom_SHA3() function works by
+# calling it via the securerom branch table, build in the sha3() support
+# by linking in keccak.o (which implements sha3())
+OBJS += keccak.o
+VPATH += ${ROOTPATH}/src/securerom/contrib/
+
 
 VPATH += $(ROOTPATH)/src/usr/targeting/common
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr

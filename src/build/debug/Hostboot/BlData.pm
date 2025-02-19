@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2024
+# Contributors Listed Below - COPYRIGHT 2017,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -67,7 +67,7 @@ sub main
     # @HBBL_SIZE_SYNC@
     # Data address is bootloader HRMOR + HBBL_MAX_SIZE + 12K exception
     # vectors
-    my $dataAddr = 0xE020B000;
+    my $dataAddr = 0xE020D000;
     my $dataOffset = 0;
 
     # Parse data address from options.

@@ -892,8 +892,13 @@ errlHndl_t verify_page(const int64_t i_offset_vaddr, const uint64_t i_hash_vaddr
                                             i_hash_vaddr + i_hash_size -
                                             2 * VMM_VADDR_SPNOR_DELTA),
                                             PAGE_SIZE));
+    // Use SHA512 hash routine via SB_SIGNING_V1_CONTAINER parameter
+    // @TODO JIRA PFHB-908 update hash page table to use V3 signing (aka sha3
+    // hash routine) by providing SB_SIGNING_V3_CONTAINER parameter
     SHA512_t l_curPageHash = {0};
-    SECUREBOOT::hashConcatBlobs(l_blobs, l_curPageHash);
+    SECUREBOOT::hashConcatBlobs(l_blobs,
+                                l_curPageHash,
+                                SB_SIGNING_V1_CONTAINER);
 
     // Compare existing hash page table entry with the derived one.
     if (memcmp(l_pageTableEntry,l_curPageHash,HASH_PAGE_TABLE_ENTRY_SIZE) != 0)
@@ -1580,10 +1585,14 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
     }
 
     // Calculate hash of HBB's sw signatures
+    // @TODO JIRA PFHB-908 update hash page table to use V3 signing (aka sha3
+    // hash routine) by providing SB_SIGNING_V3_CONTAINER parameter
     SHA512_t l_hashSwSigs = {0};
     SECUREBOOT::hashBlob(l_hbbContainerHeader.sw_sigs(),
                          l_hbbContainerHeader.totalSwKeysSize(),
-                         l_hashSwSigs);
+                         l_hashSwSigs,
+                         SB_SIGNING_V1_CONTAINER);
+
 
     // Get build time hash of HBB's sw signatures. The hash of HBB's sw
     // signatures are stored in the first entry (SALT) of HBI's hash page
@@ -1798,7 +1807,7 @@ errlHndl_t SPnorRP::getHbblV3Header (uint64_t & o_hbblV3HdrAddr)
         // Calculate virtual address offset of the "unprotected" section
         uint8_t * unprotected_vaddr = l_rec->secAddr + PAGESIZE + l_rec->textSize;
 
-        // @TODO JIRA PFHB-802 add additional checks on the validity of the
+        // @TODO JIRA PFHB-680 add additional checks on the validity of the
         // V3 header here
 
         o_hbblV3HdrAddr = reinterpret_cast<uint64_t>(unprotected_vaddr);

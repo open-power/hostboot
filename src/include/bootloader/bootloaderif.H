@@ -35,7 +35,7 @@ namespace Bootloader{
 // Max logical size of HBBL without secure header, padding, or ECC.
 // Must match PNOR layout assumptions for eyeCatch HBBL
 // Must be aligned CACHELINE_SIZE of 128 bytes
-#define MAX_HBBL_SIZE (32 * KILOBYTE)
+#define MAX_HBBL_SIZE (40 * KILOBYTE)
 
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)

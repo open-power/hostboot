@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -28,9 +28,13 @@
 
 .global call_rom_verify
 .global call_rom_SHA512
+.global call_rom_v3_verify
+.global call_rom_SHA3
 
 call_rom_verify:
 call_rom_SHA512:
+call_rom_v3_verify:
+call_rom_SHA3:
 
 call_rom_entry:
     std r2, 40(r1)
