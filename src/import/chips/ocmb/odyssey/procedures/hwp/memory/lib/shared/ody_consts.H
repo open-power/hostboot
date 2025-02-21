@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,6 +191,8 @@ enum ffdc_codes : uint16_t
     DDRPHYINIT_TX_SLEW_RISE_AC_OVERRIDE = 0x107F,
     DDRPHYINIT_TX_SLEW_FALL_AC_OVERRIDE = 0x1080,
     DDRPHYINIT_TX_SLEW_RISE_CK_OVERRIDE = 0x1081,
+
+    SET_ODY_SETUP_ARRAYS_WITH_ECS_INSTRUCTIONS = 0x1082,
 
 };
 

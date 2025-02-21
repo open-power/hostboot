@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,9 +78,15 @@ inline fapi2::ReturnCode divide_and_round( const T i_divisor,
     {
         const auto l_quotient_unrounded = i_divisor / i_dividend;
         const auto l_remainder = i_divisor % i_dividend;
+        auto l_rounder = 0;
+
+        if(i_dividend != 1)
+        {
+            l_rounder = (l_remainder >= i_dividend / 2) ? 1 : 0;
+        }
 
         // Round the quotient up or down depending on the remainder
-        o_quotient = l_quotient_unrounded + ((l_remainder >= i_dividend / 2) ? 1 : 0);
+        o_quotient = l_quotient_unrounded + l_rounder;
     }
     return fapi2::FAPI2_RC_SUCCESS;
 

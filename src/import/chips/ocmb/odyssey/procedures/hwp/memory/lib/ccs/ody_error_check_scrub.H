@@ -64,13 +64,31 @@ constexpr mss::states NESTED_LOOP_ON = mss::states::ON;
 
 
 ///
+/// @brief Get unique port_ranks from the vector of rank infos
+/// @param[in] i_rank_info Vector of rank infos of the target
+/// @return vector of unique ranks
+///
+std::vector<uint8_t> get_unique_port_ranks(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_info);
+
+///
+/// @brief Setsup the loop count, GOTO offset for the CCS command
+/// @param[in] i_loop_count - loop count that needs to go into the CCS command
+/// @param[in] i_start_loop - starting loop index that command needs to loop back to
+/// @param[in,out] io_ccs_instructions - vector of ccs instructions
+/// @return none
+///
+void setup_goto_offset(const uint8_t i_loop_count,
+                       const uint8_t i_start_loop,
+                       std::vector< instruction_t<mss::mc_type::ODYSSEY> >& io_ccs_instructions);
+///
 /// @brief Setup the CCS instructions for performing ECS test
-/// @param[in] i_rank_info Rank info of the target
+/// @param[in] i_rank_info Vector of rank infos of the target
 /// @param[in] i_srank chipid/srank that needs to be run
 /// @param[in,out] io_program object of program class that has the vector of CCS instructions
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>&
+        i_vec_rank_info,
         const uint8_t i_srank,
         mss::ccs::program<mss::mc_type::ODYSSEY>& io_program );
 

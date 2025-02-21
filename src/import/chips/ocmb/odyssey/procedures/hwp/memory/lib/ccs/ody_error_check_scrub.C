@@ -55,30 +55,123 @@ namespace ccs
 namespace ody
 {
 ///
+/// @brief Get unique port ranks from the vector of rank infos
+/// @param[in] i_rank_info Vector of rank infos of the target
+/// @return vector of unique ranks
+///
+std::vector<uint8_t>  get_unique_port_ranks(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_info)
+{
+    std::vector<uint8_t> l_vec_ranks;
+
+    // Get unique ranks from the rank infos.
+    for(const auto& l_rank_info : i_vec_rank_info)
+    {
+        // Boolean to keep track of if the rank exists in the vector
+        bool l_rank_exists = false;
+
+        // Check to see if the rank is in the vector
+        for (const auto& l_rank : l_vec_ranks)
+        {
+            if(l_rank == l_rank_info.get_port_rank())
+            {
+                l_rank_exists = true;
+                break;
+            }
+        }
+
+        // Push the current rank if it is not in the vector
+        if(!l_rank_exists)
+        {
+            l_vec_ranks.push_back(l_rank_info.get_port_rank());
+        }
+    }
+
+    FAPI_INF_NO_SBE("vec_size: %d", l_vec_ranks.size());
+    return l_vec_ranks;
+}
+
+///
+/// @brief Setsup the loop count, GOTO offset for the CCS command
+/// @param[in] i_loop_count - loop count that needs to go into the CCS command
+/// @param[in] i_start_loop - starting loop index that command needs to loop back to
+/// @param[in,out] io_ccs_instructions - vector of ccs instructions
+/// @return none
+/// @note This function is called after the instruction copies for all mranks have been added to the program
+///       hence it is safe to say that it is called on the last instruction
+///
+void setup_goto_offset(const uint8_t i_loop_count,
+                       const uint8_t i_start_loop,
+                       std::vector< instruction_t<mss::mc_type::ODYSSEY> >& io_ccs_instructions)
+{
+
+    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+
+    const uint8_t l_last_instr_idx = io_ccs_instructions.size() - 1;
+    const auto l_last_instr = io_ccs_instructions.end() - 1;
+
+    // We want this setup only when we have single rank or
+    // If we have multiple port ranks say n ranks then the setup is only for the last rank n-1
+    // Set the loop count
+    l_last_instr->arr0.template insertFromRight<TT::ARR0_NESTED_LOOP_COUNT, TT::ARR0_NESTED_LOOP_COUNT_LEN>(i_loop_count);
+
+    // Need to break out the nested loop
+    l_last_instr->arr1.template insertFromRight<TT::ARR1_BREAK_MODE, TT::ARR1_BREAK_MODE_LEN>(0b01);
+
+    // GOTO the next instruction
+    // Instruction class variable io_ccs_command.iv_goto_next_instr_offset
+    l_last_instr->iv_goto_instr_offset = i_start_loop - l_last_instr_idx;
+
+    // Else do nothing, the rest of the ranks should have default settings
+}
+
+///
 /// @brief Setup the CCS instructions for performing ECS test
-/// @param[in] i_rank_info Rank info of the target
+/// @param[in] i_rank_info Vector of rank infos of the target
 /// @param[in] i_srank chipid/srank that needs to be run
 /// @param[in,out] io_program io_program object of program class that has the vector of CCS instructions
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>&
+        i_vec_rank_info,
         const uint8_t i_srank,
         mss::ccs::program<mss::mc_type::ODYSSEY>& io_program)
 {
-    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+    // Exit if the vector is empty
+    if (i_vec_rank_info.empty())
+    {
+        FAPI_INF_NO_SBE("Vector of rank_infos is empty, exiting setup_arrays_with_ecs_instructions()" );
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Get unique ranks from the rank infos.
+    const std::vector<uint8_t> l_vec_ranks = get_unique_port_ranks(i_vec_rank_info);
+
+    // Exit if the vector is empty
+    if (l_vec_ranks.empty())
+    {
+        FAPI_INF_NO_SBE("Vector of ranks is empty, exiting setup_arrays_with_ecs_instructions()" );
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Starting loop index of the instruction that other instructions need to loop back to
+    uint8_t l_loop_mpc_start_index = 0;
 
     uint64_t l_dram_freq = 0;
     uint8_t l_dram_density = 0;
 
     // Use rank to determine ranks and targets
     // Get port rank and dimm
-    const auto& l_port_target = i_rank_info.get_port_target();
-    const auto& l_port_rank = i_rank_info.get_port_rank();
+    const auto& l_port_target = i_vec_rank_info[0].get_port_target();
+
+    // Calling function code
+    const uint16_t l_func_code = mss::ody::ffdc_codes::SET_ODY_SETUP_ARRAYS_WITH_ECS_INSTRUCTIONS;
 
     uint64_t l_tecsc_nck = 0;
     uint64_t l_tecsc_idles = 0;
+    uint64_t l_tecsc_idles_per_rank = 0;
     uint16_t l_trfc_nck = 0;
     uint16_t l_trfc_idle = 0;
+    uint16_t l_trfc_idle_per_rank = 0;
     // tMRD value is taken from Table 20 of JEDEC spec revision JESD79-5B_v1.20
     const uint64_t tMRD = 34;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -91,13 +184,16 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const mss::rank::info<mss:
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC, l_port_target, l_trfc_nck));
     // The trfc_nck should be divided by 2 so we can get the correct multiplier
     // Round up when not divisible by 2
-    FAPI_TRY(mss::divide_and_round(l_trfc_nck, uint16_t(2), 0, l_trfc_idle));
+    FAPI_TRY(mss::divide_and_round(l_trfc_nck, uint16_t(2), l_func_code, l_trfc_idle));
+
+    // Get the trfc per rank
+    FAPI_TRY(mss::divide_and_round(l_trfc_idle, uint16_t(l_vec_ranks.size()), l_func_code, l_trfc_idle_per_rank));
 
     // Get the DRAM frequency to calculate the idles for MPC:ECS operation
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port_target, l_dram_freq));
 
     // Get the DRAM density
-    FAPI_TRY(mss::attr::get_dram_density(i_rank_info.get_dimm_target(), l_dram_density));
+    FAPI_TRY(mss::attr::get_dram_density(i_vec_rank_info[0].get_dimm_target(), l_dram_density));
 
     // Write to MR14 and 15
     {
@@ -121,29 +217,67 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const mss::rank::info<mss:
         l_mr14_value0 |= i_srank;
         l_mr14_value1 |= i_srank;
 
-        // CCS instruction to write to the MR14 register
-        auto l_mr14_wr_instr1 = mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
-                                (l_port_rank, MR14_ECC_CONFIG, l_mr14_value0, tMRD);
-        // Push the mrw command
-        io_program.iv_instructions.push_back(l_mr14_wr_instr1);
+        for(const auto& l_rank : l_vec_ranks)
+        {
+            auto l_mr14_wr_instr1 = mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
+                                    (l_rank, MR14_ECC_CONFIG, l_mr14_value0, tMRD);
+            // Push the mrw command
+            io_program.iv_instructions.push_back(l_mr14_wr_instr1);
 
-        // CCS instruction to write to the MR14 register
-        auto l_mr14_wr_instr2 = mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
-                                (l_port_rank, MR14_ECC_CONFIG, l_mr14_value1, tMRD);
-        // Push the mrw command
-        io_program.iv_instructions.push_back(l_mr14_wr_instr2);
+            // CCS instruction to write to the MR14 register
+            auto l_mr14_wr_instr2 = mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
+                                    (l_rank, MR14_ECC_CONFIG, l_mr14_value1, tMRD);
+            // Push the mrw command
+            io_program.iv_instructions.push_back(l_mr14_wr_instr2);
 
-        // Setup Error Threshold: MR15 [2:0] set to 011b for 256 errors (default is 011b for 256 errors)
-        // 7  6  5  4  3  2  1  0
-        // 0  0  0  0  0  0  1  1
-        auto l_mr15_wr_instr = mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>(l_port_rank, MR15_ECC_THRESHOLD, 0x03, tMRD);
+            // Setup Error Threshold: MR15 [2:0] set to 011b for 256 errors (default is 011b for 256 errors)
+            // 7  6  5  4  3  2  1  0
+            // 0  0  0  0  0  0  1  1
+            auto l_mr15_wr_instr = mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>(l_rank, MR15_ECC_THRESHOLD, 0x03,
+                                   tMRD);
 
-        // Push the mrw command
-        io_program.iv_instructions.push_back(l_mr15_wr_instr);
-
+            // Push the mrw command
+            io_program.iv_instructions.push_back(l_mr15_wr_instr);
+        }
     }
 
-    // Flow chart of the ccs instructions for ECS test
+    // Case 0: Flow chart of the ccs instructions for ECS test (2 ranks in parallel)
+    // 0. PREab0(trfc_idle/2)
+    //      |
+    //      v
+    // 1. PREab1(trfc_idle/2)
+    //      |
+    //      v
+    // 2. REFab0(trfc_idle/2)<------|    (nested loop=0, goto offset=1)     if (l_rank != l_vec_ranks.size()-1)
+    //      |                       |
+    //      v                       |
+    // 3. REFab1(trfc_idle/2)       |    (nested loop=10, goto offset=-1)   else
+    //      |   |    10X            |
+    //      v   ---------------------
+    // 4. MPC_ECS0(tEcsc/2)<------| <-----| <-----| <-----| <-----| (nested loop=0, goto offset=1)
+    //      |                     |       |       |       |       |
+    //      v                     |       |       |       |       |
+    // 5. MPC_ECS1(tEcsc/2)       |       |       |       |       | (nested loop=32, goto offset=-1)
+    //      |        |     32X    |  128X |  128X |  128X | 2X or |
+    //      v        --------------       |       |       | 4X    |
+    // 6. REFab0(trfc_idle/2)             |       |       |       | (nested loop=0, goto offset=1)
+    //      |                             |       |       |       |
+    //      v                             |       |       |       |
+    // 7. REFab1(trfc_idle/2)--------------       |       |       | (nested loop=128, goto offset=-3)
+    //      |                                     |       |       |
+    //      v                                     |       |       |
+    // 8. NOP(0)-----------------------------------       |       | (nested loop=128, goto offset=-4)
+    //      |                                             |       |
+    //      v                                             |       |
+    // 9. NOP(0)-------------------------------------------       | (nested loop=128, goto offset=-5)
+    //      |                                                     |
+    //      v                                                     |
+    // 10.NOP(0)--------------------------------------------------- (nested loop=2 or 4, goto offset=-6)
+    //      |
+    //      v
+    // 11.NOP(32)
+    // ===================================================================================================
+    // Case 1: Flow chart of the ccs instructions for ECS test for single rank
     // 0. PREab(trfc_nck)
     //      |
     //      v
@@ -180,156 +314,228 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const mss::rank::info<mss:
     // Once the loop counter is 0 it automatically goes to the next
     // instruction.
 
-    // 0th instruction
+    // PreCharge instruction
     // Set CCS instruction for PREab
     {
-        // Create Precharge instruction for the selected srank
-        auto l_pre_all_instr = mss::ccs::ddr5::precharge_all_command<mss::mc_type::ODYSSEY>(l_port_rank, i_srank,
-                               l_trfc_idle);
+        for(const auto& l_rank : l_vec_ranks)
+        {
+            //====================================================
+            // Case        | Multiple ranks      |  Single rank  |
+            //-------------|---------------------|---------------|
+            // Ranks       |  r0    |    r1      |      r0       |
+            //====================================================
+            // idles       | l_trfc_idle/#ofranks|  l_trfc_idle  |
+            //====================================================
+            // goto_offset |     1   |    1      |        1      |
+            //====================================================
+            // loop_count  |     0   |    0      |        0      |
+            //====================================================
+            // Create Precharge instruction for the selected srank
+            auto l_pre_all_instr = mss::ccs::ddr5::precharge_all_command<mss::mc_type::ODYSSEY>(l_rank, i_srank,
+                                   l_trfc_idle_per_rank);
 
-        // GOTO the 1st instruction
-        // Instruction class variable l_pre_all_instr.iv_goto_next_instr_offset
-        // defaults to 1 that takes it to the next instruction
+            FAPI_INF_NO_SBE("l_rank: %d, l_trfc_idle_per_rank: 0x%02x for target: " GENTARGTIDFORMAT, l_rank, l_trfc_idle_per_rank,
+                            GENTARGTID(i_vec_rank_info[0].get_port_target()));
+            FAPI_INF_NO_SBE("l_rank: %d, l_trfc_nck: 0x%02x, l_trfc_idle: 0x%02x for target: " GENTARGTIDFORMAT, l_rank, l_trfc_nck,
+                            l_trfc_idle, GENTARGTID(i_vec_rank_info[0].get_port_target()));
 
-        // Push the precharge command
-        io_program.iv_instructions.push_back(l_pre_all_instr);
+            // GOTO the next instruction
+            // Instruction class variable l_pre_all_instr.iv_goto_next_instr_offset
+            // Both cases the offset is 1
+            // defaults to 1 that takes it to the next instruction
 
+            // Push the precharge command
+            io_program.iv_instructions.push_back(l_pre_all_instr);
+        }
     }
 
-    // 1st instruction
+    // REFresh instruction
     // Due to prior commands, the sequencer might have delayed several refreshes,
     // which can lead to a tREFI violation. Adds in 10x refresh prior to the ECS
     // loop to ensure that there is no tREFI violation
     {
-        // Create the REFab instruction for the selected srank
-        auto l_refab_instr_0 = mss::ccs::ddr5::refresh_command<mss::mc_type::ODYSSEY>(l_port_rank, i_srank, l_trfc_idle);
+        // Get the index of the refresh instruction
+        const uint8_t l_refab_instr0_loop_index = io_program.iv_instructions.size();
+        const uint8_t l_loop_count = 10;
 
-        // Set the loop count to 10 to refresh all the drams
-        l_refab_instr_0.arr0.template insertFromRight<TT::ARR0_NESTED_LOOP_COUNT, TT::ARR0_NESTED_LOOP_COUNT_LEN>(10);
+        for(const auto& l_rank : l_vec_ranks)
+        {
+            //====================================================
+            // Case        | Multiple ranks      |  Single rank  |
+            //-------------|---------------------|---------------|
+            // Ranks       |  r0    |    r1      |      r0       |
+            //====================================================
+            // idles       | l_trfc_idle/#ofranks|  l_trfc_idle  |
+            //====================================================
+            // goto_offset |     1  |    -1      |        1      |
+            //====================================================
+            // loop_count  |     0  |    10      |        0      |
+            //====================================================
 
-        // Need to break out the nested loop
-        l_refab_instr_0.arr1.template insertFromRight<TT::ARR1_BREAK_MODE, TT::ARR1_BREAK_MODE_LEN>(0b01);
+            // Create the REFab instruction for the selected srank
+            auto l_refab_instr_0 = mss::ccs::ddr5::refresh_command<mss::mc_type::ODYSSEY>(l_rank, i_srank, l_trfc_idle_per_rank);
 
-        // GOTO the 1st instruction
-        // Instruction class variable l_mpc_instr.iv_goto_next_instr_offset
-        // need to be set to 0 to loop around itself
-        l_refab_instr_0.iv_goto_instr_offset = 0;
+            // Push the refresh command
+            io_program.iv_instructions.push_back(l_refab_instr_0);
+        }
 
-        // Push the refresh command
-        io_program.iv_instructions.push_back(l_refab_instr_0);
+        // Update the loop count and goto fields on the instruction for the
+        // last mrank (the last instruction we added to io_program)
+        // so it loops back to the first REFab
+        setup_goto_offset(l_loop_count, l_refab_instr0_loop_index, io_program.iv_instructions);
     }
+
+    // Get the starting loop index for mpc so that all instructions can loop back to.
+    l_loop_mpc_start_index = io_program.iv_instructions.size();
 
     // Jedec table-154: ECS Operation Timing Parameter is:
     // max(176nck, 110ns)/2. We need to divide it by 2 for the idles in the CCS instr
     l_tecsc_nck = std::max(l_176_nck, l_110ns_nck);
-    FAPI_TRY(mss::divide_and_round(l_tecsc_nck, uint64_t(2), 0, l_tecsc_idles));
+    FAPI_TRY(mss::divide_and_round(l_tecsc_nck, uint64_t(2), l_func_code, l_tecsc_idles));
+    FAPI_TRY(mss::divide_and_round(l_tecsc_idles, uint64_t(l_vec_ranks.size()), l_func_code, l_tecsc_idles_per_rank));
 
-    // 2nd instruction
+    // MPC_ECS instruction
     // Set CCS instruction for MPC
     {
-        // Set the CCS instruction for MPC:ECS
-        auto l_mpc_instr = mss::ccs::ddr5::mpc_command<mss::mc_type::ODYSSEY>(l_port_rank,
-                           mss::ccs::ddr5::mpc_op_encoding::MANUAL_ECS_OP, l_tecsc_idles);
+        const uint8_t l_loop_count = 32;
 
-        // Set the loop count to 32
-        l_mpc_instr.arr0.template insertFromRight<TT::ARR0_NESTED_LOOP_COUNT, TT::ARR0_NESTED_LOOP_COUNT_LEN>(32);
+        for(const auto& l_rank : l_vec_ranks)
+        {
+            //======================================================
+            // Case        | Multiple ranks        |  Single rank  |
+            //-------------|-----------------------|---------------|
+            // Ranks       |  r0    |    r1        |      r0       |
+            //======================================================
+            // idles       | l_tecsc_idles/#ofranks| l_tecsc_idle  |
+            //======================================================
+            // goto_offset |     1  |    -1        |        0      |
+            //======================================================
+            // loop_count  |     0  |    32        |       32      |
+            //======================================================
 
-        // Need to break out the nested loop
-        l_mpc_instr.arr1.template insertFromRight<TT::ARR1_BREAK_MODE, TT::ARR1_BREAK_MODE_LEN>(0b01);
+            // Set the CCS instruction for MPC:ECS
+            auto l_mpc_instr = mss::ccs::ddr5::mpc_command<mss::mc_type::ODYSSEY>(l_rank,
+                               mss::ccs::ddr5::mpc_op_encoding::MANUAL_ECS_OP, l_tecsc_idles_per_rank);
 
-        // GOTO the 1st instruction
-        // Instruction class variable l_mpc_instr.iv_goto_next_instr_offset
-        // need to be set to 0 to loop around itself
-        l_mpc_instr.iv_goto_instr_offset = 0;
+            // Push the mpc command
+            io_program.iv_instructions.push_back(l_mpc_instr);
+        }
 
-        // Push the mpc command
-        io_program.iv_instructions.push_back(l_mpc_instr);
+        // Update the loop count and goto fields on the instruction for the
+        // last mrank (the last instruction we added to io_program)
+        // so it loops back to the first MPC
+        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
+
     }
 
-    // 3rd instruction
+    // REFab instruction
     // Set the CCS instruction for REFab
     {
-        // Create the REFab instruction for the selected srank
-        auto l_refab_instr = mss::ccs::ddr5::refresh_command<mss::mc_type::ODYSSEY>(l_port_rank, i_srank, l_trfc_idle);
+        const uint8_t l_loop_count = 128;
 
-        // Set the loop count to 128
-        l_refab_instr.arr0.template insertFromRight<TT::ARR0_NESTED_LOOP_COUNT, TT::ARR0_NESTED_LOOP_COUNT_LEN>(128);
+        for(const auto& l_rank : l_vec_ranks)
+        {
+            //======================================================
+            // Case        | Multiple ranks        |  Single rank  |
+            //-------------|-----------------------|---------------|
+            // Ranks       |  r0    |    r1        |      r0       |
+            //======================================================
+            // idles       | l_trfc_idle/#ofranks  | l_trfc_idle   |
+            //======================================================
+            // goto_offset |     1  |    -3        |        -1     |
+            //======================================================
+            // loop_count  |     0  |    128       |      128      |
+            //======================================================
+            // Create the REFab instruction for the selected srank
+            auto l_refab_instr = mss::ccs::ddr5::refresh_command<mss::mc_type::ODYSSEY>(l_rank, i_srank, l_trfc_idle_per_rank);
 
-        // Need to break out the nested loop
-        l_refab_instr.arr1.template insertFromRight<TT::ARR1_BREAK_MODE, TT::ARR1_BREAK_MODE_LEN>(0b01);
 
-        // GOTO to the 4th instruction
-        // Instruction class variable l_refab_instr.iv_goto_next_instr_offset
-        // Need to be set to -1 to go back to 1st instruction
-        l_refab_instr.iv_goto_instr_offset = -1;
+            // Push the refresh command
+            io_program.iv_instructions.push_back(l_refab_instr);
+        }
 
-        // Push the refresh command
-        io_program.iv_instructions.push_back(l_refab_instr);
+        // Update the loop count and goto fields on the instruction for the
+        // last mrank (the last instruction we added to io_program)
+        // so it loops back to the first MPC
+        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
     }
 
-    // 4th instruction
+    // NOP instruction
     // Set the CCS instruction for NOP
     {
+        //======================================================
+        // Case        | Multiple ranks        |  Single rank  |
+        //-------------|-----------------------|---------------|
+        // Ranks       |   r0   |    r1        |      r0       |
+        //======================================================
+        // idles       |         0             |       0       |
+        //======================================================
+        // goto_offset |        -4             |      -2       |
+        //======================================================
+        // loop_count  |        128            |      128      |
+        //======================================================
         auto l_nop_instr1 = mss::ccs::ddr5::des_command<mss::mc_type::ODYSSEY>(0);
-
-        // Set the loop count to 128
-        l_nop_instr1.arr0.template insertFromRight<TT::ARR0_NESTED_LOOP_COUNT, TT::ARR0_NESTED_LOOP_COUNT_LEN>(128);
-
-        // Need to break out the nested loop
-        l_nop_instr1.arr1.template insertFromRight<TT::ARR1_BREAK_MODE, TT::ARR1_BREAK_MODE_LEN>(0b01);
-
-        // GOTO back to the 1st instruction for a loop count of 128
-        // Instruction class variable l_nop_instr1.iv_goto_next_instr_offset
-        // need to be set to -2 to go back to 1st instruction
-        l_nop_instr1.iv_goto_instr_offset = -2;
-
+        const uint8_t l_loop_count = 128;
+        // Here for single and multiple there is only one instruction that needs to be setup
         // Push the nop command
         io_program.iv_instructions.push_back(l_nop_instr1);
+
+        // Loops back to the first MPC in the program
+        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
     }
 
-    // 5th instruction
+    // NOP instruction
     // Set the CCS instruction for NOP
     {
+        //======================================================
+        // Case        | Multiple ranks        |  Single rank  |
+        //-------------|-----------------------|---------------|
+        // Ranks       |   r0   |    r1        |      r0       |
+        //======================================================
+        // idles       |         0             |       0       |
+        //======================================================
+        // goto_offset |        -5             |      -3       |
+        //======================================================
+        // loop_count  |        128            |      128      |
+        //======================================================
         auto l_nop_instr2 = mss::ccs::ddr5::des_command<mss::mc_type::ODYSSEY>(0);
-        // Set the loop count to 4
-        l_nop_instr2.arr0.template insertFromRight<TT::ARR0_NESTED_LOOP_COUNT, TT::ARR0_NESTED_LOOP_COUNT_LEN>(128);
-
-        // Need to break out the nested loop
-        l_nop_instr2.arr1.template insertFromRight<TT::ARR1_BREAK_MODE, TT::ARR1_BREAK_MODE_LEN>(0b01);
-
-        // GOTO back to the 1st instruction for a loop count of 128
-        // Instruction class variable l_nop_instr2.iv_goto_next_instr_offset
-        // need to be set to -3 that takes it back to 1st instruction
-        l_nop_instr2.iv_goto_instr_offset = -3;
-
+        const uint8_t l_loop_count = 128;
+        // Here for single and multiple there is only one instruction that needs to be setup
         // Push the nop command
         io_program.iv_instructions.push_back(l_nop_instr2);
+
+        // Loops back to the first MPC in the program
+        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
     }
 
-    // 6th instruction
+    // NOP instruction
     // Set the CCS instruction for NOP
     {
-        uint8_t l_loop_cnt = 0;
+        //======================================================
+        // Case        | Multiple ranks        |  Single rank  |
+        //-------------|-----------------------|---------------|
+        // Ranks       |   r0   |    r1        |      r0       |
+        //======================================================
+        // idles       |         0             |       0       |
+        //======================================================
+        // goto_offset |        -6             |      -4       |
+        //======================================================
+        // loop_count  |        2 or 4         |   2 or 4      |
+        //======================================================
         auto l_nop_instr3 = mss::ccs::ddr5::des_command<mss::mc_type::ODYSSEY>(0);
-
+        // Here for single and multiple there is only one instruction that needs to be setup
         // Note: the comments bellow refer to gigabit not gigabyte inentionally, as the die density is the determining factor here
         // Set the loop count to 2 for 16Gb DRAM width
         // (32 * 128 * 128 * 128 * 2) = 134,217,728 (2^27) for 16Gb DRAM
         // Set the loop count to 4 for 32Gb DRAM width
         // (32 * 128 * 128 * 128 * 4) = 268,435,456 (2^28) for 32Gb DRAM
-        l_loop_cnt = l_dram_density == fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_16G ? 2 : 4;
-        l_nop_instr3.arr0.template insertFromRight<TT::ARR0_NESTED_LOOP_COUNT, TT::ARR0_NESTED_LOOP_COUNT_LEN>(l_loop_cnt);
-
-        // Need to break out the nested loop
-        l_nop_instr3.arr1.template insertFromRight<TT::ARR1_BREAK_MODE, TT::ARR1_BREAK_MODE_LEN>(0b01);
-
-        // GOTO back to the 1st instruction for a loop count of 2 or 4
-        // Instruction class variable l_nop_instr3.iv_goto_next_instr_offset
-        // need to be set to -3 that takes it back to 1st instruction
-        l_nop_instr3.iv_goto_instr_offset = -4;
+        const uint8_t l_loop_count = l_dram_density == fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_16G ? 2 : 4;
 
         // Push the nop command
         io_program.iv_instructions.push_back(l_nop_instr3);
+
+        // Loops back to the first MPC in the program
+        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
     }
 
     // Exit the CCS loop
@@ -437,7 +643,7 @@ fapi2::ReturnCode setup_to_execute_ecs(const std::vector<mss::rank::info<mss::mc
     mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
 
     // Setup the arrays with CCS instruction to perform ECS for the selected SRANK
-    FAPI_TRY(setup_arrays_with_ecs_instructions(i_vec_rank_info[0], i_srank, l_program));
+    FAPI_TRY(setup_arrays_with_ecs_instructions(i_vec_rank_info, i_srank, l_program));
 
     FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying ecs using standalone CCS", GENTARGTID(l_ocmb_target));
 
@@ -811,114 +1017,92 @@ fapi2::ReturnCode run_ecs_helper(const std::vector<mss::rank::info<mss::mc_type:
         l_num_sranks = l_logical_ranks / l_mranks;
     }
 
-    for(uint8_t l_mrank_idx = 0; l_mrank_idx < l_mranks; l_mrank_idx++)
+    // Run this for each SRANK for the rank info that the user selected
+    for(uint8_t l_srank = 0; l_srank < l_num_sranks; l_srank++)
     {
-        std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_selected_ranks;
+        // Workaround for HYNIX DIMM
+        // should take full set of ranks i_vec_ranks
+        FAPI_TRY(run_hynix_workaround(i_vec_ranks, l_srank, i_pattern));
 
-        // TODO: MSWT-334 Part(b) Remove this for AFTER both ranks at a time is added in.
-        // Loop over all the ranks and filter rank infos in to another vector
-        // that user selected so we run only the ones the user selected
-        for(const auto& l_rank_info : i_vec_ranks)
+        // Do mem init for each srank
+        FAPI_TRY(memory_init_via_memdiags(i_vec_ranks[0], l_srank, i_pattern, l_ecc_reg_data));
+
+        // Disable periodic calibration
+        FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
+
+        // Setup the ecs to execute
+        // change: should take full set of rank infos i_vec_ranks
+        FAPI_TRY(setup_to_execute_ecs(i_vec_ranks, l_srank));
+
+        // Collect the mr error info into arrays from the  rank infos only
+        // Looping through all ranks
+        for (const auto& l_rank_info : i_vec_ranks)
         {
-            // Check if the current rank_info is the one user selected
-            if(l_rank_info.get_port_rank() == l_mrank_idx)
-            {
-                // Push that rank_info into a vector
-                l_selected_ranks.push_back(l_rank_info);
-            }
-        }
+            const uint8_t l_mrank_idx = l_rank_info.get_port_rank();
+            const auto& l_port_target = l_rank_info.get_port_target();
+            const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
 
-        // TODO: MSWT-334 Part(b) Remove this for AFTER the both ranks at a time is added in
-        // No matches so this wasn't selected.
-        if(l_selected_ranks.empty())
-        {
-            continue;
-        }
-
-        // Run this for each SRANK for the rank info that the user selected
-        for(uint8_t l_srank = 0; l_srank < l_num_sranks; l_srank++)
-        {
-            // Workaround for HYNIX DIMM
-            FAPI_TRY(run_hynix_workaround(l_selected_ranks, l_srank, i_pattern));
-
-            // Do mem init for each srank
-            FAPI_TRY(memory_init_via_memdiags(l_selected_ranks[0], l_srank, i_pattern, l_ecc_reg_data));
-
-            // Disable periodic calibration
-            FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
-
-            // Setup the ecs to execute
-            FAPI_TRY(setup_to_execute_ecs(l_selected_ranks, l_srank));
-
-            // Collect the mr error info into arrays from the user selected rank infos only
-            // Looping through user selected ranks
-            for (const auto& l_sel_rank_info : l_selected_ranks)
-            {
-                const auto& l_port_target = l_sel_rank_info.get_port_target();
-                const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
-
-                FAPI_INF_NO_SBE(GENTARGTIDFORMAT " In run_ecs_helper(): l_rel_pos: %d", GENTARGTID(l_port_target), l_rel_pos);
-                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR20_ERROR_COUNT, l_dram_splits));
-                memcpy(&o_mr20_arr[l_rel_pos][l_mrank_idx][l_srank][0], &l_dram_splits[0],
-                       sizeof(o_mr20_arr[l_rel_pos][l_mrank_idx][l_srank]));
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " In run_ecs_helper(): l_rel_pos: %d", GENTARGTID(l_port_target), l_rel_pos);
+            FAPI_TRY(read_mr_error_regs(l_rank_info, MR20_ERROR_COUNT, l_dram_splits));
+            memcpy(&o_mr20_arr[l_rel_pos][l_mrank_idx][l_srank][0], &l_dram_splits[0],
+                   sizeof(o_mr20_arr[l_rel_pos][l_mrank_idx][l_srank]));
 
 #ifndef __HOSTBOOT_MODULE
 
-                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-                {
-                    FAPI_INF_NO_SBE("Error count from MR20 in port: " GENTARGTIDFORMAT
-                                    ", mrank: %u, srank: %d, DRAM %d, OPCODE: 0x%02x for pattern:%u",
-                                    GENTARGTID(l_port_target),
-                                    l_sel_rank_info.get_port_rank(), l_srank, l_dram, l_dram_splits[l_dram], i_pattern);
-                }
+            for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+            {
+                FAPI_INF_NO_SBE("Error count from MR20 in port: " GENTARGTIDFORMAT
+                                ", mrank: %u, srank: %d, DRAM %d, OPCODE: 0x%02x for pattern:%u",
+                                GENTARGTID(l_port_target),
+                                l_rank_info.get_port_rank(), l_srank, l_dram, l_dram_splits[l_dram], i_pattern);
+            }
 
 #endif
-                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR16_ERROR_COUNT, l_dram_splits));
+            FAPI_TRY(read_mr_error_regs(l_rank_info, MR16_ERROR_COUNT, l_dram_splits));
 
-                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-                {
-                    // Each element in this array is concatenation of MR16171819
-                    // [MR16MR17MR18MR19, MR16MR17MR18MR19 ......]
-                    // Shifting the MR data to the correct position in a 32 byte value
-                    o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 24;
-                    FAPI_DBG("Added MR16:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
-                             o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
-                }
+            for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+            {
+                // Each element in this array is concatenation of MR16171819
+                // [MR16MR17MR18MR19, MR16MR17MR18MR19 ......]
+                // Shifting the MR data to the correct position in a 32 byte value
+                o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 24;
+                FAPI_DBG("Added MR16:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
+                         o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
+            }
 
-                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR17_ERROR_COUNT, l_dram_splits));
+            FAPI_TRY(read_mr_error_regs(l_rank_info, MR17_ERROR_COUNT, l_dram_splits));
 
-                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-                {
-                    o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 16;
-                    FAPI_DBG("Added MR17:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
-                             o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
-                }
+            for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+            {
+                o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 16;
+                FAPI_DBG("Added MR17:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
+                         o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
+            }
 
-                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR18_ERROR_COUNT, l_dram_splits));
+            FAPI_TRY(read_mr_error_regs(l_rank_info, MR18_ERROR_COUNT, l_dram_splits));
 
-                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-                {
-                    o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 8;
-                    FAPI_DBG("Added MR18:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
-                             o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
-                }
+            for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+            {
+                o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 8;
+                FAPI_DBG("Added MR18:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
+                         o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
+            }
 
-                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR19_ERROR_COUNT, l_dram_splits));
+            FAPI_TRY(read_mr_error_regs(l_rank_info, MR19_ERROR_COUNT, l_dram_splits));
 
-                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-                {
-                    o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= l_dram_splits[l_dram];
-                    FAPI_DBG("Added MR19:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
-                             o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
-                }
-            } // end of rank_info vector
+            for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+            {
+                o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= l_dram_splits[l_dram];
+                FAPI_DBG("Added MR19:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
+                         o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
+            }
+        } // end of rank_info vector
 
-            // Reset the error counters MR16-MR20 for the next run
-            FAPI_TRY(reset_error_counters(l_selected_ranks, l_srank));
-            // Enable periodic calibration and ecc mode
-            FAPI_TRY(enable_periodic_cal_ecc_modes(l_ocmb, l_ecc_reg_data, l_periodic_calib_data));
-        } // end of l_srank
-    } // end of l_mrank loop
+        // Reset the error counters MR16-MR20 for the next run
+        FAPI_TRY(reset_error_counters(i_vec_ranks, l_srank));
+        // Enable periodic calibration and ecc mode
+        FAPI_TRY(enable_periodic_cal_ecc_modes(l_ocmb, l_ecc_reg_data, l_periodic_calib_data));
+    } // end of l_srank
 
 fapi_try_exit:
     return fapi2::current_err;
