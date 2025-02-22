@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,6 +180,14 @@ const uint64_t RAWLANEAONN_DIG_ADPT_CTL_11[NUM_OF_INSTANCES] =
     0x8001704B0801153F,
 };
 
+const uint64_t RAWLANEAONN_DIG_ADPT_CTL_21[NUM_OF_INSTANCES] =
+{
+    0x800070550801113F,
+    0x800170550801113F,
+    0x800070550801153F,
+    0x800170550801153F,
+}
+;
 const uint64_t RAWLANEAONN_DIG_ADPT_CTL_23[NUM_OF_INSTANCES] =
 {
     0x800070570801113F,
@@ -443,14 +451,10 @@ fapi2::ReturnCode p10_load_iop_override(
             l_data.setBit<63>();
             FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
 
-            // set bit 15 in DIG_ADAPT_CTL_11
-            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_11[i], l_data));
-            l_data.setBit<48>();
-            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_11[i], l_data));
 
-            // write entirety of DIG_ADAPT_CTL_23 = 0x954C
-            l_data = 0x000000000000954CULL;
-            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_23[i], l_data));
+            // write entirety of DIG_ADAPT_CTL_21 = 0x010F
+            l_data = 0x000000000000010FULL;
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_21[i], l_data));
         }
     }
 
