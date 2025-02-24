@@ -1210,7 +1210,8 @@ void SPnorRP::waitForMessage()
                             // has its V3 header as unprotected data)
                             if (l_sizeWithHdr != l_rec->infoSize &&
                                 !l_rec->hasHashTable &&
-                                l_id != HB_BOOTLOADER)
+                                l_id != HB_BOOTLOADER &&
+                                l_id != SBKT)
                             {
                                 TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> Attempting to unload an unsupported section: 0x%X textsize+hdr: 0x%llX infosize: 0x%llX (the two sizes must be equal)", l_id, l_sizeWithHdr, l_rec->infoSize);
                                 /*@
