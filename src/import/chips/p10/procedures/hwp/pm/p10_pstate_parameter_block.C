@@ -197,6 +197,8 @@ using namespace ppb;
     if ( ((!a) || (!b) || (!c) || (!d) || (!e) || (!f) || (!g) || (!h) || (!i)))  \
     { state = 0; }
 
+uint8_t g_wof_ipl_skip = 0;
+
 char const* vpdSetStr[] = VPD_PT_SET_STR;
 char const* ddsFieldStr[] = POUNDW_DDS_FIELDS_STR;
 char const* region_names[] = VPD_OP_SLOPES_REGION_ORDER_STR;
@@ -269,6 +271,11 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
             break;
         }
 
+        //_HOSTBOOT_RUNTIME is not defined for HOSTBOOT builds
+        //used for IPL (eg istep 15) so WOF Table access can be skipped.
+#ifndef __HOSTBOOT_RUNTIME
+        g_wof_ipl_skip = true;
+#endif
         // ----------------
         // get VPD data (#V,#W,IQ)
         // ----------------
@@ -4021,6 +4028,12 @@ bool PlatPmPPB::is_wof_enabled()
         iv_wof_enabled = false;
     }
 
+    if (g_wof_ipl_skip)
+    {
+        iv_wof_enabled = false;
+    }
+
+
     return iv_wof_enabled;
 }
 
@@ -7072,7 +7085,13 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
         wof_state = is_wof_enabled();
     }
 
-    FAPI_TRY(p10_pm_set_system_freq(sys_target,wof_state), "p10_pm_set_system_freq failed.");
+    // We can skip this during istep 15 flow, because all the
+    // frequency attributes are computed in istep 6/8 itself.And
+    // anyway this will execute again in runtime
+    if ( !g_wof_ipl_skip)
+    {
+        FAPI_TRY(p10_pm_set_system_freq(sys_target,wof_state), "p10_pm_set_system_freq failed.");
+    }
 
     if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
     {
