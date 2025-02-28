@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/mss_pair.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/proc_specific/mss_target_abstractions.H>
 
 #include <vector>
 #include <generic/memory/lib/utils/pos.H>
@@ -180,12 +181,12 @@ inline fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> find_target(const fapi2::Targ
 /// @return a PROC_CHIP target.
 ///
 template<>
-inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+inline fapi2::Target<PROC_TYPE> find_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target)
 {
     return i_target.getParent<fapi2::TARGET_TYPE_OMI>()
            .getParent<fapi2::TARGET_TYPE_MC>()
-           .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+           .getParent<PROC_TYPE>();
 }
 
 ///
@@ -194,10 +195,10 @@ inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target(const fapi2::Targ
 /// @return a PROC_CHIP target.
 ///
 template<>
-inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+inline fapi2::Target<PROC_TYPE> find_target(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
         i_target)
 {
-    return find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target.getParent<fapi2::TARGET_TYPE_OCMB_CHIP>());
+    return find_target<PROC_TYPE>(i_target.getParent<fapi2::TARGET_TYPE_OCMB_CHIP>());
 }
 
 ///
@@ -259,7 +260,7 @@ inline fapi2::Target<fapi2::TARGET_TYPE_OMIC> find_target(const fapi2::Target<fa
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+find_targets( const fapi2::Target<PROC_TYPE>& i_target,
               fapi2::TargetState i_state )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> > l_ocmbs;
@@ -378,7 +379,7 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >
-find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+find_targets( const fapi2::Target<PROC_TYPE>& i_target,
               fapi2::TargetState i_state )
 {
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> > l_ports;

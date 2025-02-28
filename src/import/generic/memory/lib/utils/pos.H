@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/proc_specific/mss_target_abstractions.H>
 
 ///
 /// @brief Trait classes for the mss::pos functions
@@ -87,7 +88,7 @@ class posTraits<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>
 /// @brief Processor Trait class for the mss::pos functions
 ///
 template<>
-class posTraits<fapi2::TARGET_TYPE_PROC_CHIP>
+class posTraits<PROC_TYPE>
 {
     public:
         typedef uint32_t pos_type;
@@ -129,10 +130,10 @@ fapi_try_exit:
 /// @return The position relative to the chip
 ///
 template<>
-inline posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type
-pos(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+inline posTraits<PROC_TYPE>::pos_type
+pos(const fapi2::Target<PROC_TYPE>& i_target)
 {
-    posTraits<fapi2::TARGET_TYPE_PROC_CHIP>::pos_type l_pos = 0;
+    posTraits<PROC_TYPE>::pos_type l_pos = 0;
 
     if (FAPI_ATTR_GET(fapi2::ATTR_POS, i_target, l_pos) != fapi2::FAPI2_RC_SUCCESS)
     {

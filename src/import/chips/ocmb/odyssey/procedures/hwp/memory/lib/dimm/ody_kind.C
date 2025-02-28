@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/dimm/kind.H>
+#include <generic/memory/proc_specific/mss_target_abstractions.H>
 
 
 namespace mss
@@ -52,7 +53,7 @@ namespace dimm
 template<>
 size_t count_num_dimms<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    return mss::count_ocmb_chip(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+    return mss::count_ocmb_chip(mss::find_target<PROC_TYPE>(i_target),
                                 fapi2::TARGET_STATE_PRESENT);
 }
 

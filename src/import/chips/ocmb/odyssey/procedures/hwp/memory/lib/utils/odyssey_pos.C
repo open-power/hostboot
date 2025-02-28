@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
+#include <generic/memory/proc_specific/mss_target_abstractions.H>
 
 namespace mss
 {
@@ -126,7 +127,7 @@ relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target<
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_OCMB_CHIP>::pos_type
-relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+relative_pos<mc_type::ODYSSEY, PROC_TYPE>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target)
 {
     uint8_t l_bus_pos = 0;
@@ -146,13 +147,13 @@ fapi_try_exit:
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
-relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+relative_pos<mc_type::ODYSSEY, PROC_TYPE>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
         i_target)
 {
     typedef mcTypeTraits<mss::mc_type::ODYSSEY> TT;
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
     return (relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target)) +
-           (relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmb) * TT::PORTS_PER_OCMB);
+           (relative_pos<mc_type::ODYSSEY, PROC_TYPE>(l_ocmb) * TT::PORTS_PER_OCMB);
 }
 
 ///

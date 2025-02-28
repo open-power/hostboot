@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/data_engine/data_engine_traits_def.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
+#include <generic/memory/proc_specific/mss_target_abstractions.H>
 
 namespace mss
 {
@@ -70,12 +71,12 @@ class dimmPosTraits<mss::mc_type::ODYSSEY>
         /// @param[in] i_target the dimm target
         /// @return the fapi2 proc target
         ///
-        static fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> get_proc(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+        static fapi2::Target<PROC_TYPE> get_proc(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
         {
             // Using fapi2 rather than mss::find as this is pretty low level stuff.
             const auto l_ocmb = i_target.getParent<fapi2::TARGET_TYPE_MEM_PORT>().getParent<fapi2::TARGET_TYPE_OCMB_CHIP>();
             const auto l_mc = l_ocmb.getParent<fapi2::TARGET_TYPE_OMI>().getParent<fapi2::TARGET_TYPE_MC>();
-            return l_mc.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+            return l_mc.getParent<PROC_TYPE>();
         }
 };
 

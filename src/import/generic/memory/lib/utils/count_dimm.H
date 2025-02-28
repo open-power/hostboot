@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/proc_specific/mss_target_abstractions.H>
 
 namespace mss
 {
@@ -151,7 +152,7 @@ inline size_t count_mem_port(const std::vector<fapi2::Target<T>>& i_targets,
 /// @note Use this function to count "present and nonfunctional" DIMMs
 ///
 template< >
-inline size_t count_mem_port(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+inline size_t count_mem_port(const fapi2::Target<PROC_TYPE>& i_target,
                              fapi2::TargetState i_state)
 {
     const auto& l_ocmb = find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target, i_state);
@@ -166,7 +167,7 @@ inline size_t count_mem_port(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
 /// @return size_t the count of OCMB chips attached
 /// @note Use this function to count "present and nonfunctional" DIMMs
 ///
-inline size_t count_ocmb_chip(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+inline size_t count_ocmb_chip(const fapi2::Target<PROC_TYPE>& i_target,
                               fapi2::TargetState i_state = fapi2::TARGET_STATE_FUNCTIONAL)
 {
     const auto& l_ocmb = find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target, i_state);
