@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2025                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1728,26 +1728,6 @@
       <uint8_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <no_export/>
-  </attribute>
-
-  <attribute>
-    <id>SB_SIGNING_MODE_OVERRIDE</id>
-    <description>
-        Secureboot Signing Mode used to override the system setting when
-        doing the Processor SBE Update.
-        See SB_SIGNING enum for values, but using a uint8_t type because
-        attribute overriding does not support enums
-    </description>
-    <simpleType>
-      <uint8_t>
-        <!-- see SB_SIGNING enum value SYSTEM_CONTAINER above -->
-        <default>0xEE</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
     <no_export/>

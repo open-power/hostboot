@@ -3084,49 +3084,10 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /***********************************/
             /*  Update the Signing Mode        */
             /***********************************/
-            // For production drivers only use the system's signing mode for
-            // the customized SBE image. Like previously in this function,
-            // the check will use lack of presence of a backdoor to assert
-            // we have a production driver.
-            // For imprint drivers ATTR_SB_SIGNING_MODE_OVERRIDE will determine
-            // how the signing mode should be set for the customized SBE image.
-            // The attribute defaults to using the system setting.
-            // @TODO JIRA:PFHB-686 Add support for transitioning Signing Mode
-            uint8_t system_signing_mode = SECUREBOOT::hashSignMode();
-            uint8_t attr_signing_mode_override =
-                UTIL::getCurrentNodeTarget()->getAttr<ATTR_SB_SIGNING_MODE_OVERRIDE>();
-
-            if (!SECUREBOOT::getSbeSecurityBackdoor())
-            {
-                // Use system's Signing Mode for production drivers
-                sb_settings.signing_mode = system_signing_mode;
-                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
-                          "to System Setting 0x%.2X since this is a production "
-                          "driver",
-                          sb_settings.signing_mode);
-            }
-            else if (attr_signing_mode_override ==
-                         TARGETING::SB_SIGNING_SYSTEM_CONTAINER)
-            {
-                // Use system's Signing Mode
-                sb_settings.signing_mode = system_signing_mode;
-                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
-                          "to System Setting 0x%.2X (pnor mode=0x%.2X, "
-                          "attr_ovrd=0x%.2X)",
-                          sb_settings.signing_mode, pnor_sbe_signing_mode,
-                          attr_signing_mode_override);
-            }
-            else
-            {
-                // Use Override value
-                sb_settings.signing_mode = attr_signing_mode_override;
-                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
-                          "to ATTR_SB_SIGNING_MODE_OVERRIDE setting: 0x%.2X. "
-                          "Ignoring system mode 0x%.2X and PNOR SBE's mode: "
-                          "0x%.2X",
-                          attr_signing_mode_override, system_signing_mode,
-                          pnor_sbe_signing_mode);
-            }
+            sb_settings.signing_mode = SECUREBOOT::hashSignMode();
+            TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
+                        "to System Setting 0x%.2X (pnor mode=0x%.2X)",
+                        sb_settings.signing_mode, pnor_sbe_signing_mode);
 
             // Now append P9_XIP_SECTION_SBE_SB_SETTINGS
             err = modifySbeSection(P9_XIP_SECTION_SBE_SB_SETTINGS,
@@ -7286,6 +7247,7 @@ errlHndl_t secureKeyTransition()
                 "KEY_TRANSITION_STATE_KEY_TRANSITION_STARTED");
             break;
         }
+        
 
     }
     if(l_loaded)
