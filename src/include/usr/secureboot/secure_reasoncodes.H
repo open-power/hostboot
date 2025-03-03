@@ -161,7 +161,12 @@ namespace SECUREBOOT
 
         // Since 0x00 to 0x1F is full, continuing common ones here
         RC_INVALID_HEADER_VERSION          = SECURE_COMP_ID | 0x50,
-
+        RC_BAD_V3_PREFIX_HDR_ECID          = SECURE_COMP_ID | 0x51,
+        RC_BAD_V3_PREFIX_HDR_RESERVED      = SECURE_COMP_ID | 0x52,
+        RC_BAD_V3_PREFIX_HDR_RESERVED1     = SECURE_COMP_ID | 0x53,
+        RC_BAD_V3_FW_HDR_ECID              = SECURE_COMP_ID | 0x54,
+        RC_BAD_V3_FW_HDR_RESERVED          = SECURE_COMP_ID | 0x55,
+        RC_BAD_V3_FW_HDR_RESERVED1         = SECURE_COMP_ID | 0x56,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

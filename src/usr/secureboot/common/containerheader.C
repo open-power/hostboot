@@ -26,10 +26,23 @@
 #include "../common/securetrace.H"
 #include <secureboot/secure_reasoncodes.H>
 #include <pnor/pnor_reasoncodes.H>
+#include <algorithm>
+
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
+
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+#endif
+
+#define LAST_ARRAY_ELEMENT_PTR(a) &(a[ARRAY_SIZE(a)])
+
+static bool pred_notZero(uint8_t x)
+{
+    return x != 0;
+}
 
 namespace SECUREBOOT
 {
@@ -242,10 +255,80 @@ errlHndl_t ContainerHeader::parse_header()
             break;
         }
 
-        // @TODO JIRA:PFHB-802 Determine if anything needs to be checked for
-        // ECID section as it looks like everything is defaulting to all zeroes
-        TRACDBIN(g_trac_secure,"ContainerHeader::parse_header(): V3: ECID Section",
-                 &iv_v3_headerInfo.v3_hw_prefix_hdr.ecid, ECID_SIZE);
+        {
+            auto &prefix = iv_v3_headerInfo.v3_hw_prefix_hdr;
+            // If any of the ECID bytes in the prefix header are non-zero then error out since these fields are reserved
+            // for future use.
+            if (std::any_of(prefix.ecid, &prefix.ecid[ECID_SIZE], pred_notZero))
+            {
+                TRACFCOMP(g_trac_secure, ERR_MRK"ContainerHeader::parse_header(): V3 prefix hdr ECID not 0!");
+                TRACFBIN(g_trac_secure, "ContainerHeader::parse_header(): V3 Prefix Hdr ECID Section",
+                         &prefix.ecid, ECID_SIZE);
+                static_assert(ECID_SIZE == sizeof(uint64_t)*2, "V3 Prefix HDR ECID Size changed, update error log");
+                uint64_t ecid_first = 0;
+                uint64_t ecid_last = 0;
+                memcpy(&ecid_first, prefix.ecid, sizeof(uint64_t));
+                memcpy(&ecid_last, &(prefix.ecid[sizeof(uint64_t)]), sizeof(uint64_t));
+
+                /*@
+                 * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE
+                 * @reasoncode      SECUREBOOT::RC_BAD_V3_PREFIX_HDR_ECID
+                 * @userdata1       First 8 bytes of ECID
+                 * @userdata2       Last 8 bytes of ECID
+                 * @devdesc         Error parsing secure header
+                 * @custdesc        Firmware Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE,
+                                                 SECUREBOOT::RC_BAD_V3_PREFIX_HDR_ECID,
+                                                 ecid_first,
+                                                 ecid_last);
+                l_errl->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
+            if (prefix.reserved)
+            {
+                /*@
+                 * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE
+                 * @reasoncode      SECUREBOOT::RC_BAD_V3_PREFIX_HDR_RESERVED
+                 * @userdata1       V3 Prefix Hdr reserved
+                 * @userdata2       unused
+                 * @devdesc         Error parsing secure header
+                 * @custdesc        Firmware Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE,
+                                                 SECUREBOOT::RC_BAD_V3_PREFIX_HDR_RESERVED,
+                                                 prefix.reserved);
+                l_errl->collectTrace(SECURE_COMP_NAME);
+                break;
+
+            }
+            if (std::any_of(prefix.reserved1, LAST_ARRAY_ELEMENT_PTR(prefix.reserved1), pred_notZero))
+            {
+                size_t size = std::min(ARRAY_SIZE(prefix.reserved1), sizeof(uint64_t));
+                uint64_t prefix_reserved1 = 0;
+                memcpy(&prefix_reserved1, prefix.reserved1, size);
+                /*@
+                 * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE
+                 * @reasoncode      SECUREBOOT::RC_BAD_V3_PREFIX_HDR_RESERVED1
+                 * @userdata1       Upto 8 bytes of V3 Prefix Hdr Reserved1
+                 * @userdata2       Unused
+                 * @devdesc         Error parsing secure header
+                 * @custdesc        Firmware Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE,
+                                                 SECUREBOOT::RC_BAD_V3_PREFIX_HDR_RESERVED1,
+                                                 prefix_reserved1);
+                l_errl->collectTrace(SECURE_COMP_NAME);
+                break;
+
+            }
+        }
 
         // Check for fw_key_count to be 2 is in validate() check below
         // Cache total software keys size
@@ -269,9 +352,81 @@ errlHndl_t ContainerHeader::parse_header()
                                   l_hdr,
                                   l_size,
                                   V3_SECURE_HEADER_SIZE);
+
         if(l_errl)
         {
             break;
+        }
+
+        {
+            auto &header = iv_v3_headerInfo.v3_fw_hdr;
+            if (std::any_of(header.ecid, &header.ecid[ECID_SIZE], pred_notZero))
+            {
+                TRACFCOMP(g_trac_secure, ERR_MRK"ContainerHeader::parse_header(): V3 FW Hdr ECID not 0!");
+                TRACFBIN(g_trac_secure, "ContainerHeader::parse_header(): V3 FW Hdr ECID Section",
+                         &header.ecid, ECID_SIZE);
+                static_assert(ECID_SIZE == sizeof(uint64_t)*2, "V3 FW HDR ECID Size changed, update error log");
+                uint64_t ecid_first = 0;
+                uint64_t ecid_last = 0;
+                memcpy(&ecid_first, header.ecid, sizeof(uint64_t));
+                memcpy(&ecid_last, &(header.ecid[sizeof(uint64_t)]), sizeof(uint64_t));
+
+                /*@
+                 * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE
+                 * @reasoncode      SECUREBOOT::RC_BAD_V3_FW_HDR_ECID
+                 * @userdata1       First 8 bytes of ECID
+                 * @userdata2       Last 8 bytes of ECID
+                 * @devdesc         Error parsing secure header
+                 * @custdesc        Firmware Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE,
+                                                 SECUREBOOT::RC_BAD_V3_FW_HDR_ECID,
+                                                 ecid_first,
+                                                 ecid_last);
+                l_errl->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
+            if (header.reserved)
+            {
+                /*@
+                 * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE
+                 * @reasoncode      SECUREBOOT::RC_BAD_V3_FW_HDR_RESERVED
+                 * @userdata1       V3 FW Hdr reserved
+                 * @userdata2       unused
+                 * @devdesc         Error parsing secure header
+                 * @custdesc        Firmware Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE,
+                                                 SECUREBOOT::RC_BAD_V3_FW_HDR_RESERVED,
+                                                 header.reserved);
+                l_errl->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
+            if (std::any_of(header.reserved1, LAST_ARRAY_ELEMENT_PTR(header.reserved1), pred_notZero))
+            {
+                size_t size = std::min(ARRAY_SIZE(header.reserved1), sizeof(uint64_t));
+                uint64_t header_reserved1 = 0;
+                memcpy(&header_reserved1, header.reserved1, size);
+                /*@
+                 * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE
+                 * @reasoncode      SECUREBOOT::RC_BAD_V3_FW_HDR_RESERVED1
+                 * @userdata1       Upto 8 bytes of V3 FW Hdr Reserved1
+                 * @userdata2       Unused
+                 * @devdesc         Error parsing secure header
+                 * @custdesc        Firmware Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                 SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE,
+                                                 SECUREBOOT::RC_BAD_V3_FW_HDR_RESERVED1,
+                                                 header_reserved1);
+                l_errl->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
         }
 
         // Set container component id
@@ -860,7 +1015,14 @@ errlHndl_t ContainerHeader::setHeader(const void* i_header)
     assert(i_header != nullptr, "Cannot set header to nullptr");
     iv_pHdrStart = reinterpret_cast<const uint8_t*>(i_header);
     initVars();
-    return parse_header();
+    errlHndl_t errl = parse_header();
+    if (errl)
+    {
+        // Make sure any traces that occurred are captured in the log returned.
+        errl->collectTrace(SECURE_COMP_NAME);
+    }
+
+    return errl;
 }
 
 

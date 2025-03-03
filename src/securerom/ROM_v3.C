@@ -28,11 +28,21 @@
 #include <securerom/ecverify.H>
 #include <securerom/status_codes.H>
 #include <string.h>
+#include <algorithm>
 
 #define v3_valid_magic_number(header) \
     (GET32((header)->magic_number) == ROM_MAGIC_NUMBER)
 #define v3_valid_container_version(header) \
     (GET16((header)->version) == V3_CONTAINER_VERSION)
+
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+#endif
+
+static bool pred_notZero(uint8_t x)
+{
+    return x != 0;
+}
 
 static int v3_valid_ver_alg(ROM_version_raw* ver_alg, uint8_t sig_alg)
 {
@@ -121,8 +131,10 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
         FAILED(HW_KEY_HASH_TEST,"invalid hw keys");
     }
 
-    // @TODO JIRA:PFHB-802 for completeness check that all reserved fields
-    // are zero (container->reserved)
+    if (std::any_of(container->reserved, &(container->reserved[ARRAY_SIZE(container->reserved)]), pred_notZero))
+    {
+        FAILED(CONTAINER_RESERVED_TEST, "container reserved field not 0");
+    }
 
     // process prefix header
     prefix = (ROM_v3_prefix_header_raw*) &container->prefix;
@@ -160,12 +172,21 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     //}
 
     // test for machine specific matching ecid
-    // @TODO JIRA:PFHB-802 revisit ECID checks: for prefix->ecid
-    // check for all 0; if not 0 fail
+    // All ECID bytes must be 0
+    if (std::any_of(prefix->ecid, &prefix->ecid[ECID_SIZE], pred_notZero))
+    {
+        FAILED(PREFIX_ECID_TEST, "invalid ecid bytes");
+    }
 
-    // @TODO JIRA:PFHB-802 for completeness check that all reserved fields
-    // are zero prefix->reserved, prefix->reserved1
+    if (prefix->reserved)
+    {
+        FAILED(PREFIX_RESERVED_TEST, "perfix reserved field not 0");
+    }
 
+    if (std::any_of(prefix->reserved1, &(prefix->reserved1[ARRAY_SIZE(prefix->reserved1)]), pred_notZero))
+    {
+        FAILED(PREFIX_RESERVED1_TEST, "perfix reserved1 field not 0");
+    }
 
     // test for valid prefix payload hash
     // size whould be over both public keys
@@ -239,11 +260,21 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
 
 
     // test for machine specific matching ecid
-    // @TODO JIRA:PFHB-802 revisit ECID checks: for header->ecid
     // check for all 0; if not 0 fail
+    if (std::any_of(header->ecid, &header->ecid[ECID_SIZE], pred_notZero))
+    {
+        FAILED(HEADER_ECID_TEST, "ecid bytes are not 0");
+    }
 
-    // @TODO JIRA:PFHB-802 for completeness check that all reserved fields
-    // are zero header->reserved, header->reserved1
+    if (header->reserved)
+    {
+        FAILED(HEADER_RESERVED_TEST, "header reserved not 0");
+    }
+
+    if (std::any_of(header->reserved1, &(header->reserved1[ARRAY_SIZE(header->reserved1)]), pred_notZero))
+    {
+        FAILED(HEADER_RESERVED1_TEST, "header reserved1 not 0");
+    }
 
     // Setup the ptr to the data for the sha3 hash call below
     uint8_t* data_offset = 0;
