@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2024
+# Contributors Listed Below - COPYRIGHT 2012,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -219,7 +219,7 @@ PNOR_LAYOUT_SELECTED ?= "FSP"
 BUILD_TYPE_PARAMS = --build-type fspbuild
 
 # Here we check to see if a key transition mode was set in the environment.
-# This can be either 'imprint' or 'production'. The genPnorImages.pl will catch
+# This can be either 'development-v3', 'production-v3', or 'prod-prod-v3'. The genPnorImages.pl will catch
 # cases when it is set incorrectly and report an error.
 .if (${SECUREBOOT_KEY_TRANSITION_MODE} != "") # genPnorImages handles bad parm
     KEY_TRANSITION_MODE_PARAMS = --key-transition ${SECUREBOOT_KEY_TRANSITION_MODE}
