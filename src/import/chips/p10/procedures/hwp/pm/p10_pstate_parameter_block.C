@@ -1339,7 +1339,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         compute_dds_slopes(io_globalppb);
 
         float pstatef = 0;
-        if (iv_attrs.attr_extended_freq_mode ||
+        if (iv_attrs.attr_extended_freq_mode &&
             iv_extended_freq_enable)
         {
             if ( (iv_attrs.attr_extended_freq_mode == ENUM_ATTR_EXTENDED_FREQ_MODE_OLD_FREQ) &&
@@ -3606,7 +3606,7 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
             FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
                     pv_op_str[i - 1], pv_op_str[i]);
 
-            if ( (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable) &&
+            if ( (iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable) &&
                  POUNDV_POINTS_INCREASE_PNEXT_CHECK(i))
             {
                 l_cf_point_check_fail = 1;
@@ -4945,7 +4945,7 @@ fapi2::ReturnCode PlatPmPPB::set_reference_freq(fapi2::ATTR_WOF_TABLE_DATA_Type*
         iv_extended_freq_enable = (p_wfth->sys_flags & 0x04) ? true : false;
     }
 
-    if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
+    if (iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable)
     {
         iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
@@ -5059,7 +5059,7 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
     // This must be done after all stretch and biasing as the reference
     // frequency can be modified
 
-    if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
+    if (iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable)
     {
         iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
@@ -7093,7 +7093,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
         FAPI_TRY(p10_pm_set_system_freq(sys_target,wof_state), "p10_pm_set_system_freq failed.");
     }
 
-    if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
+    if (iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable)
     {
         l_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
