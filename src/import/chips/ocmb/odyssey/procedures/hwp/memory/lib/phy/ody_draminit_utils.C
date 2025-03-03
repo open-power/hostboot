@@ -5190,8 +5190,8 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                  l_current_bad_bits_phy,
                  io_start_bad_bits,
                  l_bad_bit_flag,
-                 l_start_bad_bits_per_rank_mc,
-                 l_new_bad_bits_per_rank_mc));
+                 l_new_bad_bits_per_rank_mc,
+                 l_start_bad_bits_per_rank_mc));
 
         // When running training with all options, new bad_bit disables found
         FAPI_ASSERT_NOEXIT(!l_bad_bit_flag,

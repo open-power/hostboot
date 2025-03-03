@@ -2788,7 +2788,7 @@ inline bool has_new_bad_bits(const uint8_t (&i_start_bad_bits)[BAD_BITS_RANKS][B
 }
 
 ///
-/// @brief Returns true if this message block contains new bad bits
+/// @brief Returns true if the recovery loop needs to run
 /// @param[in] i_status the status from training
 /// @param[in] i_start_bad_bits the starting bad bits
 /// @param[in] i_struct the structure containing the current bad bits
@@ -2801,7 +2801,6 @@ inline bool has_draminit_failure(const uint8_t i_status,
     return mss::ody::phy::has_address_fails(i_status, i_struct) ||
            mss::ody::phy::has_new_bad_bits(i_start_bad_bits, i_struct);
 }
-
 
 ///
 /// @brief Returns true if this message block contains new bad bits
