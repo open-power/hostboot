@@ -158,49 +158,49 @@ errlHndl_t ContainerHeader::parse_header()
         }
 
         /*---- Parse ROM_prefix_data_raw ----*/
-        l_size = offsetof(ROM_prefix_data_raw, sw_pkey_p);
+        l_size = offsetof(ROM_prefix_data_raw, fw_pkey_p);
         l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data, l_hdr, l_size);
         if(l_errl)
         {
             break;
         }
 
-        // Get SW keys
-        l_size = iv_headerInfo.hw_prefix_hdr.sw_key_count * sizeof(ecc_key_t);
+        // Get FW keys
+        l_size = iv_headerInfo.hw_prefix_hdr.fw_key_count * sizeof(ecc_key_t);
         // Cache total software keys size
-        iv_totalSwKeysSize = l_size;
-        constexpr size_t MAX_SW_KEY_DATA=(SW_KEY_COUNT_MAX *
-                                   sizeof(iv_headerInfo.hw_prefix_data.sw_pkey_p));
-        l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data.sw_pkey_p, l_hdr,
-            l_size,MAX_SW_KEY_DATA);
+        iv_totalFwKeysSize = l_size;
+        constexpr size_t MAX_FW_KEY_DATA=(FW_KEY_COUNT_MAX *
+                                   sizeof(iv_headerInfo.hw_prefix_data.fw_pkey_p));
+        l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data.fw_pkey_p, l_hdr,
+            l_size,MAX_FW_KEY_DATA);
         if(l_errl)
         {
             break;
         }
 
-        /*---- Parse ROM_sw_header_raw ----*/
-        l_size = offsetof(ROM_sw_header_raw, ecid);
-        l_errl = safeMemCpyAndInc(&iv_headerInfo.sw_hdr, l_hdr, l_size);
+        /*---- Parse ROM_fw_header_raw ----*/
+        l_size = offsetof(ROM_fw_header_raw, ecid);
+        l_errl = safeMemCpyAndInc(&iv_headerInfo.fw_hdr, l_hdr, l_size);
         if(l_errl)
         {
             break;
         }
-        strncpy(iv_componentId,iv_headerInfo.sw_hdr.component_id,
-            sizeof(iv_headerInfo.sw_hdr.component_id));
+        strncpy(iv_componentId,iv_headerInfo.fw_hdr.component_id,
+            sizeof(iv_headerInfo.fw_hdr.component_id));
 
-        // Ensure SW header ECID count is 0, so that we can safely skip reading the
+        // Ensure FW header ECID count is 0, so that we can safely skip reading the
         // ECID array that is defined in the secure header but unsupported in code.
         l_errl = validateEcidCount(
-            ECID_COUNT_FIELD::SW_HEADER,
-            iv_headerInfo.sw_hdr.ecid_count);
+            ECID_COUNT_FIELD::FW_HEADER,
+            iv_headerInfo.fw_hdr.ecid_count);
         if(l_errl)
         {
             break;
         }
 
-        /*---- Parse ROM_sw_sig_raw ----*/
-        l_errl = safeMemCpyAndInc(&iv_headerInfo.sw_sig.sw_sig_p, l_hdr,
-                                  iv_totalSwKeysSize,MAX_SW_KEY_DATA);
+        /*---- Parse ROM_fw_sig_raw ----*/
+        l_errl = safeMemCpyAndInc(&iv_headerInfo.fw_sig.fw_sig_p, l_hdr,
+                                  iv_totalFwKeysSize,MAX_FW_KEY_DATA);
         if(l_errl)
         {
             break;
@@ -247,10 +247,10 @@ errlHndl_t ContainerHeader::parse_header()
         TRACDBIN(g_trac_secure,"ContainerHeader::parse_header(): V3: ECID Section",
                  &iv_v3_headerInfo.v3_hw_prefix_hdr.ecid, ECID_SIZE);
 
-        // Check for sw_key_count to be 2 is in validate() check below
+        // Check for fw_key_count to be 2 is in validate() check below
         // Cache total software keys size
-        iv_totalSwKeysSize = sizeof(ecc_key_t)  // sw_pkey_p;
-                             + sizeof(mldsa_pub_key_t); // sw_pkey_s;
+        iv_totalFwKeysSize = sizeof(ecc_key_t)  // fw_pkey_p;
+                             + sizeof(mldsa_pub_key_t); // fw_pkey_s;
 
         /*---- Parse ROM_v3_prefix_data_raw ----*/
         l_size = sizeof(ROM_v3_prefix_data_raw);
@@ -263,9 +263,9 @@ errlHndl_t ContainerHeader::parse_header()
             break;
         }
 
-        /*---- Parse ROM_v3_sw_header_raw ----*/
-        l_size = sizeof(ROM_v3_sw_header_raw);
-        l_errl = safeMemCpyAndInc(&iv_v3_headerInfo.v3_sw_hdr,
+        /*---- Parse ROM_v3_fw_header_raw ----*/
+        l_size = sizeof(ROM_v3_fw_header_raw);
+        l_errl = safeMemCpyAndInc(&iv_v3_headerInfo.v3_fw_hdr,
                                   l_hdr,
                                   l_size,
                                   V3_SECURE_HEADER_SIZE);
@@ -276,12 +276,12 @@ errlHndl_t ContainerHeader::parse_header()
 
         // Set container component id
         strncpy(iv_componentId,
-                iv_v3_headerInfo.v3_sw_hdr.component_id,
-                sizeof(iv_v3_headerInfo.v3_sw_hdr.component_id));
+                iv_v3_headerInfo.v3_fw_hdr.component_id,
+                sizeof(iv_v3_headerInfo.v3_fw_hdr.component_id));
 
-        /*---- Parse ROM_v3_sw_sig_raw ----*/
-        l_size = sizeof(ROM_v3_sw_sig_raw);
-        l_errl = safeMemCpyAndInc(&iv_v3_headerInfo.v3_sw_sig,
+        /*---- Parse ROM_v3_fw_sig_raw ----*/
+        l_size = sizeof(ROM_v3_fw_sig_raw);
+        l_errl = safeMemCpyAndInc(&iv_v3_headerInfo.v3_fw_sig,
                                   l_hdr,
                                   l_size,
                                   V3_SECURE_HEADER_SIZE);
@@ -291,7 +291,7 @@ errlHndl_t ContainerHeader::parse_header()
         }
     }
 
-    // Parse hw and sw flags
+    // Parse hw and fw flags
     parseFlags();
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -348,7 +348,7 @@ void ContainerHeader::genFakeHeader(const size_t i_size,
     info.hw_prefix_hdr.ver_alg.version = HEADER_VERSION;
     info.hw_prefix_hdr.ver_alg.hash_alg = HASH_ALG_SHA512;
     info.hw_prefix_hdr.ver_alg.sig_alg = SIG_ALG_ECDSA521;
-    info.hw_prefix_hdr.sw_key_count = 1;
+    info.hw_prefix_hdr.fw_key_count = 1;
     info.hw_prefix_hdr.payload_size = sizeof(ecc_key_t);
 
     l_size = offsetof(ROM_prefix_header_raw, ecid);
@@ -357,24 +357,24 @@ void ContainerHeader::genFakeHeader(const size_t i_size,
     l_hdr += l_size;
 
     /*---- Parse ROM_prefix_data_raw ----*/
-    // Skip over variable number of sw keys as they are already zeroed out
-    l_size = offsetof(ROM_prefix_data_raw, sw_pkey_p);
-    l_size += info.hw_prefix_hdr.sw_key_count * sizeof(ecc_key_t);
+    // Skip over variable number of fw keys as they are already zeroed out
+    l_size = offsetof(ROM_prefix_data_raw, fw_pkey_p);
+    l_size += info.hw_prefix_hdr.fw_key_count * sizeof(ecc_key_t);
     l_hdr += l_size;
 
-    /*---- ROM_sw_header_raw ----*/
-    info.sw_hdr.ver_alg.version = 1;
-    strncpy(info.sw_hdr.component_id, i_compId,SW_HDR_COMP_ID_SIZE_BYTES);
-    info.sw_hdr.ver_alg.hash_alg = HASH_ALG_SHA512;
-    info.sw_hdr.ver_alg.sig_alg = SIG_ALG_ECDSA521;
-    info.sw_hdr.payload_size = i_size;
+    /*---- ROM_fw_header_raw ----*/
+    info.fw_hdr.ver_alg.version = 1;
+    strncpy(info.fw_hdr.component_id, i_compId,FW_HDR_COMP_ID_SIZE_BYTES);
+    info.fw_hdr.ver_alg.hash_alg = HASH_ALG_SHA512;
+    info.fw_hdr.ver_alg.sig_alg = SIG_ALG_ECDSA521;
+    info.fw_hdr.payload_size = i_size;
 
-    l_size = offsetof(ROM_sw_header_raw, ecid);
+    l_size = offsetof(ROM_fw_header_raw, ecid);
     l_size += info.hw_prefix_hdr.ecid_count * ECID_SIZE;
-    memcpy(l_hdr, &info.sw_hdr, l_size);
+    memcpy(l_hdr, &info.fw_hdr, l_size);
     l_hdr += l_size;
 
-    /*---- Parse ROM_sw_sig_raw ----*/
+    /*---- Parse ROM_fw_sig_raw ----*/
     // No-op already zeroed out
 
     iv_pHdrStart = reinterpret_cast<const uint8_t*>(iv_fakeHeader.data());
@@ -411,36 +411,36 @@ void ContainerHeader::print() const
 
         /*---- Print ROM_prefix_header_raw ----*/
         TRACFCOMP(g_trac_secure,"hw_flags 0x%X", iv_headerInfo.hw_prefix_hdr.flags);
-        TRACFCOMP(g_trac_secure,"sw_key_count 0x%X", iv_headerInfo.hw_prefix_hdr.sw_key_count);
-        TRACFBIN(g_trac_secure,"sw public key hash", iv_headerInfo.hw_prefix_hdr.payload_hash, SHA512_DIGEST_LENGTH);
+        TRACFCOMP(g_trac_secure,"fw_key_count 0x%X", iv_headerInfo.hw_prefix_hdr.fw_key_count);
+        TRACFBIN(g_trac_secure,"fw public key hash", iv_headerInfo.hw_prefix_hdr.payload_hash, SHA512_DIGEST_LENGTH);
 
 
         /*---- Print ROM_prefix_data_raw ----*/
-        TRACFBIN(g_trac_secure,"sw_pkey_p", iv_headerInfo.hw_prefix_data.sw_pkey_p, sizeof(ecc_key_t));
-        if (iv_headerInfo.hw_prefix_hdr.sw_key_count>1)
+        TRACFBIN(g_trac_secure,"fw_pkey_p", iv_headerInfo.hw_prefix_data.fw_pkey_p, sizeof(ecc_key_t));
+        if (iv_headerInfo.hw_prefix_hdr.fw_key_count>1)
         {
-            TRACFBIN(g_trac_secure,"sw_pkey_q", iv_headerInfo.hw_prefix_data.sw_pkey_q, sizeof(ecc_key_t));
+            TRACFBIN(g_trac_secure,"fw_pkey_q", iv_headerInfo.hw_prefix_data.fw_pkey_q, sizeof(ecc_key_t));
         }
-        if (iv_headerInfo.hw_prefix_hdr.sw_key_count>2)
+        if (iv_headerInfo.hw_prefix_hdr.fw_key_count>2)
         {
-            TRACFBIN(g_trac_secure,"sw_pkey_r", iv_headerInfo.hw_prefix_data.sw_pkey_r, sizeof(ecc_key_t));
+            TRACFBIN(g_trac_secure,"fw_pkey_r", iv_headerInfo.hw_prefix_data.fw_pkey_r, sizeof(ecc_key_t));
         }
 
-        /*---- Print ROM_sw_header_raw ----*/
+        /*---- Print ROM_fw_header_raw ----*/
         TRACFCOMP(g_trac_secure,"component_id \"%s\"", componentId());
-        TRACFCOMP(g_trac_secure,"secure version 0x%.2X", iv_headerInfo.sw_hdr.fw_secure_version);
-        TRACFCOMP(g_trac_secure,"payload_size 0x%X", iv_headerInfo.sw_hdr.payload_size );
-        TRACFBIN(g_trac_secure,"payload_hash", iv_headerInfo.sw_hdr.payload_hash, SHA512_DIGEST_LENGTH);
+        TRACFCOMP(g_trac_secure,"secure version 0x%.2X", iv_headerInfo.fw_hdr.fw_secure_version);
+        TRACFCOMP(g_trac_secure,"payload_size 0x%X", iv_headerInfo.fw_hdr.payload_size );
+        TRACFBIN(g_trac_secure,"payload_hash", iv_headerInfo.fw_hdr.payload_hash, SHA512_DIGEST_LENGTH);
 
-        /*---- Print ROM_sw_sig_raw ----*/
-        TRACFBIN(g_trac_secure,"sw_sig_p", iv_headerInfo.sw_sig.sw_sig_p, sizeof(ecc_key_t));
-        if (iv_headerInfo.hw_prefix_hdr.sw_key_count>1)
+        /*---- Print ROM_fw_sig_raw ----*/
+        TRACFBIN(g_trac_secure,"fw_sig_p", iv_headerInfo.fw_sig.fw_sig_p, sizeof(ecc_key_t));
+        if (iv_headerInfo.hw_prefix_hdr.fw_key_count>1)
         {
-            TRACFBIN(g_trac_secure,"sw_sig_q", iv_headerInfo.sw_sig.sw_sig_q, sizeof(ecc_key_t));
+            TRACFBIN(g_trac_secure,"fw_sig_q", iv_headerInfo.fw_sig.fw_sig_q, sizeof(ecc_key_t));
         }
-        if (iv_headerInfo.hw_prefix_hdr.sw_key_count>2)
+        if (iv_headerInfo.hw_prefix_hdr.fw_key_count>2)
         {
-            TRACFBIN(g_trac_secure,"sw_sig_r", iv_headerInfo.sw_sig.sw_sig_r, sizeof(ecc_key_t));
+            TRACFBIN(g_trac_secure,"fw_sig_r", iv_headerInfo.fw_sig.fw_sig_r, sizeof(ecc_key_t));
         }
     }
     else
@@ -460,32 +460,32 @@ void ContainerHeader::print() const
         TRACFCOMP(g_trac_secure,"hw verion_alg.hash_alg 0x%X", iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.hash_alg );
         TRACFCOMP(g_trac_secure,"hw verion_alg.sig_alg 0x%X", iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.sig_alg);
         TRACFCOMP(g_trac_secure,"hw flags 0x%X", iv_v3_headerInfo.v3_hw_prefix_hdr.flags);
-        TRACFCOMP(g_trac_secure,"sw_key_count 0x%X", iv_v3_headerInfo.v3_hw_prefix_hdr.sw_key_count);
-        TRACFBIN(g_trac_secure,"sw public key hash", iv_v3_headerInfo.v3_hw_prefix_hdr.payload_hash, SHA3_DIGEST_LENGTH);
+        TRACFCOMP(g_trac_secure,"fw_key_count 0x%X", iv_v3_headerInfo.v3_hw_prefix_hdr.fw_key_count);
+        TRACFBIN(g_trac_secure,"fw public key hash", iv_v3_headerInfo.v3_hw_prefix_hdr.payload_hash, SHA3_DIGEST_LENGTH);
         TRACFBIN(g_trac_secure,"hw ECID:", &iv_v3_headerInfo.v3_hw_prefix_hdr.ecid, ECID_SIZE);
 
 
         /*---- Print ROM_v3_prefix_data_raw ----*/
         TRACFBIN(g_trac_secure,"hw_sig_a", &iv_v3_headerInfo.v3_hw_prefix_data.hw_sig_a, 64);
         TRACFBIN(g_trac_secure,"hw_sig_d", &iv_v3_headerInfo.v3_hw_prefix_data.hw_sig_d, 64);
-        TRACFBIN(g_trac_secure,"sw_pkey_p", &iv_v3_headerInfo.v3_hw_prefix_data.sw_pkey_p, 64);
-        TRACFBIN(g_trac_secure,"sw_pkey_s", &iv_v3_headerInfo.v3_hw_prefix_data.sw_pkey_s, 64);
+        TRACFBIN(g_trac_secure,"fw_pkey_p", &iv_v3_headerInfo.v3_hw_prefix_data.fw_pkey_p, 64);
+        TRACFBIN(g_trac_secure,"fw_pkey_s", &iv_v3_headerInfo.v3_hw_prefix_data.fw_pkey_s, 64);
 
-        /*---- Print ROM_v3_sw_header_raw ----*/
-        TRACFCOMP(g_trac_secure,"sw verion_alg.version 0x%X", iv_v3_headerInfo.v3_sw_hdr.ver_alg.version);
-        TRACFCOMP(g_trac_secure,"sw verion_alg.hash_alg 0x%X", iv_v3_headerInfo.v3_sw_hdr.ver_alg.hash_alg );
-        TRACFCOMP(g_trac_secure,"sw verion_alg.sig_alg 0x%X", iv_v3_headerInfo.v3_sw_hdr.ver_alg.sig_alg);
-        TRACFCOMP(g_trac_secure,"sw flags 0x%X", iv_v3_headerInfo.v3_hw_prefix_hdr.flags);
+        /*---- Print ROM_v3_fw_header_raw ----*/
+        TRACFCOMP(g_trac_secure,"fw verion_alg.version 0x%X", iv_v3_headerInfo.v3_fw_hdr.ver_alg.version);
+        TRACFCOMP(g_trac_secure,"fw verion_alg.hash_alg 0x%X", iv_v3_headerInfo.v3_fw_hdr.ver_alg.hash_alg );
+        TRACFCOMP(g_trac_secure,"fw verion_alg.sig_alg 0x%X", iv_v3_headerInfo.v3_fw_hdr.ver_alg.sig_alg);
+        TRACFCOMP(g_trac_secure,"fw flags 0x%X", iv_v3_headerInfo.v3_hw_prefix_hdr.flags);
         TRACFCOMP(g_trac_secure,"component_id \"%s\"", componentId());
-        TRACFCOMP(g_trac_secure,"secure version 0x%.2X", iv_v3_headerInfo.v3_sw_hdr.fw_secure_version);
-        TRACFCOMP(g_trac_secure,"payload_size_protected 0x%X", iv_v3_headerInfo.v3_sw_hdr.payload_size_protected );
-        TRACFCOMP(g_trac_secure,"payload_size_unprotected 0x%X", iv_v3_headerInfo.v3_sw_hdr.payload_size_unprotected );
-        TRACFBIN(g_trac_secure,"payload_hash_protected", iv_v3_headerInfo.v3_sw_hdr.payload_hash_protected, SHA3_DIGEST_LENGTH);
-        TRACFBIN(g_trac_secure,"sw ECID:", &iv_v3_headerInfo.v3_sw_hdr.ecid, ECID_SIZE);
+        TRACFCOMP(g_trac_secure,"secure version 0x%.2X", iv_v3_headerInfo.v3_fw_hdr.fw_secure_version);
+        TRACFCOMP(g_trac_secure,"payload_size_protected 0x%X", iv_v3_headerInfo.v3_fw_hdr.payload_size_protected );
+        TRACFCOMP(g_trac_secure,"payload_size_unprotected 0x%X", iv_v3_headerInfo.v3_fw_hdr.payload_size_unprotected );
+        TRACFBIN(g_trac_secure,"payload_hash_protected", iv_v3_headerInfo.v3_fw_hdr.payload_hash_protected, SHA3_DIGEST_LENGTH);
+        TRACFBIN(g_trac_secure,"fw ECID:", &iv_v3_headerInfo.v3_fw_hdr.ecid, ECID_SIZE);
 
-        /*---- Print ROM_v3_sw_sig_raw ----*/
-        TRACFBIN(g_trac_secure,"sw_sig_p", &iv_v3_headerInfo.v3_sw_sig.sw_sig_p, 64);
-        TRACFBIN(g_trac_secure,"sw_sig_s", &iv_v3_headerInfo.v3_sw_sig.sw_sig_s, 64);
+        /*---- Print ROM_v3_fw_sig_raw ----*/
+        TRACFBIN(g_trac_secure,"fw_sig_p", &iv_v3_headerInfo.v3_fw_sig.fw_sig_p, 64);
+        TRACFBIN(g_trac_secure,"fw_sig_s", &iv_v3_headerInfo.v3_fw_sig.fw_sig_s, 64);
     }
 
     TRACFCOMP(g_trac_secure, EXIT_MRK"ContainerHeader::print");
@@ -512,38 +512,38 @@ const ecc_key_t* ContainerHeader::hw_keys() const
 
 size_t ContainerHeader::payloadTextSize() const
 {
-    return (iv_isV3 == true) ? iv_v3_headerInfo.v3_sw_hdr.payload_size_protected // V3
-                             : iv_headerInfo.sw_hdr.payload_size; // V1
+    return (iv_isV3 == true) ? iv_v3_headerInfo.v3_fw_hdr.payload_size_protected // V3
+                             : iv_headerInfo.fw_hdr.payload_size; // V1
 }
 
 const SHA512_t* ContainerHeader::payloadTextHash() const
 {
-    return (iv_isV3 == true) ? &iv_v3_headerInfo.v3_sw_hdr.payload_hash_protected // V3
-                             : &iv_headerInfo.sw_hdr.payload_hash; // V1
+    return (iv_isV3 == true) ? &iv_v3_headerInfo.v3_fw_hdr.payload_hash_protected // V3
+                             : &iv_headerInfo.fw_hdr.payload_hash; // V1
 }
 
-size_t ContainerHeader::totalSwKeysSize() const
+size_t ContainerHeader::totalFwKeysSize() const
 {
     // Same for V1 and V3
-    return iv_totalSwKeysSize;
+    return iv_totalFwKeysSize;
 }
 
-const ecc_key_t* ContainerHeader::sw_keys() const
+const ecc_key_t* ContainerHeader::fw_keys() const
 {
-    return (iv_isV3 == true) ? &iv_v3_headerInfo.v3_hw_prefix_data.sw_pkey_p
-                             : &iv_headerInfo.hw_prefix_data.sw_pkey_p;
+    return (iv_isV3 == true) ? &iv_v3_headerInfo.v3_hw_prefix_data.fw_pkey_p
+                             : &iv_headerInfo.hw_prefix_data.fw_pkey_p;
 }
 
-const SHA512_t* ContainerHeader::swKeyHash() const
+const SHA512_t* ContainerHeader::fwKeyHash() const
 {
     return (iv_isV3 == true) ? &iv_v3_headerInfo.v3_hw_prefix_hdr.payload_hash
                              : &iv_headerInfo.hw_prefix_hdr.payload_hash;
 }
 
-const ecc_key_t* ContainerHeader::sw_sigs() const
+const ecc_key_t* ContainerHeader::fw_sigs() const
 {
-    return (iv_isV3 == true) ? &iv_v3_headerInfo.v3_sw_sig.sw_sig_p
-                             : &iv_headerInfo.sw_sig.sw_sig_p;
+    return (iv_isV3 == true) ? &iv_v3_headerInfo.v3_fw_sig.fw_sig_p
+                             : &iv_headerInfo.fw_sig.fw_sig_p;
 }
 
 const sb_flags_t* ContainerHeader::sb_flags() const
@@ -568,7 +568,7 @@ errlHndl_t ContainerHeader::validate()
     uint16_t l_version_alg = 0;
     uint8_t  l_hash_alg = 0;
     uint8_t  l_sig_alg = 0;
-    uint8_t  l_sw_key_count = 0;
+    uint8_t  l_fw_key_count = 0;
 
     if (iv_isV3 == false)
     {
@@ -579,9 +579,9 @@ errlHndl_t ContainerHeader::validate()
             && (iv_headerInfo.hw_prefix_hdr.ver_alg.version == ROM_VERSION)
             && (iv_headerInfo.hw_prefix_hdr.ver_alg.hash_alg == ROM_HASH_ALG)
             && (iv_headerInfo.hw_prefix_hdr.ver_alg.sig_alg == ROM_SIG_ALG)
-            && (iv_headerInfo.hw_prefix_hdr.sw_key_count >= SW_KEY_COUNT_MIN)
-            && (iv_headerInfo.hw_prefix_hdr.sw_key_count <= SW_KEY_COUNT_MAX)
-            && (iv_headerInfo.sw_hdr.payload_size != 0);
+            && (iv_headerInfo.hw_prefix_hdr.fw_key_count >= FW_KEY_COUNT_MIN)
+            && (iv_headerInfo.hw_prefix_hdr.fw_key_count <= FW_KEY_COUNT_MAX)
+            && (iv_headerInfo.fw_hdr.payload_size != 0);
 
         if (iv_isValid == false)
         {
@@ -591,7 +591,7 @@ errlHndl_t ContainerHeader::validate()
             l_version_alg = iv_headerInfo.hw_prefix_hdr.ver_alg.version;
             l_hash_alg = iv_headerInfo.hw_prefix_hdr.ver_alg.hash_alg;
             l_sig_alg = iv_headerInfo.hw_prefix_hdr.ver_alg.sig_alg;
-            l_sw_key_count = iv_headerInfo.hw_prefix_hdr.sw_key_count;
+            l_fw_key_count = iv_headerInfo.hw_prefix_hdr.fw_key_count;
         }
     }
     else
@@ -603,8 +603,8 @@ errlHndl_t ContainerHeader::validate()
             && (iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.version == ROM_V3_VERSION)
             && (iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.hash_alg == ROM_V3_HASH_ALG)
             && (iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.sig_alg == ROM_V3_SIG_ALG)
-            && (iv_v3_headerInfo.v3_hw_prefix_hdr.sw_key_count == V3_SW_KEY_COUNT)
-            && (iv_v3_headerInfo.v3_sw_hdr.payload_size_protected != 0);
+            && (iv_v3_headerInfo.v3_hw_prefix_hdr.fw_key_count == V3_FW_KEY_COUNT)
+            && (iv_v3_headerInfo.v3_fw_hdr.payload_size_protected != 0);
 
         if (iv_isValid == false)
         {
@@ -614,7 +614,7 @@ errlHndl_t ContainerHeader::validate()
             l_version_alg = iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.version;
             l_hash_alg = iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.hash_alg;
             l_sig_alg = iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.sig_alg;
-            l_sw_key_count = iv_v3_headerInfo.v3_hw_prefix_hdr.sw_key_count;
+            l_fw_key_count = iv_v3_headerInfo.v3_hw_prefix_hdr.fw_key_count;
         }
     }
 
@@ -630,7 +630,7 @@ errlHndl_t ContainerHeader::validate()
          * @userdata2[0:15]   Algorithm version
          * @userdata2[16:31]  Hash algorithm
          * @userdata2[32:47]  Signature algorithm
-         * @userdata2[48:63]  SW key count
+         * @userdata2[48:63]  FW key count
          * @devdesc         Error parsing secure header
          * @custdesc        Firmware Error
          */
@@ -643,7 +643,7 @@ errlHndl_t ContainerHeader::validate()
             FOUR_UINT16_TO_UINT64(l_version_alg,
                                   l_hash_alg,
                                   l_sig_alg,
-                                  l_sw_key_count),
+                                  l_fw_key_count),
             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         l_errl->collectTrace(SECURE_COMP_NAME);
         l_errl->collectTrace(PNOR_COMP_NAME);
@@ -783,8 +783,8 @@ const char* ContainerHeader::componentId() const
 
 const uint8_t ContainerHeader::secureVersion() const
 {
-    return (iv_isV3 == true) ? iv_v3_headerInfo.v3_sw_hdr.fw_secure_version // V3
-                             : iv_headerInfo.sw_hdr.fw_secure_version; // V1
+    return (iv_isV3 == true) ? iv_v3_headerInfo.v3_fw_hdr.fw_secure_version // V3
+                             : iv_headerInfo.fw_hdr.fw_secure_version; // V1
 }
 
 void ContainerHeader::parseFlags()
@@ -799,7 +799,7 @@ void ContainerHeader::parseFlags()
                                      & LAB_OVERRIDE_FLAG);
         iv_sbFlags.hw_key_transition =(  iv_headerInfo.hw_prefix_hdr.flags
                                        & KEY_TRANSITION_FLAG);
-        iv_sbFlags.sw_hash = iv_headerInfo.sw_hdr.flags & HASH_PAGE_TABLE_FLAG;
+        iv_sbFlags.fw_hash = iv_headerInfo.fw_hdr.flags & HASH_PAGE_TABLE_FLAG;
     }
     else
     {
@@ -811,7 +811,7 @@ void ContainerHeader::parseFlags()
                                      & LAB_OVERRIDE_FLAG);
         iv_sbFlags.hw_key_transition =(iv_v3_headerInfo.v3_hw_prefix_hdr.flags
                                        & KEY_TRANSITION_FLAG);
-        iv_sbFlags.sw_hash = iv_v3_headerInfo.v3_sw_hdr.flags & HASH_PAGE_TABLE_FLAG;
+        iv_sbFlags.fw_hash = iv_v3_headerInfo.v3_fw_hdr.flags & HASH_PAGE_TABLE_FLAG;
     }
 
 }

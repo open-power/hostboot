@@ -61,7 +61,7 @@ enum CONTAINER_SECTION_VERSION : uint16_t
  */
 enum CONTAINER_FIELD_SIZE : size_t
 {
-    SW_HDR_COMP_ID_SIZE_BYTES = 8,
+    FW_HDR_COMP_ID_SIZE_BYTES = 8,
 };
 
 /**
@@ -108,7 +108,7 @@ typedef struct
   ecc_key_t       hw_pkey_b;
   ecc_key_t       hw_pkey_c;
   uint64_t        prefix; // prefix header place holder
-  // followed by sw header (if not special prefix)
+  // followed by fw header (if not special prefix)
   // followed by optional unprotected payload data
 }__attribute__((packed)) ROM_container_raw;
 
@@ -125,7 +125,7 @@ typedef struct
   ecc_key_t       hw_pkey_a;
   mldsa_pub_key_t hw_pkey_d;
   uint64_t        prefix; // prefix header place holder
-  // followed by sw header (if not special prefix)
+  // followed by fw header (if not special prefix)
   // followed by optional unprotected payload data
 }__attribute__((packed)) ROM_v3_container_raw;
 
@@ -185,7 +185,7 @@ typedef struct
   uint64_t        code_start_offset;
   uint64_t        reserved;
   uint32_t        flags;
-  uint8_t         sw_key_count;
+  uint8_t         fw_key_count;
   uint64_t        payload_size;
   SHA512_t        payload_hash;
   uint8_t         ecid_count;
@@ -208,7 +208,7 @@ typedef struct
   ROM_version_raw ver_alg;
   uint64_t        reserved;
   uint32_t        flags;
-  uint8_t         sw_key_count;
+  uint8_t         fw_key_count;
   uint64_t        payload_size;
   sha3_t          payload_hash;
   uint8_t         ecid[ECID_SIZE];
@@ -228,9 +228,9 @@ typedef struct
   ecc_signature_t  hw_sig_a;
   ecc_signature_t  hw_sig_b;
   ecc_signature_t  hw_sig_c;
-  ecc_key_t        sw_pkey_p;
-  ecc_key_t        sw_pkey_q;
-  ecc_key_t        sw_pkey_r;
+  ecc_key_t        fw_pkey_p;
+  ecc_key_t        fw_pkey_q;
+  ecc_key_t        fw_pkey_r;
 }__attribute__((packed)) ROM_prefix_data_raw;
 
 /**
@@ -241,8 +241,8 @@ typedef struct
 {
   ecc_signature_t                       hw_sig_a;
   mldsa_signature_t                     hw_sig_d;
-  ecc_key_t                             sw_pkey_p;
-  mldsa_pub_key_t                       sw_pkey_s;
+  ecc_key_t                             fw_pkey_p;
+  mldsa_pub_key_t                       fw_pkey_s;
 }__attribute__((packed)) ROM_v3_prefix_data_raw;
 
 
@@ -250,7 +250,7 @@ typedef struct
 {
   ROM_version_raw ver_alg;
   uint64_t        code_start_offset;
-  char            component_id[SW_HDR_COMP_ID_SIZE_BYTES];
+  char            component_id[FW_HDR_COMP_ID_SIZE_BYTES];
   uint32_t        flags;
   uint8_t         fw_secure_version;
   uint64_t        payload_size;
@@ -258,10 +258,10 @@ typedef struct
   uint8_t         ecid_count;
   // optional ecid place holder ecid_count * ecid_size(128 bits)
   uint8_t         ecid[ECID_SIZE];
-  // followed by sw sig raw
-}__attribute__((packed)) ROM_sw_header_raw;
+  // followed by fw sig raw
+}__attribute__((packed)) ROM_fw_header_raw;
 
-#define SW_HEADER_SIZE(_p) (sizeof(ROM_sw_header_raw) \
+#define FW_HEADER_SIZE(_p) (sizeof(ROM_fw_header_raw) \
             +((_p->ecid_count-1)*ECID_SIZE))
 
 
@@ -273,7 +273,7 @@ typedef struct
 {
   ROM_version_raw ver_alg;
   uint64_t        reserved;
-  char            component_id[SW_HDR_COMP_ID_SIZE_BYTES];
+  char            component_id[FW_HDR_COMP_ID_SIZE_BYTES];
   uint32_t        flags;
   uint8_t         fw_secure_version;
   uint64_t        payload_size_protected;
@@ -281,10 +281,10 @@ typedef struct
   sha3_t          payload_hash_protected;
   uint8_t         ecid[ECID_SIZE];
   uint8_t         reserved1[7];
-  // followed by sw sig raw
-}__attribute__((packed)) ROM_v3_sw_header_raw;
+  // followed by fw sig raw
+}__attribute__((packed)) ROM_v3_fw_header_raw;
 
-#define V3_SW_HEADER_SIZE(_p) (sizeof(ROM_v3_sw_header_raw))
+#define V3_FW_HEADER_SIZE(_p) (sizeof(ROM_v3_fw_header_raw))
 
 
 /**
@@ -293,13 +293,13 @@ typedef struct
  */
 typedef struct
 {
-  ecc_signature_t sw_sig_p;
-  ecc_signature_t sw_sig_q;
-  ecc_signature_t sw_sig_r;
+  ecc_signature_t fw_sig_p;
+  ecc_signature_t fw_sig_q;
+  ecc_signature_t fw_sig_r;
   // followed by zero's padding to 4K
-  // followed by protected sw payload_data
-  // followed by unprotected sw payload_text
-}__attribute__((packed)) ROM_sw_sig_raw;
+  // followed by protected fw payload_data
+  // followed by unprotected fw payload_text
+}__attribute__((packed)) ROM_fw_sig_raw;
 
 /**
  * @brief Secure Header V3 SW/FW Header Signatures
@@ -307,12 +307,12 @@ typedef struct
  */
 typedef struct
 {
-  ecc_signature_t                   sw_sig_p;
-  mldsa_signature_t                 sw_sig_s;
+  ecc_signature_t                   fw_sig_p;
+  mldsa_signature_t                 fw_sig_s;
   // followed by zero's padding to 10K
-  // followed by protected sw payload_data
-  // followed by unprotected sw payload_text
-}__attribute__((packed)) ROM_v3_sw_sig_raw;
+  // followed by protected fw payload_data
+  // followed by unprotected fw payload_text
+}__attribute__((packed)) ROM_v3_fw_sig_raw;
 
 
 typedef enum { ROM_DONE, ROM_FAILED } ROM_response;
@@ -511,8 +511,8 @@ constexpr uint16_t ROM_VERSION = 1;
 constexpr uint8_t ROM_HASH_ALG = 1;
 constexpr uint8_t ROM_SIG_ALG = 1;
 constexpr uint8_t HW_KEY_COUNT = 3;
-constexpr uint8_t SW_KEY_COUNT_MIN = 1;
-constexpr uint8_t SW_KEY_COUNT_MAX = 3;
+constexpr uint8_t FW_KEY_COUNT_MIN = 1;
+constexpr uint8_t FW_KEY_COUNT_MAX = 3;
 constexpr size_t MAX_SECURE_HEADER_SIZE = 4096;
 constexpr size_t V1_MAX_SECURE_HEADER_SIZE = MAX_SECURE_HEADER_SIZE;
 constexpr size_t V1_SECURE_HEADER_SIZE = 1288; // Truncated V1 Size
@@ -529,7 +529,7 @@ constexpr uint16_t ROM_V3_VERSION = 3;
 constexpr uint8_t  ROM_V3_HASH_ALG = 2;
 constexpr uint8_t  ROM_V3_SIG_ALG = 3;
 constexpr uint8_t  V3_HW_KEY_COUNT = 2;
-constexpr uint8_t  V3_SW_KEY_COUNT = 2;
+constexpr uint8_t  V3_FW_KEY_COUNT = 2;
 constexpr size_t   V3_SECURE_HEADER_SIZE = 15360;
 // Sum of Secure header size V1 + V3, using truncated V1 Size
 constexpr size_t COMBINED_V1_V3_SECURE_HEADER_SIZE =
@@ -548,13 +548,13 @@ enum HW_SB_FLAGS
     KEY_TRANSITION_FLAG = 0x00000001
 };
 
-// SW Security Flags
-enum SW_SB_FLAGS
+// FW Security Flags
+enum FW_SB_FLAGS
 {
     HASH_PAGE_TABLE_FLAG = 0x80000000
 };
 
-// Structure to store all hw and sw flag values in a container header
+// Structure to store all hw and fw flag values in a container header
 struct sb_flags_t
 {
     sb_flags_t() :
@@ -563,7 +563,7 @@ struct sb_flags_t
         hw_phyp(false),
         hw_lab_override(false),
         hw_key_transition(false),
-        sw_hash(false)
+        fw_hash(false)
     {
     }
 
@@ -573,7 +573,7 @@ struct sb_flags_t
     bool hw_lab_override;   ///< Whether to enable lab security override;
                             ///< Only applicable for SBE partition
     bool hw_key_transition; ///< Indicates this is a key transition container
-    bool sw_hash;           ///< Indicates presence of hash page table
+    bool fw_hash;           ///< Indicates presence of hash page table
 };
 
 /**

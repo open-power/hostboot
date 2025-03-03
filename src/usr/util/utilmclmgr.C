@@ -1193,10 +1193,10 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
         break;
     }
 
-    // Extend SW keys hash
+    // Extend FW keys hash
     l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_5,
               TRUSTEDBOOT::EV_COMPACT_HASH,
-              reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
+              reinterpret_cast<const uint8_t*>(i_conHdr.fwKeyHash()),
               sizeof(SHA512_t),
               reinterpret_cast<uint8_t*>(pcr5Msg),
               pcr5Len);

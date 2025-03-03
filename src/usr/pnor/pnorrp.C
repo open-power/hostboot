@@ -792,7 +792,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                 o_info.size -= l_contHdrSize;
 
                 // Need to change size to accommodate for hash table
-                if (l_conHdr.sb_flags()->sw_hash)
+                if (l_conHdr.sb_flags()->fw_hash)
                 {
                     o_info.vaddr += payloadTextSize;
                     // Hash page table needs to use containerSize as the base

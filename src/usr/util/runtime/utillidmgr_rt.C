@@ -256,7 +256,7 @@ errlHndl_t UtilLidMgr::loadLid()
                                            : PAGESIZE;
 
                 UTIL_FT("UtilLidMgr::loadLid - resv mem section has secure header");
-                if (l_conHdr.sb_flags()->sw_hash)
+                if (l_conHdr.sb_flags()->fw_hash)
                 {
                     // Size of lid has to be size of unprotected data. So we
                     // need to take out header and hash table sizes

@@ -98,13 +98,13 @@ errlHndl_t verifyComponentId(
 
     if(strncmp(i_containerHeader.componentId(),
                i_pComponentId,
-               sizeof(ROM_sw_header_raw::component_id)) != 0)
+               sizeof(ROM_fw_header_raw::component_id)) != 0)
     {
-        char pTruncatedComponentId[sizeof(ROM_sw_header_raw::component_id)+
+        char pTruncatedComponentId[sizeof(ROM_fw_header_raw::component_id)+
                                   sizeof(uint8_t)]={0};
         strncpy(pTruncatedComponentId,
                 i_pComponentId,
-                sizeof(ROM_sw_header_raw::component_id));
+                sizeof(ROM_fw_header_raw::component_id));
 
         TRACFCOMP(g_trac_secure,ERR_MRK"SECUREROM::verifyComponentId: "
             "Secure Boot verification failure; container's component ID of "

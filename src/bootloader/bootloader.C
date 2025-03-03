@@ -247,7 +247,7 @@ namespace Bootloader{
             reinterpret_cast<const ROM_prefix_header_raw* const>(
                   reinterpret_cast<const uint8_t* const>(i_pHeader)
                 + offsetof(ROM_container_raw,prefix));
-        const auto swKeyCount = pHwPrefix->sw_key_count;
+        const auto fwKeyCount = pHwPrefix->fw_key_count;
         const auto ecidCount = pHwPrefix->ecid_count;
 
         const char* const pCompIdInContainer =
@@ -255,20 +255,20 @@ namespace Bootloader{
             + offsetof(ROM_container_raw,prefix)
             + offsetof(ROM_prefix_header_raw,ecid)
             + ecidCount*ECID_SIZE
-            + offsetof(ROM_prefix_data_raw,sw_pkey_p)
-            + swKeyCount*sizeof(ecc_key_t)
-            + offsetof(ROM_sw_header_raw,component_id);
+            + offsetof(ROM_prefix_data_raw,fw_pkey_p)
+            + fwKeyCount*sizeof(ecc_key_t)
+            + offsetof(ROM_fw_header_raw,component_id);
 
         if(strncmp(pCompIdInContainer,
                    i_pComponentId,
-                   sizeof(ROM_sw_header_raw::component_id)) != 0)
+                   sizeof(ROM_fw_header_raw::component_id)) != 0)
         {
             char pTruncatedComponentId[
-                  sizeof(ROM_sw_header_raw::component_id)
+                  sizeof(ROM_fw_header_raw::component_id)
                 + sizeof(uint8_t)]={0};
             strncpy(pTruncatedComponentId,
                     i_pComponentId,
-                    sizeof(ROM_sw_header_raw::component_id));
+                    sizeof(ROM_fw_header_raw::component_id));
 
             BOOTLOADER_TRACE(BTLDR_TRC_COMP_ID_VERIFY_FAILED);
 
@@ -450,12 +450,12 @@ namespace Bootloader{
                     uint8_t  l_container_min_version = 0;
 
                     // Get Secure Version from the container
-                    // - get sw_key_count and ecid_count
+                    // - get fw_key_count and ecid_count
                     const auto* const pHwPrefix =
                         reinterpret_cast<const ROM_prefix_header_raw* const>(
                             reinterpret_cast<const uint8_t* const>(i_pContainer)
                             + offsetof(ROM_container_raw,prefix));
-                    const auto swKeyCount = pHwPrefix->sw_key_count;
+                    const auto fwKeyCount = pHwPrefix->fw_key_count;
                     const auto ecidCount = pHwPrefix->ecid_count;
 
                     // - get pointer to Secure Version in the container
@@ -464,9 +464,9 @@ namespace Bootloader{
                             + offsetof(ROM_container_raw,prefix)
                             + offsetof(ROM_prefix_header_raw,ecid)
                             + ecidCount*ECID_SIZE
-                            + offsetof(ROM_prefix_data_raw,sw_pkey_p)
-                            + swKeyCount*sizeof(ecc_key_t)
-                            + offsetof(ROM_sw_header_raw,fw_secure_version);
+                            + offsetof(ROM_prefix_data_raw,fw_pkey_p)
+                            + fwKeyCount*sizeof(ecc_key_t)
+                            + offsetof(ROM_fw_header_raw,fw_secure_version);
                     // - copy secure version from the container to a local variable
                     memcpy(&l_container_min_version,
                            pFwSecureVersionInContainer,

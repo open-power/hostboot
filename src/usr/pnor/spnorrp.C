@@ -1584,8 +1584,8 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
 
     // Calculate the hash of HBB's sw signatures using V3 sha3
     SHA512_t l_hashSwSigs = {0};
-    SECUREBOOT::hashBlob(l_hbbContainerHeader.sw_sigs(),
-                         l_hbbContainerHeader.totalSwKeysSize(),
+    SECUREBOOT::hashBlob(l_hbbContainerHeader.fw_sigs(),
+                         l_hbbContainerHeader.totalFwKeysSize(),
                          l_hashSwSigs,
                          SB_SIGNING_V3_CONTAINER);
 

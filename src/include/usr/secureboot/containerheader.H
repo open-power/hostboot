@@ -54,7 +54,7 @@ class ContainerHeader
         enum class ECID_COUNT_FIELD : uint8_t
         {
             HW_HEADER = 0x00, // ECID count field in the HW header
-            SW_HEADER = 0x01, // ECID count field in the SW header
+            FW_HEADER = 0x01, // ECID count field in the FW header
         };
 
         /**
@@ -62,7 +62,7 @@ class ContainerHeader
          */
         ContainerHeader():
             iv_headerInfo{}, iv_v3_headerInfo{}, iv_componentId{}, iv_isValid(false),
-            iv_pHdrStart(nullptr), iv_hdrBytesRead(0), iv_totalSwKeysSize(0),
+            iv_pHdrStart(nullptr), iv_hdrBytesRead(0), iv_totalFwKeysSize(0),
             iv_sbFlags{}, iv_hwKeyHash{}, iv_isV3(false), iv_fakeHeader{}
         {}
 
@@ -143,33 +143,33 @@ class ContainerHeader
         const SHA512_t* payloadTextHash() const;
 
         /**
-         * @brief Retrieves total size of all sw keys concatenated
-         * @return size_t - size of concatenated sw keys
+         * @brief Retrieves total size of all fw keys concatenated
+         * @return size_t - size of concatenated fw keys
          */
-        size_t totalSwKeysSize() const;
+        size_t totalFwKeysSize() const;
 
         /**
-         * @brief Retrieves sw public key hash
-         * @return SHA512_t* - ptr to hash of sw public keys
+         * @brief Retrieves fw public key hash
+         * @return SHA512_t* - ptr to hash of fw public keys
          */
-        const SHA512_t* swKeyHash() const;
+        const SHA512_t* fwKeyHash() const;
 
         /**
-         * @brief Retrieves pointer to first sw key
-         * @return ecc_key_t* - ptr to first sw key
+         * @brief Retrieves pointer to first fw key
+         * @return ecc_key_t* - ptr to first fw key
          */
-        const ecc_key_t* sw_keys() const;
+        const ecc_key_t* fw_keys() const;
 
         /**
-         * @brief Retrieves pointer to first sw signature
-         * @return ecc_key_t* - ptr to first sw signature
+         * @brief Retrieves pointer to first fw signature
+         * @return ecc_key_t* - ptr to first fw signature
          */
-        const ecc_key_t* sw_sigs() const;
+        const ecc_key_t* fw_sigs() const;
 
         /**
          * @brief Retrieves pointer to sb flag struct holding all hw and sw
          *        flags set when parsing the header.
-         * @return sb_flags_t - hw and sw flag struct
+         * @return sb_flags_t - hw and fw flag struct
          */
         const sb_flags_t* sb_flags() const;
 
@@ -229,8 +229,8 @@ class ContainerHeader
             ROM_container_raw hw_hdr;
             ROM_prefix_header_raw hw_prefix_hdr;
             ROM_prefix_data_raw hw_prefix_data;
-            ROM_sw_header_raw sw_hdr;
-            ROM_sw_sig_raw sw_sig;
+            ROM_fw_header_raw fw_hdr;
+            ROM_fw_sig_raw fw_sig;
         };
 
         // Entire cached V1 container header content
@@ -246,8 +246,8 @@ class ContainerHeader
             ROM_v3_container_raw v3_hw_hdr;
             ROM_v3_prefix_header_raw v3_hw_prefix_hdr;
             ROM_v3_prefix_data_raw v3_hw_prefix_data;
-            ROM_v3_sw_header_raw v3_sw_hdr;
-            ROM_v3_sw_sig_raw v3_sw_sig;
+            ROM_v3_fw_header_raw v3_fw_hdr;
+            ROM_v3_fw_sig_raw v3_fw_sig;
         };
 
         // entire cached V3 container header content
@@ -267,10 +267,10 @@ class ContainerHeader
          *  @note this is the same size for V1 and V3; confirmed with
          *        static_assert check below
          */
-        char iv_componentId[  sizeof(ROM_sw_header_raw::component_id)
+        char iv_componentId[  sizeof(ROM_fw_header_raw::component_id)
                             + sizeof(uint8_t) ];
-        static_assert(sizeof(ROM_sw_header_raw::component_id) ==
-                      sizeof(ROM_v3_sw_header_raw::component_id),
+        static_assert(sizeof(ROM_fw_header_raw::component_id) ==
+                      sizeof(ROM_v3_fw_header_raw::component_id),
                       "V1 and V3 component_id sizes do not match!");
 
         // Indicates if container header is a valid, in a very loose sense,
@@ -285,9 +285,9 @@ class ContainerHeader
         size_t iv_hdrBytesRead;
 
         // Total size of all software keys concatenated
-        size_t iv_totalSwKeysSize;
+        size_t iv_totalFwKeysSize;
 
-        // Struct to hold all hw and sw flags set
+        // Struct to hold all hw and fw flags set
         sb_flags_t iv_sbFlags;
 
         // HW keys' hash for current container.
@@ -309,7 +309,7 @@ class ContainerHeader
         bool iv_isV3;
 
         /**
-         * @brief Determines what flags are set based on the hw and sw flag bit
+         * @brief Determines what flags are set based on the hw and fw flag bit
          *        fields in the container header.
          *        Also sets iv_sbFlags private member
          */
@@ -352,7 +352,7 @@ class ContainerHeader
          *      header is 0
          *
          *  @param[in] i_ecidCountField Indicates which secure header ECID count
-         *      field (HW header or SW header) should be validated
+         *      field (HW header or FW header) should be validated
          *  @param[in] i_ecidCount The actual value of the ECID count field
          *
          *  @return errlHndl_t Error log handle indicating success or failure

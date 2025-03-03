@@ -554,10 +554,10 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         char* const pCompIdInContainer = pHeader
             + offsetof(ROM_container_raw,prefix)
             + offsetof(ROM_prefix_header_raw,ecid)
-            + offsetof(ROM_prefix_data_raw,sw_pkey_q)
-            + offsetof(ROM_sw_header_raw,component_id);
+            + offsetof(ROM_prefix_data_raw,fw_pkey_q)
+            + offsetof(ROM_fw_header_raw,component_id);
 
-        const size_t compIdSize = sizeof(ROM_sw_header_raw::component_id);
+        const size_t compIdSize = sizeof(ROM_fw_header_raw::component_id);
 
         for(const auto& test : tests)
         {
@@ -641,7 +641,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         TRACFCOMP(g_trac_secure,"SecureRomManagerTest::test_fakeHeader");
 
         const size_t l_payloadSize = 0x10000;
-        // Purposely make a comp id larger than SW_HDR_COMP_ID_SIZE_BYTES
+        // Purposely make a comp id larger than FW_HDR_COMP_ID_SIZE_BYTES
         // otherwise strncmp below needs a different size
         const char* l_compId = "FAKEHEADERTEST";
 
@@ -672,9 +672,9 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         }
 
         // Ensure the parsed component ID matches what was passed in through
-        // SW_HDR_COMP_ID_SIZE_BYTES
+        // FW_HDR_COMP_ID_SIZE_BYTES
         if(strncmp(l_fakeHdr.componentId(), l_compId,
-                   SW_HDR_COMP_ID_SIZE_BYTES) != 0)
+                   FW_HDR_COMP_ID_SIZE_BYTES) != 0)
         {
             TS_FAIL("SecureRomManagerTest::test_fakeHeader: component ID was not parsed correctly");
             break;

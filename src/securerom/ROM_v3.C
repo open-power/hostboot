@@ -92,12 +92,12 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     sha3_t digest;
     ROM_v3_prefix_header_raw* prefix;
     ROM_v3_prefix_data_raw* hw_data;
-    ROM_v3_sw_header_raw* header;
-    ROM_v3_sw_sig_raw* sw_sig;
+    ROM_v3_fw_header_raw* header;
+    ROM_v3_fw_sig_raw* fw_sig;
     uint64_t size;
 
     // params->log is used to pass in a FW Secure Version to
-    // compare against the container's sw header's fw_secure_version field
+    // compare against the container's fw header's fw_secure_version field
     uint8_t i_fw_secure_version = static_cast<uint8_t>(params->log);
 
     params->log=CONTEXT|BEGIN;
@@ -171,33 +171,33 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     // size whould be over both public keys
     size = GET64(prefix->payload_size);
     // hash public keys
-    sha3(hw_data->sw_pkey_p, size, &digest);
+    sha3(hw_data->fw_pkey_p, size, &digest);
     // compare to hash
     if(memcmp(prefix->payload_hash, digest, sizeof(sha3_t)))
     {
         FAILED(PREFIX_HASH_TEST,"invalid prefix payload hash");
     }
-    // test for valid sw key count (V3 only supports 2)
-    if (prefix->sw_key_count != V3_SW_KEY_COUNT)
+    // test for valid fw key count (V3 only supports 2)
+    if (prefix->fw_key_count != V3_FW_KEY_COUNT)
     {
-        FAILED(SW_KEY_INVALID_COUNT,"sw key count not 2");
+        FAILED(FW_KEY_INVALID_COUNT,"fw key count not 2");
     }
     // finish processing prefix header
-    // test for protection of all sw key material (sanity check)
-    if(size != (sizeof(ecc_key_t)           // sw_pkey_p;
-                + sizeof(mldsa_pub_key_t))) // sw_pkey_s;
+    // test for protection of all fw key material (sanity check)
+    if(size != (sizeof(ecc_key_t)           // fw_pkey_p;
+                + sizeof(mldsa_pub_key_t))) // fw_pkey_s;
 
     {
-        FAILED(SW_KEY_PROTECTION_TEST,"incomplete sw key protection in prefix header");
+        FAILED(FW_KEY_PROTECTION_TEST,"incomplete fw key protection in prefix header");
     }
 
-    // start processing sw header
-    header = (ROM_v3_sw_header_raw*) (hw_data
+    // start processing fw header
+    header = (ROM_v3_fw_header_raw*) (hw_data
                                      + sizeof(ROM_v3_prefix_data_raw));
 
 
     // test for fw secure version - compare what was passed in via
-    // params->log to what the container's sw header has
+    // params->log to what the container's fw header has
     if( header->fw_secure_version < i_fw_secure_version)
     {
         FAILED(SECURE_VERSION_TEST,"bad container fw secure version");
@@ -206,22 +206,22 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     // test for valid header version, hash & signature algorithms (sanity check)
     if(!v3_valid_ver_alg(&header->ver_alg, 0))
     {
-        FAILED(HEADER_VER_ALG_TEST,"bad sw header version,alg");
+        FAILED(HEADER_VER_ALG_TEST,"bad fw header version,alg");
     }
 
-    // test for valid sw header signatures (all)
-    sw_sig = (ROM_v3_sw_sig_raw*) (header
-                                   + sizeof(ROM_v3_sw_header_raw));
-    sha3((uint8_t*)header, V3_SW_HEADER_SIZE(header), &digest);
+    // test for valid fw header signatures (all)
+    fw_sig = (ROM_v3_fw_sig_raw*) (header
+                                   + sizeof(ROM_v3_fw_header_raw));
+    sha3((uint8_t*)header, V3_FW_HEADER_SIZE(header), &digest);
 
 
-    // Test for SW (aka FW) Signatures:
+    // Test for FW (aka FW) Signatures:
     // First ec_verify fw_ecdsa_public_key_P and fw_signature P
-    if (ec_verify (hw_data->sw_pkey_p,
+    if (ec_verify (hw_data->fw_pkey_p,
                    digest,
-                   sw_sig->sw_sig_p)<1)
+                   fw_sig->fw_sig_p)<1)
     {
-        FAILED(SW_SIGNATURE_TEST_ECDSA,"invalid sw signature - ECDSA");
+        FAILED(FW_SIGNATURE_TEST_ECDSA,"invalid fw signature - ECDSA");
     }
 
 
@@ -264,7 +264,7 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
 
     if(memcmp(header->payload_hash_protected, digest, sizeof(sha3_t)))
     {
-        FAILED(HEADER_HASH_TEST,"invalid sw payload hash");
+        FAILED(HEADER_HASH_TEST,"invalid fw payload hash");
     }
     params->log=CONTEXT|COMPLETED;
     return ROM_DONE;

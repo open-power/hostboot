@@ -446,10 +446,10 @@ errlHndl_t extendPnorSectionHash(
             break;
         }
 
-        // Extend SW public key hash
+        // Extend FW public key hash
         pError = TRUSTEDBOOT::pcrExtend(swKeyHashPcr,
                     swKeyHashEventType,
-                    reinterpret_cast<const uint8_t*>(i_conHdr.swKeyHash()),
+                    reinterpret_cast<const uint8_t*>(i_conHdr.fwKeyHash()),
                     sizeof(SHA512_t),
                     reinterpret_cast<const uint8_t*>(swKeyMsg),
                     strlen(swKeyMsg) + 1,
@@ -461,7 +461,7 @@ errlHndl_t extendPnorSectionHash(
         if (pError)
         {
             TRACFCOMP(g_trac_trustedboot, ERR_MRK " Failed in call to "
-                "pcrExtend() (extend SW public key hash) for section %s.",
+                "pcrExtend() (extend FW public key hash) for section %s.",
                 sectionInfo.name);
             break;
         }
