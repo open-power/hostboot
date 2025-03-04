@@ -269,7 +269,7 @@ p10_attr_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_INTERPOSER_FEATURE_HW632898, i_target, l_hw632898));
 
-    FAPI_TRY(p10_attr_update_mer0_pdI_mvpd(i_target, (l_interposer_rev != fapi2::ENUM_ATTR_INTERPOSER_REV_NONE)));
+    FAPI_TRY(p10_attr_update_mer0_pdI_mvpd(i_target, (l_interposer_rev == fapi2::ENUM_ATTR_INTERPOSER_REV_REV2)));
 
 fapi_try_exit:
     FAPI_DBG("End");
