@@ -552,20 +552,8 @@ hb_startsimics()
         PPE_CACHE_DIR=${HOSTBOOT_ENVIRONMENT}/prime/ppe/main-p11/${PPE_SUBREPO_TOP_COMMIT}
         # Pick up cached SBE images unless they don't exist or we were told to rebuild them locally
         if [[ "$HB_FAST_PRIME" ]] && [[ -d ${PPE_CACHE_DIR} ]] && [[ -z "$HB_FORCE_REBUILD_SBE" ]]; then
-            # @TODO JIRA PFHB-802 remove this workaround of pushing the
-            # securerom (via hbbl) into the cached sbe image
-            echo "Pushing hbbl+securerom into cached proc sbe image"
-            # strip ECC
-            ${PPE_CACHE_DIR}/sbeTest/ecc --remove ${PPE_CACHE_DIR}/sbe_seeprom_p10.bin.ecc --output ${PROJECT_ROOT}/standalone/staging/sbe_seeprom_p10.bin --p8
-            # delete existing .hbbl section and append the updated one
-            ${PPE_CACHE_DIR}/sbeTest/ipl_image_tool ${PROJECT_ROOT}/standalone/staging/sbe_seeprom_p10.bin delete .hbbl
-            ${PPE_CACHE_DIR}/sbeTest/ipl_image_tool ${PROJECT_ROOT}/standalone/staging/sbe_seeprom_p10.bin append .hbbl ${PROJECT_ROOT}/standalone/pnor/hbbl.bin
-            # add back in ECC
-            ${PPE_CACHE_DIR}/sbeTest/ecc --inject ${PROJECT_ROOT}/standalone/staging/sbe_seeprom_p10.bin --output ${PROJECT_ROOT}/standalone/staging/sbe_seeprom_p10.bin.ecc --p8
-
             # Pick up pre-built SBE images
-            # See workaround above: SBE_STANDALONE_IMG=${PPE_CACHE_DIR}/sbe_seeprom_p10.bin.ecc
-            SBE_STANDALONE_IMG=${PROJECT_ROOT}/standalone/staging/sbe_seeprom_p10.bin.ecc
+            SBE_STANDALONE_IMG=${PPE_CACHE_DIR}/sbe_seeprom_p10.bin.ecc
             SBE_STANDALONE_MEASURE_IMG=${PPE_CACHE_DIR}/sbe_measurement_p10.bin.ecc
             SBE_STANDALONE_OTPROM_IMG=${PPE_CACHE_DIR}/sbe_otprom_p10.bin
             SBE_SCRIPT_TO_RUN=${PPE_CACHE_DIR}/sbeTest/sbe_startup.simics
