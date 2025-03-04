@@ -229,29 +229,6 @@ namespace SBE
         {};
     };
 
-    /**
-     * @brief Layout of P9_XIP_SECTION_SBE_SB_SETTINGS section in the SBE
-     *
-     * @note  @TODO JIRA:PFHB-802 replace this struct and any references to it
-     *        with the SBE struct sb_settings_t in p10_sbe_hb_structures.H
-     */
-    struct sbeSectionSbSettings_t
-    {
-        SHA512_t hw_keys_hash = {0};            // 64 bytes
-        uint8_t minimum_secure_version = 0;     // 1 byte
-        uint8_t signing_mode = 0;               // 1 byte
-        uint8_t reserved[6] = {0,0,0,0,0,0};    // 6 bytes - used to keep 8-byte alignment
-    } PACKED;
-
-    // Catch if the struct is ever not 8-byte aligned
-    static_assert(0 == (sizeof(sbeSectionSbSettings_t) % 8),
-                  "sbeSectionSbSettings_t is not 8-byte-aligned");
-
-
-
-
-
-
 /*******************************************************************************
  * @brief virtual base work item class for updates (used by thread pool)
  */

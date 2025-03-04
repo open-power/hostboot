@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/customize/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/spi/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 EXTRAINCDIR += ${ROOTPATH}/src/import/
 
 # to pick up a special secureboot error log user detail section:

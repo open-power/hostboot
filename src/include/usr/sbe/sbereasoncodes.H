@@ -122,6 +122,7 @@ enum sbeReasonCode
     SBE_INVALID_HBBL_DATA               = SBE_COMP_ID | 0x28,
     SBE_INVALID_HBBL_SECURITY_HEADERS   = SBE_COMP_ID | 0x29,
     SBE_SECTION_MARKER_NOT_FOUND        = SBE_COMP_ID | 0x2A,
+    SBE_MISMATCHED_SIGNING_MODE         = SBE_COMP_ID | 0x2B,
 };
 
 enum UserDetailsTypes

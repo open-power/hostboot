@@ -42,7 +42,7 @@
 #include <sbe/sbeif.H>
 #include <sbe/sbe_update.H>
 #include <secureboot/service.H>
-
+#include <kernel/bltohbdatamgr.H>
 
 extern trace_desc_t* g_trac_sbe;
 
@@ -820,7 +820,15 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 break;
             }
 
-            // @TODO JIRA:PFHB-802 Add check for SB signing mode
+            uint8_t l_signModeToUse = g_BlToHbDataManager.getSecurebootSigningMode();
+            if (l_signModeToUse != signing_mode)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
+                           "signing modes do not match!");
+                fails++;
+                TS_FAIL("testSbeUpdateTarget() - getSecuritySettingsFromSbeImage() did not return system signing mode. "
+                        "Got 0x%X, Expected 0x%X", signing_mode, l_signModeToUse);
+            }
 
         }while(0);
 

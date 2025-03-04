@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -562,9 +562,34 @@ void validateSecuritySettings()
 
         break;
     }
-    // @TODO JIRA:PFHB-802 Add check for SB signing mode
+    else if (l_primaryProcPrimarySBE.signing_mode != l_primaryProcSecondarySBE.signing_mode)
+    {
+        // add only the hashes relevant to the error to hashes vector
+        l_hashes.push_back(l_primaryProcPrimarySBE);
+        l_hashes.push_back(l_primaryProcSecondarySBE);
 
-    SB_INF("Primary proc Primary SBE HW keys' hash and Secure Version successfully match backup.");
+       bool l_continue = !SECUREBOOT::enabled();
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP::RC_PRIMARY_PROC_SIGNING_MODE_MISMATCH
+         * @moduleid         ISTEP::MOD_VALIDATE_SECURITY_SETTINGS
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @userdata1        Primary Processor Target
+         * @devdesc          The primary SBE HW Keys' hash does not match
+         *                   the backup SBE HW Keys' hash, so we cannot
+         *                   guarantee platform security for the system
+         * @custdesc         Platform security problem detected
+         */
+        handleProcessorSecurityError(mProc,
+                                     ISTEP::RC_PRIMARY_PROC_SIGNING_MODE_MISMATCH,
+                                     l_hashes,
+                                     0,
+                                     l_continue); // stop IPL if secureboot enabled
+
+        break;
+    }
+
+    SB_INF("Primary proc Primary SBE HW keys' hash, Secure Version, and signing mode successfully match backup.");
 
     TARGETING::TargetHandleList l_procList;
     getAllChips(l_procList,TARGETING::TYPE_PROC,true);

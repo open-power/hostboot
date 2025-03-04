@@ -38,6 +38,7 @@
 #include <errl/errludtarget.H>
 #include <errl/errludstring.H>
 #include <errl/errlreasoncodes.H>
+#include <errl/hberrltypes.H>
 #include <targeting/common/predicates/predicatectm.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/targetservice.H>
@@ -88,10 +89,11 @@
 #include <p10_ipl_customize.H>
 #include <p10_ipl_section_append.H>
 #include <p10_ipl_image.H>
-
 #include <p10_sbe_spi_cmd.H>
 #include <p10_infrastruct_help.H>
 #include <p10_scom_perv_a.H>
+#include <p10_sbe_hb_structures.H>
+
 #include <initservice/mboxRegs.H>
 #include <bootloader/bootloaderif.H>
 #include <secureboot/service.H>
@@ -2705,7 +2707,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
         errlHndl_t err = nullptr;
         void *sbeHbblImgPtr = nullptr;
-        sbeSectionSbSettings_t sb_settings;
+        sb_settings_t sb_settings;
 
         // Clear build information
         io_sbeState.new_imageBuild.buildDate = 0;
@@ -3172,7 +3174,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             }
 
             // Save off secure_version used for customization and a check below
-            sb_settings.minimum_secure_version = pnor_sbe_secure_version;
+            sb_settings.msv = pnor_sbe_secure_version;
 
             /***********************************/
             /*  Update the HW Key's Hash       */
@@ -3197,7 +3199,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                sha512_to_u32(pnor_sbe_hash));
 
                     // Save off hash
-                    memcpy (&sb_settings.hw_keys_hash,
+                    memcpy (&sb_settings.hwKeyHash,
                             pnor_sbe_hash,
                             sizeof(SHA512_t));
                 }
@@ -3209,7 +3211,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                sha512_to_u32(sys_hash));
 
                     // Save off hash
-                    memcpy (&sb_settings.hw_keys_hash,
+                    memcpy (&sb_settings.hwKeyHash,
                             sys_hash,
                             sizeof(SHA512_t));
                 }
@@ -3223,7 +3225,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
 
                 // Save off hash
-                memcpy (&sb_settings.hw_keys_hash,
+                memcpy (&sb_settings.hwKeyHash,
                         g_hw_keys_hash_transition_data,
                         sizeof(SHA512_t));
             }
@@ -3233,17 +3235,17 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /***********************************/
             if (g_do_key_transition)
             {
-                sb_settings.signing_mode = g_key_transition_sb_signing_mode;
+                sb_settings.sbMode = g_key_transition_sb_signing_mode;
                 TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
                             "to SBKT partition Setting 0x%.2X (pnor mode=0x%.2X)",
-                            sb_settings.signing_mode, pnor_sbe_signing_mode);
+                            sb_settings.sbMode, pnor_sbe_signing_mode);
             }
             else
             {
-                sb_settings.signing_mode = SECUREBOOT::hashSignMode();
+                sb_settings.sbMode = SECUREBOOT::hashSignMode();
                 TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
                             "to System Setting 0x%.2X (pnor mode=0x%.2X)",
-                            sb_settings.signing_mode, pnor_sbe_signing_mode);
+                            sb_settings.sbMode, pnor_sbe_signing_mode);
             }
 
             // Now append P9_XIP_SECTION_SBE_SB_SETTINGS
@@ -3368,13 +3370,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             }
 
             // Verify that the correct Secure Version is included in customized image
-            if ( sb_settings.minimum_secure_version != sbe_secure_version )
+            if ( sb_settings.msv != sbe_secure_version )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error: "
                            "Secure Version in customized image 0x%.2X doesn't "
                            "match expected value of 0x%.2X for proc=0x%X",
                            sbe_secure_version,
-                           sb_settings.minimum_secure_version,
+                           sb_settings.msv,
                            get_huid(io_sbeState.target));
 
                 /*@
@@ -3396,7 +3398,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                     get_huid(io_sbeState.target),
                                     FOUR_UINT16_TO_UINT64(
                                       sbe_secure_version,
-                                      sb_settings.minimum_secure_version,
+                                      sb_settings.msv,
                                       min_secure_version,
                                       lockin_policy));
 
@@ -3409,13 +3411,13 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
 
             // Verify that the HW Key Hash is the same hash used earlier
-            if ( memcmp(sbe_hash, sb_settings.hw_keys_hash, sizeof(SHA512_t)) != 0 )
+            if ( memcmp(sbe_hash, sb_settings.hwKeyHash, sizeof(SHA512_t)) != 0 )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error: "
                            "HW Key Hash in customized image 0x%.8X doesn't "
                            "match expected hash 0x%.8X for proc=0x%X",
                            sha512_to_u32(sbe_hash),
-                           sha512_to_u32(sb_settings.hw_keys_hash),
+                           sha512_to_u32(sb_settings.hwKeyHash),
                            get_huid(io_sbeState.target));
 
                 /*@
@@ -3435,7 +3437,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                     get_huid(io_sbeState.target),
                                     TWO_UINT32_TO_UINT64(
                                       sha512_to_u32(sbe_hash),
-                                      sha512_to_u32(sb_settings.hw_keys_hash)));
+                                      sha512_to_u32(sb_settings.hwKeyHash)));
 
                 TRACFBIN(g_trac_sbe,
                          "getSbeInfoState() - sbe_hash",
@@ -3448,14 +3450,14 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                               sbe_secure_version).addToLog(err);
 
                 TRACFBIN(g_trac_sbe,
-                         "getSbeInfoState() - sb_settings.hw_keys_hash",
-                         sb_settings.hw_keys_hash,
+                         "getSbeInfoState() - sb_settings.hwKeyHash",
+                         sb_settings.hwKeyHash,
                          sizeof(SHA512_t));
                 SECUREBOOT::UdTargetHwKeyHash(
                               io_sbeState.target,
                               3,
-                              sb_settings.hw_keys_hash,
-                              sb_settings.minimum_secure_version).addToLog(err);
+                              sb_settings.hwKeyHash,
+                              sb_settings.msv).addToLog(err);
 
                 err->collectTrace(SBE_COMP_NAME);
                 err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
@@ -3464,7 +3466,41 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
-            // @TODO JIRA:PFHB-802 Add check for SB signing mode
+            if ( sb_settings.sbMode != sbe_signing_mode )
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error: "
+                           "SBE Signing Mode in customized image 0x%.2X doesn't "
+                           "match expected value of 0x%.2X for proc=0x%X",
+                           sbe_signing_mode,
+                           sb_settings.sbMode,
+                           get_huid(io_sbeState.target));
+
+                using namespace errl_util;
+
+                /*@
+                 * @errortype
+                 * @moduleid         SBE_GET_TARGET_INFO_STATE
+                 * @reasoncode       SBE_MISMATCHED_SIGNING_MODE
+                 * @userdata1        Target HUID
+                 * @userdata2[0:7]   Signing Mode found in Customized SBE Image
+                 * @userdata2[8:15]  Expected Signing Mode
+                 * @devdesc          Unexpected Secure Version found in SBE Image
+                 * @custdesc         A problem occurred while updating processor
+                 *                   boot code.
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_GET_TARGET_INFO_STATE,
+                                    SBE_MISMATCHED_SIGNING_MODE,
+                                    get_huid(io_sbeState.target),
+                                    SrcUserData(bits{0, 7},  sbe_signing_mode,
+                                                bits{8, 15}, sb_settings.sbMode));
+
+
+                err->collectTrace(SBE_COMP_NAME);
+                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH );
+                break;
+            }
 
             void * pSearchBfr = pCustomizedBfr;
             uint32_t searchSize = sbeImgSize; // Actual image size
@@ -6908,7 +6944,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                            const void * i_image_ptr) // defaults to nullptr
 {
     errlHndl_t err = nullptr;
-    sbeSectionSbSettings_t sb_settings;
+    sb_settings_t sb_settings;
 
 
     // Only useChipOp if the sbe is started
@@ -7334,10 +7370,10 @@ errlHndl_t getSecuritySettingsFromSbeImage(
     }
 
     // Copy to output variables
-    o_secure_version = sb_settings.minimum_secure_version;
-    o_signing_mode = sb_settings.signing_mode;
+    o_secure_version = sb_settings.msv;
+    o_signing_mode = sb_settings.sbMode;
     memcpy(o_hash,
-           &sb_settings.hw_keys_hash,
+           &sb_settings.hwKeyHash,
            sizeof(SHA512_t));
 
     TRACDBIN(g_trac_sbe,"getSecuritySettingsFromSbeImage - Hash:", o_hash, sizeof(SHA512_t));
@@ -7413,7 +7449,7 @@ errlHndl_t secureKeyTransition()
                 "KEY_TRANSITION_STATE_KEY_TRANSITION_STARTED");
             break;
         }
-        
+
 
     }
     if(l_loaded)
