@@ -1898,37 +1898,21 @@ sub create_hb_hll
         $basename =~ s{^.*/|\.[^.]+$}{}g;
         my $entry_file = "$v3_dir/${basename}.entry";
 
-        # @TODO JIRA:PFHB-802 Consider updating the run_command calls to
-        #       perl binary File I/O operations
-        #       If "dd" calls remain, then investigate need for ibs=1 and
-        #       obs=1 when bs=1 has already been set
-
-        # If there is an old HB_HLL.header file in the directory,
-        # skip processing it
-        # @TODO JIRA:PFHB-802 Consider a better location to find and cleanup
-        # an old HB_HLL header file
-        if ($basename eq "HB_HLL")
-        {
-            # reduce the count of entries and skip
-            $num_of_entries--;
-            next;
-        }
-
         # Create and clear new .entry file
         run_command("dd if=/dev/zero bs=96 count=1 > $entry_file");
 
         # Get and set the partname - string left-justified (ie starts at bit0)
         # NOTE: this comes from Component ID
-        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc ibs=1 obs=1 seek=0 skip=10347 of=$entry_file");
+        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc seek=0 skip=10347 of=$entry_file");
 
         # Get and set the ProtectedSize;
-        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc ibs=1 obs=1 seek=16 skip=10360 of=$entry_file");
+        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc seek=16 skip=10360 of=$entry_file");
 
         # Get and set the overall SectionSize
-        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc ibs=1 obs=1 seek=24 skip=6 of=$entry_file");
+        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc seek=24 skip=6 of=$entry_file");
 
         # Get and set the hash value
-        run_command("dd if=$v3_header_file bs=1 count=64 conv=notrunc ibs=1 obs=1 seek=32 skip=10376 of=$entry_file");
+        run_command("dd if=$v3_header_file bs=1 count=64 conv=notrunc seek=32 skip=10376 of=$entry_file");
 
         # Uncomment next line for debug
         #run_command("hexdump -C $entry_file");
@@ -2112,9 +2096,9 @@ print <<"ENDUSAGE";
                         Multiple '--corrupt' options are allowed, but note the system will checkstop on the
                             first bad partition so multiple may not be that useful.
                         Example: --corrupt HBI --corrupt HBD=unpro
-    --sign-mode <development|production>                       
+    --sign-mode <development|production>
                                   Indicates how to sign partitions with either development keys or production keys
-    --key-transition <development|production|prod-prod>-V3     
+    --key-transition <development|production|prod-prod>-V3
                                   Indicates a key transition is needed and creates a secureboot key transition container.
                                   Note: Transition images to V1 are not supported, but for clarity "-V3" must be appended to argument
                                   Note: "--sign-mode production" is not allowed with "--key-transition development"
