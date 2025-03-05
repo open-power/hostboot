@@ -117,9 +117,10 @@ static bool g_istep_mode        = false;
 static bool g_update_both_sides = false;
 
 // ----------------------------------------
-// Global Variables HW Keys Hash Transition
-static bool    g_do_hw_keys_hash_transition = false;
+// Global Variables Key Transition
+static bool    g_do_key_transition = false;
 static SHA512_t g_hw_keys_hash_transition_data = {0};
+static uint8_t g_key_transition_sb_signing_mode = 0x0;
 
 // ----------------------------------------
 // Global Variables for HBBL Data
@@ -685,12 +686,15 @@ namespace SBE
                 break;
             }
 
-            // Print new hw keys' hash if a key transition is required.
-            if(g_do_hw_keys_hash_transition)
+            // Print new hw keys' hash and sb signing mode if a key transition is required.
+            if(g_do_key_transition)
             {
                 TRACFBIN(g_trac_sbe, "updateProcessorSbeSeeproms(): Key transition new hw key hash",
                          g_hw_keys_hash_transition_data,
                          sizeof(g_hw_keys_hash_transition_data));
+
+                TRACFCOMP(g_trac_sbe, "updateProcessorSbeSeeproms(): Key transition new signing mode 0x%.2X",
+                            g_key_transition_sb_signing_mode);
 
                 // Sync all attributes to FSP/BMC before we quiesce all the
                 // SBEs.
@@ -776,7 +780,7 @@ namespace SBE
 
             // Restart IPL if SBE Update requires it or key transition occurred
             // No restart if running Simics
-            if ( ((g_restart_needed == true) || (g_do_hw_keys_hash_transition))
+            if ( ((g_restart_needed == true) || (g_do_key_transition))
                     && !Util::isSimicsRunning())
             {
                 TRACFCOMP( g_trac_sbe,
@@ -859,7 +863,7 @@ namespace SBE
              }
         }
 
-        if(err && g_do_hw_keys_hash_transition)
+        if(err && g_do_key_transition)
         {
             // In theory it's possible to end up here if Hostboot fails to send
             // the key transition started/succeeded message.  Hostboot will
@@ -3034,7 +3038,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             // to save hash being put into image for comparison later
             SHA512_t zero_hash = {0};
 
-            if ( !g_do_hw_keys_hash_transition )
+            if ( !g_do_key_transition )
             {
                 // Use the HW Key Hash that the system used to boot
                 SHA512_t sys_hash = {0};
@@ -3084,10 +3088,20 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /***********************************/
             /*  Update the Signing Mode        */
             /***********************************/
-            sb_settings.signing_mode = SECUREBOOT::hashSignMode();
-            TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
-                        "to System Setting 0x%.2X (pnor mode=0x%.2X)",
-                        sb_settings.signing_mode, pnor_sbe_signing_mode);
+            if (g_do_key_transition)
+            {
+                sb_settings.signing_mode = g_key_transition_sb_signing_mode;
+                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
+                            "to SBKT partition Setting 0x%.2X (pnor mode=0x%.2X)",
+                            sb_settings.signing_mode, pnor_sbe_signing_mode);
+            }
+            else
+            {
+                sb_settings.signing_mode = SECUREBOOT::hashSignMode();
+                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
+                            "to System Setting 0x%.2X (pnor mode=0x%.2X)",
+                            sb_settings.signing_mode, pnor_sbe_signing_mode);
+            }
 
             // Now append P9_XIP_SECTION_SBE_SB_SETTINGS
             err = modifySbeSection(P9_XIP_SECTION_SBE_SB_SETTINGS,
@@ -4342,7 +4356,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
         // function for the other SEEPROM
         if ( ( err == nullptr ) &&
              ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) &&
-             ( g_do_hw_keys_hash_transition) )
+             ( g_do_key_transition) )
         {
             io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
             TRACFCOMP( g_trac_sbe,
@@ -4813,7 +4827,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
 #elif CONFIG_SBE_UPDATE_SEQUENTIAL
 
             // On a secure boot key transition, force both sides to update
-            if (g_do_hw_keys_hash_transition)
+            if (g_do_key_transition)
             {
                 decisionTreeForUpdatesSimultaneous(l_actions,
                                                    io_sbeState,
@@ -5452,7 +5466,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
 #endif
 
 #ifdef CONFIG_SBE_UPDATE_SEQUENTIAL
-                if (g_do_hw_keys_hash_transition)
+                if (g_do_key_transition)
                 {
                     TRACFCOMP( g_trac_sbe, "UPDATE_BOTH_SIDES_OF_SBE Key transition, will update both sides" );
                     io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
@@ -6635,7 +6649,7 @@ errlHndl_t sbeDoReboot( void )
 
     do{
 
-        if(g_do_hw_keys_hash_transition)
+        if(g_do_key_transition)
         {
             err = updateKeyTransitionState(
                       KEY_TRANSITION_STATE_KEY_TRANSITION_SUCCEEDED);
@@ -6649,7 +6663,7 @@ errlHndl_t sbeDoReboot( void )
             }
         }
 
-        if (!g_do_hw_keys_hash_transition)
+        if (!g_do_key_transition)
         {
             // Sync all attributes to the FSP/BMC before doing the Shutdown
             err = AttrRP::syncAllAttributesToSP();
@@ -6673,7 +6687,7 @@ errlHndl_t sbeDoReboot( void )
         }
 
 #ifdef CONFIG_CONSOLE
-        if(g_do_hw_keys_hash_transition)
+        if(g_do_key_transition)
         {
             CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "Performing Secure Boot key transition\n");
             CONSOLE::displayf(CONSOLE::DEFAULT, SBE_COMP_NAME, "System will power off after completion\n");
@@ -6688,7 +6702,7 @@ errlHndl_t sbeDoReboot( void )
 #endif
 
 #if defined(CONFIG_PLDM)
-        if(g_do_hw_keys_hash_transition)
+        if(g_do_key_transition)
         {
 #ifdef CONFIG_PLDM
             TRACFCOMP(g_trac_sbe,
@@ -6706,7 +6720,7 @@ errlHndl_t sbeDoReboot( void )
             INITSERVICE::requestReboot("SBE update");
         }
 #else // non-PLDM
-        if(g_do_hw_keys_hash_transition)
+        if(g_do_key_transition)
         {
             TRACFCOMP(g_trac_sbe,
                 INFO_MRK"sbeDoReboot(): Performing Secure Boot key transition. "
@@ -7235,8 +7249,12 @@ errlHndl_t secureKeyTransition()
         // Update global variable with hw keys hash to transition to.
         memcpy(g_hw_keys_hash_transition_data, l_hwKeyHash,
                sizeof(g_hw_keys_hash_transition_data));
+
+        // update global variable with signing mode
+        g_key_transition_sb_signing_mode = l_nestedConHdr.isV3() ? 0x2 : 0x0;
+
         // Indicate a key transition is required
-        g_do_hw_keys_hash_transition = true;
+        g_do_key_transition = true;
 
         l_errl = updateKeyTransitionState(
                      KEY_TRANSITION_STATE_KEY_TRANSITION_STARTED);

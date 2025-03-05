@@ -1648,6 +1648,8 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
     errlHndl_t l_errl = NULL;
     assert(i_vaddr != NULL);
 
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"SPnorRP::keyTransitionCheck");
+
     do {
     // Check if the header flags have the key transition bit set
     SECUREBOOT::ContainerHeader l_outerConHdr;
@@ -1714,6 +1716,8 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
     }
 
     }while(0);
+
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"SPnorRP::keyTransitionCheck");
 
     return l_errl;
 }
