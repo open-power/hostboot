@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -295,6 +295,28 @@
     <default>
       0x033A
     </default>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PCIE_FW_LEGACY_MODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Permits selection between two discrete sets of IOP configurations
+      - Synopsys FW image loaded from HW reference image
+        TRUE  = .iopxram2 (iop_legacy.fw)
+        FALSE = .iopxram  (iop_current.fw)
+      - dynamic scan inits customized from HW reference image
+        TRUE  = enable iop_legacy dynamic init feature
+        FALSE = base only
+      - SCOM customziation applied via IPL HWPs
+    </description>
+    <enum>
+      FALSE = 0,
+      TRUE = 1
+    </enum>
+    <valueType>uint8</valueType>
+    <platInit>mrw</platInit>
+    <default>FALSE</default>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
