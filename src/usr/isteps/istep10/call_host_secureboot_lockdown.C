@@ -315,16 +315,6 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
 
     IStepError l_istepError;
 
-    // @TODO JIRA PFHB-802 New SBE code with signing mode = 2 is triggering
-    // security fails in this step in simics. Temporarily skip this step when
-    // running simics until that issue has been resolved
-    if (Util::isSimicsRunning())
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,EXIT_MRK
-            "call_host_secureboot_lockdown: Skipping this step in simics");
-        return l_istepError.getErrorHandle();
-    }
-
 #ifndef CONFIG_VPO_COMPILE
     errlHndl_t l_err = nullptr;
 
