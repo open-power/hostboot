@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -276,6 +276,13 @@ static const uint32_t SPATTN_MASK_34 = 34;
 static const uint32_t SPATTN_MASK_35 = 35;
 //<< [SPATTN_MASK]
 // perv/reg00007.H
+
+//>> SCRATCH REG 11 & 14
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_FSI = 0x00002982ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI = 0x00002985ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_RW  = 0x00050182ull;
+static const uint32_t FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW  = 0x00050185ull;
+//<< SCRATCH REG 11 & 14
 
 //>>THE END<<
 

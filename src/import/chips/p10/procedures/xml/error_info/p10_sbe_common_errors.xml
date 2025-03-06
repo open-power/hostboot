@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -221,6 +221,8 @@
         <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI</cfamRegister>
         <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI</cfamRegister>
         <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_FSI</cfamRegister>
+        <cfamRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
         <id>SBE_IPL_SCRATCH_REGISTERS_SCOM</id>
@@ -232,6 +234,8 @@
         <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW</scomRegister>
         <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW</scomRegister>
         <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_RW</scomRegister>
+        <scomRegister> scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW</scomRegister>
     </registerFfdc>
    <!-- ******************************************************************** -->
     <hwpError>
