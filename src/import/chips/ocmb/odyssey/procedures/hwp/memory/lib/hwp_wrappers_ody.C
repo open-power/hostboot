@@ -198,18 +198,33 @@ fapi_try_exit:
 /// @param[in] i_end whether to end, and where (default - don't stop at end of rank)
 /// @param[in] i_stop stop conditions (default - 0 meaning 'don't change conditions')
 /// @param[in] i_speed the speed to scrub (default - SAME_SPEED meaning leave speed untouched)
+/// @param[in] i_resume_dqs control flag for resuming dqs after continue command (default - false/dont resume)
+/// expected behavior is for targeted scrub dqs remains suspended(flag = false)
+/// and for background scrub we will resume(flag true) dqs post continue cmd.
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode ody_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                     const mss::mcbist::end_boundary i_end,
                                     const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
-                                    const mss::mcbist::speed i_speed )
+                                    const mss::mcbist::speed i_speed,
+                                    const bool i_resume_dqs)
 {
+    if(!i_resume_dqs)
+    {
+        FAPI_TRY(mss::ody::suspend_dqs_track(i_target));
+    }
 
-    FAPI_TRY(mss::ody::suspend_dqs_track(i_target));
     FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
                                  fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_TRUE));
     FAPI_TRY(mss::memdiags::continue_cmd<mss::mc_type::ODYSSEY>(i_target, i_end, i_stop, i_speed));
+
+    // since PRD uses this API to resume tg scrub and also bg scrub we need flag to
+    // control dqs drift tracking post that, expected behavior is for targeted scrub dqs remains suspended
+    // and for background scrub we will resume dqs
+    if(i_resume_dqs)
+    {
+        FAPI_TRY(mss::ody::resume_dqs_track(i_target));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

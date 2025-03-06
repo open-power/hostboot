@@ -752,7 +752,7 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>DIMM_TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
   </hwpError>

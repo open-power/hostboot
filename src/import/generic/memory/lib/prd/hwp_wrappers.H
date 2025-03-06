@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -288,6 +288,9 @@ fapi2::ReturnCode ody_targeted_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCM
 /// @param[in] i_end whether to end, and where (default - don't stop at end of rank)
 /// @param[in] i_stop stop conditions (default - 0 meaning 'don't change conditions')
 /// @param[in] i_speed the speed to scrub (default - SAME_SPEED meaning leave speed untouched)
+/// @param[in] i_resume_dqs control flag for resuming dqs after continue command (default - false/dont resume)
+/// expected behavior is for targeted scrub dqs remains suspended(flag = false)
+/// and for background scrub we will resume(flag true) dqs post continue cmd.
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode ody_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
@@ -295,7 +298,8 @@ fapi2::ReturnCode ody_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                                     const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop =
                                         mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>
                                         (mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>::DONT_CHANGE),
-                                    const mss::mcbist::speed i_speed = mss::mcbist::speed::SAME_SPEED );
+                                    const mss::mcbist::speed i_speed = mss::mcbist::speed::SAME_SPEED,
+                                    const bool i_resume_dqs = false );
 
 ///
 /// @brief Update bad DQ bits in SPD for Odyssey
