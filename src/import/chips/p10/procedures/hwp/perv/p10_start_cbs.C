@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include "p10_scom_perv_c.H"
 #include "p10_scom_perv_d.H"
 #include "p10_scom_proc_f.H"
+#include "p10_scom_perv_3.H"
 #include "p10_avsbus_lib.H"
 
 enum P10_START_CBS_Private_Constants
@@ -73,6 +74,9 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
 
     FAPI_DBG("Clearing  Selfboot message register before every boot ");
     FAPI_TRY(fapi2::putCfamRegister(i_target_chip, perv::FSXCOMP_FSXLOG_SB_MSG_FSI, 0));
+
+    FAPI_DBG("Clearing  Scratch register 14 to check and capture TPM fails later");
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, 0));
 
     FAPI_DBG("Setting up hreset to 0");
     FAPI_TRY(fapi2::getCfamRegister(i_target_chip, perv::FSXCOMP_FSXLOG_SB_CS_FSI, l_data32));

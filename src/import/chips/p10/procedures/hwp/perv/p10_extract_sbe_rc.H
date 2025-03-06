@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@ enum RETURN_ACTION
     REIPL_BKP_BMSEEPROM  = 9, // Run IPL by selecting backup Measurement and  Boot seeproms
     RECONFIG_WITH_CLOCK_GARD = 10, // SBE boot failed due to failure of primary clock. HWP will gard the clock.
     // Need to do reconfig for recovering
+    REIPL_FIRST_THEN_TPM_CALLOUT = 11, // first time do a re IPL, second time do a TPM callout
 };
 };
 

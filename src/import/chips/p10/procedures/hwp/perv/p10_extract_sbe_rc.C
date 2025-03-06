@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 ///     3) Reading chip ec attribute detect if chip is NDD1 or later, and update memory location values
 ///     4) Read the value of DBGPRO 0xE0005 & Store IAR as Current IAR
 ///     5) Identify if PPE is halted from XSR Bit0, if not halted report error as infinite loop
+///     6) In case of TPM failure, check for non-zero data in Scratch register 14
 /// Level 0 :
 ///     1) If Halted, Read the value of RAMDBG 0xE0003 & store SPRG0
 ///     2) Check if SPRG0 has address within valid PIBMEM range
@@ -98,9 +99,9 @@
 //     ------------------------------------------------------               //
 //////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------------------------------
-// *HWP HW Owner        : Sandeep Korrapati <sakorrap@in.ibm.com>
-// *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
-// *HWP FW Owner        : Raja Das <rajadas2@in.ibm.com>
+// *HWP HW Owner        : Sreekanth Reddy   <skadapal@in.ibm.com>
+// *HWP HW Backup Owner : Sandeep Korrapati <sakorrap@in.ibm.com>
+// *HWP FW Owner        : Sunil Kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
 // *HWP Level           : 3
 // *HWP Consumed by     : SP:HB
@@ -180,6 +181,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     fapi2::buffer<uint64_t> l_data64_mib_mem_info;
     fapi2::buffer<uint64_t> l_data64_mib_sib_info;
     fapi2::buffer<uint32_t> l_data32;
+    fapi2::buffer<uint32_t> l_data32_tpmRc;
     fapi2::buffer<uint32_t> l_data32_ir;
     fapi2::buffer<uint32_t> l_data32_edr;
     fapi2::buffer<uint32_t> l_data32_iar;
@@ -309,8 +311,15 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_POWERCHECK_FAIL() .set_TARGET_CHIP(i_target_chip), "VDN_PGOOD not set");
     }
 
-#endif
+    l_data32_tpmRc.flush<0>();
+    FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, l_data32_tpmRc));
 
+    o_return_action = P10_EXTRACT_SBE_RC::REIPL_FIRST_THEN_TPM_CALLOUT;
+    FAPI_ASSERT(!l_data32_tpmRc,
+                fapi2::EXTRACT_SBE_RC_TPM_ERR()
+                .set_TARGET_CHIP(i_target_chip),
+                "TPM fail occurred");
+#endif
 
     if(i_set_sdb)
     {
