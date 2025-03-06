@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -197,7 +197,9 @@ void GroupInfo::print() const
     UTIL_FT("  - LidIds (if applicable compressed sizes):");
     for (auto lidInfo : lidIds)
     {
-        UTIL_FT("    - 0x%08X, size 0x%X (%lld)", lidInfo.id, lidInfo.size, lidInfo.size);
+        UTIL_FT("    - 0x%08X, size 0x%X (%lld) hash 0x%.8X",
+                lidInfo.id, lidInfo.size, lidInfo.size,
+                sha512_to_u32(reinterpret_cast<uint8_t*>(&lidInfo.hllHash)));
     }
 }
 
@@ -217,6 +219,10 @@ HLLMgr::HLLMgr(const bool i_toc_only)
     iv_tmpAddr = hostboot_base_address + TOC_TMP_ADDR;
     iv_HLLAddr = hostboot_base_address + TOC_ADDR;
 
+    UTIL_FT(ENTER_MRK"HLLMgr::HLLMgr: i_toc_only=%d, "
+                     "iv_HLLAddr=%p, iv_tmpAddr=%p",
+                      i_toc_only, iv_HLLAddr, iv_tmpAddr);
+
     initHLL();
 }
 
@@ -232,6 +238,10 @@ HLLMgr::HLLMgr(const void* i_pHLL, const size_t i_size)
 
     iv_HLLAddr = hostboot_base_address + TOC_ADDR;
     iv_tmpAddr = hostboot_base_address + TOC_TMP_ADDR;
+
+    UTIL_FT(ENTER_MRK"HLLMgr::HLLMgr: i_pHLL=%p, i_size=0x%X, "
+                     "iv_HLLAddr=%p, iv_tmpAddr=%p",
+                      i_pHLL, i_size, iv_HLLAddr, iv_tmpAddr);
 
     initHLL(i_pHLL, i_size);
 }
@@ -318,7 +328,7 @@ void HLLMgr::releaseMem(const uint64_t i_physAddr,
                                        void *&io_pVaddr)
 {
     errlHndl_t l_errl = nullptr;
-    assert(i_physAddr != 0, "HLLMgr physical address to release cannot be 0");
+    assert(i_physAddr != 0, "HLLMgr::releaseMem: HLLMgr physical address to release cannot be 0");
 
     do {
     if ( io_pVaddr != nullptr)
@@ -366,7 +376,7 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
                                     void *&io_pVaddr)
 {
     errlHndl_t l_errl = nullptr;
-    assert(i_physAddr != 0, "HLLMgr physical address cannot be 0");
+    assert(i_physAddr != 0, "HLLMgr::initMem: HLLMgr physical address cannot be 0");
 
     do {
     //Check if we already initialized vm space
@@ -471,7 +481,7 @@ errlHndl_t HLLMgr::parseHLL()
 {
     errlHndl_t l_err = nullptr;
 
-    assert(iv_pHLLVaddr != nullptr);
+    assert(iv_pHLLVaddr != nullptr, "HLLMgr::parseHLL: iv_pHLLVaddr can't be nullptr");
     do {
     auto l_pHLL = reinterpret_cast<const uint8_t*>(iv_pHLLVaddr);
 
@@ -673,46 +683,107 @@ errlHndl_t HLLMgr::verifyPowerVM(void * i_payload)
     errlHndl_t l_errl = nullptr;
     GroupIdString l_curGroupIdStr = {};
     groupIdToString(g_HLLPowerVM, l_curGroupIdStr);
-    UTIL_FT(ENTER_MRK"HLLMgr::verifyPowerVM");
+    UTIL_FT(ENTER_MRK"HLLMgr::verifyPowerVM: i_payload=%p", i_payload);
     uint8_t* l_pLidVaddr = reinterpret_cast<uint8_t*>(i_payload);
+
+    // This function is only called for FSP Systems.
+    // The FSP does not have seperate behaviors for V1 versus V3.  As such, it
+    // always places the V1 header at the start of the payload section, and
+    // then places all of the LIDs into memory, one directly after the other
+    // So first, skip over V1 header at the start:
+    l_pLidVaddr += V1_MAX_SECURE_HEADER_SIZE;
+
     auto groupInfoPairItr = iv_groupInfoCache.find(g_HLLPowerVM);
     if(groupInfoPairItr != iv_groupInfoCache.end())
     {
         for (auto & lidInfo : groupInfoPairItr->second.lidIds)
         {
-            HashEntry hash = {0};
-            SECUREBOOT::hashBlob(reinterpret_cast<void*>(l_pLidVaddr), lidInfo.size, hash.HashCalc);
-            // @TODO JIRA:PFHB-802 Skipping V3 verification for now
-            // (HLL is V3 based)
-            UTIL_FT(INFO_MRK"HLLMgr::verifyPowerVM - Skipping Hash Verification"
-                " on lidInfo.id=0x%X, lidInfo.size=%d, hash=0x%08X",
-                lidInfo.id, lidInfo.size,
-                sha512_to_u32(hash.HashCalc));
-            //if (memcmp(hash.HashCalc, &lidInfo.hllHash, sizeof(HashEntry)) != 0)
-            if (0)
-            {
-                /*@
-                * @moduleid          Util::UTIL_HLL_VERIFY_POWERVM
-                * @reasoncode        Util::UTIL_HLL_HASH_FAILURE
-                * @userdata1         lidInfo.hllHash
-                * @userdata2         HashCalc
-                * @devdesc           Secure hash failure on lid
-                * @custdesc          Firmware Error
-                */
-                l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            Util::UTIL_HLL_VERIFY_POWERVM,
-                            Util::UTIL_HLL_HASH_FAILURE,
-                            *((uint64_t*)&lidInfo.hllHash),
-                            *((uint64_t*)hash.HashCalc),
-                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-                l_errl->collectTrace(UTIL_COMP_NAME);
-                UTIL_FT(ERR_MRK"HLLMgr::verifyPowerVM failed to verify Group Name=%s", l_curGroupIdStr);
-                SECUREBOOT::handleSecurebootFailure(l_errl);
-                assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+            if (lidInfo.Unsigned != 0x0)
+            {
+                // This LID is marked as Unsigned so skip hash and size checks below
+                UTIL_FT("HLLMgr::verifyPowerVM: Skipping checks on Unsigned Lid: "
+                        "lidInfo.id=0x%04X lidInfo.size=%d lidInfo.Unsigned=0x%X",
+                        lidInfo.id, lidInfo.size, lidInfo.Unsigned);
             }
-            //UTIL_FT("HLLMgr::verifyPowerVM lidInfo.id=0x%X passed HashCalc", lidInfo.id);
+            else
+            {
+                UTIL_FT("HLLMgr::verifyPowerVM: hashing lid 0x%04X "
+                        "of size 0x%X at l_pLidVaddr=%p",
+                        lidInfo.id, lidInfo.size, l_pLidVaddr);
+
+// Comment this out once things are working and just keep the one in the fail path
+                UTIL_FBIN("HLLMgr::verifyPowerVM",
+                          reinterpret_cast<void*>(l_pLidVaddr),
+                          64);
+
+                HashEntry hash = {0};
+                SECUREBOOT::hashBlob(reinterpret_cast<void*>(l_pLidVaddr),
+                                     lidInfo.size,
+                                     hash.HashCalc,
+                // HLL always uses the SHA3 hash routine, which is the V3 hash
+                // routine, so always pass in this argument:
+                                     SB_SIGNING_V3_CONTAINER);
+                UTIL_FT(INFO_MRK"HLLMgr::verifyPowerVM - Hash Verification "
+                    "on lidInfo.id=0x%04X, lidInfo.size=%d, "
+                    "expected_hash=0x%08X, calculated_hash=0x%08X",
+                    lidInfo.id, lidInfo.size,
+                    sha512_to_u32(reinterpret_cast<uint8_t*>(&lidInfo.hllHash)),
+                    sha512_to_u32(hash.HashCalc));
+
+                if (memcmp(hash.HashCalc, &lidInfo.hllHash, sizeof(HashEntry)) != 0)
+                {
+                    /*@
+                    * @moduleid          Util::UTIL_HLL_VERIFY_POWERVM
+                    * @reasoncode        Util::UTIL_HLL_HASH_FAILURE
+                    * @userdata1[00:31]  lidInfo.id
+                    * @userdata1[32:63]  lidInfo.size
+                    * @userdata1[00:31]  Expected Hash
+                    * @userdata1[32:63]  Calculated Hash
+                    * @devdesc           Secure hash failure on lid
+                    * @custdesc          Firmware Error
+                    */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                Util::UTIL_HLL_VERIFY_POWERVM,
+                                Util::UTIL_HLL_HASH_FAILURE,
+                                errl_util::SrcUserData(
+                                    errl_util::bits{0, 31}, lidInfo.id,
+                                    errl_util::bits{32, 63},lidInfo.size),
+                                errl_util::SrcUserData(
+                                    errl_util::bits{0, 31},
+                                        sha512_to_u32(
+                                            reinterpret_cast<uint8_t*>
+                                                (&lidInfo.hllHash)),
+                                    errl_util::bits{32, 63},
+                                        sha512_to_u32(hash.HashCalc)),
+                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                    l_errl->addFFDC(UTIL_COMP_ID,
+                                &lidInfo.hllHash,
+                                sizeof(HashEntry),
+                                0,      // version
+                                ERRORLOG::ERRL_UDT_HASH, // parser ignores data
+                                false); // merge
+                    l_errl->addFFDC(UTIL_COMP_ID,
+                                hash.HashCalc,
+                                sizeof(HashEntry),
+                                0,      // version
+                                ERRORLOG::ERRL_UDT_HASH, // parser ignores data
+                                false); // merge
+
+                    UTIL_FBIN("HLLMgr::verifyPowerVM: Lid in Memory",
+                              reinterpret_cast<void*>(l_pLidVaddr),
+                              64);
+
+                    l_errl->collectTrace(UTIL_COMP_NAME);
+                    UTIL_FT(ERR_MRK"HLLMgr::verifyPowerVM failed to verify Group Name=%s", l_curGroupIdStr);
+                    SECUREBOOT::handleSecurebootFailure(l_errl);
+                    assert(false,"HLLMgr::verifyPowerVM: Bug! handleSecurebootFailure shouldn't return!");
+                }
+                UTIL_FT("HLLMgr::verifyPowerVM lidInfo.id=0x%X passed HashCalc", lidInfo.id);
+            }
+            // Now increment past this Lid to go to the next PowerVM lid that PHYP loaded
             l_pLidVaddr += lidInfo.size;
         }
     }
@@ -831,10 +902,12 @@ errlHndl_t HLLMgr::managePreVerifiedGroup()
     {
         size_t l_reportedSize = 0;
         // Load lids into temp mainstore memory first
-        // This is called in populate_hbruntime to load lids into HB reserved memory
+        // This is called in populate_hbruntime to load lids into HB reserved
+        // memory
         GroupIdString l_curGroupIdStr = {};
         groupIdToString(g_HLLPreVerified, l_curGroupIdStr);
-        UTIL_FT("HLLMgr::managePreVerifiedGroup calling loadLids for %s", l_curGroupIdStr);
+        UTIL_FT("HLLMgr::managePreVerifiedGroup calling loadLids for %s",
+                l_curGroupIdStr);
         l_errl = loadLids(groupInfoPairItr->second, l_reportedSize);
         if (l_errl)
         {
@@ -842,7 +915,11 @@ errlHndl_t HLLMgr::managePreVerifiedGroup()
             break;
         }
         groupInfoPairItr->second.totalSize = l_reportedSize;
-        auto l_curAddr = reinterpret_cast<uint64_t>(iv_pVaddr); // load into HB reserved memory
+        // load into HB reserved memory
+        auto l_curAddr = reinterpret_cast<uint64_t>(iv_pVaddr);
+        UTIL_FT("HLLMgr::managePreVerifiedGroup: l_curAddr = 0x%ullX",
+                l_curAddr);
+
         bool mainstore_marker = true;
         for (auto & lidInfo : groupInfoPairItr->second.lidIds)
         {
@@ -1018,10 +1095,7 @@ errlHndl_t HLLMgr::initMetaData(
         break;
     }
 
-    // @TODO JIRA:PFHB-802 Skipping V3 verification for now
-    // (HLL is V3 based)
-    // if (SECUREBOOT::enabled())
-    if (0)
+    if (SECUREBOOT::enabled())
     {
         // Parse the HLL Container Header
         SECUREBOOT::ContainerHeader l_conHdr;
@@ -1030,7 +1104,7 @@ errlHndl_t HLLMgr::initMetaData(
         {
             UTIL_FT(ERR_MRK"HLLMgr::initMetaData - setheader failed");
             SECUREBOOT::handleSecurebootFailure(l_errl);
-            assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+            assert(false,"HLLMgr::initMetaData: setHeader: Bug! handleSecurebootFailure shouldn't return!");
         }
 
         // Cache size stats into group info cache
@@ -1039,8 +1113,11 @@ errlHndl_t HLLMgr::initMetaData(
         io_groupInfo.unprotectedSize = l_conHdr.totalContainerSize() -
                                         l_conHdr.payloadTextSize();
 
-        UTIL_FT("HLLMgr::initMetaData totalSize=%d protectedSize (payloadTextSize)=%d unprotectedSize=%d",
-            io_groupInfo.totalSize, io_groupInfo.protectedSize, io_groupInfo.unprotectedSize);
+        UTIL_FT("HLLMgr::initMetaData totalSize=%d protectedSize "
+                "(payloadTextSize=%d) unprotectedSize=%d. Will Verify and "
+                "Extend HLL container",
+            io_groupInfo.totalSize, io_groupInfo.protectedSize,
+            io_groupInfo.unprotectedSize);
 
         l_errl = SECUREBOOT::verifyContainer(iv_pHLLVaddr,
                                     extractLidIds(io_groupInfo.lidIds));
@@ -1048,14 +1125,14 @@ errlHndl_t HLLMgr::initMetaData(
         {
             UTIL_FT(ERR_MRK"HLLMgr::initMetaData - verifyContainer failed");
             SECUREBOOT::handleSecurebootFailure(l_errl);
-            assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+            assert(false,"HLLMgr::initMetaData: verifyContainer: Bug! handleSecurebootFailure shouldn't return!");
         }
         l_errl = tpmExtendContainer(i_groupId, l_conHdr);
         if (l_errl)
         {
             UTIL_FT("HLLMgr::initMetaData failed to tpmExtend Group Name=%s", iv_curGroupIdStr);
             SECUREBOOT::handleSecurebootFailure(l_errl);
-            assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+            assert(false,"HLLMgr::initMetaData: tpmExtendContainer: Bug! handleSecurebootFailure shouldn't return!");
         }
     }
 
@@ -1299,64 +1376,79 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
             lidInfo.size = l_lidSize;
         }
 
-        if (SECUREBOOT::enabled())
+        if (lidInfo.Unsigned != 0x0)
         {
-            HashEntry hash = {0};
-            SECUREBOOT::hashBlob(reinterpret_cast<void*>(l_pLidVaddr), l_lidSize, hash.HashCalc);
+            // This LID is marked as Unsigned so skip hash and size checks below
+            UTIL_FT("HLLMgr::loadLids Skipping checks on Unsigned Lid: "
+                    "lidInfo.id=0x%X l_lidSize=%d lidInfo.size=%d "
+                    "lidInfo.Unsigned=0x%X",
+                    lidInfo.id, l_lidSize, lidInfo.size, lidInfo.Unsigned);
+        }
+        else if (SECUREBOOT::enabled() && (lidInfo.id != Util::HLL_LIDID))
+        {
+            // LIDs that are not the HLL are verified by hashing their
+            // content and verifying the result against what is in the HLL
+
+            // First check the sizes (before even running the hash routine)
             if (l_lidSize != lidInfo.size)
             {
-                // We are reading in the lids here, so the HLL_LIDID is validated
-                // by the VerifyContainer with a secure header, so ignore its miscompare
-                // The HLL_LIDID is the data we need in order to read and validate
-                // reported sizes when lids are read, so we rely on the VerifyContainer
-                // for the validation of the HLL_LIDID size itself.
-                if (lidInfo.id != Util::HLL_LIDID)
-                {
-                    /*@
-                    * @moduleid          Util::UTIL_HLL_LOADLIDS
-                    * @reasoncode        Util::UTIL_HLL_SIZE_MISCOMPARE
-                    * @userdata1[00:31]  lidInfo.size
-                    * @userdata1[32:63]  l_lidSize
-                    * @userdata2[00:31]  lidInfo.id
-                    * @devdesc           Size miscompare on hashBlob
-                    * @custdesc          Firmware Error
-                    */
-                    l_errl = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                Util::UTIL_HLL_LOADLIDS,
-                                Util::UTIL_HLL_SIZE_MISCOMPARE,
-                                errl_util::SrcUserData(
-                                    errl_util::bits{0, 31}, lidInfo.size,
-                                    errl_util::bits{32, 63},l_lidSize),
-                                errl_util::SrcUserData(
-                                    errl_util::bits{0, 31}, lidInfo.id),
-                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                    // Extra info to help direct problem source being PHYP HLL
-                    l_errl->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE,
-                                HWAS::SRCI_PRIORITY_HIGH);
-                    UTIL_FT(ERR_MRK"HLLMgr::loadLids - size miscompare on hashBlob validation lidInfo.id=0x%X lidInfo.size=%d l_lidSize=%d",
-                        lidInfo.id, lidInfo.size, l_lidSize);
-                    l_errl->collectTrace(UTIL_COMP_NAME);
-                    SECUREBOOT::handleSecurebootFailure(l_errl);
-                    assert(false,"Bug! handleSecurebootFailure shouldn't return!");
-                }
+                UTIL_FT(ERR_MRK"HLLMgr::loadLids - size miscompare on hashBlob validation lidInfo.id=0x%X lidInfo.size=%d l_lidSize=%d",
+                    lidInfo.id, lidInfo.size, l_lidSize);
+
+                /*@
+                * @moduleid          Util::UTIL_HLL_LOADLIDS
+                * @reasoncode        Util::UTIL_HLL_SIZE_MISCOMPARE
+                * @userdata1[00:31]  lidInfo.size
+                * @userdata1[32:63]  l_lidSize
+                * @userdata2[00:31]  lidInfo.id
+                * @devdesc           Size miscompare on hashBlob
+                * @custdesc          Firmware Error
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            Util::UTIL_HLL_LOADLIDS,
+                            Util::UTIL_HLL_SIZE_MISCOMPARE,
+                            errl_util::SrcUserData(
+                                errl_util::bits{0, 31}, lidInfo.size,
+                                errl_util::bits{32, 63},l_lidSize),
+                            errl_util::SrcUserData(
+                                errl_util::bits{0, 31}, lidInfo.id),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                // Extra info to help direct problem source being PHYP HLL
+                l_errl->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE,
+                            HWAS::SRCI_PRIORITY_HIGH);
+                l_errl->collectTrace(UTIL_COMP_NAME);
+                SECUREBOOT::handleSecurebootFailure(l_errl);
+                assert(false,"HLLMgr::loadLids: Size Check: Bug! handleSecurebootFailure shouldn't return!");
             }
 
-            // @TODO JIRA:PFHB-802 Skipping V3 verification for now
-            // (HLL is V3 based)
-            UTIL_FT(INFO_MRK"HLLMgr::loadLids - Skipping Hash Verification on "
+            // Now run the hash routine
+            HashEntry hash = {0};
+            SECUREBOOT::hashBlob(reinterpret_cast<void*>(l_pLidVaddr),
+                                 l_lidSize,
+                                 hash.HashCalc,
+            // HLL always uses the SHA3 hash routine, which is the V3 hash
+            // routine, so always pass in this argument:
+                                 SB_SIGNING_V3_CONTAINER);
+
+            UTIL_FT(INFO_MRK"HLLMgr::loadLids - Hash Verification on "
                 "lidInfo.id=0x%X, lidInfo.size=%d l_lidSize=%d, "
-                "hash=0x%08X",
+                "expected_hash=0x%08X, calculated_hash=0x%08X",
                 lidInfo.id, lidInfo.size, l_lidSize,
+                sha512_to_u32(reinterpret_cast<uint8_t*>(&lidInfo.hllHash)),
                 sha512_to_u32(hash.HashCalc));
-            //if (memcmp(hash.HashCalc, &lidInfo.hllHash, sizeof(HashEntry)) != 0)
-            if (0)
+
+            if (memcmp(hash.HashCalc, &lidInfo.hllHash, sizeof(HashEntry)) != 0)
             {
+                UTIL_FT(ERR_MRK"HLLMgr::loadLids - failed hashBlob validation");
+
                 /*@
                 * @moduleid          Util::UTIL_HLL_LOADLIDS
                 * @reasoncode        Util::UTIL_HLL_HASH_FAILURE
                 * @userdata1[00:31]  lidInfo.id
                 * @userdata1[32:63]  lidInfo.size
+                * @userdata1[00:31]  Expected Hash
+                * @userdata1[32:63]  Calculated Hash
                 * @devdesc           Secure hash failure on lid
                 * @custdesc          Firmware Error
                 */
@@ -1367,6 +1459,13 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
                             errl_util::SrcUserData(
                                 errl_util::bits{0, 31}, lidInfo.id,
                                 errl_util::bits{32, 63},lidInfo.size),
+                            errl_util::SrcUserData(
+                                errl_util::bits{0, 31},
+                                    sha512_to_u32(
+                                        reinterpret_cast<uint8_t*>
+                                            (&lidInfo.hllHash)),
+                                errl_util::bits{32, 63},
+                                    sha512_to_u32(hash.HashCalc)),
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 l_errl->addFFDC(UTIL_COMP_ID,
                             &lidInfo.hllHash,
@@ -1383,12 +1482,17 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
                 // Extra info to help direct problem source being PHYP HLL
                 l_errl->addProcedureCallout(HWAS::EPUB_PRC_PHYP_CODE,
                             HWAS::SRCI_PRIORITY_HIGH);
-                UTIL_FT(ERR_MRK"HLLMgr::loadLids - failed hashBlob validation");
                 l_errl->collectTrace(UTIL_COMP_NAME);
                 SECUREBOOT::handleSecurebootFailure(l_errl);
-                assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+                assert(false,"HLLMgr::loadLids: Hash Check: Bug! handleSecurebootFailure shouldn't return!");
             }
-            UTIL_FT("HLLMgr::loadLids lidInfo.id=0x%X passed HashCalc", lidInfo.id);
+            UTIL_FT("HLLMgr::loadLids lidInfo.id=0x%X passed HashCalc",
+                    lidInfo.id);
+        }
+        else if (SECUREBOOT::enabled() && (lidInfo.id == Util::HLL_LIDID))
+        {
+            // The HLL LID has already been verified in HLLMgr::initMetaData
+            UTIL_FT("HLLMgr::loadLids: HLL has been previously verified");
         }
 
         // Store current LID load virtual address
