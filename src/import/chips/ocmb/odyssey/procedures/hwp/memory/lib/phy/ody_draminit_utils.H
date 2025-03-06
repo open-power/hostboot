@@ -2822,6 +2822,23 @@ inline bool is_recovery_loop_needed(const uint8_t i_status,
 }
 
 ///
+/// @brief Returns true if FIR checking is necessary after a training iteration
+/// @param[in] i_status the status from training
+/// @param[in] i_start_bad_bits the starting bad bits
+/// @param[in] i_struct the structure containing the current bad bits
+/// @param[in] i_fir_check_enable value of ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE
+/// @return true if FIR checking needs to run
+///
+inline bool is_fir_checking_needed(const uint8_t i_status,
+                                   const uint8_t (&i_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                   const PMU_SMB_DDR5U_1D_t& i_struct,
+                                   const uint8_t i_fir_check_enable)
+{
+    return (i_fir_check_enable == fapi2::ENUM_ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE_ENABLE) &&
+           has_draminit_failure(i_status, i_start_bad_bits, i_struct);
+}
+
+///
 /// @brief Checks if the DQ errors have exceeded the potential number of repairs
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_status the status of the draminit run

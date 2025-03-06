@@ -4312,7 +4312,7 @@ fapi2::ReturnCode run_training_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             l_fir_check_enable) );
 
-    if(l_fir_check_enable == fapi2::ENUM_ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE_ENABLE)
+    if(is_fir_checking_needed(io_status, io_start_bad_bits, io_struct, l_fir_check_enable))
     {
         bool l_fir_error = false;
         fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
