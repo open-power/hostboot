@@ -26,6 +26,7 @@
 #define __SECUREROMMANAGERTEST_H
 
 #include <array>
+#include <cxxtest/TestSuite.H>
 #include <sys/mm.h>
 #include <sys/mmio.h>
 #include <vfs/vfs.H>
@@ -405,10 +406,13 @@ class SecureRomManagerTest : public CxxTest::TestSuite
 
         // Get base offset of test container with respect to the HBI section
         signedFile_vaddr-=VFS_EXTENDED_MODULE_VADDR;
-        uint64_t l_hashPageTableOffset = signedFile_vaddr + PAGE_SIZE;
-        uint64_t l_baseOffset = signedFile_vaddr
-                                + PAGE_SIZE
-                                + l_payloadTextSize;
+        // hash page table is after header:
+        // [v1 or v3 header][hash page table][data]
+        // and hash page table is of size l_payloadTextSize
+        // l_baseOffset is the offset of the data
+        size_t   l_contHdrSize = l_conHdr.isV3() ? V3_SECURE_HEADER_SIZE : PAGESIZE;
+        uint64_t l_hashPageTableOffset = signedFile_vaddr + l_contHdrSize;
+        uint64_t l_baseOffset = l_hashPageTableOffset + l_payloadTextSize;
 
         // Get offset of TEST_PAGE_NUM
         uint64_t l_vaddr = l_baseOffset
@@ -427,6 +431,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
             errlCommit(l_errl, SECURE_COMP_ID);
             break;
         }
+        TS_INFO("SecureRomManagerTest::test_hash_page_table_verify: TC1 - PASS");
 
         /*******************************************************************/
         /* Test verifying a corrupt page                                  */
@@ -478,6 +483,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
             break;
         }
 
+        TS_INFO("SecureRomManagerTest::test_hash_page_table_verify: TC2 - PASS");
         } while(0);
 
         if ( signedFile_pageAddr != nullptr   )

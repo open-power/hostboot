@@ -70,6 +70,7 @@ print ("jailcmd = $jailcmd\n");
 ################################################################################
 use POSIX ();
 use Digest::SHA qw(sha512);
+use Crypt::Digest::SHA3_512 qw(sha3_512);
 
 my $programName = File::Basename::basename $0;
 my @systemBinFiles =  ();
@@ -1633,16 +1634,16 @@ sub genHashPageTable
     if (defined $saltData)
     {
         # Use input salt data
-        $salt_entry = truncate_sha(sha512($saltData));
+        $salt_entry = truncate_sha(sha3_512($saltData));
     }
     else
     {
         # Generate random salt data
         for (my $i = 0; $i < SHA_TRUNCATE_SIZE; $i++)
         {
-            $salt_entry .= sha512(rand(0x7FFFFFFFFFFFFFFF));
+            $salt_entry .= sha3_512(rand(0x7FFFFFFFFFFFFFFF));
         }
-        $salt_entry = truncate_sha(sha512($salt_entry));
+        $salt_entry = truncate_sha(sha3_512($salt_entry));
     }
     my @hashes = ($salt_entry);
     print OUTBINFILE $salt_entry;
@@ -1667,7 +1668,7 @@ sub genHashPageTable
         # hash(salt + data)
         #   salt = previous entry
         #   data = current page
-        my $hash_entry = truncate_sha(sha512($hashes[$index-1].$data));
+        my $hash_entry = truncate_sha(sha3_512($hashes[$index-1].$data));
         push @hashes, $hash_entry;
         $index++;
         print OUTBINFILE $hash_entry;
@@ -1706,8 +1707,8 @@ sub gen_test_containers
 
     my $openSigningFlags = OP_SIGNING_FLAG.$header->{flags};
 
-    # At this time this file will only support V1 signed test containers
-    my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST_V1 $openSigningFlags";
+    # At this time this file will only support V3 signed test containers
+    my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST_V3 $openSigningFlags";
 
     my $componentId = "TESTCONT";
     $CUR_OPEN_SIGN_REQUEST .= " --sign-project-FW-token $componentId ";
