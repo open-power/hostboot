@@ -319,4 +319,16 @@
     <default>FALSE</default>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Specifies presence of legacy mode FW in HW reference image
+      (to support backwards compatbility with older reference images)
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

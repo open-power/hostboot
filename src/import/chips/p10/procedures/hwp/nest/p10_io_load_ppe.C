@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,7 @@ fapi2::ReturnCode p10_io_load_ppe(
     uint8_t* l_memRegsImgDataPtr = NULL;
     uint32_t l_memRegsImgSize = 0;
 
-    FAPI_ASSERT(i_hw_image != NULL ,
+    FAPI_ASSERT(i_hw_image != NULL,
                 fapi2::P10_IO_LOAD_PPE_HW_IMG_ERROR()
                 .set_TARGET(i_target)
                 .set_HW_IMAGE(i_hw_image),
@@ -96,10 +96,22 @@ fapi2::ReturnCode p10_io_load_ppe(
         fapi2::ATTR_PROC_PCIE_FW_VERSION_1_Type l_fw_ver_1 = 0;
         uint8_t* l_iopverImgDataPtr = NULL;
         uint32_t l_iopverImgSize = 0;
+        fapi2::ATTR_PCIE_FW_LEGACY_MODE_Type l_attr_pcie_fw_legacy_mode = fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_FALSE;
+        fapi2::ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG_Type l_attr_pcie_fw_legacy_mode_in_hwimg = 0;
+        p9_xip_section_hw_t l_xram_xip_section = P9_XIP_SECTION_HW_IOPXRAM;
 
-        FAPI_DBG("p10_io_load_ppe: Calling p9_xip_get_section (HW image, IOPXRAM)");
-        FAPI_TRY(p9_xip_get_section(i_hw_image, P9_XIP_SECTION_HW_IOPXRAM, &l_section),
-                 "p10_io_load_ppe: Error from p9_xip_get_section (HW image, IOPXRAM)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCIE_FW_LEGACY_MODE, i_target, l_attr_pcie_fw_legacy_mode));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG, i_target, l_attr_pcie_fw_legacy_mode_in_hwimg));
+
+        if ((l_attr_pcie_fw_legacy_mode == fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_TRUE) &&
+            (l_attr_pcie_fw_legacy_mode_in_hwimg))
+        {
+            l_xram_xip_section = P9_XIP_SECTION_HW_IOPXRAM2;
+        }
+
+        FAPI_DBG("p10_io_load_ppe: Calling p9_xip_get_section (HW image, IOPXRAM section %02X)", l_xram_xip_section);
+        FAPI_TRY(p9_xip_get_section(i_hw_image, l_xram_xip_section, &l_section),
+                 "p10_io_load_ppe: Error from p9_xip_get_section (HW image section %02X).", l_xram_xip_section);
         l_iopxramImgPtr = l_section.iv_offset + (uint8_t*)(i_hw_image);
 
         // from the IOPXRAM image, obtain pointer to iop_fw_ver section to read

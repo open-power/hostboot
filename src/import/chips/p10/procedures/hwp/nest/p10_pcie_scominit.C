@@ -349,9 +349,13 @@ fapi2::ReturnCode p10_load_iop_override(
 
     fapi2::ATTR_PROC_PCIE_FW_VERSION_0_Type l_fw_ver_0 = 0;
     fapi2::ATTR_PROC_PCIE_FW_VERSION_1_Type l_fw_ver_1 = 0;
+    fapi2::ATTR_PCIE_FW_LEGACY_MODE_Type l_attr_pcie_fw_legacy_mode = fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_FALSE;
+    fapi2::ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG_Type l_attr_pcie_fw_legacy_mode_in_hwimg = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_FW_VERSION_0, i_target, l_fw_ver_0));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_FW_VERSION_1, i_target, l_fw_ver_1));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCIE_FW_LEGACY_MODE, i_target, l_attr_pcie_fw_legacy_mode));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG, i_target, l_attr_pcie_fw_legacy_mode_in_hwimg));
 
     FAPI_DBG("FW VERSION 0: %04X", l_fw_ver_0);
     FAPI_DBG("FW VERSION 1: %04X", l_fw_ver_1);
@@ -451,10 +455,15 @@ fapi2::ReturnCode p10_load_iop_override(
             l_data.setBit<63>();
             FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
 
-
-            // write entirety of DIG_ADAPT_CTL_21 = 0x010F
-            l_data = 0x000000000000010FULL;
-            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_21[i], l_data));
+            // selected 'current' FW, or selected 'legacy' FW but running with an old reference image
+            // which does not have this capability
+            if ((l_attr_pcie_fw_legacy_mode == fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_FALSE) ||
+                (l_attr_pcie_fw_legacy_mode_in_hwimg == 0))
+            {
+                // write entirety of DIG_ADAPT_CTL_21 = 0x010F
+                l_data = 0x000000000000010FULL;
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_21[i], l_data));
+            }
         }
     }
 

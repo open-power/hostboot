@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,6 @@ fapi2::ReturnCode p10_load_iop_xram(
     void* const i_hw_image)
 {
     FAPI_DBG("Start");
-    fapi2::ReturnCode l_rc;
     P9XipSection l_section;
     l_section.iv_offset = 0;
     l_section.iv_size = 0;
@@ -74,6 +73,18 @@ fapi2::ReturnCode p10_load_iop_xram(
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PEC>> l_pecChiplets = l_target_mcast.getChildren<fapi2::TARGET_TYPE_PEC>();
 
     fapi2::ATTR_IS_SIMULATION_Type l_attr_is_simulation = 0;
+    fapi2::ATTR_PCIE_FW_LEGACY_MODE_Type l_attr_pcie_fw_legacy_mode = fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_FALSE;
+    fapi2::ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG_Type l_attr_pcie_fw_legacy_mode_in_hwimg = 0;
+    p9_xip_section_hw_t l_xram_xip_section = P9_XIP_SECTION_HW_IOPXRAM;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCIE_FW_LEGACY_MODE, i_target, l_attr_pcie_fw_legacy_mode));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG, i_target, l_attr_pcie_fw_legacy_mode_in_hwimg));
+
+    if ((l_attr_pcie_fw_legacy_mode == fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_TRUE) &&
+        (l_attr_pcie_fw_legacy_mode_in_hwimg))
+    {
+        l_xram_xip_section = P9_XIP_SECTION_HW_IOPXRAM2;
+    }
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_attr_is_simulation));
 
     // Skip load if there are no functional PEC targets on this chip
@@ -84,17 +95,18 @@ fapi2::ReturnCode p10_load_iop_xram(
     }
 
     // Validate HW image
-    FAPI_ASSERT(i_hw_image != NULL ,
+    FAPI_ASSERT(i_hw_image != NULL,
                 fapi2::P10_LOAD_IOP_XRAM_HW_IMG_ERROR()
                 .set_TARGET(i_target)
                 .set_HW_IMAGE(i_hw_image),
                 "p10_load_iop_xram: Invalid HW XIP image");
 
-    // Reference the XRAM image (.xram) section in the HW image
+    // Reference the selected XRAM image section nested in the HW image
     // This is an XIP image nested in the HW image itself
-    FAPI_INF("p10_load_iop_xram: Calling p9_xip_get_section (HW image)");
-    FAPI_TRY(p9_xip_get_section(i_hw_image, P9_XIP_SECTION_HW_IOPXRAM, &l_section),
-             "p10_load_iop_xram: Error from p9_xip_get_section (HW image).");
+
+    FAPI_DBG("p10_load_iop_xram: Calling p9_xip_get_section (HW image, IOPXRAM section %02X)", l_xram_xip_section);
+    FAPI_TRY(p9_xip_get_section(i_hw_image, l_xram_xip_section, &l_section),
+             "p10_load_iop_xram: Error from p9_xip_get_section (HW image section %02X).", l_xram_xip_section);
     l_xramImgPtr = l_section.iv_offset + (uint8_t*)(i_hw_image);
 
     // From the XRAM image, obtain pointers to IOP FW data

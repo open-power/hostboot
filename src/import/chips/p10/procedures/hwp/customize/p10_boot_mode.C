@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -537,6 +537,32 @@ add_plat_features_sbe(
         if (l_attr_pvr_82_mode == fapi2::ENUM_ATTR_PVR_82_MODE_OFF)
         {
             FAPI_TRY(set_bit(i_bvec, P10_PVR_COMPAT_MODE, "P10_PVR_COMPAT_MODE"));
+        }
+    }
+
+    {
+        fapi2::ATTR_PCIE_FW_LEGACY_MODE_Type l_attr_pcie_fw_legacy_mode = fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_FALSE;
+        fapi2::ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG_Type l_attr_pcie_fw_legacy_mode_in_hwimg = 0;
+
+        // common mechanism to track presence of HW image content
+        if (test_bit_in_range(i_img_bvec, IOP_LEGACY))
+        {
+            l_attr_pcie_fw_legacy_mode_in_hwimg = 1;
+        }
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PCIE_FW_LEGACY_MODE, i_target_proc, l_attr_pcie_fw_legacy_mode));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PCIE_FW_LEGACY_MODE_IN_HWIMG, i_target_proc, l_attr_pcie_fw_legacy_mode_in_hwimg));
+
+        if (l_attr_pcie_fw_legacy_mode == fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_TRUE)
+        {
+            if (l_attr_pcie_fw_legacy_mode_in_hwimg)
+            {
+                FAPI_TRY(set_bit(i_bvec, IOP_LEGACY, "IOP_LEGACY"));
+            }
+            else
+            {
+                FAPI_INF("Unable to set IOP_LEGACY, feature unsupported by HW reference image");
+            }
         }
     }
 
