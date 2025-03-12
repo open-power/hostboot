@@ -1217,10 +1217,10 @@ sub manipulateImage
             {
                 $callerHwHdrFields{configure} = 1;
                 create_sb_key_transition_container($tempImages{PAD_PHASE});
-                setV3HdrCntrSize(\%callerHwHdrFields, $tempImages{PAD_PHASE});
+                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
 
                 create_sb_key_transition_container($tempImages{PAD_PHASE_V3});
-                setV3HdrCntrSize(\%callerHwHdrFields, $tempImages{PAD_PHASE_V3});
+                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE_V3});
             }
             else
             {
@@ -1981,30 +1981,6 @@ sub convertEyecatchToCompId
     my $componentId = substr($eyeCatcher,0,$finalLen);
 
     return $componentId;
-}
-
-################################################################################
-# setV3HdrCntrSize
-#       Sets the caller hardware header total container size field for V3
-#       headers
-################################################################################
-sub setV3HdrCntrSize
-{
-    my ($i_callerHwHdrFields, $i_file) = @_;
-
-    if($i_callerHwHdrFields->{configure})
-    {
-        # If not already explicitly set, compute total container size
-        if(!$i_callerHwHdrFields->{totalContainerSize})
-        {
-            $i_callerHwHdrFields->{totalContainerSize}
-                = -s $i_file;
-            die  "Could not determine size of file $i_file; errno = $!" unless
-                    defined($i_callerHwHdrFields->{totalContainerSize});
-        }
-        my $callerContainerSize = sprintf("%016llX",$i_callerHwHdrFields->{totalContainerSize});
-        run_command( "echo \"$callerContainerSize\" | xxd -r -ps -seek 6 - $i_file");
-    }
 }
 
 ################################################################################

@@ -819,30 +819,11 @@ void ContainerHeader::parseFlags()
 #ifndef __HOSTBOOT_RUNTIME
 void ContainerHeader::genHwKeyHash()
 {
-    // Need to be V1 or V3 specific to generate the correct hash across the
-    // container's HW Keys
-    auto l_hw_key_a_ptr = (iv_isV3 == true)
-                          ? iv_v3_headerInfo.v3_hw_hdr.hw_pkey_a //V3
-                          : (void*)&iv_headerInfo.hw_hdr.hw_pkey_a; // V1
-
-    auto l_totalHwKeysSize = (iv_isV3 == true)
-                             ? v3_totalHwKeysSize // V3
-                             : totalHwKeysSize; // V1
-
-    auto l_mode = (iv_isV3 == true)
-                  ? TARGETING::SB_SIGNING_V3_CONTAINER // V3
-                  : TARGETING::SB_SIGNING_V1_CONTAINER; // V1
+    // @TODO JIRA:PFHB-680 Update SECUREBOOT::hashBlob for V3 hash algorithm
 
     // Generate and store hw hash key
-    SECUREBOOT::hashBlob(l_hw_key_a_ptr,
-                         l_totalHwKeysSize,
-                         iv_hwKeyHash,
-                         l_mode);
-
-    TRACUCOMP(g_trac_secure, "ContainerHeader::genHwKeyHash: "
-              "l_totalHwKeysSize=0x%X l_mode=0x%X hash=0x%.8X",
-              l_totalHwKeysSize, l_mode,
-              sha512_to_u32(iv_hwKeyHash));
+    SECUREBOOT::hashBlob(&iv_headerInfo.hw_hdr.hw_pkey_a,
+                         totalHwKeysSize, iv_hwKeyHash);
 
     TRACDBIN(g_trac_secure, "ContainerHeader::genHwKeyHash:",
              iv_hwKeyHash, sizeof(iv_hwKeyHash));
