@@ -110,22 +110,8 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-#ifndef __PPE__
-        // Suspend DQS drift tracking
-        FAPI_TRY(mss::ody::suspend_dqs_track(i_target_ocmb),
-                 GENTARGTIDFORMAT " Failed to suspend DQS drift tracking",
-                 GENTARGTID(i_target_ocmb));
-#endif
-
         FAPI_TRY( mss::ody::row_repair::deploy_mapped_repairs(i_target_ocmb, l_row_repairs, MAINT_REPAIR),
                   "Failed to deploy maint repairs from repair map for " GENTARGTIDFORMAT,  GENTARGTID(i_target_ocmb) );
-
-#ifndef __PPE__
-        // Resume DQS drift tracking
-        FAPI_TRY(mss::ody::resume_dqs_track(i_target_ocmb),
-                 GENTARGTIDFORMAT " Failed to resume DQS drift tracking",
-                 GENTARGTID(i_target_ocmb));
-#endif
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -173,8 +159,22 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
+#ifndef __PPE__
+        // Suspend DQS drift tracking
+        FAPI_TRY(mss::ody::suspend_dqs_track(i_target_ocmb),
+                 GENTARGTIDFORMAT " Failed to suspend DQS drift tracking",
+                 GENTARGTID(i_target_ocmb));
+#endif
+
         FAPI_TRY( mss::ody::row_repair::deploy_mapped_repairs(i_target_ocmb, l_row_repairs, RUNTIME_REPAIR),
                   "Failed to deploy repairs from repair map for " GENTARGTIDFORMAT, GENTARGTID(i_target_ocmb));
+
+#ifndef __PPE__
+        // Resume DQS drift tracking
+        FAPI_TRY(mss::ody::resume_dqs_track(i_target_ocmb),
+                 GENTARGTIDFORMAT " Failed to resume DQS drift tracking",
+                 GENTARGTID(i_target_ocmb));
+#endif
 
     fapi_try_exit:
         return fapi2::current_err;
