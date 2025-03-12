@@ -185,9 +185,8 @@ namespace Bootloader{
                sizeof(l_system_hash));
         uint8_t l_system_min_version = g_blData->blToHbData.min_secure_version;
         uint8_t l_mode = g_blData->blToHbData.sb_signing_mode;
-        uint8_t l_bd = g_blData->blToHbData.secBackdoorBit;
 
-        bl_console::putString("\rSettings: SAB: 0x");
+        bl_console::putString("\rSystem Settings: SAB: 0x");
         bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_SAB),
                                sizeof(l_SAB));
         bl_console::putString(", Hash: 0x");
@@ -199,9 +198,6 @@ namespace Bootloader{
         bl_console::putString(", Mode: 0x");
         bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_mode),
                                sizeof(l_mode));
-        bl_console::putString(", BD: 0x");
-        bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_bd),
-                               sizeof(l_bd));
         bl_console::putString("\r\n");
     }
 
@@ -376,7 +372,6 @@ namespace Bootloader{
         // Terminate if a valid securerom is not present
         else if ( !g_blData->secureRomValid )
         {
-            bl_console::putString("SecureRom Invalid\r\n");
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_INVALID_SECROM);
             /*@
              * @errortype

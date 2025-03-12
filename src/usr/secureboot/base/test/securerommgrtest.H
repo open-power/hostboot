@@ -168,17 +168,16 @@ class SecureRomManagerTest : public CxxTest::TestSuite
     }
 
     /**
-     * @brief Secure ROM Test - Test sha512 hash and sha3 hash
+     * @brief Secure ROM Test - Test sha512 hash
      */
-    void test_hash(void)
+    void test_sha512(void)
     {
-        TRACUCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_hash>");
+        TRACUCOMP(g_trac_secure,ENTER_MRK"SecureRomManagerTest::test_sha512>");
 
         // Constants for sha512 test
         const sha2_byte l_text[]={"The quick brown fox jumps over the lazy dog"};
         // Do not include NULL character in sha512 test
         size_t l_textSize = 43;
-        // These are the expected answers:
         const uint64_t l_textHash[] =
         {
             0x07E547D9586F6A73,
@@ -191,74 +190,17 @@ class SecureRomManagerTest : public CxxTest::TestSuite
             0xA0538F3DB854FEE6
         };
 
-        const uint64_t l_textHash_sha3[] =
-        {
-            0x01dedd5de4ef1464,
-            0x2445ba5f5b97c15e,
-            0x47b9ad931326e4b0,
-            0x727cd94cefc44fff,
-            0x23f07bf543139939,
-            0xb49128caf436dc1b,
-            0xdee54fcb24023a08,
-            0xd9403f9b4bf0d450
-        };
-
-
         // Result hash
         SHA512_t l_resultHash = {0};
-        SECUREBOOT::hashBlob(&l_text, l_textSize, l_resultHash,
-        // SHA512 is the V1 hash routine, so always pass in this argument
-        SB_SIGNING_V1_CONTAINER);
+        SECUREBOOT::hashBlob(&l_text, l_textSize, l_resultHash);
 
         // Ensure calculated result matches expected result
         if (memcmp(l_textHash, l_resultHash, SHA512_DIGEST_LENGTH) != 0)
         {
-            TS_FAIL("SecureRomManagerTest::test_hash: sha512 hashBlob() Failed");
-
-            // Debug info for the fail
-            TRACFBIN(g_trac_secure,
-                     "SecureRomManagerTest::test_hash: l_text",
-                     &l_text,
-                     l_textSize);
-
-            TRACFBIN(g_trac_secure,
-                     "SecureRomManagerTest::test_hash: sha512: l_textHash",
-                     l_textHash,
-                     SHA512_DIGEST_LENGTH);
-
-            TRACFBIN(g_trac_secure,
-                     "SecureRomManagerTest::test_hash: sha512: l_resultHash",
-                     l_resultHash,
-                     SHA512_DIGEST_LENGTH);
+            TS_FAIL("SecureRomManagerTest::test_sha512: hashBlob() Failed");
         }
 
-
-        SECUREBOOT::hashBlob(&l_text, l_textSize, l_resultHash,
-        // SHA3 is the V3 hash routine, so always pass in this argument
-        SB_SIGNING_V3_CONTAINER);
-
-        if (memcmp(l_textHash_sha3, l_resultHash, SHA3_DIGEST_LENGTH) != 0)
-        {
-            TS_FAIL("SecureRomManagerTest::test_hash: sha3 hashBlob() Failed");
-
-            // Debug info for the fail
-            TRACFBIN(g_trac_secure,
-                     "SecureRomManagerTest::test_hash: l_text",
-                     &l_text,
-                     l_textSize);
-
-            TRACFBIN(g_trac_secure,
-                     "SecureRomManagerTest::test_hash: l_textHash_sha3",
-                     l_textHash_sha3,
-                     SHA3_DIGEST_LENGTH);
-
-            TRACFBIN(g_trac_secure,
-                     "SecureRomManagerTest::test_hash: sha3: l_resultHash",
-                     l_resultHash,
-                     SHA3_DIGEST_LENGTH);
-        }
-
-        TRACUCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_hash");
+        TRACUCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_sha512");
     }
 
     /**

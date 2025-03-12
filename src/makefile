@@ -81,14 +81,12 @@ BOOTLDR_OBJECTS += p10_spi_clear_status_errors.o
 BOOTLDR_OBJECTS += hbbl_plat_attribute_service.o
 
 SECUREROM_OBJECTS += ROM.o
-SECUREROM_OBJECTS += ROM_v3.o
 SECUREROM_OBJECTS += ecverify.o
 SECUREROM_OBJECTS += hw_utils.o
 SECUREROM_OBJECTS += sha512.o
 SECUREROM_OBJECTS += string_utils.o
 SECUREROM_OBJECTS += rom_entry.o
 SECUREROM_OBJECTS += secureromasm.o
-SECUREROM_OBJECTS += keccak.o
 
 DIRECT_BOOT_OBJECTS += start.o
 DIRECT_BOOT_OBJECTS += kernel.o

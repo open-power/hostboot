@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/securerom/keccak.H $                              */
+/* $Source: src/include/securerom/keccak.h $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -25,5 +25,5 @@
 
 #ifndef __KECCAK_H
 #define __KECCAH_H
-#include <securerom/contrib/keccak.H>
+#include <securerom/contrib/v3_mlca/qsc/crystals/keccak.h>
 #endif

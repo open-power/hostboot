@@ -51,14 +51,12 @@
 /*                                                                        */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// This file was modified from the ekb version of this file used by
-// the processor SBE code for sha3/v3 verification
-#ifndef SHA3_H
-#define SHA3_H
+/* EKB-Mirror-To: hw/ppe                                                  */
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
-#include <securerom/keccak.H>
+#include <securerom/keccak.h>
 #include <securerom/ecverify.H>
 #include <string.h>
 
@@ -81,8 +79,11 @@ typedef Keccak_state sha3_ctx_t;
  * @param c Pointer to SHA3-512 context
  * @return int true always
  */
-extern "C"
-int sha3_init(sha3_ctx_t* c);
+static inline int sha3_init(sha3_ctx_t* c)
+{
+    sha3_512_init(c);
+    return 1;
+}
 
 /**
  * @brief Stream like interface for sha3-512 .
@@ -93,8 +94,11 @@ int sha3_init(sha3_ctx_t* c);
  * @param len length og the data to be hashed
  * @return int true always
  */
-extern "C"
-int sha3_update(sha3_ctx_t* c, const void* data, size_t len);
+static inline int sha3_update(sha3_ctx_t* c, const void* data, size_t len)
+{
+    sha3_512_update(c, data, len);
+    return 1;
+}
 
 /**
  * @brief finalize and output a hash
@@ -103,8 +107,11 @@ int sha3_update(sha3_ctx_t* c, const void* data, size_t len);
  * @param c Pointer to SHA3-512 context
  * @return int true always
  */
-extern "C"
-int sha3_final(sha3_t* md, sha3_ctx_t* c);
+static inline int sha3_final(sha3_t* md, sha3_ctx_t* c)
+{
+    sha3_512_final((uint8_t*)md, c);
+    return 1;
+}
 
 /**
  * @brief compute a sha3 hash (md) of given byte length from "in"
@@ -115,7 +122,10 @@ int sha3_final(sha3_t* md, sha3_ctx_t* c);
  * @param mdlen Length of the message hash
  * @return void* Hash of the message
  */
-extern "C"
-void* sha3(const void* in, size_t inlen, void* md, int mdlen = SHA3_DIGEST_LENGTH);
-
-#endif
+static inline void* sha3(const void* in, size_t inlen, void* md, int mdlen = SHA3_DIGEST_LENGTH)
+{
+    sha3_t digest;
+    sha3_512(digest, (const uint8_t*)in, inlen);
+    memcpy(md, digest, ((mdlen > SHA3_DIGEST_LENGTH) ? SHA3_DIGEST_LENGTH : mdlen));
+    return md;
+}

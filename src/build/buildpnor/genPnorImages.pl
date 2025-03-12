@@ -48,8 +48,8 @@ use constant BASE_IMAGE_INSTRUCTION_START_STACK_POINTER => 0x0000000008280000;
 use constant MAX_COMP_ID_LEN => 8;
 
 # @HBBL_SIZE_SYNC@
-# Max logical HBBL content size is 40K
-my $MAX_HBBL_SIZE = 40960;
+# Max logical HBBL content size is 32K
+my $MAX_HBBL_SIZE = 32768;
 
 # Jail command for yocto froot
 my $jailcmd = "";

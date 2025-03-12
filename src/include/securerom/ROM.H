@@ -330,10 +330,6 @@ extern void ROM_sreset (void);
 extern "C" ROM_response ROM_verify (ROM_container_raw* container,
                                     ROM_hw_params* params);
 
-extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
-                                       ROM_hw_params* params);
-
-
 /************************* END OF ORIGINAL ROM CODE ***************************/
 
 /* Offsets relative to branchtable start to call functions in SecureROM code.
@@ -342,9 +338,6 @@ extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
    E.g.
     0000000000000040 <_SHA512_Hash>:
     0000000000000050 <_ROM_verify>:
-    0000000000000070 <_sha3>:
-    0000000000000078 <_ROM_v3_verify>:
-
 
     Search for branchtableoffset
     0000000000000010 <branchtableoffset>:
@@ -354,17 +347,12 @@ extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
     Subtraction (0x28) results in relative offset from branch table start
     0000000000000018 <_SHA512_Hash>:
     0000000000000028 <_ROM_verify>:
-    0000000000000048 <_sha3>:
-    0000000000000050 <_ROM_v3_verify>:
-
 
    Note: If the SecureRomInfo change size, these will be affected.
          See src/securerom/secureromasm.S for more info.
 */
 #define SHA512_HASH_FUNCTION_OFFSET 0x18
 #define ROM_VERIFY_FUNCTION_OFFSET 0x28
-#define SHA3_HASH_FUNCTION_OFFSET 0x48
-#define ROM_V3_VERIFY_FUNCTION_OFFSET 0x50
 
 // Version info at SECUREROM_VERSION_STRUCTURE_OFFSET
 // - [8 bytes] - eyeCatch
@@ -386,8 +374,7 @@ const uint64_t SECROM_EYECATCHER = 0x23534543524F4D00; // #SECROM\0
 enum SecureRomInfoVersion
 {
     // [release:4][version:4]
-    // moving release to 0xB for P11 V3 support
-    SECUREROM_INFO_VER3 = 0x0000000B00000001
+    SECUREROM_INFO_ADDED = 0x0000000900000001
 };
 
 /**
@@ -401,7 +388,7 @@ inline bool secureRomInfoValid (const SecureRomInfo * i_secureRomInfo)
 {
     // Ensure EyeCatch and Version are valid
     return (i_secureRomInfo->eyeCatch == SECROM_EYECATCHER) &&
-           (i_secureRomInfo->version >= SECUREROM_INFO_VER3);
+           (i_secureRomInfo->version >= SECUREROM_INFO_ADDED);
 }
 
 // Need this for the following definition
@@ -442,36 +429,6 @@ ROM_response call_rom_verify(void*, const ROM_container_raw*, ROM_hw_params*);
  */
 void call_rom_SHA512(void*, const sha2_byte *, size_t, SHA512_t*);
 
-
-/**
- * @brief Call rom verify code against system hash keys
- *
- * @param[in] void*                 Address of function offset into Secure ROM
- * @param[in] ROM_v3_container_raw* Pointer to effective address of container
- * @param[in/out] ROM_hw_params*  HW params to pass in (including HW keys' hash)
- *                               Additionally, the secure version used to check
- *                               against the container's fw secure version is
- *                               passed in via the HW params log; and then the
- *                               error information is written to
- *                               the HW params log.
- *
- * @return ROM_response ROM_DONE on sucess ROM_FAILURE otherwise
- */
-ROM_response call_rom_v3_verify(void*, const ROM_v3_container_raw*, ROM_hw_params*);
-
-/**
- * @brief Call rom SHA3 code
- *
- * @param[in] void*            Address of function offset into Secure ROM
- * @param[in] sha2_byte*       Pointer to effective address of blob to hash
- * @param[in] size_t           Size of blob to hash
- * @param[in/out] SHA512_t*    Pointer to resulting hash value
- *
- * @return N/A
- */
-void call_rom_SHA3(void*, const void *, size_t, sha3_t*);
-
-
 #ifdef __cplusplus
 }
 #endif
@@ -503,7 +460,6 @@ static_assert(V1_MAX_SECURE_HEADER_SIZE == PAGESIZE,
 constexpr uint16_t ROM_V3_VERSION = 3;
 constexpr uint8_t  ROM_V3_HASH_ALG = 2;
 constexpr uint8_t  ROM_V3_SIG_ALG = 3;
-constexpr uint8_t  V3_HW_KEY_COUNT = 2;
 constexpr uint8_t  V3_SW_KEY_COUNT = 2;
 constexpr size_t   V3_SECURE_HEADER_SIZE = 15360;
 // Sum of Secure header size V1 + V3, using truncated V1 Size
@@ -557,16 +513,11 @@ struct sb_flags_t
 typedef uint32_t sbFuncType_t;
 /**
  *  @brief Secure Boot function types
- *         These values are defined in the Hypervisor Interface Data
- *         Specifications (aka HDAT spec)
- *         v11.00 added the values for SHA3 and MLDSA
  */
 enum SB_FUNC_TYPES : sbFuncType_t
 {
-    SHA512 = 0x0000,    // SHA512 hash function
-    ECDSA521 = 0x0001,  // ECDSA 521 verification function
-    SHA3 = 0x0002,      // SHA3 hash function
-    MLDSA = 0x0003,     // Quantum safe v3 verification function
+    SHA512 = 0x0000,
+    ECDSA521 = 0x0001,
     MAX_TYPES,
     SB_FUNC_TYPES_INVALID = 0xFFFF
 };
@@ -576,10 +527,7 @@ enum SB_FUNC_TYPES : sbFuncType_t
  */
 typedef uint32_t sbFuncVer_t;
 /**
- *  @brief Secure Boot function type versions as defined in the
- *         Hypervisor Interface Data Specifications (aka HDAT spec)
- *         Currently all versions are set to 1.  They will only be incremented
- *         if there is a need to track an update to one of the functions.
+ *  @brief Secure Boot function type versions
  */
 enum SB_FUNC_VERS : sbFuncVer_t
 {
@@ -591,12 +539,6 @@ enum SB_FUNC_VERS : sbFuncVer_t
 
     // ECDSA521 function definition(s) per version
     ECDSA521_INIT = 0x0001, // ROM_response call_rom_verify(void*, const ROM_container_raw*, ROM_hw_params*);
-
-    // SHA3 Hash function definition(s) per version
-    SHA3_INIT = 0x0001, // void call_rom_SHA3(void*, const void *, size_t, SHA3_t*);
-
-    // MLDSA function definition(s) per version
-    MLDSA_INIT = 0x0001, // ROM_response call_rom_v3_verify(void*, const ROM_container_raw*, ROM_hw_params*);
 };
 
 /**

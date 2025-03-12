@@ -89,11 +89,6 @@ class SecureRomManager
          *                          [default = SB_SIGNING_SYSTEM_CONTAINER, use
          *                          whatever version the system is using to IPL;
          *                          otherwise, use i_signMode]
-         *                          SB_SIGNING_V1_CONTAINER will call the
-         *                          sha512_t hash algorithm
-         *                          SB_SIGNING_V3_CONTAINER will call the
-         *                          sha3_t hash algorithm
-         *
          * @return N/A
          */
         void hashBlob(const void * i_blob,
@@ -105,12 +100,8 @@ class SecureRomManager
          * @brief Retrieve the internal hardware keys' hash from secure ROM
          *        object.
          *
-         * @param[out] o_hash  Reference to the SHA512_t (for a V1 header) or
-         *                     the sha3_t array (for a V3 header) to copy the
+         * @param[out] o_hash  Reference to the SHA512_t array to copy the
          *                     hash to.
-         *                     NOTE: that the size of a SHA512_t and sha3_t are
-         *                     the same size and confirmed with static_asserts
-         *                     in ROM.H.
          */
         void getHwKeyHash(SHA512_t o_hash);
 
@@ -131,16 +122,10 @@ class SecureRomManager
          *                         pointer to effective address and size
          *                         of the blob to concatenate
          * @param[out] o_buf       SHA512 hash
-         * @param[in]  i_signMode  Specifies hash algorithm (aka version,
-         *                         like V1 or V3) to use. Will assert if it
-         *                         doesn't get 1 of these 3 options:
-         *                         (1) SB_SIGNING_SYSTEM_CONTAINER (default)
-         *                         use whatever version the system is using to IPL;
-         *                         (2) SB_SIGNING_V1_CONTAINER
-         *                         use V1 (aka sha512) hash algorighm
-         *                         (3) SB_SIGNING_V3_CONTAINER
-         *                         use V3 (aka sha3) hash algorithm
-         *
+         * @param[in] i_signMode   Specifies version (like V1 or V3) of i_container
+         *                         [default = SB_SIGNING_SYSTEM_CONTAINER, use
+         *                         whatever version the system is using to IPL;
+         *                         otherwise, use i_signMode]
          * @return N/A
          */
         void hashConcatBlobs (const blobPair_t &i_blobs,
@@ -176,9 +161,7 @@ class SecureRomManager
                            iv_secureromValid(false),
                            iv_key_hash(nullptr),
                            iv_curSHA512Ver(SB_FUNC_VERS::SHA512_INIT),
-                           iv_curECDSA521Ver(SB_FUNC_VERS::ECDSA521_INIT),
-                           iv_curSHA3Ver(SB_FUNC_VERS::SHA3_INIT),
-                           iv_curMLDSAVer(SB_FUNC_VERS::MLDSA_INIT) {}
+                           iv_curECDSA521Ver(SB_FUNC_VERS::ECDSA521_INIT) {}
 
         /**
          * @brief Destructor
@@ -224,13 +207,6 @@ class SecureRomManager
 
         // ECDSA521 function version
         sbFuncVer_t iv_curECDSA521Ver;
-
-        // SHA3 function version
-        sbFuncVer_t iv_curSHA3Ver;
-
-        // MLDSA function version
-        sbFuncVer_t iv_curMLDSAVer;
-
 
         /********************************************
          * Private Functions

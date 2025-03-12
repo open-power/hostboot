@@ -85,11 +85,4 @@ typedef unsigned long int   uintptr_t;
 // add intmax_t support
 typedef long int            intmax_t;
 typedef unsigned long int   uintmax_t;
-
-// Since C++11
-// Needed for sha3() hash function implementation in keccak.H/C
-#ifndef UINT64_C
-#  define UINT64_C(value)   value##uLL
-#endif
-
 #endif

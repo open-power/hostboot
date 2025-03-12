@@ -39,8 +39,8 @@
 .set HBBL_END_ADDRESS,    end_load_address
 
 # @HBBL_SIZE_SYNC@
-# Should be HBBL_MAX_SIZE + 12K (0xD000 currently)
-.set HBBL_DATA_ADDR_OFFSET,      0x0000D000 ;// offset of external data
+# Should be HBBL_MAX_SIZE + 12K (0xB000 currently)
+.set HBBL_DATA_ADDR_OFFSET,      0x0000B000 ;// offset of external data
 
 # @sync_ti_area_size if bl_TIDataArea moves from the start of blData struct,
 # HBBL_TI_OFFSET will need to be updated to the new offset of the TI Data.
