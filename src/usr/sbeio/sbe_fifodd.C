@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -780,7 +780,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target    *i_target,
             std::vector<uint8_t> l_ffdc;
 
             o_fifoBuffer.getFFDCData(l_ffdc);
-            l_ffdc_parser.parseFFDCData(l_ffdc.data());
+            l_ffdc_parser.parseFFDCData(l_ffdc.data(), i_target);
 
             /*@
              * @errortype

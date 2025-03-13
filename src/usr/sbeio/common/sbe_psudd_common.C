@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -527,7 +527,7 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
             if(l_ffdcPkg != NULL)
             {
                 SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-                l_ffdc_parser->parseFFDCData(l_ffdcPkg);
+                l_ffdc_parser->parseFFDCData(l_ffdcPkg, i_target);
                 uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
                 uint8_t i;
                 for(i = 0; i < l_pkgs; i++)
@@ -810,7 +810,7 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
                 else
                 {
                     SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-                    l_ffdc_parser->parseFFDCData(l_ffdcPkg);
+                    l_ffdc_parser->parseFFDCData(l_ffdcPkg, i_target);
                     uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
                     uint8_t i;
                     for(i = 0; i < l_pkgs; i++)
@@ -1084,7 +1084,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                 if(l_ffdcPkg != NULL)
                 {
                     SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-                    l_ffdc_parser->parseFFDCData(l_ffdcPkg);
+                    l_ffdc_parser->parseFFDCData(l_ffdcPkg, i_target);
                     uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
                     for(uint8_t i=0; i < l_pkgs; i++)
                     {

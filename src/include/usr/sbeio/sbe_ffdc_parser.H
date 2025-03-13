@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,8 +53,9 @@ struct ffdc_package
     // For P10, this will always be ERRL_SEV_UNRECOVERABLE since those SBE packages do not have this field and
     // historically that was the only severity used.
     ERRORLOG::errlSeverity_t severity;
+    bool           skipParsingFFDC; // The FFDC format is not supported and parsing should be skipped
 
-    ffdc_package() : ffdcPtr(nullptr), rc(0), size(0), slid(0), severity(ERRORLOG::ERRL_SEV_UNRECOVERABLE)
+    ffdc_package() : ffdcPtr(nullptr), rc(0), size(0), slid(0), severity(ERRORLOG::ERRL_SEV_UNRECOVERABLE), skipParsingFFDC(false)
     { };
 
     ~ffdc_package() { };
@@ -96,9 +97,10 @@ class SbeFFDCParser
         /**
          * @brief Parses the FFDC data package
          *  @param[in]  i_ffdcPackageBuffer Memory buffer contains FFDC package
+         *  @param[in]  i_target            The OCMB/Proc the SBE FFDC data originated from.
          *
          */
-        void parseFFDCData(void * i_ffdcPackageBuffer);
+        void parseFFDCData(void * i_ffdcPackageBuffer, TARGETING::TargetHandle_t i_target);
 
         /**
          * @brief Returns number of FFDC packages found
@@ -192,18 +194,20 @@ class SbeFFDCParser
 
         /**
          * @brief Store the data words found in FFDC package
-         *  @param[in]  i_ffdcPackage   FFDC package to store
-         *  @param[in]  i_rc            the RC word
-         *  @param[in]  i_packageLen    length of package
-         *  @param[in]  i_slid          SBE Log Id. For P10, 0 as it does not exist.
-         *  @param[in]  i_sev           fapi2::errlSeverity from FFDC package. For P10, does not exist.
+         *  @param[in]  i_ffdcPackage       FFDC package to store
+         *  @param[in]  i_rc                the RC word
+         *  @param[in]  i_packageLen        length of package
+         *  @param[in]  i_slid              SBE Log Id. For P10, 0 as it does not exist.
+         *  @param[in]  i_sev               fapi2::errlSeverity from FFDC package. For P10, does not exist.
+         *  @param[in]  i_skipParsingFFDC   The FFDC is an unsupported format and should not be processed.
          */
 
         void addFFDCPackage(void * i_ffdcPackage,
                             uint32_t i_rc,
                             uint32_t i_packageLen,
                             uint16_t i_slid,
-                            uint8_t  i_sev);
+                            uint8_t  i_sev,
+                            bool i_skipParsingFFDC);
 
 };
 
