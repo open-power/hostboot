@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,7 @@ public:
         TS_TRACE("ffdcParserTest test 1 - no data");
 
         SBEIO::SbeFFDCParser l_ffdc_parser;
-        l_ffdc_parser.parseFFDCData(&data);
+        l_ffdc_parser.parseFFDCData(&data, nullptr);
 
         l_num = l_ffdc_parser.getTotalPackages();
         if(l_num != 0)
@@ -100,7 +100,7 @@ public:
         TS_TRACE("ffdcParserTest test 2 - 1 package, 1 word data");
 
         SBEIO::SbeFFDCParser l_ffdc_parser;
-        l_ffdc_parser.parseFFDCData(&data);
+        l_ffdc_parser.parseFFDCData(&data, nullptr);
 
         l_num = l_ffdc_parser.getTotalPackages();
         if(l_num != 1)
@@ -147,7 +147,7 @@ public:
         TS_TRACE("ffdcParserTest test 3 - 1 package, 2 word data");
 
         SBEIO::SbeFFDCParser l_ffdc_parser;
-        l_ffdc_parser.parseFFDCData(&data);
+        l_ffdc_parser.parseFFDCData(&data, nullptr);
 
         l_num = l_ffdc_parser.getTotalPackages();
         if(l_num != 1)
@@ -200,7 +200,7 @@ public:
         TS_TRACE("ffdcParserTest test 4 - 2 packages, 2 word data");
 
         SBEIO::SbeFFDCParser l_ffdc_parser;
-        l_ffdc_parser.parseFFDCData(&data);
+        l_ffdc_parser.parseFFDCData(&data, nullptr);
 
         l_num = l_ffdc_parser.getTotalPackages();
         if(l_num != 2)
@@ -253,7 +253,7 @@ public:
         TS_TRACE("ffdcParserTest test 5 - 2 packages, bad 2nd magic byte");
 
         SBEIO::SbeFFDCParser l_ffdc_parser;
-        l_ffdc_parser.parseFFDCData(&data);
+        l_ffdc_parser.parseFFDCData(&data, nullptr);
         l_num = l_ffdc_parser.getTotalPackages();
         if(l_num != 1)
         {
@@ -300,7 +300,7 @@ public:
         TS_TRACE("ffdcParserTest test 6 - 1 ODYSSEY package");
 
         SBEIO::SbeFFDCParser l_ffdc_parser;
-        l_ffdc_parser.parseFFDCData(&data[0]);
+        l_ffdc_parser.parseFFDCData(&data[0], nullptr);
         l_numPackages = l_ffdc_parser.getTotalPackages();
         if(l_numPackages != 1)
         {
@@ -359,7 +359,7 @@ public:
                  l_totalNumPackages);
 
         SBEIO::SbeFFDCParser l_ffdc_parser;
-        l_ffdc_parser.parseFFDCData(&data[0]);
+        l_ffdc_parser.parseFFDCData(&data[0], nullptr);
         l_numPackages = l_ffdc_parser.getTotalPackages();
         if((l_numPackages + 1) != l_totalNumPackages)
         {
@@ -541,7 +541,7 @@ public:
         };
 
         SBEIO::SbeFFDCParser ffdcParser;
-        ffdcParser.parseFFDCData(&odyPackage[0]);
+        ffdcParser.parseFFDCData(&odyPackage[0], nullptr);
         size_t numPackages = ffdcParser.getTotalPackages();
         if (numPackages != expected.size())
         {

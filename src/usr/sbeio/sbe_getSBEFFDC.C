@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,7 +96,7 @@ namespace SBEIO
         l_fifoResponse.getFFDCData(l_ffdc);
 
         auto l_ffdcParser = std::make_shared<SbeFFDCParser>();
-        l_ffdcParser->parseFFDCData(l_ffdc.data());
+        l_ffdcParser->parseFFDCData(l_ffdc.data(), i_chipTarget);
 
         /*@
          * @errortype

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1373,7 +1373,7 @@ void ProcSbeRetryHandler::sbe_get_ffdc_handler()
         auto l_ffdc_parser = std::make_shared<SbeFFDCParser>();
         std::vector<uint8_t> l_ffdc;
         l_pFifoResponse.getFFDCData(l_ffdc);
-        l_ffdc_parser->parseFFDCData(l_ffdc.data());
+        l_ffdc_parser->parseFFDCData(l_ffdc.data(), iv_proc);
 
         uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
 

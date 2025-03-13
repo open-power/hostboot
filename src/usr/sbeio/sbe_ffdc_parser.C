@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,14 +108,31 @@ SbeFFDCParser::~SbeFFDCParser()
  *     byte 0-3: FFDC Word 0
  * Word N:
  *     byte 0-3: FFDC Word N
+ *
+ * Odyssey Golden side FFDC package does not match
+ * SBE Interface Specifications so we skip FFDC parsing:
+ * Word 0:
+ *     byte 0,1: Magic Byte: 0xFFDC
+ *     byte 2,3: Length in words (N + 4)
+ * Word 1:
+ *     byte 0,1: Sequence Id
+ *     byte 2  : Command Class
+ *     byte 3  : Command
+ * Word 2:
+ *     byte 0-3: Return Code
+ * Word 3:
+ *     byte 0-3: FFDC Word 0
+ * Word N:
+ *     byte 0-3: FFDC Word N
  */
-void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
+void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer, TARGETING::TargetHandle_t i_target)
 {
     uint16_t l_magicByte = 0x00;
     size_t   i           = 0; // offset into the buffer
     errlHndl_t errl      = nullptr;
     uint8_t * ffdcPackageBuffer = static_cast<uint8_t *>(i_ffdcPackageBuffer);
     bool shouldSortBySlid = false;
+    bool l_goldenOdyssey = false;
 
     SBE_TRACF(ENTER_MRK "parseFFDCData");
     // Clear the internal vector of packages. If this function gets called more than once for any reason, we don't want
@@ -141,18 +158,30 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                 // For Odyssey, collect the SLID and severity
                 // Get the SLID from the package header. Word 2.
                 slid = UtilByte::bufferTo16uint(ffdcPackageBuffer
-                                               + i
-                                               + SLID_OFFSET);
+                                                + i
+                                                + SLID_OFFSET);
                 SBE_TRACF("parseFFDCData> Found odyssey slid %d",slid);
 
                 // Get the log severity by advancing past the SLID. They are in the same word.
                 severity = *(ffdcPackageBuffer
-                             + i
-                             + SLID_OFFSET
-                             + sizeof(uint16_t)); // Slid size
+                                + i
+                                + SLID_OFFSET
+                                + sizeof(uint16_t)); // Slid size
+            }
+            else
+            {
+                // Determine if this is the Odyssey FFDC format from the golden side code
+                // i_target should only be nullptr during test cases
+                if(i_target != nullptr &&
+                    i_target->getAttr<TARGETING::ATTR_TYPE>()==TARGETING::TYPE_OCMB_CHIP &&
+                    i_target->getAttr<TARGETING::ATTR_SPPE_BOOT_SIDE>() == TARGETING::SPPE_BOOT_SIDE_GOLDEN )
+                {
+                    SBE_TRACF("parseFFDCData> booted from Golden side");
+                    l_goldenOdyssey = true;
+                }
             }
 
-            // P10 and Odyssey header sizes are different from one another. Have to account for that in the
+            // P10/Odyssey Golden and Odyssey header sizes are different from one another. Have to account for that in the
             // pointer math below.
             const uint8_t HDR_SIZE_IN_BYTES = (l_magicByte == SbeFifo::FIFO_ODY_FFDC_MAGIC)
                                            ? HEADER_SIZE_IN_BYTES_ODYSSEY
@@ -183,8 +212,8 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
             // Check to see if what we're copying is beyond the buffer size.
             const uint32_t OFFSET_INTO_FFDC_BUFFER = i + HDR_SIZE_IN_BYTES + FFDC_BUFFER_LENGTH_IN_BYTES;
 
-            // There are different maximum amount of pages based on the Magic Byte
-            const uint32_t SBE_FFDC_MAX_PAGES = (l_magicByte == SbeFifo::FIFO_ODY_FFDC_MAGIC) ?
+            // There are different maximum amount of pages based on the Magic Byte or l_goldenOdyssey
+            const uint32_t SBE_FFDC_MAX_PAGES = ((l_magicByte == SbeFifo::FIFO_ODY_FFDC_MAGIC) || l_goldenOdyssey) ?
                                                   SBE_FFDC_MAX_PAGES_POZ : SBE_FFDC_MAX_PAGES_P10;
 
             if(OFFSET_INTO_FFDC_BUFFER > (PAGESIZE * SBE_FFDC_MAX_PAGES))
@@ -228,7 +257,7 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                                     + HDR_SIZE_IN_BYTES;
 
                 SBE_TRACF("parseFFDCData> Add package for slid %d",slid);
-                addFFDCPackage(l_wordBuffer, FFDC_RETURN_CODE, FFDC_BUFFER_LENGTH_IN_BYTES, slid, severity);
+                addFFDCPackage(l_wordBuffer, FFDC_RETURN_CODE, FFDC_BUFFER_LENGTH_IN_BYTES, slid, severity, l_goldenOdyssey);
 
             }
 
@@ -351,7 +380,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
         // Hostboot has to call FAPI_SET_SBE_ERROR to create the HWP error log. After that, it's easy to append PLAT RC
         // data to that existing log. RC=0 is always last because Hostboot doesn't have a way to parse the data that
         // comes back with RC=0 so it's added as unformated data for SBE to look over.
-        if ((package->rc != fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA) && (package->rc != 0))
+        if ((package->rc != fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA) && (package->rc != 0) && !package->skipParsingFFDC)
         {
             // RC is not PLAT or 0, so it must be a hardware procedure RC.
 
@@ -395,7 +424,8 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                 slidErrl->collectTrace(FAPI_TRACE_NAME);
             }
         }
-        else if (package->rc == fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
+        else if (package->rc == fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA 
+                    && !package->skipParsingFFDC)
         {
             // By definition this package only contains FFDC, it is not logging
             // an actual error.  The Severity that comes back from Odyssey is
@@ -436,12 +466,18 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                               UDT_FORMAT_TYPE,
                               false /* Do not merge*/);
         }
-        else // RC==0
-        {
-            SBE_TRACF("RC=0 case");
+        else // RC==0 or skipParsingFFDC
+        {            
             if (slidErrl == nullptr)
             {
-                SBE_TRACF("Creating log for RC=0");
+                if(package->skipParsingFFDC)
+                {
+                    SBE_TRACF("Creating log skipping FFDC parsing");
+                }
+                else
+                {
+                    SBE_TRACF("Creating log for RC=0");
+                }
                 // Create new error for this SLID
                 slidErrl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
                                                    i_modId,
@@ -451,6 +487,9 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                 slidErrl->setErrorType(SBEIO_ERROR_TYPE_FFDC_PACKAGE);
 
             }
+            // skipParsingFFDC is a result of the odyssey goldside having an
+            // unsupported ffdc format. We pull some header info to log and
+            // shove the payload into a log as unformatted data.
             // For now, rc == 0 will have its data stuffed into a log as unformatted data. SBE team has said that RC=0
             // means no failure on the part of the SBE but they will sometimes send data back anyway.
             // At present there is no way to distingiush between PLAT error or HWP error RC=0 cases. So this
@@ -465,8 +504,11 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
             slidErrl->addProcedureCallout(HWAS::EPUB_PRC_SBE_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
 
-            SBE_TRACF(ERR_MRK"ERROR: SBE sent RC=0. This is a code bug on their part. ERRL %.8x",
+            if(!package->skipParsingFFDC)
+            {
+                SBE_TRACF(ERR_MRK"ERROR: SBE sent RC=0. This is a code bug on their part. ERRL %.8x",
                       ERRL_GETEID_SAFE(slidErrl));
+            }
 
         }
 
@@ -637,7 +679,8 @@ ERRORLOG::errlSeverity_t SbeFFDCParser::setSeverity(const uint8_t i_sev)
  */
 void SbeFFDCParser::addFFDCPackage(void * i_ffdcPackage,
                                    const uint32_t i_rc, const uint32_t i_packageLen,
-                                   const uint16_t i_slid, const uint8_t i_sev)
+                                   const uint16_t i_slid, const uint8_t i_sev,
+                                   bool i_skipParsingFFDC)
 {
     std::unique_ptr<ffdc_package> l_ffdcPkg = std::make_unique<ffdc_package>();
     l_ffdcPkg->rc = i_rc;
@@ -646,6 +689,7 @@ void SbeFFDCParser::addFFDCPackage(void * i_ffdcPackage,
     l_ffdcPkg->severity = setSeverity(i_sev);
 
     l_ffdcPkg->ffdcPtr = malloc(i_packageLen);
+    l_ffdcPkg->skipParsingFFDC = i_skipParsingFFDC;
     memcpy(l_ffdcPkg->ffdcPtr, i_ffdcPackage, i_packageLen);
     iv_ffdcPackages.push_back(std::move(l_ffdcPkg));
 }
