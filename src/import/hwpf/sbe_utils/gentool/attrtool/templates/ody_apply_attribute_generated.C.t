@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,17 +74,35 @@ ReturnCode ody_apply_sbe_attribute_row<{{target_type}}>(
             {
              {% if attr.fromSbeSync(attr_data.chip_type, target_type) %}
                 fapi2::{{attr.name}}_Type l_val;
+                fapi2::{{attr.name}}_Type l_original;
                 FAPI_TRY(l_attr.getAttrValue(&l_val, sizeof(fapi2::{{attr.name}}_Type),
                             sizeof({{attr.value_type}}_t)),
                          "getAttrValue failed for the attribute {{attr.name}}");
-                l_rc = FAPI_ATTR_SET(fapi2::{{attr.name}}, i_targ, l_val);
-                l_{{attr.name}}_found = true;
+
+                //only set if new value is differrent from original
+                l_rc = FAPI_ATTR_GET(fapi2::{{attr.name}}, i_targ, l_original);
                 if (l_rc != FAPI2_RC_SUCCESS)
                 {
-                    FAPI_INF("FAPI_ATTR_SET failed for the attribute {{attr.name}}");
+                    FAPI_INF("FAPI_ATTR_GET failed for the attribute {{attr.name}}");
                     o_errors.emplace_back({{target_type}}, i_targ_parser.getInstNum(),
-                                          fapi2::{{attr.name}}, SBE_ATTRIBUTE_RC_SET_ATTR_FAILED);
+                                          fapi2::{{attr.name}}, SBE_ATTRIBUTE_RC_GET_ATTR_FAILED);
                     fapi2::current_err = FAPI2_RC_SUCCESS;
+                }
+
+                l_{{attr.name}}_found = true;
+
+                if(memcmp(&l_val, &l_original, sizeof({{attr.value_type}}_t)))
+                {
+                     FAPI_INF("Attribute {{attr.name}} original[%x] new[%x]"
+                              " <<WARNING First word only", l_original, l_val);
+                    l_rc = FAPI_ATTR_SET(fapi2::{{attr.name}}, i_targ, l_val);
+                    if (l_rc != FAPI2_RC_SUCCESS)
+                    {
+                        FAPI_INF("FAPI_ATTR_SET failed for the attribute {{attr.name}}");
+                        o_errors.emplace_back({{target_type}}, i_targ_parser.getInstNum(),
+                                              fapi2::{{attr.name}}, SBE_ATTRIBUTE_RC_SET_ATTR_FAILED);
+                        fapi2::current_err = FAPI2_RC_SUCCESS;
+                    }
                 }
              {% else %}
                 FAPI_DBG("{{attr.name}} is not required to sync from sbe");

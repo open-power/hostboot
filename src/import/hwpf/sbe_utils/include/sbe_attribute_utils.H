@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,7 @@ enum SbeAttributeRC : uint32_t
     SBE_ATTRIBUTE_RC_SBE_FAPI_TGT_CREATION_FAILED   = 9,
     SBE_ATTRIBUTE_RC_EXPECTED_BUT_NOT_RECEIVED      = 10,
     SBE_ATTRIBUTE_RC_DENIED_UPDATE                  = 11,
+    SBE_ATTRIBUTE_RC_GET_ATTR_FAILED                = 12,
 };
 
 /**
