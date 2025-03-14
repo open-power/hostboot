@@ -54,7 +54,8 @@ void* sha3(const void* in, size_t inlen, void* md, int mdlen)
 
 asm(".globl .L.ROM_v3_verify");
 ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
-                            ROM_hw_params* params )
+                            ROM_hw_params* params,
+                            void* )
 {
     return ROM_DONE;
 }

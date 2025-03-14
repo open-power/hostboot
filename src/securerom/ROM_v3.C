@@ -82,11 +82,12 @@ static inline void ROM_v3_init_cache_area(uint64_t target, uint64_t size)
 #undef  CONTEXT
 #define CONTEXT  ROM_V3_VERIFY
 // NOTE: ROM_verify is called with with hrmor relative addresses from Hostboot
-// @TODO JIRA PFHB-TBD reinstate the asm() call so that the securerom
+// @TODO JIRA PFHB-921 reinstate the asm() call so that the securerom
 // branch table can properly find this function
 //asm(".globl .L.ROM_v3_verify");
 ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
-                            ROM_hw_params* params )
+                            ROM_hw_params* params,
+                            void* i_data )
 {
     sha3_t digest;
     ROM_v3_prefix_header_raw* prefix;
@@ -244,9 +245,22 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     // @TODO JIRA:PFHB-802 for completeness check that all reserved fields
     // are zero header->reserved, header->reserved1
 
+    // Setup the ptr to the data for the sha3 hash call below
+    uint8_t* data_offset = 0;
+    if (i_data == nullptr)
+    {
+        // Set the data_offset to the default location of the data
+        // being just past the V3 container header
+        data_offset = reinterpret_cast<uint8_t*>(container)
+                      + V3_SECURE_HEADER_SIZE;
+    }
+    else
+    {
+        data_offset = reinterpret_cast<uint8_t*>(i_data);
+    }
 
     size = GET64(header->payload_size_protected);
-    sha3((uint8_t*)container + V3_SECURE_HEADER_SIZE, size, &digest);
+    sha3(data_offset, size, &digest);
 
     if(memcmp(header->payload_hash_protected, digest, sizeof(sha3_t)))
     {

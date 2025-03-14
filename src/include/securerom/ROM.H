@@ -330,8 +330,27 @@ extern void ROM_sreset (void);
 extern "C" ROM_response ROM_verify (ROM_container_raw* container,
                                     ROM_hw_params* params);
 
+/**
+ * @brief Call rom V3 verify code against system hash keys
+ *
+ * @param[in] ROM_v3_container_raw* Pointer to effective address of container
+ * @param[in/out] ROM_hw_params*  HW params to pass in (including HW keys' hash)
+ *                               Additionally, the secure version used to check
+ *                               against the container's fw secure version is
+ *                               passed in via the HW params log; and then the
+ *                               error information is written to
+ *                               the HW params log.
+ * @param[in] void* i_data          Pointer to effective address of data;
+ *                                  default is nullptr.
+ *                                  If nullptr is entered then the data is
+ *                                  expected to start V3_SECURE_HEADER_SIZE past
+ *                                  the effective address of ROM_v3_container_raw
+ *
+ * @return ROM_response ROM_DONE on success ROM_FAILURE otherwise
+ */
 extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
-                                       ROM_hw_params* params);
+                                       ROM_hw_params* params,
+                                       void* i_data = nullptr);
 
 
 /************************* END OF ORIGINAL ROM CODE ***************************/
@@ -425,7 +444,7 @@ extern "C"
  *                               error information is written to
  *                               the HW params log.
  *
- * @return ROM_response ROM_DONE on sucess ROM_FAILURE otherwise
+ * @return ROM_response ROM_DONE on success ROM_FAILURE otherwise
  */
 ROM_response call_rom_verify(void*, const ROM_container_raw*, ROM_hw_params*);
 
@@ -443,7 +462,7 @@ void call_rom_SHA512(void*, const sha2_byte *, size_t, SHA512_t*);
 
 
 /**
- * @brief Call rom verify code against system hash keys
+ * @brief Call rom V3 verify code against system hash keys
  *
  * @param[in] void*                 Address of function offset into Secure ROM
  * @param[in] ROM_v3_container_raw* Pointer to effective address of container
@@ -453,10 +472,17 @@ void call_rom_SHA512(void*, const sha2_byte *, size_t, SHA512_t*);
  *                               passed in via the HW params log; and then the
  *                               error information is written to
  *                               the HW params log.
+ * @param[in] void*                 Pointer to effective address of data;
+ *                                  If nullptr is entered then the data is
+ *                                  expected to start V3_SECURE_HEADER_SIZE past
+ *                                  the effective address of ROM_v3_container_raw
  *
- * @return ROM_response ROM_DONE on sucess ROM_FAILURE otherwise
+ * @return ROM_response ROM_DONE on success ROM_FAILURE otherwise
  */
-ROM_response call_rom_v3_verify(void*, const ROM_v3_container_raw*, ROM_hw_params*);
+ROM_response call_rom_v3_verify(void*,
+                                const ROM_v3_container_raw*,
+                                ROM_hw_params*,
+                                void*);
 
 /**
  * @brief Call rom SHA3 code
