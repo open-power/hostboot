@@ -346,10 +346,15 @@ errlHndl_t generateAKCertificate()
     }
 
     // Hash the AK Certificate and extend the hash into PCR1
+    // Node Comm exchange is going to continue to use the V1 SHA512 hash
+    // routine (via SB_SIGNING_V1_CONTAINER parameter) rather than new V3 sha3
+    // hash routine because there is no additional benefit for "trustedboot"
+    // by changing to the sha3 algorithm.
     SHA512_t l_AKCertHash = {0};
     hashBlob(g_nodeAK.buffer,
              g_nodeAK.size,
-             l_AKCertHash);
+             l_AKCertHash,
+             SB_SIGNING_V1_CONTAINER);
 
     l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
                                     TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS,
@@ -833,8 +838,12 @@ errlHndl_t nodeCommProcessQuote(uint8_t* const i_quote,
 
     // Extend the hash of the quote to PCR 1, and include the whole quote
     // in binary form as the message in the TPM log
+    // Node Comm exchange is going to continue to use the V1 SHA512 hash
+    // routine (via SB_SIGNING_V1_CONTAINER parameter) rather than new V3 sha3
+    // hash routine because there is no additional benefit for "trustedboot"
+    // by changing to the sha3 algorithm.
     SHA512_t l_quoteHash = {0};
-    hashBlob(i_quote, i_quoteSize, l_quoteHash);
+    hashBlob(i_quote, i_quoteSize, l_quoteHash, SB_SIGNING_V1_CONTAINER);
     l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
                                     TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS,
                                     l_quoteHash,
@@ -1621,8 +1630,16 @@ errlHndl_t extendAllQuotes(std::vector<quoteInfo_t>& io_quotes)
     {
         // Extend the hash of the quote to PCR 1 and include the whole quote
         // in binary form as the message in the TPM log
+        // Node Comm exchange is going to continue to use the V1 SHA512 hash
+        // routine (via SB_SIGNING_V1_CONTAINER parameter) rather than new V3
+        // sha3 hash routine because there is no additional benefit for
+        // "trustedboot" by changing to the sha3 algorithm.
+
         SHA512_t l_quoteHash = {};
-        hashBlob(l_quoteInf.quoteData, l_quoteInf.quoteSize, l_quoteHash);
+        hashBlob(l_quoteInf.quoteData,
+                 l_quoteInf.quoteSize,
+                 l_quoteHash,
+                 SB_SIGNING_V1_CONTAINER);
         l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_1,
                                         TRUSTEDBOOT::EV_PLATFORM_CONFIG_FLAGS,
                                         l_quoteHash,

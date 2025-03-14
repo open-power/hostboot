@@ -35,6 +35,7 @@
 
 // context codes
 #define ROM_VERIFY             0x0100
+#define ROM_V3_VERIFY          0x0300
 #define ROM_SRESET             0x0E00
 
 // progress/test codes
@@ -77,17 +78,22 @@
 #define OTP_ECID_INVPOPSUM_CHECK 0x0059
 #define OTP_KEY_INVPOPSUM_CHECK  0x005A
 
-#define HW_KEY_HASH_TEST       0x0060
-#define HW_SIGNATURE_TEST      0x0061
-#define PREFIX_ECID_TEST       0x0062
-#define PREFIX_HASH_TEST       0x0063
-#define SW_KEY_PROTECTION_TEST 0x0064
-#define SW_KEY_INVALID_COUNT   0x0065
+#define HW_KEY_HASH_TEST        0x0060
+#define HW_SIGNATURE_TEST       0x0061
+#define PREFIX_ECID_TEST        0x0062
+#define PREFIX_HASH_TEST        0x0063
+#define SW_KEY_PROTECTION_TEST  0x0064
+#define SW_KEY_INVALID_COUNT    0x0065
+#define HW_SIGNATURE_TEST_ECDSA 0x0066
+#define HW_SIGNATURE_TEST_MLDSA 0x0067
 
-#define SW_SIGNATURE_TEST      0x0070
-#define HEADER_ECID_TEST       0x0071
-#define HEADER_HASH_TEST       0x0072
-#define CODE_PROTECTION_TEST   0x0073
+
+#define SW_SIGNATURE_TEST       0x0070
+#define HEADER_ECID_TEST        0x0071
+#define HEADER_HASH_TEST        0x0072
+#define CODE_PROTECTION_TEST    0x0073
+#define SW_SIGNATURE_TEST_ECDSA 0x0074
+#define SW_SIGNATURE_TEST_MLDSA 0x0075
 
 #define ENTRY_VALID_TEST       0x0080
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,39 @@
 #include <securerom/ecverify.H>
 #include <securerom/status_codes.H>
 #include <string.h>
+
+
+/*
+ * Temporarily stub these three functions for their securerom implementation
+ * until they work as expected.  Their presence here allows them to be
+ * built into the securerom and included in the branch table while taking up
+ * minimal space.  Once they are properly working, these stubs will be
+ * removed and the proper implementation will be used in the securerom.
+ * @TODO JIRA PFHB-921 remove these stub functions once their official
+ * implementation is ready.
+ */
+
+asm(".globl .L.sha3_512");
+void sha3_512(uint8_t h[64], const uint8_t* in, size_t inlen)
+{
+    return;
+}
+
+
+asm(".globl .L.sha3");
+void* sha3(const void* in, size_t inlen, void* md, int mdlen)
+{
+    return md;
+}
+
+asm(".globl .L.ROM_v3_verify");
+ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
+                            ROM_hw_params* params )
+{
+    return ROM_DONE;
+}
+// ^^^ end of stubbed functions
+
 
 #define valid_magic_number(header) \
     (GET32((header)->magic_number) == ROM_MAGIC_NUMBER)

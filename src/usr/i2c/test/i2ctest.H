@@ -457,15 +457,18 @@ class I2CTestIPL : public CxxTest::TestSuite
                 break;
             }
 
-            if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SULBit)))
-            {
-                TS_FAIL("test_secureInfo SULBit (SEEPROM Update Lock) should have been set in host_secureboot_lockdown");
-                break;
-            }
-            else
-            {
-                TS_INFO("test_secureInfo SULBit (SEEPROM Update Lock) properly set");
-            }
+            // @TODO JIRA PFHB-802 istep 10.3 where this bit gets set is
+            // temporarily skipped in simics; activate this test once that
+            // issue has been resolved
+            //if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SULBit)))
+            //{
+            //    TS_FAIL("test_secureInfo SULBit (SEEPROM Update Lock) should have been set in host_secureboot_lockdown");
+            //    break;
+            //}
+            //else
+            //{
+            //    TS_INFO("test_secureInfo SULBit (SEEPROM Update Lock) properly set");
+            //}
 
             if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SabBit)))
             {
