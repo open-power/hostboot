@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2024
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -445,6 +445,8 @@ function _setDebugPaths_()
     if [[ $build_tag = *"."*"."* ]]; then
         _writeLog_ "Build Type: BMC"
         FFDC_BUILD_RELEASE=$(echo $build_tag | cut -c 1-4 | awk '{print $1}')
+        generation="p$(echo $FFDC_BUILD_RELEASE | cut -c 1-2)"
+        _writeLog_ "System Generation: $generation"
         build_release="fw${FFDC_BUILD_RELEASE}"
         _writeLog_ "Build Release: $build_release"
         pnor_build=$(sed -n 's/pnor_build: //p' < /afs/rchland/projects/esw/$build_release/Builds/$build_tag/sbs-metadata/pnor_build_details.txt)
@@ -463,14 +465,14 @@ function _setDebugPaths_()
             return 1
         fi
 
-        hb_commit_hash=$(sed -n -e 's/^.*hostboot-p10-//p' < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -d "/" -f 1 | head -n1)
+        hb_commit_hash=$(sed -n -e "s/^.*hostboot-${generation}-//p" < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -d "/" -f 1 | head -n1)
         _writeLog_ "Hostboot commit for PNOR build: $hb_commit_hash"
         if [ -z "$hb_commit_hash" ]; then
             echo "ERROR: Could not find hostboot commit hash with given package name:'$build_tag'"
             return 1
         fi
 
-        FFDC_DRIVER_DIR="/afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build_savedOutput/p10ebmc/ship/hostboot-p10-$hb_commit_hash"
+        FFDC_DRIVER_DIR="/afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build_savedOutput/${generation}ebmc/ship/hostboot-${generation}-$hb_commit_hash"
         _writeLog_ "Driver Path: ${FFDC_DRIVER_DIR}"
 
         # Path to the images dir
