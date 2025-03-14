@@ -1000,7 +1000,46 @@ sub manipulateImage
                                     . "--contrHdrOut $final_header_file_V3 "
                                     . "--out $tempImages{PROTECTED_PAYLOAD_V3}");
 
-                        # Now append the V3 header to the V1 HDR_PHASE image
+                        # Now append the V3 header to the V1 PROTECTED_PAYLOD image
+                        # It will show up as "unprotected" data in the PNOR code
+                        run_command("cat $tempImages{PROTECTED_PAYLOAD} $final_header_file_V3 > $tempImages{HDR_PHASE}");
+
+                        # Nothing unique for V3 HDR_PHASE_V3 image
+                        run_command("cp $tempImages{PROTECTED_PAYLOAD_V3} $tempImages{HDR_PHASE_V3}");
+                    }
+                    elsif ($eyeCatch eq "HBB")
+                    {
+                        # HBB needs this offset set
+                        my $codeStartOffset = "--code-start-offset 0x00000180";
+
+                        # Like the HBBL above, the HBB does not have a Hash Page
+                        # Table, but needs to have the V3 Header added as an
+                        # "unprotected" section to the final V1 image:
+                        # [V1 Header][HBB data + pad to page boundary][V3 Header]
+
+                        # Appending the V3 header here allows for the HBBL to
+                        # verify the HBB data when it loads it and the system is
+                        # in V3 mode
+
+                        # First pad HBB data such that the V1 and V3 headers
+                        # can be processed on the page-aligned HBB data
+                        run_command("dd if=$bin_file of=$tempImages{TEMP_BIN} ibs=4k conv=sync");
+
+                        # Create V1 Header for HBB data + pad
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
+                                    . "$codeStartOffset "
+                                    . "--protectedPayload $tempImages{TEMP_BIN} "
+                                    . "--contrHdrOut $final_header_file "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD}");
+
+                        # Create the V3 Header for the HBB data + pad
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                    . "$codeStartOffset "
+                                    . "--protectedPayload $tempImages{TEMP_BIN} "
+                                    . "--contrHdrOut $final_header_file_V3 "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD_V3}");
+
+                        # Now append the V3 header to the V1 PROTECTED_PAYLOAD image
                         # It will show up as "unprotected" data in the PNOR code
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $final_header_file_V3 > $tempImages{HDR_PHASE}");
 
@@ -1009,16 +1048,12 @@ sub manipulateImage
                     }
                     else
                     {
-                        my $codeStartOffset = ($eyeCatch eq "HBB") ?
-                            "--code-start-offset 0x00000180" : "";
                         run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
-                                    . "$codeStartOffset "
                                     . "--protectedPayload $bin_file "
                                     . "--contrHdrOut $final_header_file "
                                     . "--out $tempImages{HDR_PHASE}");
 
                         run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
-                                    . "$codeStartOffset "
                                     . "--protectedPayload $bin_file "
                                     . "--contrHdrOut $final_header_file_V3 "
                                     . "--out $tempImages{HDR_PHASE_V3}");
