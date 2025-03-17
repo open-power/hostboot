@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -219,8 +219,12 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>::DONT_CHANGE);
             }
 
+            // The 'true' boolean passed in indicates that DQS drift tracking
+            // should be resumed in this case when a background scrub is the
+            // MCBIST command being continued.
             FAPI_INVOKE_HWP( errl, ody_continue_cmd, fapiTrgt,
-                mss::mcbist::end_boundary::DONT_CHANGE, stopCond );
+                mss::mcbist::end_boundary::DONT_CHANGE, stopCond,
+                mss::mcbist::speed::SAME_SPEED, true );
         }
         else
         {
