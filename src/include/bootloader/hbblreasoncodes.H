@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,6 +112,7 @@ namespace Bootloader
         //termination_rc
         RC_BAD_PROTECTED_SIZE_LEN  = HBBL_COMP_ID | 0x28,  /**< Protected Size of HBB is too large */
         RC_TPM_STS_TIMEOUT_REG     = HBBL_COMP_ID | 0x29,  /**< Timeout out waiting for TPM status reg */
+        RC_BAD_SB_SIGN_MODE        = HBBL_COMP_ID | 0x2a,  /**< sb_signing_mode value not V1(0x0) or V3(0x2) */
 
         RC_TPM_INITIALIZE          = 0x100, /**< Special TPM RC that signals if TPM's been initialized already */
 

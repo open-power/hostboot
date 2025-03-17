@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,6 +89,9 @@ enum BootloaderTraces
 
     /** Bootloader Protected Size of HBB is too big */
     BTLDR_TRC_BAD_PROTECTED_SIZE_LEN         = 0x1D,
+
+    /** Bootloader bad SB signing mode */
+    BTLDR_TRC_BAD_SB_SIGN_MODE               = 0x1E,
 
     /** Bootloader handleMMIO started */
     BTLDR_TRC_HANDLEMMIO_START               = 0x20,

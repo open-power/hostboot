@@ -73,9 +73,27 @@ const uint64_t XSCOM_BAR_MASK = 0xFF000003FFFFFFFFULL;
 const uint64_t LPC_BAR_MASK = 0xFF000000FFFFFFFFULL;
 
 
-// Offset into the secure header of the hash and size of protected payload
-const uint16_t CONTENT_HASH_OFFSET = 1085;
-const uint16_t CONTENT_PROTECTED_SIZE_OFFSET = CONTENT_HASH_OFFSET - 8;
+// Offset into the V1 secure header of the hash and size of protected payload
+// - from the start of the V1 header
+const uint16_t V1_CONTENT_HASH_OFFSET = 1085;
+const uint16_t V1_CONTENT_PROTECTED_SIZE_OFFSET = V1_CONTENT_HASH_OFFSET - 8;
+
+// Offset into the V3 secure header of the hash and size of protected payload
+const uint16_t V3_CONTENT_HASH_OFFSET =
+    offsetof(ROM_v3_container_raw, prefix)
+    + sizeof(ROM_v3_prefix_header_raw) +
+    + sizeof(ROM_v3_prefix_data_raw) +
+    + offsetof(ROM_v3_fw_header_raw, payload_hash_protected);
+static_assert(V3_CONTENT_HASH_OFFSET == 10376);
+
+// Offset into the V3 secure header of the size of protected payload
+// - from the start of the V3 header
+const uint16_t V3_CONTENT_PROTECTED_SIZE_OFFSET =
+    offsetof(ROM_v3_container_raw, prefix)
+    + sizeof(ROM_v3_prefix_header_raw) +
+    + sizeof(ROM_v3_prefix_data_raw) +
+    + offsetof(ROM_v3_fw_header_raw, payload_size_protected);
+static_assert(V3_CONTENT_PROTECTED_SIZE_OFFSET == 10360);
 
 
 namespace Bootloader{
@@ -322,6 +340,42 @@ namespace Bootloader{
 
         uint64_t l_rc = 0;
 
+        // In non-secure mode the following will happen:
+        // 1) Assume that the Container starts with a secureboot header
+        // 2) Measure the container from after the secureboot header until the end
+        //    - Use the "protected size" value in the secure header for the measurement
+        //    - This ensures that we are measuring (and eventually extending to the TPM)
+        //      EXACTLY what is being loaded on the system
+        // 3) Put the hash value from that measurement into the secureboot header
+        //    - The call_rom_SHA512() function below accomplishes tasks 2 and 3 at the same time
+
+        // In non-secure mode must skip past the secure header at the start of the container
+        // Create some offsets that are used below
+        // - offset of V1 header is 0
+        const uint8_t* l_v1_header_addr =
+            reinterpret_cast<uint8_t*>(const_cast<void*>(i_pContainer));
+
+        // - offset of HBB content is 0x1000
+        const uint8_t* l_hbb_blob_addr = l_v1_header_addr
+                                        + V1_MAX_SECURE_HEADER_SIZE;
+
+        // - offset of V3 content needs to be calculated based on payload size
+        //   in V1 header
+        size_t l_protectedSize = 0;
+        memcpy(&l_protectedSize,
+            l_v1_header_addr + V1_CONTENT_PROTECTED_SIZE_OFFSET,
+            sizeof(l_protectedSize));
+
+        const uint8_t* l_v3_header_addr = l_hbb_blob_addr + l_protectedSize;
+
+        // Location of hash of the "protected payload" into the secure header
+        // - This location is used for extending the hash to the TPM
+        uint64_t l_v1_hash = reinterpret_cast<uint64_t>(i_pContainer) +
+                                V1_CONTENT_HASH_OFFSET;
+
+        // uint64_t l_v3_hash = reinterpret_cast<uint64_t>(l_v3_header_addr) +
+        //                        V3_CONTENT_HASH_OFFSET;
+
         // Used in multiple places below: Set startAddr to SHA512_HASH_FUNCTION_OFFSET
         // call_rom_SHA512() function at an offset of Secure ROM
         const uint64_t l_rom_SHA512_startAddr =
@@ -341,36 +395,10 @@ namespace Bootloader{
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SAB_UNSET);
 
-            // In non-secure mode the following will happen:
-            // 1) Assume that the Container starts with a secureboot header
-            // 2) Measure the container from after the secureboot header until the end
-            //    - Use the "protected size" value in the secure header for the measurement
-            //    - This ensures that we are measuring (and eventually extending to the TPM)
-            //      EXACTLY what is being loaded on the system
-            // 3) Put the hash value from that measurement into the secureboot header
-            //    - The call_rom_SHA512() function below accomplishes tasks 2 and 3 at the same time
-
-            // In non-secure mode must skip past the secure header at the start of the container
-            uint8_t* l_pContainer = reinterpret_cast<uint8_t*>(const_cast<void*>(i_pContainer));
-            uint8_t* l_blob_addr = l_pContainer + PAGE_SIZE;
-
-            // While the protected size section in the secure header is 8 bytes/uint64_t,
-            // the hash function takes in a uint32_t
-            uint64_t l_protectedSize_u64 = 0;
-            memcpy(&l_protectedSize_u64,
-                   l_pContainer + CONTENT_PROTECTED_SIZE_OFFSET,
-                   sizeof(l_protectedSize_u64));
-            uint32_t l_protectedSize = l_protectedSize_u64;
-
-            // Location of hash of the "protected payload" into the secure header
-            // - This location is used for extending the hash to the TPM
-            uint64_t l_hash = reinterpret_cast<uint64_t>(i_pContainer) +
-                                  CONTENT_HASH_OFFSET;
-
             call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
-                            l_blob_addr,
+                            l_hbb_blob_addr,
                             l_protectedSize,
-                            reinterpret_cast<SHA512_t*>(l_hash));
+                            reinterpret_cast<SHA512_t*>(l_v1_hash));
 
         }
         // Terminate if a valid securerom is not present
@@ -437,9 +465,9 @@ namespace Bootloader{
                 if ((l_hw_parms.log == l_hw_key_hash_test_fail_rc) ||
                     (l_hw_parms.log == l_secure_version_test_fail_rc))
                 {
-
                     // Gather info to add console messages for common fails
-                    const uint32_t l_imprint_hash = 0x40d487ff; // Hard-coded, publicly-known value
+                    const uint32_t l_v1_imprint_hash = 0x40d487ff; // Hard-coded, publicly-known value
+                    const uint32_t l_v3_imprint_hash = 0xa29164db; // Hard-coded, publicly-known value
 
                     uint32_t l_system_hash = 0;
                     memcpy(&l_system_hash,
@@ -448,46 +476,84 @@ namespace Bootloader{
                     uint8_t  l_system_min_version = g_blData->blToHbData.min_secure_version;
                     uint32_t l_container_hash = 0;
                     uint8_t  l_container_min_version = 0;
+                    uint32_t l_cur_imprint_hash = 0x0;
 
-                    // Get Secure Version from the container
-                    // - get fw_key_count and ecid_count
-                    const auto* const pHwPrefix =
+                    // populate information based on mode
+                    if (g_blData->blToHbData.sb_signing_mode == 0x0)
+                    {
+                        l_cur_imprint_hash = l_v1_imprint_hash;
+                        // Get Secure Version from the container
+                        // - get fw_key_count and ecid_count
+                        const auto* const pHwPrefix =
                         reinterpret_cast<const ROM_prefix_header_raw* const>(
                             reinterpret_cast<const uint8_t* const>(i_pContainer)
                             + offsetof(ROM_container_raw,prefix));
-                    const auto fwKeyCount = pHwPrefix->fw_key_count;
-                    const auto ecidCount = pHwPrefix->ecid_count;
+                        const auto fwKeyCount = pHwPrefix->fw_key_count;
+                        const auto ecidCount = pHwPrefix->ecid_count;
 
-                    // - get pointer to Secure Version in the container
-                    const char* const pFwSecureVersionInContainer =
-                          reinterpret_cast<const char* const>(i_pContainer)
-                            + offsetof(ROM_container_raw,prefix)
-                            + offsetof(ROM_prefix_header_raw,ecid)
-                            + ecidCount*ECID_SIZE
-                            + offsetof(ROM_prefix_data_raw,fw_pkey_p)
-                            + fwKeyCount*sizeof(ecc_key_t)
-                            + offsetof(ROM_fw_header_raw,fw_secure_version);
-                    // - copy secure version from the container to a local variable
-                    memcpy(&l_container_min_version,
-                           pFwSecureVersionInContainer,
-                           sizeof(l_container_min_version));
+                        // - get pointer to Secure Version in the container
+                        const char* const pFwSecureVersionInContainer =
+                            reinterpret_cast<const char* const>(i_pContainer)
+                                + offsetof(ROM_container_raw,prefix)
+                                + offsetof(ROM_prefix_header_raw,ecid)
+                                + ecidCount*ECID_SIZE
+                                + offsetof(ROM_prefix_data_raw,fw_pkey_p)
+                                + fwKeyCount*sizeof(ecc_key_t)
+                                + offsetof(ROM_fw_header_raw,fw_secure_version);
+                        // - copy secure version from the container to a local variable
+                        memcpy(&l_container_min_version,
+                            pFwSecureVersionInContainer,
+                            sizeof(l_container_min_version));
 
-                    // Setup and call hash function on public HW Keys in the container
-                    // - Get pointer to public HW Keys in the container
-                    const char* const l_pHwPKeyA =
+                        // Setup and call hash function on public HW Keys in the container
+                        // - Get pointer to public HW Keys in the container
+                        const char* const l_pHwPKeyA =
                         reinterpret_cast<const char* const>(i_pContainer)
                         + offsetof(ROM_container_raw,hw_pkey_a);
 
-                    // - get total HW Keys Size and create a variable to hold the hash
-                    size_t l_totalHwKeysSize = HW_KEY_COUNT*sizeof(ecc_key_t);
-                    SHA512_t l_pContainerHash;
-                    // - hash HW Keys
-                    call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
-                                    reinterpret_cast<const sha2_byte*>(l_pHwPKeyA),
-                                    l_totalHwKeysSize,
-                                    reinterpret_cast<SHA512_t*>(&l_pContainerHash));
-                    // - copy just the first 4 bytes to a local variable
-                    memcpy(&l_container_hash, &l_pContainerHash, sizeof(l_container_hash));
+                        // - get total HW Keys Size and create a variable to hold the hash
+                        size_t l_totalHwKeysSize = HW_KEY_COUNT*sizeof(ecc_key_t);
+                        SHA512_t l_pContainerHash;
+
+                        // - hash HW Keys
+                        call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
+                                        reinterpret_cast<const sha2_byte*>(l_pHwPKeyA),
+                                        l_totalHwKeysSize,
+                                        reinterpret_cast<SHA512_t*>(&l_pContainerHash));
+
+                        // - copy just the first 4 bytes to a local variable
+                        memcpy(&l_container_hash, &l_pContainerHash, sizeof(l_container_hash));
+                    }
+                    else
+                    {
+                        l_cur_imprint_hash = l_v3_imprint_hash;
+
+                        const uint16_t V3_FW_SECURE_VERSION_OFFSET =
+                           offsetof(ROM_v3_container_raw, prefix)
+                           + sizeof(ROM_v3_prefix_header_raw) +
+                           + sizeof(ROM_v3_prefix_data_raw) +
+                           + offsetof(ROM_v3_fw_header_raw, fw_secure_version);
+
+                        memcpy(&l_container_min_version,
+                            l_v3_header_addr + V3_FW_SECURE_VERSION_OFFSET,
+                            sizeof(l_container_min_version));
+
+                        sha3_t l_pContainerHash;
+
+                        // @TODO JIRA PFHB-677 Until securerom's call_rom_SHA3() function is
+                        // working, call the linked sha3() function directly below
+
+                        // call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
+                        //               l_hbbl_blob_addr,
+                        //               l_protectedSize,
+                        //               reinterpret_cast<sha3_t*>(l_pContainerHash));
+
+                        // @TODO: JIRA:PFHB-679 update this when hash function is compiled in
+                        // sha3(l_hbb_blob_addr, l_protectedSize, reinterpret_cast<sha3_t*>(l_pContainerHash));
+                        memset(&l_pContainerHash, 0xFF, sizeof(l_container_hash));
+
+                        memcpy(&l_container_hash, &l_pContainerHash, sizeof(l_container_hash));
+                    }
 
                     if (l_hw_parms.log == l_hw_key_hash_test_fail_rc)
                     {
@@ -497,6 +563,11 @@ namespace Bootloader{
                     {
                         bl_console::putString("\rFAILED Minimum Secure Version Check\r\n");
                     }
+                    bl_console::putString("\rsb_signing_mode=0x");
+                    bl_console::displayHex(reinterpret_cast<unsigned char*>(&g_blData->blToHbData.sb_signing_mode),
+                                            sizeof(g_blData->blToHbData.sb_signing_mode));
+                    bl_console::putString("\r\n");
+
                     bl_console::putString("\rHashes: Sys=0x");
                     bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_system_hash),
                                            sizeof(l_system_hash));
@@ -504,8 +575,8 @@ namespace Bootloader{
                     bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_container_hash),
                                            sizeof(l_container_hash));
                     bl_console::putString("\t(imprint hash=0x");
-                    bl_console::displayHex(reinterpret_cast<const unsigned char*>(&l_imprint_hash),
-                                           sizeof(l_imprint_hash));
+                    bl_console::displayHex(reinterpret_cast<const unsigned char*>(&l_cur_imprint_hash),
+                                           sizeof(l_cur_imprint_hash));
                     bl_console::putString(")\r\n");
 
                     bl_console::putString("\rSecure Versions: Sys=0x");
@@ -521,8 +592,16 @@ namespace Bootloader{
                 // Prepare To Terminate The System:
                 // Get first 4 bytes of Container that failed verification
                 uint32_t l_beginContainer = 0;
-                memcpy(&l_beginContainer, i_pContainer,
-                       sizeof(l_beginContainer));
+                if (g_blData->blToHbData.sb_signing_mode == 0x0)
+                {
+                    memcpy(&l_beginContainer, l_v1_header_addr,
+                            sizeof(l_beginContainer));
+                }
+                else
+                {
+                    memcpy(&l_beginContainer, l_v3_header_addr,
+                            sizeof(l_beginContainer));
+                }
 
                 // Get first 4 bytes of system's hw keys' hash
                 uint32_t l_beginHwKeysHash = 0;
@@ -897,7 +976,7 @@ namespace Bootloader{
                 // before verifying the protected payload since the value in the header is untrusted
                 uint64_t l_protectedSize = 0;
                 memcpy(&l_protectedSize,
-                       reinterpret_cast<uint8_t*>(l_src_addr) + CONTENT_PROTECTED_SIZE_OFFSET,
+                       reinterpret_cast<uint8_t*>(l_src_addr) + V1_CONTENT_PROTECTED_SIZE_OFFSET,
                        sizeof(l_protectedSize));
 
                 // Check that protectedSize length is not too large
@@ -928,6 +1007,39 @@ namespace Bootloader{
                         (MEGABYTE-WORDSIZE));
                 }
 
+                if (g_blData->blToHbData.sb_signing_mode != 0x0 &&
+                    g_blData->blToHbData.sb_signing_mode != 0x2)
+                {
+                    BOOTLOADER_TRACE(BTLDR_TRC_BAD_SB_SIGN_MODE);
+
+                    bl_console::putString("\rBad SB sign mode: 0x");
+                    bl_console::displayHex(reinterpret_cast<unsigned char*>(&g_blData->blToHbData.sb_signing_mode),
+                                        sizeof(g_blData->blToHbData.sb_signing_mode));
+                    bl_console::putString("\r\n");
+
+                    /*@
+                    * @errortype
+                    * @moduleid         Bootloader::MOD_BOOTLOADER_MAIN
+                    * @reasoncode       Bootloader::RC_BAD_SB_SIGN_MODE
+                    * @userdata1[0:15]  TI_WITH_SRC
+                    * @userdata1[16:31] TI_BOOTLOADER
+                    * @userdata1[32:63] Failing address = 0
+                    * @userdata2[0:31]  sb_signing_mode value
+                    * @userdata2[32:63] 0 (unused)
+                    * @errorInfo[0:31]  0 (unused)
+                    * @devdesc          Bad SB signing mode
+                    * @custdesc         Failed to load boot firmware
+                    */
+                    bl_terminate(
+                        MOD_BOOTLOADER_MAIN,
+                        RC_BAD_SB_SIGN_MODE,
+                        TO_UINT32(g_blData->blToHbData.sb_signing_mode),
+                        0,
+                        true,
+                        0,
+                        0);
+                }
+
                 // ROM verification of HBB image
                 verifyContainer(l_src_addr);
 
@@ -938,7 +1050,7 @@ namespace Bootloader{
                 // Current offset of the hash of protected payload in the
                 // secure header
                 uint8_t* l_hash = reinterpret_cast<uint8_t*>(l_src_addr) +
-                                  CONTENT_HASH_OFFSET;
+                                  V1_CONTENT_HASH_OFFSET;
 
                 bool isMpipl = false;
                 Bootloader::hbblReasonCode l_rc = XSCOM::get_mpipl_setting(isMpipl);
