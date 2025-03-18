@@ -4961,7 +4961,7 @@ fapi2::ReturnCode PlatPmPPB::set_reference_freq(fapi2::ATTR_WOF_TABLE_DATA_Type*
             iv_reference_frequency_mhz);
 
 fapi_try_exit:
-    FAPI_INF("<<<<<<<<<< compute_vpd_pts");
+    FAPI_INF("<<<<<<<<<< set_reference_freq");
     return fapi2::current_err;
 }
 
@@ -5059,7 +5059,8 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
     // This must be done after all stretch and biasing as the reference
     // frequency can be modified
 
-    if (iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable)
+    if ((iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable) ||
+        ((iv_pdv_model_data & PDV_MODEL_DATA_PNEXT) == PDV_MODEL_DATA_PNEXT))
     {
         iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
