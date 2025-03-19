@@ -3310,7 +3310,9 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
         // Assert the number of function types does not exceed the HDAT spec
         assert(SecRomFuncTypes.size() <= SB_FUNC_TYPES::MAX_TYPES, "Number entries per node exceeds HDAT spec");
-        l_hdatHashVerifyFunc->hdatArrayCnt = SecRomFuncTypes.size();
+        // Some function types might not be added to the array, so keep an
+        // array count for the loop below
+        size_t l_array_count = 0;
         l_hdatHashVerifyFunc->hdatAllocSize = sizeof(HDAT::hdatHashVerifyFunc_t);
         l_hdatHashVerifyFunc->hdatActSize = sizeof(HDAT::hdatHashVerifyFunc_t);
 
@@ -3322,6 +3324,16 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         // version and offset
         for (auto const &funcType : SecRomFuncTypes)
         {
+            // @TODO JIRA PFHB-922 the SHA3 and MLDSA function types are not
+            // currently working, so do not include them in this section
+            if ((funcType == SHA3) || (funcType == MLDSA))
+            {
+                TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
+                          "Skipping inoperable SecureROM function of type %d",
+                          funcType);
+                continue;
+            }
+
             auto l_hdatHashVerifyInfo =
                 reinterpret_cast<HDAT::hdatHashVerifyFunc_t*>(l_baseAddr +
                                                               l_currOffset);
@@ -3343,7 +3355,14 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
             // advance the current offset and instance pointer
             l_currOffset += sizeof(*l_hdatHashVerifyInfo);
+
+            // increment the array count
+            l_array_count++;
         }
+
+        // Now set array count
+        l_hdatHashVerifyFunc->hdatArrayCnt = l_array_count;
+
 
         // populate the second part of the pointer pair from earlier
         l_hdatTpmData->hdatHashVerifyFunc.hdatSize = l_currOffset -
