@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -41,6 +41,47 @@
     </attribute>
     <attribute>
       <id>CFM_TEST_V_WR</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_NONVOLATILE</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_NONVOLATILE_RW</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_VOLATILE</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_VOLATILE_ZERO</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>enc-node-power10</id>
+    <attribute>
+      <id>MPIPL_CCU_NONVOLATILE</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_NONVOLATILE_RW</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_VOLATILE</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_VOLATILE_ZERO</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>sys</id>
+    <attribute>
+      <id>MPIPL_CCU_NONVOLATILE</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_VOLATILE</id>
+    </attribute>
+    <attribute>
+      <id>MPIPL_CCU_VOLATILE_ZERO</id>
     </attribute>
   </targetTypeExtension>
 

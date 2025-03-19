@@ -69,6 +69,8 @@
 #include <isteps/bios_attr_accessors/bios_attr_setters.H>
 #endif
 
+#include <errl/hberrltypes.H>
+
 namespace ISTEP_06
 {
 
@@ -364,6 +366,133 @@ errlHndl_t forceClearBlockSpecDeconfig()
     return l_err;
 }
 
+#ifdef CONFIG_TEST_MPIPL_CCU_ATTR_UPDATE
+/* @brief Creates an error for a failed MPIPL CCU test. The user data specifies the kind of failure.
+ *
+ * @param[in] i_target     The target the tryGetAttr was attempted on
+ * @param[in] i_attrId     The ATTRIBUTE_ID of the attr that was used in tryGetAttr
+ * @param[in] i_attrValue  The value of the attr that was recieved from tryGetAttr, or 0 if the get failed.
+ * @param[in] i_fetched    0 if tryGetAttr failed, otherwise 1.
+ *
+ */
+void mpiplCcuAttrUpdateError(Target *     i_target,
+                             const ATTRIBUTE_ID i_attrId,
+                             const uint32_t     i_attrValue,
+                             const uint8_t      i_fetched = 0)
+{
+    using namespace errl_util;
+    /*@
+     * @errortype
+     * @severity          ERRL_SEV_UNRECOVERABLE
+     * @moduleid          ISTEP::MOD_MPIPL_CCU_ATTR_UPDATE_ERROR
+     * @reasoncode        ISTEP::RC_GET_ATTR_FAILURE
+     * @devdesc           Could not get the correct value for an attr in MPIPL after a concurrent code update
+     * @userdata1[00:31]  Target HUID
+     * @userdata1[32:63]  Attribute ID
+     * @userdata2[00:31]  Attribute Value
+     * @userdata2[32:39]  0 if tryGetAttr failed, 1 otherwise.
+     * @custdesc          Firmware error.
+     */
+    errlHndl_t err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             ISTEP::MOD_MPIPL_CCU_ATTR_UPDATE_ERROR,
+                                             ISTEP::RC_GET_ATTR_FAILURE,
+                                             SrcUserData(bits{0, 31},  get_huid(i_target),
+                                                         bits{32, 63}, i_attrId),
+                                             SrcUserData(bits{0, 31},  i_attrValue,
+                                                         bits{32, 39}, i_fetched));
+
+    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "Target[0x%X] ATTR_ID 0x%X=0x%X",
+                      get_huid(i_target),
+                      i_attrId,
+                      i_attrValue);
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Target[0x%X] ATTR_ID 0x%X=0x%X",
+                      get_huid(i_target),
+                      i_attrId,
+                      i_attrValue);
+
+    err->collectTrace(ISTEP_COMP_NAME);
+    errlCommit(err, ISTEP_COMP_ID);
+
+}
+
+/* @brief This function calls tryGetAttr on the given target for the specified ATTRIBUTE_ID. It's expected that the
+ *        attribute should be retrieved and the value match the huid of the given target. If either of those aren't
+ *        true then an error will be created.
+ *
+ *
+ */
+template<ATTRIBUTE_ID attrId>
+void TryAttrCCU(Target * target)
+{
+    typename AttributeTraits<attrId>::Type attrValue = 0;
+    if (target->tryGetAttr<attrId>(attrValue))
+    {
+        if (get_huid(target) != attrValue)
+        {
+            constexpr uint8_t ATTR_RETRIEVED = 1;
+            mpiplCcuAttrUpdateError(target,
+                    attrId,
+                    attrValue,
+                    ATTR_RETRIEVED);
+        }
+    }
+    else
+    {
+        mpiplCcuAttrUpdateError(target,
+                attrId,
+                attrValue);
+    }
+}
+
+/* @brief This is a test of mpipl_targeting_update. That function acts as a backup for attribute updates after a
+ *        concurrent code update (CCU). Typically HBRT is supposed to update the targeting data during a CCU but
+ *        there are rare cases where that can fail. When that fails and an MPIPL is triggered (e.g. to gather a PHYP
+ *        dump) and there were new attributes present that Hostboot wasn't aware of during IPL, then Hostboot will
+ *        crash. To avoid that, mpipl_targeting_update will attempt to update the targeting data after the MPIPL is
+ *        triggered so that Hostboot won't crash. This test is compiled in when feature function test wants to test this
+ *        behavior. Presently, Simics does not support MPIPL so this test must run on hardware. That means this code
+ *        cannot be compiled in all the time.
+ *
+ */
+void doMpiplCcuTest()
+{
+    // There are three targets with MPIPL CCU attributes on them. The system target, procs, and nodes.
+    // Only need to get the system, a proc, and a node for the test.
+    Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
+
+    TARGETING::TargetHandleList l_chipList;
+    TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, true);
+    Target * l_proc = l_chipList[0];
+
+    Target * l_node = UTIL::getCurrentNodeTarget();
+
+    TargetHandleList targets = {l_pTopLevel, l_proc, l_node };
+    // Try to get the attributes from the targets. There are four attributes, each one resides in
+    // a different section of the binary.
+    for (const auto & target : targets)
+    {
+        TryAttrCCU<ATTR_MPIPL_CCU_NONVOLATILE>(target);
+        // System targets cannot have non-volatile read/write attributes
+        // Don't try to get ATTR_MPIPL_CCU_NONVOLATILE_RW on the system target.
+        if (target->getAttr<ATTR_TYPE>() != TYPE_SYS)
+        {
+            TryAttrCCU<ATTR_MPIPL_CCU_NONVOLATILE_RW>(target);
+        }
+
+        TryAttrCCU<ATTR_MPIPL_CCU_VOLATILE>(target);
+
+        // This is a volatile zeroed attribute, it should just exist.
+        ATTR_MPIPL_CCU_VOLATILE_ZERO_type ccu_zero = 0;
+        if (!target->tryGetAttr<ATTR_MPIPL_CCU_VOLATILE_ZERO>(ccu_zero))
+        {
+            mpiplCcuAttrUpdateError(target,
+                                    ATTR_MPIPL_CCU_VOLATILE_ZERO,
+                                    ccu_zero);
+        }
+    }
+}
+#endif
+
 void* host_gard( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard entry" );
@@ -378,6 +507,10 @@ void* host_gard( void *io_pArgs )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_gard: MPIPL mode");
+
+#ifdef CONFIG_TEST_MPIPL_CCU_ATTR_UPDATE
+            doMpiplCcuTest();
+#endif
 
             PredicateCTM l_coreFilter(CLASS_UNIT, TYPE_CORE);
             PredicateCTM l_fcFilter(CLASS_UNIT, TYPE_FC);

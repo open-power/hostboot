@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021
+# Contributors Listed Below - COPYRIGHT 2021,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -44,6 +44,7 @@ perl $MRW_HB_TOOLS/filter_out_unwanted_attributes.pl \
             --tgt-xml $MRW_HB_TOOLS/xmltohb/target_types_hb.xml \
             --tgt-xml $MRW_HB_TOOLS/xmltohb/target_types_oppowervm.xml \
             --tgt-xml $MRW_HB_TOOLS/xmltohb/target_types_openpower.xml \
+            --tgt-xml $MRW_HB_TOOLS/xmltohb/target_types_cfm.xml \
             --mrw-xml "$TMPOUT"
 
 echo Copy "$TMPOUT".updated to $PROJECT_ROOT/src/usr/targeting/common/xmltohb/simics_P10.system.xml

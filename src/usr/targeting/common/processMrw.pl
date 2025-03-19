@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2024
+# Contributors Listed Below - COPYRIGHT 2015,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -523,6 +523,36 @@ sub loadXmlFile
     $targetObj->setVersion();
 } # end loadXmlFile
 
+
+#--------------------------------------------------
+# @brief Sets attributes used for testing MPIPL CCU
+#
+# @details Sets values for MPIPL CCU Attribute Update so that Feature Function Test
+#          can load a CCI driver with these attributes present to test with. These
+#          attributes appearing are controlled by CONFIG_TEST_MPIPL_CCU_ATTR_UPDATE.
+#          Otherwise they will be filtered out of the final hostboot consumed MRW by
+#          filter_out_unwanted_attributes.pl
+#
+# @param [in] $targetObj - The global target object.
+#--------------------------------------------------
+sub setMpiplTestAttrs
+{
+    my $targetObj = shift;
+    my $target = shift;
+    my $value = shift;
+    # This represents what the ATTR_TYPE is set to for this target
+    my $type = $targetObj->getType($target);
+
+    if ($type ne "SYS")
+    {
+        $targetObj->setAttribute($target, "MPIPL_CCU_NONVOLATILE_RW", $value);
+    }
+
+    $targetObj->setAttribute($target, "MPIPL_CCU_NONVOLATILE", $value);
+    $targetObj->setAttribute($target, "MPIPL_CCU_VOLATILE", $value);
+
+}
+
 #--------------------------------------------------
 # @brief Iterate thru target hierarchy and set attributes
 #
@@ -1000,6 +1030,8 @@ sub processSystem
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysPos]{KEY} = $target;
 
+    setMpiplTestAttrs($targetObj, $target, 0x00010000);
+
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
 
@@ -1088,6 +1120,8 @@ sub processNode
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]
                 {NODES}[$nodePosPerSystem]{KEY} = $target;
+
+    setMpiplTestAttrs($targetObj, $target, $targetObj->getAttribute($target, "HUID"));
 
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
@@ -1184,6 +1218,8 @@ sub processProcessorAndChildren
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
                 {PROCS}[$procPosPerNode]{KEY} = $target;
+
+    setMpiplTestAttrs($targetObj, $target, $targetObj->getAttribute($target, "HUID"));
 
     # Set the PROC's master status
     setProcMasterStatus($targetObj, $target);

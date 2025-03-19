@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -81,6 +81,66 @@
         <default>0x33EFE76B</default>
       </uint32_t>
     </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+          This attribute is used for concurrent code update testing to ensure that new attributes added during code
+          update make it into the live targeting data on an MPIPL regardless if HBRT was able to do the update or not
+      </description>
+    <id>MPIPL_CCU_NONVOLATILE</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <default>0xFFFFFFFF</default>
+      <uint32_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
+          This attribute is used for concurrent code update testing to ensure that new attributes added during code
+          update make it into the live targeting data on an MPIPL regardless if HBRT was able to do the update or not
+      </description>
+    <id>MPIPL_CCU_NONVOLATILE_RW</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <default>0xFFFFFFFF</default>
+      <uint32_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
+          This attribute is used for concurrent code update testing to ensure that new attributes added during code
+          update make it into the live targeting data on an MPIPL regardless if HBRT was able to do the update or not
+      </description>
+    <id>MPIPL_CCU_VOLATILE</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <simpleType>
+      <default>0xFFFFFFFF</default>
+      <uint32_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
+          This attribute is used for concurrent code update testing to ensure that new attributes added during code
+          update make it into the live targeting data on an MPIPL regardless if HBRT was able to do the update or not
+      </description>
+    <id>MPIPL_CCU_VOLATILE_ZERO</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <no_export/>
   </attribute>
 
 </attributes>

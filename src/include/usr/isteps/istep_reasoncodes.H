@@ -96,6 +96,9 @@ namespace ISTEP
         MOD_MSS_ATTR_CLEANUP                              = 0x42,
         MOD_HOST_SET_IPL_PARMS                            = 0x43,
         MOD_HOST_IPL_COMPLETE                             = 0x44,
+
+        // For CCU Testing
+        MOD_MPIPL_CCU_ATTR_UPDATE_ERROR                   = 0xFE,
     };
 
     /**
@@ -206,6 +209,9 @@ namespace ISTEP
         RC_TIMEBASE_CORE_FREQ_MISMATCH           = ISTEP_COMP_ID | 0x72,
         RC_ALL_AVAILABLE_SPARES_DEPLOYED         = ISTEP_COMP_ID | 0x73,
         RC_PRIMARY_PROC_SIGNING_MODE_MISMATCH    = ISTEP_COMP_ID | 0x74,
+
+        // For CCU testing
+        RC_GET_ATTR_FAILURE                      = ISTEP_COMP_ID | 0xFE,
     };
 
 };
