@@ -8839,6 +8839,20 @@
   </attribute>
 
   <attribute>
+    <description>
+      Used to disable HBRT update prep. This attribute is set via
+      attribute override.
+    </description>
+    <id>SKIP_HBRT_ATTR_UPDATE</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>SLOT_INDEX</id>
     <description>PCIe slot index definition</description>
     <simpleType>

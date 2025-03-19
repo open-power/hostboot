@@ -392,6 +392,14 @@ int hbrt_update_prep(void)
     TRACFCOMP(g_trac_hbrt, ENTER_MRK" prepare_hbrt_update");
     TRACFCOMP(g_trac_targeting, ENTER_MRK" hbrt_update_prep");
     errlHndl_t pError = nullptr;
+    int l_rc = 0;
+
+    do {
+    if (UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_SKIP_HBRT_ATTR_UPDATE>())
+    {
+        TRACFCOMP(g_trac_hbrt, INFO_MRK"prepare_hbrt_update: SKIP_HBRT_ATTR_UPDATE is set, skipping...");
+        break;
+    }
 
     // Define a structure to defer the application of the new targeting data
     //  until after we've processed every node
@@ -539,7 +547,7 @@ int hbrt_update_prep(void)
     }
 
     // Add the traces onto any error log and commit it
-    int l_rc = ERRL_GETRC_SAFE(pError);
+    l_rc = ERRL_GETRC_SAFE(pError);
     if(pError)
     {
         TRACFCOMP( g_trac_targeting,
@@ -599,6 +607,7 @@ int hbrt_update_prep(void)
             l_memChunk.newTarg = nullptr;
         }
     }
+    } while(0);
 
     TRACFCOMP(g_trac_targeting, EXIT_MRK" hbrt_update_prep");
     TRACFCOMP(g_trac_hbrt, EXIT_MRK" prepare_hbrt_update: rc=%.X", l_rc);
