@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -33,6 +33,25 @@
   <persistRuntime/>
   <platInit/>
   <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_LOAD_BOOTLOADER_CHUNK_OFFSET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Defines offset to be applied to SBE bootloader installation for current image segment</description>
+  <valueType>uint64</valueType>
+  <persistRuntime/>
+  <initToZero/>
+  <platInit/>
+  <writeable/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_LOAD_BOOTLOADER_HBBL_SIZE</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Defines size of complete HBBL image to be loaded, in B</description>
+  <valueType>uint64</valueType>
+  <persistRuntime/>
+  <initToZero/>
+  <platInit/>
 </attribute>
 <attribute>
   <id>ATTR_SBE_MASTER_HRMOR_ADDRESS</id>
