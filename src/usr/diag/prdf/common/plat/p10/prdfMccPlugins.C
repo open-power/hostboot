@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,6 +220,37 @@ int32_t chnlTimeout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
 {
     #define PRDF_FUNC "[p10_mcc::chnlTimeout] "
 
+    // Callout the entire bus interface. If both channel timeout bits on the
+    // MC_DSTL_FIR (22 and 23) are reporting at the same time, callout the
+    // processor side OMI high priority, else callout the OCMB high priority.
+    PRDpriority omiPriority = MRU_LOW;
+    PRDpriority ocmbPriority = MRU_HIGH;
+    SCAN_COMM_REGISTER_CLASS * dstlfir = i_chip->getRegister("MC_DSTL_FIR");
+    if (SUCCESS != dstlfir->Read())
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to read MC_DSTL_FIR on 0x%08x",
+                 i_chip->getHuid());
+    }
+    else if (dstlfir->IsBitSet(22) && dstlfir->IsBitSet(23))
+    {
+        omiPriority = MRU_HIGH;
+        ocmbPriority = MRU_LOW;
+
+        #ifdef __HOSTBOOT_MODULE
+        // Clear both bits
+        SCAN_COMM_REGISTER_CLASS * dstlfir_and =
+            i_chip->getRegister("MC_DSTL_FIR_AND");
+        dstlfir_and->setAllBits();
+        dstlfir_and->ClearBit(22);
+        dstlfir_and->ClearBit(23);
+        if (SUCCESS != dstlfir_and->Write())
+        {
+            PRDF_ERR(PRDF_FUNC "Failed to write MC_DSTL_FIR_AND on 0x%08x",
+                     i_chip->getHuid());
+        }
+        #endif
+    }
+
     TargetHandle_t rxTrgt = getConnectedChild( i_chip->getTrgt(), TYPE_OMI,
                                                i_pos );
     if ( nullptr == rxTrgt )
@@ -241,7 +272,7 @@ int32_t chnlTimeout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
     // the likely cause. As such, we want the OCMB to be the high priority
     // callout, and the OMI and bus to be low priority callouts.
     calloutBus( io_sc, rxTrgt, txTrgt, HWAS::OMI_BUS_TYPE, HWAS::FLAG_NONE,
-                MRU_LOW, MRU_HIGH );
+                omiPriority, ocmbPriority );
 
     return SUCCESS;
 
