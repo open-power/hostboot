@@ -84,10 +84,11 @@ fapi2::ReturnCode p10_io_init::lane_setup(const fapi2::Target<fapi2::TARGET_TYPE
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MNFG_BAD_LANE_DURATION, i_target, l_mnfg_bad_lane_duration),
              "Error from FAPI_ATTR_GET (ATTR_IOHS_MNFG_BAD_LANE_DURATION)");
 
-    FAPI_TRY(GET_DLP_OPTICAL_CONFIG(l_iohs_targets[0], c_optical_config_data));
 
     for (auto l_iohs_target : l_iohs_targets)
     {
+        FAPI_TRY(GET_DLP_OPTICAL_CONFIG(l_iohs_target, c_optical_config_data));
+
         l_data = c_optical_config_data;
         // Lane Reversal
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_FABRIC_LANE_REVERSAL, l_iohs_target, l_lane_reversal),
