@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,17 +114,17 @@ struct hdatSLCAStruct_t
  *
  * @post None
  *
- * @param i_msAddr - Mainstore address where SLCA structure is loaded
- *        o_hdatslcaCount - output parameter - Number of SLCA structures
- *        o_hdatslcaSize - output paramster - Size of SLCA created
+ * @param o_msAddr        Address where SLCA structure is loaded
+ *        o_hdatslcaCount Number of SLCA structures
+ *        o_hdatslcaSize  Size of SLCA created
  *
  * @return errlHndl_t - Error Handle
  *
  * @retval HDAT_OTHER_COMP_ERROR
  */
-errlHndl_t hdatBuildSLCA(const HDAT::hdatMsAddr_t &i_msAddr,
-                               uint32_t &o_hdatslcaCount,
-                               uint32_t &o_hdatslcaSize);
+errlHndl_t hdatBuildSLCA(HDAT::hdatMsAddr_t &o_msAddr,
+                         uint32_t           &o_hdatslcaCount,
+                         uint32_t           &o_hdatslcaSize);
 
 /**
  * @brief This routine copies the SLCA from a source address to a destination

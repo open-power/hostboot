@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -793,17 +793,17 @@ static errlHndl_t hdatSetSLCAStructHdrs(hdatSLCAStruct_t &o_slcaStruct,
  *
  * @post None
  *
- * @param i_msAddr - Mainstore address where SLCA structure is loaded
- *        o_hdatslcaCount - output parameter - Number of SLCA structures
- *        o_hdatslcaSize - output paramster - Size of SLCA created
+ * @param io_msAddr - Address where SLCA structure is loaded
+ *        o_hdatslcaCount Number of SLCA structures
+ *        o_hdatslcaSize  Size of SLCA created
  *
  * @return errlHndl_t - Error Handle
  *
  * @retval HDAT_OTHER_COMP_ERROR
  */
-errlHndl_t hdatBuildSLCA(const HDAT::hdatMsAddr_t &i_msAddr,
-                               uint32_t &o_hdatslcaCount,
-                               uint32_t &o_hdatslcaSize)
+errlHndl_t hdatBuildSLCA(HDAT::hdatMsAddr_t & o_msAddr,
+                         uint32_t & o_hdatslcaCount,
+                         uint32_t & o_hdatslcaSize)
 
 {
     HDAT_ENTER();
@@ -814,67 +814,35 @@ errlHndl_t hdatBuildSLCA(const HDAT::hdatMsAddr_t &i_msAddr,
     hdatPopulateMTMAndSerialNumber();
     hdatConstructslcaTable(l_hdatslcaentries);
 
-    uint32_t l_hdatslcastructsize = l_hdatslcaentries.size() *
-                                                    sizeof(HDAT_slcaEntry_t);
-
-    uint64_t l_base_addr = ((uint64_t) i_msAddr.hi << 32) | i_msAddr.lo;
+    uint32_t l_hdatslcastructsize = l_hdatslcaentries.size() * sizeof(HDAT_slcaEntry_t);
 
     //Set SLCA Headers
     hdatSetSLCAStructHdrs(l_hdatslcastruct, l_hdatslcaentries.size());
 
     // Allocate space for SLCA Header
-    void *l_virt_addr_hdr = mm_block_map(reinterpret_cast<void*>
-                                               (ALIGN_PAGE_DOWN(l_base_addr)),
-                                         (ALIGN_PAGE(sizeof(hdatSLCAStruct_t) +
-                                            l_hdatslcastructsize) + PAGESIZE));
-    l_virt_addr_hdr = reinterpret_cast<void *>(
-                    reinterpret_cast<uint64_t>(l_virt_addr_hdr) +
-                    (l_base_addr - ALIGN_PAGE_DOWN(l_base_addr)));
+    void * l_slcaAddr = malloc((ALIGN_PAGE(sizeof(hdatSLCAStruct_t) + l_hdatslcastructsize) + PAGESIZE));
 
-    HDAT_DBG("SLCA hdr addr 0x%016llX SLCA hdr size %d",
-                   (uint64_t)l_virt_addr_hdr, sizeof(hdatSLCAStruct_t));
+    HDAT_DBG("SLCA hdr addr %p SLCA hdr size %d",
+                   l_slcaAddr, sizeof(hdatSLCAStruct_t));
 
-    memcpy(reinterpret_cast<hdatSLCAStruct_t *>(l_virt_addr_hdr),
-                                 &l_hdatslcastruct, sizeof(hdatSLCAStruct_t));
+    memcpy(l_slcaAddr, &l_hdatslcastruct, sizeof(hdatSLCAStruct_t));
 
-    HDAT_slcaEntry_t *l_hdatSLCA = reinterpret_cast<HDAT_slcaEntry_t *>
-                       ((uint64_t)l_virt_addr_hdr + sizeof(hdatSLCAStruct_t));
+    // Get a pointer to the first SLCA entry
+    HDAT_slcaEntry_t *l_hdatSLCA = reinterpret_cast<HDAT_slcaEntry_t *>(
+                                    reinterpret_cast<uint64_t>(l_slcaAddr) + sizeof(hdatSLCAStruct_t));
 
-    HDAT_DBG("HDAT SLCA addr 0x%016llX SLCA struct size %d",
-                  (uint64_t) l_base_addr, l_hdatslcastructsize);
-
-    HDAT_DBG("HDAT SLCA addr 0x%016llX virtual addr 0x%016llX",
-                  (uint64_t) l_hdatSLCA, (uint64_t)l_virt_addr_hdr);
+    HDAT_DBG("HDAT SLCA entry addr %p SLCA struct size %d",
+                  l_hdatSLCA, l_hdatslcastructsize);
 
     std::copy(l_hdatslcaentries.begin(), l_hdatslcaentries.end(), l_hdatSLCA);
 
     HDAT_DBG("HDAT:: Loaded SLCA structures: Size: 0x%X",
-                                               sizeof(hdatSLCAStruct_t) +
-                                               l_hdatslcastructsize);
+             sizeof(hdatSLCAStruct_t) + l_hdatslcastructsize);
 
     o_hdatslcaSize = sizeof(hdatSLCAStruct_t) + l_hdatslcastructsize;
     o_hdatslcaCount = 1;
-
-    int rc = mm_block_unmap(l_virt_addr_hdr);
-
-    if( rc != 0)
-    {
-        errlHndl_t l_errl = nullptr;
-        /*@
-         * @errortype
-         * @moduleid         HDAT::MOD_SLCA_DESTRUCTOR
-         * @reasoncode       HDAT::RC_DEV_MAP_FAIL
-         * @devdesc          Unmap a mapped region failed
-         * @custdesc         Firmware encountered an internal error.
-        */
-        hdatBldErrLog(l_errl,
-                MOD_PCIA_DESTRUCTOR,
-                RC_DEV_MAP_FAIL,
-                (uint32_t)((uint64_t)l_virt_addr_hdr >> 32),
-                (uint32_t)((uint64_t)l_virt_addr_hdr),0,0,
-                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                HDAT_VERSION1, false);
-    }
+    o_msAddr.hi = reinterpret_cast<uint64_t>(l_slcaAddr) >> 32;
+    o_msAddr.lo = reinterpret_cast<uint64_t>(l_slcaAddr);
 
     HDAT_EXIT();
     return l_errl;
@@ -910,14 +878,9 @@ void hdatMoveSLCA(const HDAT::hdatMsAddr_t &i_msAddrSource,
     HDAT_DBG("Move SLCA from 0x%016llX to 0x%016llX with size  %d",
                   (uint64_t) l_base_addr_source, (uint64_t)l_base_addr_dest,
                                                  i_slcaSize);
-    // Allocate space for SLCA
-    void *l_virt_addr_source = mm_block_map(reinterpret_cast<void*>
-                                          (ALIGN_PAGE_DOWN(l_base_addr_source)),
-                                          (ALIGN_PAGE(i_slcaSize)+PAGESIZE));
 
-    l_virt_addr_source = reinterpret_cast<void *>(
-                    reinterpret_cast<uint64_t>(l_virt_addr_source) +
-                    (l_base_addr_source - ALIGN_PAGE_DOWN(l_base_addr_source)));
+    void * l_virt_addr_source = reinterpret_cast<void *>(l_base_addr_source
+                              +(l_base_addr_source - ALIGN_PAGE_DOWN(l_base_addr_source)));
 
     // Allocate space for SLCA
     void *l_virt_addr_dest = mm_block_map(reinterpret_cast<void*>
@@ -928,10 +891,8 @@ void hdatMoveSLCA(const HDAT::hdatMsAddr_t &i_msAddrSource,
                     reinterpret_cast<uint64_t>(l_virt_addr_dest) +
                     (l_base_addr_dest - ALIGN_PAGE_DOWN(l_base_addr_dest)));
 
-    memcpy(l_virt_addr_dest , reinterpret_cast<void*>(l_virt_addr_source),
-                                                                   i_slcaSize);
+    memcpy(l_virt_addr_dest, l_virt_addr_source, i_slcaSize);
 
-    mm_block_unmap(l_virt_addr_source);
     mm_block_unmap(l_virt_addr_dest);
     HDAT_EXIT();
 }

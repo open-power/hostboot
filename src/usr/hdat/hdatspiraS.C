@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,7 @@
 #include "hdattpmdata.H"
 #include <util/align.H>
 #include <targeting/common/commontargeting.H>
-
+#include <targeting/common/utilFilter.H>
 
 
 namespace HDAT
@@ -275,40 +275,23 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
 {
     HDAT_ENTER();
     errlHndl_t l_err = NULL;
-    hdatMsAddr_t l_msAddr,l_addrToPass,i_slcaMsAddr = SLCA_BUILD_ADDR;
+    hdatMsAddr_t l_msAddr = {0, 0},
+                 l_addrToPass = {0, 0},
+                 l_slcaMsAddr = {0, 0};
     hdat5Tuple_t l_spirasEntry;
-    uint32_t l_hostUsed = 0;
-    uint32_t l_size,l_count,l_hdatslcaSize,l_hdatSlcaCnt;
-    uint64_t l_binAddr;
+    uint32_t l_hostUsed = 0,
+             l_size = 0,
+             l_count = 0,
+             l_hdatslcaSize = 0,
+             l_hdatSlcaCnt = 0;
+    uint64_t l_binAddr = 0;
     o_actCount = 1;
     o_actSize = 0;
 
     do {
 
-    //calculate HRMOR
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget( sys );
-
-    assert(sys != NULL);
-
-    uint64_t l_hrmor =
-             sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>()*MEGABYTE;
-
-    HDAT_DBG("HRMOR=0x%08x",l_hrmor);
-
-
     HDAT_DBG("building SLCA");
-    l_binAddr = ((uint64_t)i_slcaMsAddr.hi << 32)
-                      |
-                i_slcaMsAddr.lo;
-
-    l_binAddr += l_hrmor;
-    memcpy(&i_slcaMsAddr, &l_binAddr, sizeof(l_binAddr));
-
-    HDAT_DBG("building SLCA at i_slcaMsAddr.hi=%x,i_slcaMsAddr.lo=%x",
-             i_slcaMsAddr.hi,i_slcaMsAddr.lo);
-
-    l_err = hdatBuildSLCA(i_slcaMsAddr,l_hdatSlcaCnt,l_hdatslcaSize);
+    l_err = hdatBuildSLCA(l_slcaMsAddr,l_hdatSlcaCnt,l_hdatslcaSize);
 
     if ( l_err )
     {
@@ -323,6 +306,10 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
     HDAT_DBG("size of hdatSpiraS_t:  0x%08X, hdatActualSize: 0x%08X",
               (sizeof(hdatSpiraS_t)),i_spirasHostEntry.hdatActualSize);
 
+
+    uint64_t l_payloadHrmor = TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_PAYLOAD_BASE>()
+                            * MEGABYTE;
+    HDAT_DBG("PAYLOAD HRMOR 0x%08X", l_payloadHrmor);
 
     for ( hdatSpiraSDataAreas l_entryToPrint=HDAT_SPIRAS_DA_FIRST;
          (l_entryToPrint < HDAT_SPIRAS_DA_LAST);
@@ -345,8 +332,7 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
         HDAT_DBG("next spiras tuple will be l_msAddr.hi=0x%8x,"
                  "l_msAddr.lo=0x%8x",l_msAddr.hi,l_msAddr.lo);
 
-
-        l_binAddr += l_hrmor;
+        l_binAddr += l_payloadHrmor;
 
         memcpy(&l_addrToPass, &l_binAddr, sizeof(l_binAddr));
 
@@ -411,9 +397,8 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
                 HDAT_DBG("calling SLCA from spiras ");
                 l_count = l_hdatSlcaCnt;
                 l_size = l_hdatslcaSize;
-                hdatMoveSLCA(i_slcaMsAddr,
-                l_addrToPass,l_hdatslcaSize);
-                HDAT_DBG("moved SLCA count=%d, size=0x%x",l_count,l_size);
+                hdatMoveSLCA(l_slcaMsAddr, l_addrToPass, l_hdatslcaSize);
+                HDAT_DBG("moved SLCA count=%d, size=0x%x", l_count, l_size);
             }
                  break;
             case HDAT_SPIRAS_BACKPLANE_VPD:

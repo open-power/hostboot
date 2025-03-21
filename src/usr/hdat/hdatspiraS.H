@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,6 @@
 #include <errl/errlentry.H>
 #include <hdat/hdat.H>
 
-
 namespace HDAT
 {
 
@@ -55,8 +54,6 @@ namespace HDAT
 const char HDAT_SPIRAS_EYE_CATCHER[] = "SPIRAS";
 
 const uint16_t HDAT_SPIRAS_VERSION = 0x40;
-
-const  hdatMsAddr_t SLCA_BUILD_ADDR = {0x00000000, 0x80000000};
 
 /*---------------------------------------------------------------------------*/
 /* Type definitions                                                          */
