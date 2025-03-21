@@ -87,6 +87,8 @@ function copy_targeting_xml ()
         if [ ${rc} -ne 0 ]; then
             return ${rc}
         fi
+        # Commit the file changes to keep the users working tree clean and avoid user accidentally losing the changes.
+        git add $PROJECT_ROOT/src/usr/targeting/common/xmltohb/$sim_file && git commit -m "$sim_file changes for $package_name HBD patching"
     fi
 }
 
@@ -102,7 +104,7 @@ function pull_pnor_xml ()
 {
     file=pnorLayoutP10.xml
     echo "Getting the OP-BUILD PNOR defaultPnorLayout_64.xml to replace the STANDALONE $file to properly build patches for BMC"
-    cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/build/openpower-pnor-p11*/p11Layouts/defaultPnorLayout_64.xml $PROJECT_ROOT/src/build/buildpnor/$file
+    cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/build/openpower-pnor-${generation}*/${generation}Layouts/defaultPnorLayout_64.xml $PROJECT_ROOT/src/build/buildpnor/$file
     rc=$?
     if [ ${rc} -ne 0 ]; then
         return ${rc}
@@ -152,7 +154,6 @@ function verify_config_file ()
 
 function update_customrc()
 {
-    generation=P11
     while true; do
         read -p "It is recommended that this script update your customrc with CONFIG_FILE and BMC_STANDALONE_PATCHING defaults to prevent issues re-entering the hostboot workon in the future. Do that now [Y/N]? " yn
         case $yn in
@@ -174,23 +175,25 @@ function update_customrc()
             esac
     done
     # Get the line the header starts on
-    customrcHeader=$(grep -in "$generation STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
+    customrcHeader=$(grep -in "${generation^^} STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
     if [ -z "${customrcHeader}"  ]; then
         # Make a backup in case the user needs it
         \cp $PROJECT_ROOT/customrc $PROJECT_ROOT/customrc.backup
         # Write the standalone patching section in the user's custom rc
+        # Note, CONFIG_FILE should be the first export because below code uses its relative position to
+        # modify customrcs which already have this block in it.
         $(echo "" >> $PROJECT_ROOT/customrc)
         $(echo "###########################################################" >> $PROJECT_ROOT/customrc)
-        $(echo "########### $generation STANDALONE PATCHING"                 >> $PROJECT_ROOT/customrc)
+        $(echo "########### ${generation^^} STANDALONE PATCHING"                 >> $PROJECT_ROOT/customrc)
         $(echo "###########################################################" >> $PROJECT_ROOT/customrc)
         $(echo "export CONFIG_FILE=$PROJECT_ROOT/$config_name"               >> $PROJECT_ROOT/customrc)
         $(echo "export BMC_STANDALONE_PATCHING=1"                            >> $PROJECT_ROOT/customrc)
         $(echo "export HOSTBOOT_COMMIT_HASH=$HOSTBOOT_COMMIT_HASH"           >> $PROJECT_ROOT/customrc)
         # Try again
-        customrcHeader=$(grep -in "$generation STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
+        customrcHeader=$(grep -in "${generation^^} STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
         if [ -z "${customrcHeader}" ]; then
             # Just give up
-            echo "Can't find the $generation STANDALONE PATCHING header in $PROJECT_ROOT/customrc."
+            echo "Can't find the ${generation^^} STANDALONE PATCHING header in $PROJECT_ROOT/customrc."
             return 1
         fi
     else
@@ -238,9 +241,20 @@ function update_customrc()
             if [ $(wc -l $PROJECT_ROOT/customrc | cut -f1 -d" ") -lt $expectedLine ]; then
                 $(echo "export BMC_STANDALONE_PATCHING=1" >> $PROJECT_ROOT/customrc)
             else
-                $(sed -i "${expectedLine}export BMC_STANDALONE_PATCHING=1" $PROJECT_ROOT/customrc)
+                $(sed -i "${expectedLine}iexport BMC_STANDALONE_PATCHING=1" $PROJECT_ROOT/customrc)
             fi
         fi
+
+        # There could be a HOSTBOOT_COMMIT_HASH in the customrc file already. Update with proper one for this build
+        $(sed -i '/HOSTBOOT_COMMIT_HASH/d' $PROJECT_ROOT/customrc)
+        expectedLine=$((${customrcHeader} + 4))
+        if [ $(wc -l $PROJECT_ROOT/customrc | cut -f1 -d" ") -lt $expectedLine ]; then
+            $(echo "export HOSTBOOT_COMMIT_HASH=$HOSTBOOT_COMMIT_HASH" >> $PROJECT_ROOT/customrc)
+        else
+            $(sed -i "${expectedLine}iexport HOSTBOOT_COMMIT_HASH=$HOSTBOOT_COMMIT_HASH" $PROJECT_ROOT/customrc)
+        fi
+
+
     fi
     return 0
 }
@@ -291,6 +305,9 @@ function main ()
             usage
             return 1;;
     esac
+    generation=$(echo $package_name | cut -c 1-2 | awk '{print "p"$1}')
+    echo "Generation is: $generation"
+    config_name=${generation}ebmc.config
 
     build_release=$(echo $package_name | cut -c 1-4 | awk '{print "fw"$1}')
     echo "Build Release: $build_release"
@@ -310,7 +327,7 @@ function main ()
         return 1
     fi
 
-    export HOSTBOOT_COMMIT_HASH=$(sed -n -e 's/^.*hostboot-p11-//p' < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -c 1-7 | head -n1)
+    export HOSTBOOT_COMMIT_HASH=$(sed -n -e "s/^.*hostboot-$generation-//p" < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -c 1-7 | head -n1)
     echo "Hostboot commit for PNOR build: $HOSTBOOT_COMMIT_HASH"
     if [ -z "$HOSTBOOT_COMMIT_HASH" ]; then
         echo "ERROR: Could not find hostboot commit hash with given package name:'$package_name'"
@@ -468,9 +485,6 @@ function main ()
     fi
 
 }
-
-# global for CONFIG_FILE
-config_name=p11ebmc.config
 
 # The user must source this script
 # otherwise it can't update the environment variable for the CONFIG_FILE
