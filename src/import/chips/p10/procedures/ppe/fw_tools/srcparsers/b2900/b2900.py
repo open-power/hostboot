@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2023
+# Contributors Listed Below - COPYRIGHT 2023,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -639,4 +639,3 @@ if  __name__ == "__main__":
                     word7,
                     word8,
                     word9 )
-        print(out)

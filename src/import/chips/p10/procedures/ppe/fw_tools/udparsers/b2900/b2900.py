@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2023,2024
+# Contributors Listed Below - COPYRIGHT 2023,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -81,9 +81,7 @@ def parseQmeUserDataSection(data):
         qmeTraceBinFile.write( data )
     magicWordOffset = checkForPpeTraceBuff()
     cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(1024) + " if=" + "/tmp/qme.bin " + " of=" + "/tmp/qmeTrace.bin" + " bs=1 >/dev/null 2>&1"
-    rc = os.system( cmd )
-    if( rc ):
-        print( "Failed To Extract QME Trace Section. RC : " + str( rc ) )
+    os.system( cmd )
 
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -113,7 +111,6 @@ def parseUDToJson(subType, ver, data):
     qmeReg.close()
     qmeReg = open( "/tmp/qme.bin", "rb" )
 
-    #print( "Gen = " + chipGen + " " + '{:016x}'.format( procVer ) )
     size_parsed = ERRL_BIN_XIR_SECT_VER_OFFSET;
     l_sectn = 0;
     qme_xir_reg =""
@@ -142,7 +139,6 @@ def parseUDToJson(subType, ver, data):
                 readData = fspFormat.read()
 
             traceStringFile = getLid(QME_STRING_LID_FILE)
-            print( traceStringFile )
 
             if traceStringFile == "":
                 traceDict["File not found"] = QME_STRING_LID_FILE

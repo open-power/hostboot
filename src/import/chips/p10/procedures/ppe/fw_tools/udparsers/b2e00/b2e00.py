@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2023,2024
+# Contributors Listed Below - COPYRIGHT 2023,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -80,8 +80,6 @@ def parseXgpeUserDataSection(data):
     magicWordOffset = checkForPpeTraceBuff()
     cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(2048) + " if=" + "/tmp/pgpe.bin " + " of=" + "/tmp/pgpeTrace.bin" + " bs=1 >/dev/null 2>&1"
     rc = os.system( cmd )
-    if( rc ):
-        print( "Failed To Extract PGPE Trace Section. RC : " + str( rc ) )
 
 #----------------------------------------------------------------------------------------------------------------------
 
@@ -140,7 +138,6 @@ def parseUDToJson(subType, ver, data):
                 readData = fspFormat.read()
 
             traceStringFile = getLid(PGPE_STRING_LID_FILE)
-            print( traceStringFile )
 
             if traceStringFile == "":
                 traceDict["File not found"] = PGPE_STRING_LID_FILE
