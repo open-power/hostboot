@@ -440,7 +440,7 @@ if ($keyTransition{enabled})
     # Allowed transition drivers:
     # 1. V3 dev to V3 dev
     # 2. V3 dev to V3 prod
-    # 3. V1 prod to V3 prod
+    # 3. V1 prod to V3 prod - Not currently supperted @TODO JIRA: PFHB-923
 
     if ($signMode{$DEVELOPMENT} && $keyTransition{$V3} && $keyTransition{$DEVELOPMENT})
     {
@@ -456,6 +456,8 @@ if ($keyTransition{enabled})
     {
         $OPEN_SIGN_KEY_TRANS_OLD = "$OPEN_SIGN_REQUEST_V1 $OPEN_PRD_SIGN_PARAMS_V1";
         $OPEN_SIGN_KEY_TRANS_NEW = "$OPEN_SIGN_REQUEST_V3 $OPEN_PRD_SIGN_PARAMS_V3";
+        # currently not supported
+        die "Prod v1 - prod v3 not currently supported\n";
     }
     else
     {
@@ -472,7 +474,9 @@ if ($keyTransition{enabled})
 
 if ($signMode{$PRODUCTION})
 {
-    $OPEN_SIGN_REQUEST_V1 .= $OPEN_PRD_SIGN_PARAMS_V1;
+    # for p11 we dont support V1 prod signing
+    # use prod for V3 and dev for V1
+    $OPEN_SIGN_REQUEST_V1 .= $OPEN_DEV_SIGN_PARAMS_V1;
     $OPEN_SIGN_REQUEST_V3 .= $OPEN_PRD_SIGN_PARAMS_V3;
 }
 else
