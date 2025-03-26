@@ -188,80 +188,102 @@ using namespace CxxTest;
     uint32_t ci_spd_CRC{0}; // use in CI to store the SPD VPD CRC
 
     /*
-    * @brief Set the mask/unmask XIP section data and update the CRC
+    * @brief Set all the mask/unmask XIP section data with a value OR
+    *        Modify one byte outside the XIP section data
     */
-    void ci_inject_set_sections(sbeTargetState_t &io_sbeState,
-                                void             *i_custImage,
-                                uint32_t          i_custImageSize)
+    void ci_inject_section_data(void    *i_custImage,
+                                uint32_t i_custImageSize,
+                                uint8_t  i_value,
+                                bool     i_change_byte)
     {
         P9XipSection l_xipSection{0};
         uint64_t     l_section_addr{0};
-        uint8_t      l_value{0};
+
+        for (const auto& l_xipMask : g_xipSectionMask)
+        {
+            if (p9_xip_get_section(i_custImage, l_xipMask.section, &l_xipSection) ||
+                l_xipSection.iv_size == 0)
+            {
+                continue; // not found or no size, so skip
+            }
+            if (i_change_byte && !l_xipMask.selectOffsetMarker)
+            {
+                continue; // change byte but not a marker string, so skip
+            }
+
+            if (l_xipMask.selectOffsetMarker)
+            {
+                // this table entry is a string id
+                void *pIdStringBfr{nullptr};
+                if (locateStringInBfr((char*)(l_xipMask.startOffsetMarker),
+                                    i_custImage,
+                                    i_custImageSize,
+                                    pIdStringBfr))
+                {
+                    l_section_addr = reinterpret_cast<uint64_t>(pIdStringBfr);
+                }
+                if (!l_section_addr) {continue;} // not found, so skip
+
+                if (i_change_byte)
+                {
+                    // set one byte, just outside of one table entry
+                    *reinterpret_cast<uint8_t*>(l_section_addr +
+                                          l_xipMask.numberOfBytesToMask) = 0x6a;
+                    break;
+                }
+            }
+            else
+            {
+                // this table entry is an offset
+                l_section_addr = reinterpret_cast<uint64_t>(i_custImage) +
+                                                  l_xipSection.iv_offset +
+                      *reinterpret_cast<uint32_t*>(l_xipMask.startOffsetMarker);
+            }
+
+            // set the section data to value
+            memset(reinterpret_cast<void *>(l_section_addr),
+                    i_value,
+                    l_xipMask.numberOfBytesToMask);
+        }
+    }
+    /*
+    * @brief Handle injects before the mask/unmask XIP section data
+    */
+    void ci_inject_before_masking(sbeTargetState_t &io_sbeState,
+                                  void             *i_custImage,
+                                  uint32_t          i_custImageSize)
+    {
+        if (g_cxxTestInject.isSet(SBE_INJECT_BZERO_SECTIONS))
+        {
+            ci_inject_section_data(i_custImage,
+                                   i_custImageSize,
+                                   0,
+                                   false);
+            // save the CRC of bzero'd sections
+            ci_spd_CRC = Util::crc32_calc(i_custImage, i_custImageSize);
+        }
 
         if (g_cxxTestInject.isSet(SBE_INJECT_NON_ZERO_SECTIONS))
         {
-            l_value = 0x7b; // rather than 0, use this value to modify the section data
+            ci_inject_section_data(i_custImage,
+                                   i_custImageSize,
+                                   0x7b,
+                                   false);
         }
 
-        if (g_cxxTestInject.isSet(SBE_INJECT_BZERO_SECTIONS)   || // if inject is
-            g_cxxTestInject.isSet(SBE_INJECT_NON_ZERO_SECTIONS)|| // to modify the
-            g_cxxTestInject.isSet(SBE_INJECT_CHANGE_BYTE))        // custImage
+        if (g_cxxTestInject.isSet(SBE_INJECT_CHANGE_BYTE))
         {
-            for (const auto& xipMask : g_xipSectionMask)
-            {
-                if (p9_xip_get_section(i_custImage, xipMask.section, &l_xipSection) ||
-                    l_xipSection.iv_size == 0)
-                {
-                    continue; // not found or no size, so skip
-                }
-                if (!xipMask.selectOffsetMarker)
-                {
-                    // this table entry is an offset
-                    l_section_addr = reinterpret_cast<uint64_t>(i_custImage) +
-                                                    l_xipSection.iv_offset +
-                                        *(uint32_t*)xipMask.startOffsetMarker;
-                }
-                else
-                {
-                    // this table entry is a string id
-                    void *pIdStringBfr{nullptr};
-                    if (locateStringInBfr((char*)(xipMask.startOffsetMarker),
-                                        i_custImage,
-                                        i_custImageSize,
-                                        pIdStringBfr))
-                    {
-                        l_section_addr = reinterpret_cast<uint64_t>(pIdStringBfr);
-                    }
-                    if (!l_section_addr) {continue;} // not found, so skip
-
-                    if (g_cxxTestInject.isSet(SBE_INJECT_CHANGE_BYTE))
-                    {
-                        // set one byte, just outside of one table entry
-                        *(uint8_t*)((uint64_t)l_section_addr +
-                                            xipMask.numberOfBytesToMask) = 0x6a;
-                        break;
-                    }
-                }
-
-                // set the section data to value
-                memset(reinterpret_cast<void *>(l_section_addr),
-                    l_value,
-                    xipMask.numberOfBytesToMask);
-            }
-
-            // update the CRC since we modified the custImage
-            io_sbeState.customizedImage_crc = Util::crc32_calc(i_custImage, i_custImageSize);
-        }
-
-        if (g_cxxTestInject.isSet(SBE_INJECT_BZERO_SECTIONS))
-        {
-            ci_spd_CRC = Util::crc32_calc(i_custImage, i_custImageSize);
+            // modify one byte outside of section data
+            ci_inject_section_data(i_custImage,
+                                   i_custImageSize,
+                                   0,
+                                   true);
         }
     }
     /*
     * @brief Handle injects after the mask/unmask XIP section data
     */
-    void do_inject(sbeTargetState_t &io_sbeState)
+    void ci_inject_after_masking(sbeTargetState_t &io_sbeState)
     {
         // default, set good values
         io_sbeState.seeprom_0_ver.struct_version = STRUCT_VERSION_LATEST;
@@ -284,13 +306,13 @@ using namespace CxxTest;
             io_sbeState.seeprom_1_ver.data_crc = 0;
         }
     }
-#define CI_INJECT_MASK_UNMASK_SET_XIP_SECTIONS(_a,_b,_c) ci_inject_set_sections(_a,_b,_c)
-#define CI_INJECT_MASK_UNMASK(_a) do_inject(_a)
+#define CI_INJECT_BEFORE_MASKING(_a,_b,_c) ci_inject_before_masking(_a,_b,_c)
+#define CI_INJECT_AFTER_MASKING(_a)        ci_inject_after_masking(_a)
 #define CI_INJECT_MASK_UNMASK_CHECK_FOR_SKIP() \
     if (g_cxxTestInject.isSet(SBE_INJECT_SKIP_MASK)) {continue;}
 #else
-#define CI_INJECT_MASK_UNMASK_SET_XIP_SECTIONS(_a,_b,_c)
-#define CI_INJECT_MASK_UNMASK(_s)
+#define CI_INJECT_BEFORE_MASKING(_a,_b,_c)
+#define CI_INJECT_AFTER_MASKING(_s)
 #define CI_INJECT_MASK_UNMASK_CHECK_FOR_SKIP()
 
 #endif // CONFIG_COMPILE_CXXTEST_HOOKS
@@ -3506,7 +3528,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             uint32_t searchSize = sbeImgSize; // Actual image size
             vaddr_metadata_vector_t tempMetaDataVector;
 
-            CI_INJECT_MASK_UNMASK_SET_XIP_SECTIONS(io_sbeState, pCustomizedBfr, sbeImgSize);
+            CI_INJECT_BEFORE_MASKING(io_sbeState, pCustomizedBfr, sbeImgSize);
 
             // Remove specific section data from the image, before the
             // CRC is calculated.
@@ -3570,7 +3592,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
-            CI_INJECT_MASK_UNMASK(io_sbeState);
+            CI_INJECT_AFTER_MASKING(io_sbeState);
 
             // Determine Permanent Side from flag in MVPD
             if(SEEPROM_0_PERMANENT_VALUE ==
@@ -7557,9 +7579,10 @@ errlHndl_t maskUnmaskMetaData( void*                     i_pSourceBfr,
                 uint64_t * pSectionBfrAddr = reinterpret_cast<uint64_t *>(sectionBfrAddr);
 
                 TRACFCOMP( g_trac_sbe,
-                    "maskUnmaskMetaData(): section_str:(%-13s) section:%-3d "
+                    "maskUnmaskMetaData(%08x): section_str:(%-13s) section:%-3d "
                     "totalOffset:%-8X = iv_offset:%-8X +  startOffset:%-8X "
                     "size:%d",
+                    pSectionBfrAddr,
                     section_str, xipMask.section,
                     xipSection.iv_offset + *(uint32_t*)xipMask.startOffsetMarker,
                     xipSection.iv_offset, *(uint32_t*)xipMask.startOffsetMarker,
@@ -7627,9 +7650,10 @@ errlHndl_t maskUnmaskMetaData( void*                     i_pSourceBfr,
                 uint64_t markerOffset = (uint64_t)pIdStringBfr - (uint64_t)i_pSourceBfr;
 
                 TRACFCOMP( g_trac_sbe,
-                    "maskUnmaskMetaData(): section_str:(%-13s) section:%-3d "
+                    "maskUnmaskMetaData(%8x): section_str:(%-13s) section:%-3d "
                     "totalOffset:%-8X = iv_offset:%-8X + markerOffset:%-8X "
                     "size:%-5d %.14s",
+                    pIdStringBfr,
                     section_str, xipMask.section,
                     xipSection.iv_offset + markerOffset,
                     xipSection.iv_offset, markerOffset,

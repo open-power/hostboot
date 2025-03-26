@@ -1246,6 +1246,11 @@ class SBEUpdateTest: public CxxTest::TestSuite
         l_sbeState.sbe_update_space_vaddr = VMM_VADDR_SBE_UPDATE;
         l_sbeState.target = l_target;
 
+        g_cxxTestInject.clear(SBE_INJECT_BZERO_SECTIONS);
+        g_cxxTestInject.clear(SBE_INJECT_NON_ZERO_SECTIONS);
+        g_cxxTestInject.clear(SBE_INJECT_SKIP_MASK);
+        g_cxxTestInject.clear(SBE_INJECT_CHANGE_BYTE);
+
         //----------------------------------------------------------------------
         // TC1_ZERO_SECTIONS_NO_UPDATE
         //----------------------------------------------------------------------
@@ -1279,6 +1284,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
         //----------------------------------------------------------------------
         TS_INFO("testSbeMaskUnmask: TC2_CRC_MISMATCH_DO_UPDATE");
 
+        g_cxxTestInject.set(SBE_INJECT_BZERO_SECTIONS);
         g_cxxTestInject.set(SBE_INJECT_CRC_MISMATCH);
         l_errl = getSbeInfoState(l_sbeState);
         if (l_errl)
@@ -1298,6 +1304,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
         {
             TS_FAIL("testSbeMaskUnmask: TC2 - SBE update expected");
         }
+        g_cxxTestInject.clear(SBE_INJECT_BZERO_SECTIONS);
         g_cxxTestInject.clear(SBE_INJECT_CRC_MISMATCH);
 
         //----------------------------------------------------------------------
@@ -1305,6 +1312,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
         //----------------------------------------------------------------------
         TS_INFO("testSbeMaskUnmask: TC3_NON_ZERO_SECTIONS_DO_UPDATE");
 
+        g_cxxTestInject.set(SBE_INJECT_BZERO_SECTIONS);
         g_cxxTestInject.set(SBE_INJECT_NON_ZERO_SECTIONS);
         g_cxxTestInject.set(SBE_INJECT_SKIP_MASK);
         l_errl = getSbeInfoState(l_sbeState);
@@ -1325,6 +1333,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
         {
             TS_FAIL("testSbeMaskUnmask: TC3 - SBE update is expected");
         }
+        g_cxxTestInject.clear(SBE_INJECT_BZERO_SECTIONS);
         g_cxxTestInject.clear(SBE_INJECT_NON_ZERO_SECTIONS);
         g_cxxTestInject.clear(SBE_INJECT_SKIP_MASK);
 
@@ -1332,6 +1341,9 @@ class SBEUpdateTest: public CxxTest::TestSuite
         // TC4_NON_ZERO_SECTIONS_NO_UPDATE
         //----------------------------------------------------------------------
         TS_INFO("testSbeMaskUnmask: TC4_NON_ZERO_SECTIONS_NO_UPDATE");
+
+        g_cxxTestInject.set(SBE_INJECT_BZERO_SECTIONS);
+        g_cxxTestInject.set(SBE_INJECT_NON_ZERO_SECTIONS);
 
         l_errl = getSbeInfoState(l_sbeState);
         if (l_errl)
@@ -1351,13 +1363,18 @@ class SBEUpdateTest: public CxxTest::TestSuite
         {
             TS_FAIL("testSbeMaskUnmask: TC4 - SBE update NOT expected");
         }
+        g_cxxTestInject.clear(SBE_INJECT_BZERO_SECTIONS);
+        g_cxxTestInject.clear(SBE_INJECT_NON_ZERO_SECTIONS);
 
         //----------------------------------------------------------------------
         // TC5_OUTSIDE_AREA_DO_UPDATE
         //----------------------------------------------------------------------
         TS_INFO("testSbeMaskUnmask: TC5_OUTSIDE_AREA_DO_UPDATE");
 
+        g_cxxTestInject.set(SBE_INJECT_BZERO_SECTIONS);
+        g_cxxTestInject.set(SBE_INJECT_NON_ZERO_SECTIONS);
         g_cxxTestInject.set(SBE_INJECT_CHANGE_BYTE);
+
         l_errl = getSbeInfoState(l_sbeState);
         if (l_errl)
         {
@@ -1376,7 +1393,10 @@ class SBEUpdateTest: public CxxTest::TestSuite
         {
             TS_FAIL("testSbeMaskUnmask: TC5 - SBE update expected");
         }
+        g_cxxTestInject.clear(SBE_INJECT_BZERO_SECTIONS);
+        g_cxxTestInject.clear(SBE_INJECT_NON_ZERO_SECTIONS);
         g_cxxTestInject.clear(SBE_INJECT_CHANGE_BYTE);
+
         TRACFCOMP( g_trac_sbe, EXIT_MRK"testSbeMaskUnmask" );
 #endif
 #endif // ifndef __HOSTBOOT_RUNTIME
