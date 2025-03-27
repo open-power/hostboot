@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2024
+# Contributors Listed Below - COPYRIGHT 2020,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -93,6 +93,9 @@ class errludP_secure:
         # **** Version 4 Memory Layout ****
         # Append this to the end of Version 3:
         # 1 byte   : Secureboot Signing Mode
+        # **** Version 5 Memory Layout ****
+        # Append this to the end of Version 4:
+        # 8 bytes   : SecureRom Info Version
 
         d = dict()
         subd = dict()
@@ -111,6 +114,9 @@ class errludP_secure:
 
         if ver >= 4:
             subd['Secureboot Signing Mode'], i= hexConcat(data, i, i+1)
+
+        if ver >= 5:
+            subd['SecureRom Info Version'], i= hexConcat(data, i, i+8)
 
         d['Security Settings']=subd
 

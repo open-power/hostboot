@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,6 +179,7 @@ namespace SECUREBOOT
         SECURE_UDT_VERSION_2          = 0x2,
         SECURE_UDT_VERSION_3          = 0x3,
         SECURE_UDT_VERSION_4          = 0x4,
+        SECURE_UDT_VERSION_5          = 0x5,
 
         // Formats/User Detail Sections
         SECURE_UDT_NO_FORMAT          = 0x0,

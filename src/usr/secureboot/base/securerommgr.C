@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -485,50 +485,50 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
         {
 
             // V3 verification path
-// @TODO JIRA PFHB-921 Use SecureROM access when it is available
-#if 0
-            // Set startAddr to ROM_v3_verify() function at an offset of Secure ROM
-            l_rom_verify_startAddr =
-                                reinterpret_cast<uint64_t>(iv_securerom) +
-                                getSecRomFuncOffset(SB_FUNC_TYPES::MLDSA);
+            if (g_BlToHbDataManager.getSecureRomInfoVersion() >= SECUREROM_INFO_VER3_2)
+            {
+// V3 verification via secureROM
+                // Set startAddr to ROM_v3_verify() function at an offset of Secure ROM
+                l_rom_verify_startAddr =
+                                    reinterpret_cast<uint64_t>(iv_securerom) +
+                                    getSecRomFuncOffset(SB_FUNC_TYPES::MLDSA);
 
-            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
-                     "Calling ROM_v3_verify() via call_rom_v3_verify: l_rc=0x%x, "
-                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
-                     l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
-                     iv_securerom);
+                TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                        "Calling ROM_v3_verify() via call_rom_v3_verify: l_rc=0x%x, "
+                        "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
+                        l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
+                        iv_securerom);
 
-            ROM_v3_container_raw* l_v3_container =
-                                   reinterpret_cast<ROM_v3_container_raw*>(
-                                                                 i_container);
+                ROM_v3_container_raw* l_v3_container =
+                                    reinterpret_cast<ROM_v3_container_raw*>(
+                                                                    i_container);
 
-            l_rc = call_rom_v3_verify(reinterpret_cast<void*>
-                                       (l_rom_verify_startAddr),
-                                     l_v3_container,
-                                     &l_hw_parms);
+                l_rc = call_rom_v3_verify(reinterpret_cast<void*>
+                                        (l_rom_verify_startAddr),
+                                        l_v3_container,
+                                        &l_hw_parms,
+                                        nullptr);
 
-            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
-                     "Back from ROM_v3_verify() via call_rom_v3_verify: l_rc=0x%x, "
-                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
-                     l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
-                     iv_securerom);
+                TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                        "Back from ROM_v3_verify() via call_rom_v3_verify: l_rc=0x%x, "
+                        "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
+                        l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
+                        iv_securerom);
+            }
+            else
+            {
+                // V3 verification via direct call
+                ROM_v3_container_raw* l_v3_container =
+                                    reinterpret_cast<ROM_v3_container_raw*>(
+                                                                    i_container);
 
-#endif
+                l_rc = ROM_v3_verify(l_v3_container, &l_hw_parms);
 
-            ROM_v3_container_raw* l_v3_container =
-                                   reinterpret_cast<ROM_v3_container_raw*>(
-                                                                 i_container);
-
-            l_rc = ROM_v3_verify (l_v3_container,
-                                  &l_hw_parms);
-
-            TRACFCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                TRACFCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
                      "Back from ROM_v3_verify() via direct ROM_v3_verify: l_rc=0x%x, "
-                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
-                     l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
-                     iv_securerom);
-
-
+                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) (iv_d_p=%p)",
+                     l_rc, l_hw_parms.log, &l_hw_parms, iv_securerom);
+            }
         }
         else
         {
@@ -606,8 +606,7 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                 // container's header, which is what i_container points to.
                 // There are different headers sizes based on the container's
                 // version.
-                size_t l_contHdrSize = (l_signModeToUse
-                                        == TARGETING::SB_SIGNING_V3_CONTAINER)
+                size_t l_contHdrSize = (l_conHdr.isV3())
                                            ? V3_SECURE_HEADER_SIZE
                                            : PAGESIZE;
 
@@ -701,26 +700,32 @@ void SecureRomManager::hashBlob(const void * i_blob,
     }
     else
     {
+        uint64_t l_securerom_info_ver = g_BlToHbDataManager.getSecureRomInfoVersion();
         // V3
+        if (l_securerom_info_ver >= SECUREROM_INFO_VER3_2)
+        {
+            // Set startAddr to ROM_SHA3() function at an offset of Secure ROM
+            uint64_t l_rom_SHA3_startAddr =
+                                   reinterpret_cast<uint64_t>(iv_securerom) +
+                                   getSecRomFuncOffset(SB_FUNC_TYPES::SHA3);
 
-        // @TODO JIRA PFHB-921 Until securerom's call_rom_SHA3() function is
-        // working, call the linked sha3() function directly below
+            call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
+                           i_blob,
+                           i_size,
+                           reinterpret_cast<sha3_t*>(o_buf));
 
-        // Set startAddr to ROM_SHA3() function at an offset of Secure ROM
-        //uint64_t l_rom_SHA3_startAddr =
-        //                        reinterpret_cast<uint64_t>(iv_securerom) +
-        //                        getSecRomFuncOffset(SB_FUNC_TYPES::SHA3);
-
-        //call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
-        //                i_blob,
-        //                i_size,
-        //                reinterpret_cast<sha3_t*>(o_buf));
-        sha3(i_blob, i_size, reinterpret_cast<void*>(o_buf));
-
-        TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
+            TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
                   "call_rom_SHA3: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
-                   i_blob, i_size, l_rom_SHA3_startAddr,
-                   iv_securerom);
+                   i_blob, i_size, l_rom_SHA3_startAddr, iv_securerom);
+        }
+        else
+        {
+            sha3(i_blob, i_size, reinterpret_cast<void*>(o_buf));
+
+            TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
+                  "sha3: blob=%p size=0x%X",
+                   i_blob, i_size);
+        }
     }
 }
 
@@ -799,8 +804,6 @@ const SecureRomManager::SecRomFuncTypeOffsetMap_t
             }
         }
     } ,
-// @TODO JIRA PFHB-921 Restore these after support in Secure ROM is confirmed
-#if 0
     // SHA3 Hash Function
     { SB_FUNC_TYPES::SHA3,
         {
@@ -819,7 +822,6 @@ const SecureRomManager::SecRomFuncTypeOffsetMap_t
             }
         }
     }
-#endif
 };
 
 sbFuncVer_t SecureRomManager::getSecRomFuncVersion(const sbFuncType_t

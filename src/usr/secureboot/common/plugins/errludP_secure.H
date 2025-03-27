@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,6 +230,10 @@ class UdParserSecuritySettings : public ERRORLOG::ErrlUserDetailsParser
         // Append this to the end of Version 3:
         // 1 byte   : Secureboot Signing Mode
 
+        // **** Version 5 Memory Layout ****
+        // Append this to the end of Version 4:
+        // 8 bytes   : SecureRom Info Version
+
         detailsLayout* l_databuf = static_cast<detailsLayout*>(i_pBuffer);
 
         i_parser.PrintHeading("Security Settings");
@@ -257,6 +261,11 @@ class UdParserSecuritySettings : public ERRORLOG::ErrlUserDetailsParser
             i_parser.PrintNumber("Secureboot Signing Mode","0x%.2X",
                                  l_databuf->securebootSigningMode);
         }
+        if (i_version >= 5)
+        {
+            i_parser.PrintNumber("SecureRom Info Version","0x%X",
+                                 l_databuf->secureRomInfoVersion);
+        }
     }
 
   private:
@@ -273,6 +282,7 @@ class UdParserSecuritySettings : public ERRORLOG::ErrlUserDetailsParser
         uint8_t minSecureVersion;
         uint32_t measurementSeepromVersion;
         uint8_t securebootSigningMode;
+        uint64_t secureRomInfoVersion;
     };
 };
 

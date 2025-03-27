@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,7 +153,7 @@ namespace Bootloader{
             // Add cases as additional versions are created
             case SB_SETTING:
             default:
-                g_blData->blToHbData.version = BLTOHB_TPM_FFDC;
+                g_blData->blToHbData.version = BLTOHB_SR_INFO_VER;
                 break;
         }
 
@@ -211,6 +211,9 @@ namespace Bootloader{
 
             // Get Secureboot Signing Mode
             g_blData->blToHbData.sb_signing_mode = l_blConfigData->sbSettings.sbMode;
+
+            // Get version of secure rom
+            g_blData->blToHbData.secure_rom_info_version = l_pSecRomInfo->version;
         }
 
         // Send system settings to console
@@ -222,6 +225,7 @@ namespace Bootloader{
         uint8_t l_system_min_version = g_blData->blToHbData.min_secure_version;
         uint8_t l_mode = g_blData->blToHbData.sb_signing_mode;
         uint8_t l_bd = g_blData->blToHbData.secBackdoorBit;
+        uint64_t l_sriv = g_blData->blToHbData.secure_rom_info_version;
 
         bl_console::putString("\rSettings: SAB: 0x");
         bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_SAB),
@@ -238,6 +242,9 @@ namespace Bootloader{
         bl_console::putString(", BD: 0x");
         bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_bd),
                                sizeof(l_bd));
+        bl_console::putString(", SRIV: 0x");
+        bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_sriv),
+                                sizeof(l_sriv));
         bl_console::putString("\r\n");
     }
 
@@ -963,7 +970,7 @@ namespace Bootloader{
         // Initialization
         g_blData->bl_trace_index = 0;
         g_blData->bl_trace_index_saved = BOOTLOADER_TRACE_SIZE;
-        g_blData->blToHbData.version = BLTOHB_TPM_FFDC;
+        g_blData->blToHbData.version = BLTOHB_SR_INFO_VER;
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_START);
 
         //Set core scratch 3 to say bootloader is active

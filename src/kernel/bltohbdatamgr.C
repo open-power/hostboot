@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,8 @@ void BlToHbDataManager::print() const
                 iv_data.min_secure_version);
         printkd("-- Secureboot Signing Mode  = 0x%02X\n",
                 iv_data.sb_signing_mode);
+        printkd("-- Secure Rom info version  = 0x%X\n",
+                iv_data.secure_rom_info_version);
         printkd("-- Measurement Seeprom Version  = 0x%08X\n",
                 iv_data.measurement_seeprom_version);
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
@@ -131,6 +133,8 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.secBackdoorBit = i_data.secBackdoorBit;
     iv_data.min_secure_version = i_data.min_secure_version;
     iv_data.sb_signing_mode = i_data.sb_signing_mode;
+    iv_data.secure_rom_info_version = i_data.secure_rom_info_version;
+
     if(iv_data.version >= Bootloader::BLTOHB_SB_SETTING)
     {
         iv_data.measurement_seeprom_version = i_data.measurement_seeprom_version;
@@ -328,6 +332,21 @@ const uint8_t BlToHbDataManager::getSecurebootSigningMode() const
         crit_assert(iv_dataValid);
     }
     return iv_data.sb_signing_mode;
+}
+
+const uint64_t BlToHbDataManager::getSecureRomInfoVersion() const
+{
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access Secure Rom Info Version\n");
+        crit_assert(iv_dataValid);
+    }
+    if (iv_data.version < Bootloader::BLTOHB_SR_INFO_VER)
+    {
+        printk("E> BlToHbDataManager version is old, returning default for Secure Rom Info Version\n");
+        return SECUREROM_INFO_VER3;
+    }
+    return iv_data.secure_rom_info_version;
 }
 
 const uint32_t BlToHbDataManager::getMeasurementSeepromVersion() const

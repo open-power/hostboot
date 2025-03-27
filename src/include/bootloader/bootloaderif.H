@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,12 +76,14 @@ namespace Bootloader{
 const uint64_t BLTOHB_EYECATCHER = 0x23626C746F686200; // #BLTOHB\0
 
 // Used for version checking as the BlToHbData structure changes
+// BLTOHB_TPM_FFDC is fw1110 GA level
 enum BlToHbDataVersion
 {
     // [release:4][version:4]
     BLTOHB_INIT             = 0x0000000A00000001,
     BLTOHB_SB_SETTING       = 0x0000000A00000002,
     BLTOHB_TPM_FFDC         = 0x0000000A00000003,
+    BLTOHB_SR_INFO_VER      = 0x0000000B00000004,
 };
 
 enum
@@ -147,7 +149,7 @@ struct BlToHbData
                    cacheSizeMb(0), numKeyAddrPair(0),
                    min_secure_version(0), tdpSource(TDP_BIT_UNSET),
                    measurement_seeprom_version(0), tpmRc(0),
-                   sb_signing_mode(0)
+                   sb_signing_mode(0), secure_rom_info_version(0)
     {
         memset(keyAddrStashData, 0, sizeof(keyAddrStashData));
     }
@@ -200,6 +202,8 @@ struct BlToHbData
     uint32_t tpmRc;
     // Secureboot signing mode
     uint8_t sb_signing_mode;
+    // Secure rom info version
+    uint64_t secure_rom_info_version;
 
 } __attribute__((packed));
 

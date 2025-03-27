@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,7 +145,7 @@ UdSecuritySettings::UdSecuritySettings()
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_4;
+    iv_Version = SECURE_UDT_VERSION_5;
     iv_SubSection = SECURE_UDT_SECURITY_SETTINGS;
 
     char * l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(
@@ -170,12 +170,17 @@ UdSecuritySettings::UdSecuritySettings()
     // The following is appended onto VERSION_3 for VERSION_4:
     // 1 byte   : Secureboot Signing Mode
 
+    // **** Version 5 Memory Layout ****
+    // The following is appended onto VERSION_4 for VERSION_5:
+    // 8 bytes   : SecureRom Info Version
+
     l_pDetailsLayout->secAccessBit = 0xFF;
     l_pDetailsLayout->secOverride = 0xFF;
     l_pDetailsLayout->allowAttrOverride = 0xFF;
     l_pDetailsLayout->minSecureVersion = 0xFF;
     l_pDetailsLayout->measurementSeepromVersion = 0xFFFFFFFF;
     l_pDetailsLayout->securebootSigningMode = 0xFF;
+    l_pDetailsLayout->secureRomInfoVersion = 0xFFFFFFFFFFFFFFFF;
 
 #ifndef __HOSTBOOT_RUNTIME
     // Only check BlToHbData if it is valid, otherwise fields defaulted to 0xFF
@@ -189,6 +194,8 @@ UdSecuritySettings::UdSecuritySettings()
             g_BlToHbDataManager.getMeasurementSeepromVersion();
         l_pDetailsLayout->securebootSigningMode =
             g_BlToHbDataManager.getSecurebootSigningMode();
+        l_pDetailsLayout->secureRomInfoVersion =
+            g_BlToHbDataManager.getSecureRomInfoVersion();
     }
 #endif
 

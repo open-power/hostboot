@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -391,10 +391,8 @@ extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
 */
 #define SHA512_HASH_FUNCTION_OFFSET 0x18
 #define ROM_VERIFY_FUNCTION_OFFSET 0x28
-
-// @TODO JIRA PFHB-921 Restore after support in Secure ROM is confirmed
-//#define SHA3_HASH_FUNCTION_OFFSET 0x30
-//#define ROM_V3_VERIFY_FUNCTION_OFFSET 0x40
+#define SHA3_HASH_FUNCTION_OFFSET 0x30
+#define ROM_V3_VERIFY_FUNCTION_OFFSET 0x38
 
 
 // Version info at SECUREROM_VERSION_STRUCTURE_OFFSET
@@ -417,8 +415,10 @@ const uint64_t SECROM_EYECATCHER = 0x23534543524F4D00; // #SECROM\0
 enum SecureRomInfoVersion
 {
     // [release:4][version:4]
+    SECUREROM_INFO_ADDED  = 0x0000000900000001, // original value
     // moving release to 0xB for P11 V3 support
-    SECUREROM_INFO_VER3 = 0x0000000B00000001
+    SECUREROM_INFO_VER3   = 0x0000000B00000001, // v3 algorithms NOT available in securerom
+    SECUREROM_INFO_VER3_2 = 0x0000000B00000002  // v3 algorithms available in securerom
 };
 
 /**
