@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -1047,6 +1047,20 @@
         <id>ATTR_IS_IOSCM</id>
         <no_export/>
         <writeable/>
+        <default>0x0</default>
+    </attribute>
+
+    <attribute>
+        <!-- Hide from MRW, only used by SBE -->
+        <id>ATTR_SBE_LOAD_BOOTLOADER_CHUNK_OFFSET</id>
+        <no_export/>
+        <default>0x0</default>
+    </attribute>
+
+    <attribute>
+        <!-- Hide from MRW, only used by SBE -->
+        <id>ATTR_SBE_LOAD_BOOTLOADER_HBBL_SIZE</id>
+        <no_export/>
         <default>0x0</default>
     </attribute>
 
