@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,6 +139,7 @@ namespace TRUSTEDBOOT
         // TPM Return Codes
         TPM_SUCCESS               = 0x000,
         TPM_RC_INITIALIZE         = 0x100,
+        TPM_RC_NOT_INITIALIZED    = 0x001,
         TPM_RC_HANDLE             = 0x18B,
 
         // TPM Authorization types
