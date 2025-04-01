@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -511,6 +511,13 @@ fapi2::ReturnCode p10_adu_utils_setup_adu(
             if ( l_transSize == adu_operationFlag::TSIZE_1 )
             {
                 l_altd_cmd_reg_fbc_tsize = ALTD_CMD_PMISC_TSIZE_1;
+
+                // Set OVERWRITE_PBINIT -- this is required to keep the ADU state machine
+                // from getting stuck on the switch command, in the case its first
+                // attempt to issue the switch command itself is retried.  This rety
+                // triggers the ADU state machine to re-sample pb_init, which would be
+                // guaranteed to be low at this point, and thus we're pathologically stuck
+                SET_TP_TPBR_AD_ALTD_CMD_REG_FBC_ALTD_OVERWRITE_PBINIT(altd_cmd_reg_data);
 
                 // Set TM_QUIESCE
                 SET_TP_TPBR_AD_ALTD_CMD_REG_FBC_ALTD_WITH_TM_QUIESCE(altd_cmd_reg_data);
