@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2213,6 +2213,7 @@ fapi2::ReturnCode PlatPmPPB::compute_vdn_setpoint()
     uint32_t l_ext_vdn_mv = 0;
     uint32_t l_vdn_adjust_mv = 0;
     bool     b_vdn_allow_uplift = true;
+    const uint32_t VDN_MAX_ALLOWED_VOLTAGE_MV = 1100; //1.1V
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -2272,7 +2273,23 @@ fapi2::ReturnCode PlatPmPPB::compute_vdn_setpoint()
             iv_vdn_sysparam.distloss_uohm,
             iv_vdn_sysparam.distoffset_uv);
 
-    iv_attrs.attr_boot_voltage_mv[VDN] = (l_ext_vdn_mv);
+    if ( l_ext_vdn_mv >= VDN_MAX_ALLOWED_VOLTAGE_MV )
+    {
+        iv_attrs.attr_boot_voltage_mv[VDN] = VDN_MAX_ALLOWED_VOLTAGE_MV;
+
+        FAPI_ASSERT_NOEXIT(false,
+                fapi2::PM_VDN_MAX_VOLTAGE_EXCEED(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                .set_CHIP_TARGET(iv_procChip)
+                .set_ACT_VDN_VOLT(l_ext_vdn_mv)
+                .set_MAX_VDN_VOLT(VDN_MAX_ALLOWED_VOLTAGE_MV),
+                "Pstate Parameter Block #V Zero contents error being logged");
+    }
+    else
+    {
+        iv_attrs.attr_boot_voltage_mv[VDN] = (l_ext_vdn_mv);
+    }
+
+
     FAPI_INF("%s : VDN AW voltage: %d mV (0x%X)", iv_tgtstr,
             revle16(iv_array_vdn_mv),
             revle16(iv_array_vdn_mv));

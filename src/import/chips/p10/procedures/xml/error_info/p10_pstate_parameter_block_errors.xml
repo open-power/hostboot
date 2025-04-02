@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -896,4 +896,20 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_VDN_MAX_VOLTAGE_EXCEED</rc>
+    <description>
+    Total VDN voltage(VPD VDN + UPLIFT + LOALINE) value
+    exceeds more than MAX_ALLOWED_VDN_VOLTAGE
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>ACT_VDN_VOLT</ffdc>
+    <ffdc>MAX_VDN_VOLT</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+
 </hwpErrors>
