@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -304,7 +304,7 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
         }
 
         lid_contents
-            = (uint8_t*)realloc(lid_contents, lid_contents_size + READ_CHUNK_SIZE);
+            = reinterpret_cast<uint8_t*>(realloc(lid_contents, lid_contents_size + READ_CHUNK_SIZE));
         lid_contents_size = lid_contents_size + READ_CHUNK_SIZE;
     }
 
