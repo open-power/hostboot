@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -70,5 +70,29 @@
     <platScomFail/>
     <rc>RC_SBE_PIB_TIMEOUT_ERROR</rc>
     <description>SBE SCOM failure - Timeout error</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <rc>RC_SBE_VERIFY_HBBL_FAIL_IN_MPIPL</rc>
+    <description>SBE Failed to verify hbbl in MPIPL</description>
+    <ffdc>CAL_HASH_0</ffdc>
+    <ffdc>CAL_HASH_1</ffdc>
+    <ffdc>CAL_HASH_2</ffdc>
+    <ffdc>CAL_HASH_3</ffdc>
+    <ffdc>CAL_HASH_4</ffdc>
+    <ffdc>CAL_HASH_5</ffdc>
+    <ffdc>CAL_HASH_6</ffdc>
+    <ffdc>CAL_HASH_7</ffdc>
+    <ffdc>EXP_HASH_0</ffdc>
+    <ffdc>EXP_HASH_1</ffdc>
+    <ffdc>EXP_HASH_2</ffdc>
+    <ffdc>EXP_HASH_3</ffdc>
+    <ffdc>EXP_HASH_4</ffdc>
+    <ffdc>EXP_HASH_5</ffdc>
+    <ffdc>EXP_HASH_6</ffdc>
+    <ffdc>EXP_HASH_7</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <ffdc>EXP_SIZE</ffdc>
+    <ffdc>SCRATCH_11</ffdc>
 </hwpError>
 </hwpErrors>
