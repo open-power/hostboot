@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@
 #define __INTERNAL_POUNDV__
 #include "p10_pstate_parameter_block_int_vpd.H"
 
+
 using namespace ppb;
 using namespace scomt;
 static const uint32_t DPLL_TIMEOUT_MS       = 50000;
@@ -76,6 +77,8 @@ static const uint32_t NEST_DPLL_FREQ_FMAX        = TP_TPCHIP_TPC_DPLL_CNTL_NEST_
 static const uint32_t NEST_DPLL_FREQ_FMAX_LEN    = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMAX_LEN;
 static const uint32_t NEST_DPLL_FREQ_FMIN        = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMIN;
 static const uint32_t NEST_DPLL_FREQ_FMIN_LEN    = TP_TPCHIP_TPC_DPLL_CNTL_NEST_REGS_FREQ_FMIN_LEN;
+
+uint32_t g_evid_value;
 
 fapi2::ReturnCode
 p10_update_net_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
@@ -382,6 +385,8 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 ;
         }
 
+        g_evid_value = i_evid_value;
+
         if (i_evid_value != VIO)
         {
             // Initialize the buses
@@ -532,6 +537,8 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     uint32_t    l_count;
     int32_t     l_delta_mv = 0;
     char        rail_str[8];
+    g_evid_value = i_evid_value;
+
 
     switch (i_evid_value)
     {

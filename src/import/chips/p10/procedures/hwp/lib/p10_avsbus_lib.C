@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@ const static char* g_rail_str[]
     "VDN",
     "VIO"
 };
+
+extern uint32_t g_evid_value;
 
 //##############################################################################
 // Function which generates a 3 bit CRC value for 29 bit data
@@ -615,7 +617,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     {
 
         FAPI_INF("Non-clean response received for %s: Computed CRC vs %X Received CRC %X;  Full Response %08X",
-        g_rail_str[i_RailSelect], l_rsp_computed_crc, l_rsp_rcvd_crc, l_rsp_data);
+        g_rail_str[g_evid_value], l_rsp_computed_crc, l_rsp_rcvd_crc, l_rsp_data);
 
 
         FAPI_TRY(getScom(i_target, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_RW, l_data64));
@@ -623,25 +625,25 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_RI_DC_B>())
         {
             FAPI_ERR("ERROR: AVS command failed for %s. Receiver Inhibit in Root Control 1 is not set!!!",
-            g_rail_str[i_RailSelect]);
+            g_rail_str[g_evid_value]);
         }
 
         if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI1_DC_B>())
         {
             FAPI_ERR("ERROR: AVS command failed for %s. Driver Inhibit 1 in Root Control 1 is not set!!!",
-            g_rail_str[i_RailSelect]);
+            g_rail_str[g_evid_value]);
         }
 
         if (!l_data64.getBit<scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI2_DC_B>())
         {
             FAPI_ERR("ERROR: AVS command failed. Driver Inhibit 2 in Root Control 1 is not set!!!",
-            g_rail_str[i_RailSelect]);
+            g_rail_str[g_evid_value]);
         }
 
         if(l_rsp_data == 0x00000000)
         {
             FAPI_DBG("ERROR: AVS command failed for %s. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.",
-            g_rail_str[i_RailSelect]);
+            g_rail_str[g_evid_value]);
             FAPI_ASSERT((i_throw_assert != true),
             fapi2::PM_AVSBUS_ZERO_RESP_ERROR()
             .set_PROC_TARGET(i_target)
@@ -654,7 +656,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         else if(l_rsp_data == 0xFFFFFFFF)
         {
             FAPI_DBG("ERROR: AVS command failed failed for %s. No response from VRM device, Check AVSBus interface connectivity to VRM in system.",
-            g_rail_str[i_RailSelect]);
+            g_rail_str[g_evid_value]);
             FAPI_ASSERT((i_throw_assert != true),
             fapi2::PM_AVSBUS_NO_RESP_ERROR()
             .set_PROC_TARGET(i_target)
@@ -667,7 +669,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         else if(l_rsp_rcvd_crc != l_rsp_computed_crc)
         {
             FAPI_DBG("ERROR: AVS command failed for %s. Bad CRC detected by P10 on AVSBus Slave Segement.",
-            g_rail_str[i_RailSelect]);
+            g_rail_str[g_evid_value]);
             FAPI_ASSERT((i_throw_assert != true),
             fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR()
             .set_PROC_TARGET(i_target)
@@ -679,7 +681,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         else if(l_rsp_ack_code == 0x02)
         {
             FAPI_DBG("ERROR: AVS command failed for %s. Bad CRC indicated by Slave VRM on AVSBus Master Segement.",
-            g_rail_str[i_RailSelect]);
+            g_rail_str[g_evid_value]);
             FAPI_ASSERT((i_throw_assert != true),
             fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR()
             .set_PROC_TARGET(i_target)
@@ -694,7 +696,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             {
 
                 FAPI_ERR("ERROR: AVS Write Voltage command problem for rail %s.  Valid data sent but no action is taken due to unavailable resource.",
-                g_rail_str[i_RailSelect]);
+                g_rail_str[g_evid_value]);
 
                 // Parse the Status Response for the reason.
 
@@ -796,7 +798,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         else if(l_rsp_ack_code == 0x03)
         {
             FAPI_DBG("ERROR: AVS command failed for rail %s. Unknown resource, invalid data, incorrect data or incorrect action.",
-                     g_rail_str[i_RailSelect]);
+                     g_rail_str[g_evid_value]);
             FAPI_ASSERT((i_throw_assert != true),
                         fapi2::PM_AVSBUS_INVALID_DATA_ERROR()
                         .set_PROC_TARGET(i_target)
