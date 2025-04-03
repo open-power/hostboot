@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@
 #include <p10_hcd_memmap_qme_sram.H>
 
 /// @brief Misc constants useful for HWP
-enum
+enum : uint32_t
 {
     PGPE_SRAM_END_ADDR  = ( PGPE_SRAM_BASE_ADDR + OCC_SRAM_PGPE_REGION_SIZE ),
     XGPE_SRAM_END_ADDR  = ( XGPE_SRAM_BASE_ADDR + OCC_SRAM_XGPE_REGION_SIZE ),
