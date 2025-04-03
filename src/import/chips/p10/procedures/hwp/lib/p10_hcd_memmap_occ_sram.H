@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ HCD_CONST(OCC_SRAM_TRACE_BUF_BASE_SSX_PTR,      0xFFF40824)
 HCD_CONST(OCC_SRAM_PGPE_REGION_SIZE,            (80 * ONE_KB))
 HCD_CONST(OCC_SHARED_SRAM_ADDR_START,
           ((PGPE_SRAM_BASE_ADDR + OCC_SRAM_PGPE_REGION_SIZE) - PGPE_OCC_SHARED_SRAM_SIZE))
-HCD_CONST(OCC_SRAM_PGPE_REVISED_REGION_SIZE,   (80 * ONE_KB))
+HCD_CONST(OCC_SRAM_PGPE_REVISED_REGION_SIZE,   0x14000)
 
 // Offset to trace buf ptr and trace buffer size from base
 HCD_CONST(GPE_DEBUG_PTR_OFFSET,                      0x180)
@@ -99,8 +99,6 @@ HCD_CONST(PGPE_HCODE_SIZE,                      (OCC_SRAM_PGPE_REGION_SIZE - ( P
           PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE )))
 HCD_CONST(PGPE_IMAGE_SIZE,                      (PGPE_HCODE_SIZE + PGPE_GLOBAL_PSTATE_PARAM_BLOCK_SIZE +
           PGPE_OCC_SHARED_SRAM_SIZE + PGPE_SRAM_BOOT_REGION))
-HCD_CONST(PGPE_IMAGE_RESERVE_SIZE,
-          (OCC_PSTATE_PARAM_BLOCK_PPMR_OFFSET - PGPE_IMAGE_PPMR_OFFSET - PGPE_IMAGE_SIZE))
 
 
 /// PGPE Boot

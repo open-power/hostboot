@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,18 +143,25 @@ p10_block_wakeup_intr(
             break;
 
         default:
+#ifdef __PPE__
             FAPI_ASSERT_NOEXIT(false,
                                //SBE Platform does not take an arguement for FFDC constructor.
                                //There was a ppe compilation failure due to this.
-#ifdef __PPE__
                                fapi2::PM_BLOCK_WAKEUP_INTR_OP()
-#else
-                               fapi2::PM_BLOCK_WAKEUP_INTR_OP(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-#endif
                                .set_OPERATION(i_operation)
                                .set_CORE_TARGET(i_core_target)
                                .set_CORE_POSITION(l_attr_chip_unit_core_pos),
                                "Invalid parameter passed to block wakeup procedure");
+
+#else
+            FAPI_ASSERT_NOEXIT(false,
+                               fapi2::PM_BLOCK_WAKEUP_INTR_OP(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_OPERATION(i_operation)
+                               .set_CORE_TARGET(i_core_target)
+                               .set_CORE_POSITION(l_attr_chip_unit_core_pos),
+                               "Invalid parameter passed to block wakeup procedure");
+
+#endif
             break;
     }
 

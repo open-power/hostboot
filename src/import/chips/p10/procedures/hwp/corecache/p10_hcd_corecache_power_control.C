@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,9 +140,10 @@ p10_hcd_corecache_power_control(
     uint32_t                l_timeout         = 0;
     uint32_t                l_pfet_stat       = 0;
     uint32_t                l_expected_mask   = 0;
+    uint32_t l_runn_mode_cond = 0;
+    fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
 #ifdef USE_RUNN
     fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
-    fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
 #endif
 
@@ -257,16 +258,17 @@ p10_hcd_corecache_power_control(
         {
 #endif
 
-            HCD_ASSERT4( (
 #ifdef USE_RUNN
-                             l_attr_runn_mode ?
 #if defined(POWER10_DD_LEVEL) && POWER10_DD_LEVEL != 10
-                             ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) :
+            l_runn_mode_cond = ( ( l_pfet_stat & HCD_PFET_FINGER0_SENSE_BITS[l_isL3][l_isVCS] ) == l_expected_mask ) ? true : false;
 #else
-                             ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) :
-#endif
-#endif
-                             (l_timeout != 0) ),
+            l_runn_mode_cond = ( ( l_pfet_stat & HCD_PFET_ACTUAL_MASKS[l_isVCS] ) == l_expected_mask ) ? true : false;
+#endif //POWER10_DD_LEVEL
+#else
+            l_attr_runn_mode    =   false;
+#endif //USE_RUNN_MODE
+
+            HCD_ASSERT4( ( l_attr_runn_mode ? l_runn_mode_cond : (l_timeout != 0) ),
                          CORECACHE_POW_CTRL_TIMEOUT,
                          set_POW_COMMAND, i_command,
                          set_PFET_SENSES, l_pfet_stat,

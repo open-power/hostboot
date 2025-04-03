@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,7 @@
 #define ULL(x) x
 #define HCD_CONST(name, expr)   .set name, expr;
 #define HCD_CONST64(name, expr) .set name, expr;
+#define HWP_CONST(name, expr)   .set name, expr;
 
 #define HCD_HDR_UINT64(symbol, value) hcd_header_uint64 symbol value
 #define HCD_HDR_UINT32(symbol, value) hcd_header_uint32 symbol value
@@ -128,8 +129,13 @@
 
 #else
 
+    #define HWP_CONST(name, expr)  enum { name = expr };
     #define ULL(x) x##ull
-    #define HCD_CONST(name, expr)   enum { name = expr };
+    #ifdef __IOTA__
+        #define HCD_CONST(name, expr)   enum { name = expr };
+    #else
+        #define HCD_CONST(name, expr)   static const uint32_t name = (expr);
+    #endif //__IOTA__
     #define HCD_CONST64(name, expr) enum { name = expr };
 
     #define HCD_HDR_UINT64(symbol, value) uint64_t symbol

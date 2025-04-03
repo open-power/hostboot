@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,6 +96,8 @@ p10_hcd_core_stopgrid(
     uint32_t                l_core_change_done = 0;
     uint32_t                l_regions  = i_target.getCoreSelect();
     uint8_t                 l_attr_mma_poweroff_disable = 0;
+    uint32_t l_run_cond = 0;
+    fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
 #ifndef __PPE_QME
     auto l_chip_target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
     fapi2::ATTR_ZERO_CORE_CHIP_Type l_zero_core_chip = 0;
@@ -105,7 +107,6 @@ p10_hcd_core_stopgrid(
     fapi2::Target < fapi2::TARGET_TYPE_SYSTEM > l_sys;
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_SYSTEM_MMA_POWEROFF_DISABLE, l_sys, l_attr_mma_poweroff_disable ) );
 #ifdef USE_RUNN
-    fapi2::ATTR_RUNN_MODE_Type                  l_attr_runn_mode;
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_RUNN_MODE, l_sys, l_attr_runn_mode ) );
 #endif
 
@@ -169,11 +170,13 @@ p10_hcd_core_stopgrid(
     }
     while( (--l_timeout) != 0 );
 
-    HCD_ASSERT4( (
 #ifdef USE_RUNN
-                     l_attr_runn_mode ? ( SCOM_GET(33) == 0 ) :
+    l_run_cond = ( SCOM_GET(33) == 0 ) ? true : false;
+#else
+    l_attr_runn_mode = false;
 #endif
-                     (l_timeout != 0) ),
+
+    HCD_ASSERT4( ( l_attr_runn_mode ? l_run_cond : (l_timeout != 0) ),
                  ECL2_CLK_SYNC_DROP_TIMEOUT,
                  set_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS, HCD_ECL2_CLK_SYNC_DROP_POLL_TIMEOUT_HW_NS,
                  set_CPMS_CGCSR, l_scomData,
@@ -214,11 +217,9 @@ p10_hcd_core_stopgrid(
         }
         while( (--l_timeout) != 0 );
 
-        HCD_ASSERT4( (
-#ifdef USE_RUNN
-                         l_attr_runn_mode ? ((l_core_change_done & l_regions) == l_regions) :
-#endif
-                         (l_timeout != 0) ),
+        l_run_cond = ( ( l_core_change_done & l_regions) == l_regions ) ? true : false;
+
+        HCD_ASSERT4( ( l_attr_runn_mode ? l_run_cond : (l_timeout != 0) ),
                      CORE_CHANGE_DONE_RESCLK_ENTRY_TIMEOUT,
                      set_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS, HCD_CORE_CHANGE_DONE_RESCLK_ENTRY_POLL_TIMEOUT_HW_NS,
                      set_CORE_CHANGE_DONE, l_core_change_done,
