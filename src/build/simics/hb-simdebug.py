@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2025
 # [+] International Business Machines Corp.
 #
 #
@@ -225,7 +225,7 @@ def hb_get_objects_by_class(classname):
     obj_list=[]
     obj_dict={}
     # Put objects into a dictionary, indexed by object name
-    for obj in SIM_get_all_objects():
+    for obj in SIM_object_iterator(None):
         if (obj.classname == classname):
             obj_dict[obj.name]=obj
 

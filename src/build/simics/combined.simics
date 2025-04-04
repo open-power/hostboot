@@ -5,12 +5,12 @@
 if($machine_name == "denali") {
 
     # Trigger hostboot commands specific to denali
-    run-command-file (lookup-file -query ($hb_script_location + "/denali_hb.simics"))
+    run-script (lookup-file -query ($hb_script_location + "/denali_hb.simics"))
 
 } else {
     # Assume if we're not running a Denali that we're running one of the Rainier configs.
 
     # Trigger Rainier specific commands
-    run-command-file (lookup-file -query ($hb_script_location + "/rainier_hb.simics"))
+    run-script (lookup-file -query ($hb_script_location + "/rainier_hb.simics"))
 
 }
