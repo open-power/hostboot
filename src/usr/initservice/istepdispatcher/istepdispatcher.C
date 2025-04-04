@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -84,7 +84,6 @@
 #include <targeting/common/mfgFlagAccessors.H>
 #endif
 
-#include <initservice/bootconfigif.H>
 #include <trace/trace.H>
 #include <util/utilmbox_scratch.H>
 #include <secureboot/service.H>
@@ -273,9 +272,6 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
 
     printk( "IStepDispatcher entry.\n" );
     TRACFCOMP( g_trac_initsvc, "IStepDispatcher entry." );
-
-    //  Read and process the Hostboot configuration flags
-    BOOTCONFIG::readAndProcessBootConfig();
 
     TARGETING::Target* l_pTopLevelTarget = NULL;
     TARGETING::targetService().getTopLevelTarget(l_pTopLevelTarget);

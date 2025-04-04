@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -253,11 +253,7 @@ void    splessComm( void *  io_msgQ )
             "splessComm : readybit set." );
 
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
-#ifdef CONFIG_SIO_ISTEP_CONTROL
-    const char* l_input = "SIO";
-#else
     const char* l_input = "CFAM";
-#endif
     CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "ISTEP mode -- awaiting user input from %s", l_input);
     CONSOLE::flush();
 #endif

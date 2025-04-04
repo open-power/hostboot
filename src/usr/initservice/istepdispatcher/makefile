@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2024
+# Contributors Listed Below - COPYRIGHT 2011,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -38,15 +38,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm/
 EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm/oem/ibm/
 
-VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
 
 OBJS += istepdispatcher.o
 OBJS += initsvcudistep.o
 OBJS += sptask.o
 OBJS += splesscommon.o
-OBJS += bootconfig.o
-OBJS += bootconfigif.o
-OBJS += $(if $(CONFIG_BMC_AST2400),bootconfig_ast2400.o)
 OBJS += progressSrc.o
 
 ## SUBDIRS += test.d

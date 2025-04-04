@@ -155,7 +155,8 @@ BASE_MODULES += secureboot_base
 BASE_MODULES += lpc
 BASE_MODULES += pnor
 BASE_MODULES += vfs
-BASE_MODULES += $(if $(CONFIG_AST2400) || $(CONFIG_AST2500), sio)
+# SIO required for standalone p10 simics as it uses SFC_AST2400
+BASE_MODULES += $(if $(CONFIG_SFC_IS_AST2400),sio)
 BASE_MODULES += console
 ifndef VPO_COMPILE
 BASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),mctp)

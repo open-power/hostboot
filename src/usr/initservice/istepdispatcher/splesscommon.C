@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,6 @@
 
 #include    "splesscommon.H"
 #include    <config.h>
-#include    <initservice/bootconfigif.H>
 #include    <errl/errlmanager.H>
 
 // external reference
@@ -95,25 +94,6 @@ void    readCmdSts( SPLessCmd   &io_rcmd )
                                                        g_SPLess_pMasterProcChip );
     }
 
-#ifdef CONFIG_SIO_ISTEP_CONTROL
-    errlHndl_t err = NULL;
-    INITSERVICE::BOOTCONFIG::istepControl_t istepCtl;
-    memset (&istepCtl, 0x0, sizeof(istepCtl));
-    err = INITSERVICE::BOOTCONFIG::readIstepControl(istepCtl);
-    if(err)
-    {
-        TRACFCOMP( g_trac_initsvc, "Error reading SIO regs... blindly continuing" );
-        errlCommit(err, INITSVC_COMP_ID);
-    }
-    else
-    {
-        io_rcmd.bytes[HDR] = istepCtl.istepControl;
-        io_rcmd.bytes[STS] = istepCtl.istepStatus;
-        io_rcmd.istep = istepCtl.istepMajorNumber;
-        io_rcmd.substep = istepCtl.istepMinorNumber;
-    }
-
-#else
     // $$ save -io_rcmd.val64 = mmio_scratch_read(MMIO_SCRATCH_IPLSTEP_COMMAND);
 
     //  command reg is GMB2EC is mailbox scratchpad 3 { regs 0 - 3 }.
@@ -126,7 +106,6 @@ void    readCmdSts( SPLessCmd   &io_rcmd )
               DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR));
 
     io_rcmd.word = (op >>32);
-#endif
 
 #ifdef  SPLESS_DEBUG
     printk( "readCmd 0x%x\n", io_rcmd.word );
@@ -143,23 +122,6 @@ void    writeCmdSts( SPLessCmd    i_rcmd )
                                                        g_SPLess_pMasterProcChip );
     }
 
-#ifdef CONFIG_SIO_ISTEP_CONTROL
-    errlHndl_t err = NULL;
-    INITSERVICE::BOOTCONFIG::istepControl_t istepCtl;
-    memset (&istepCtl, 0x0, sizeof(istepCtl));
-    istepCtl.istepControl = i_rcmd.bytes[HDR];
-    istepCtl.istepStatus  = i_rcmd.bytes[STS];
-    TRACFCOMP( g_trac_initsvc, "Write istep control" );
-
-    err = BOOTCONFIG::writeIstepControl(istepCtl);
-    if(err)
-    {
-        TRACFCOMP( g_trac_initsvc, "Error writing SIO regs... blindly continuing" );
-        errlCommit(err, INITSVC_COMP_ID);
-    }
-
-#else
-
     // save mmio_scratch_write( MMIO_SCRATCH_IPLSTEP_COMMAND, i_rcmd.val64 );
 
     //  command reg is GMB2EC is mailbox scratchpad 3 { regs 0 - 3 }.
@@ -170,7 +132,6 @@ void    writeCmdSts( SPLessCmd    i_rcmd )
                &(op),
                op_size,
                DEVICE_SCOM_ADDRESS(MboxScratch4_t::REG_ADDR));
-#endif
 
 #ifdef  SPLESS_DEBUG
     printk( "writeCmd 0x%x\n", i_rcmd.word );
