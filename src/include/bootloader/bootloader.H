@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -240,7 +240,7 @@ namespace Bootloader{
 
     /** HW Keys hash is placed in the last 64 bytes of the HBBL */
 #define HW_KEYS_HASH_ADDR (getHRMOR() + HBBL_EXCEPTION_VECTOR_SIZE \
-                           + MAX_HBBL_SIZE - 64)
+                           + MAX_HBBL_SIZE_HB - 64)
 
     /** FW Secure Version is placed in byte before HW_KEYS_HASH_ADDR */
 #define SECURE_VERSION_ADDR (HW_KEYS_HASH_ADDR-1)
@@ -253,7 +253,7 @@ namespace Bootloader{
 
     /** Location of HBBL data */
 #define HBBL_DATA_ADDR          (getHRMOR() + HBBL_EXCEPTION_VECTOR_SIZE \
-                                 + MAX_HBBL_SIZE)
+                                 + MAX_HBBL_SIZE_HB)
 
     /** Location of HBBL scratch space */
 #define HBBL_SCRATCH_SPACE_ADDR (getHRMOR() + (64*KILOBYTE))

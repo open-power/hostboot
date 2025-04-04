@@ -53,6 +53,7 @@
 
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
+#include <secureboot/service_ext.H>
 #include <p10_scom_proc.H>
 #include <p10_sbe_spi_cmd.H>
 #include <sys/time.h>

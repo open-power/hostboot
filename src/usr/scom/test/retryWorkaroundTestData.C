@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,86 +103,3 @@ std::vector<uint64_t> g_always_no_retry_addrs = {
                                                  0x30108f3,
                                              };
 
-//All of the following addresses require retries
-std::vector<uint64_t> g_always_retry_addrs =
-                                         {
-                                             //dmi-4
-                                             0x3010823,
-                                             0x3010824,
-                                             0x3010825,
-                                             0x3010826,
-                                             0x3010827,
-                                             0x3010828,
-                                             0x3010829,
-                                             0x301082a,
-
-                                             //dmi-5
-                                             0x3010833,
-                                             0x3010834,
-                                             0x3010835,
-                                             0x3010836,
-                                             0x3010837,
-                                             0x3010838,
-                                             0x3010839,
-                                             0x301083a,
-
-                                             //dmi-6
-                                             0x30108a3,
-                                             0x30108a4,
-                                             0x30108a5,
-                                             0x30108a6,
-                                             0x30108a7,
-                                             0x30108a8,
-                                             0x30108a9,
-                                             0x30108aa,
-
-                                             //dmi-7
-                                             0x30108b3,
-                                             0x30108b4,
-                                             0x30108b5,
-                                             0x30108b6,
-                                             0x30108b7,
-                                             0x30108b8,
-                                             0x30108b9,
-                                             0x30108ba,
-
-                                             //dmi-0
-                                             0x5010823,
-                                             0x5010824,
-                                             0x5010825,
-                                             0x5010826,
-                                             0x5010827,
-                                             0x5010828,
-                                             0x5010829,
-                                             0x501082a,
-
-                                             //dmi-1
-                                             0x5010833,
-                                             0x5010834,
-                                             0x5010835,
-                                             0x5010836,
-                                             0x5010837,
-                                             0x5010838,
-                                             0x5010839,
-                                             0x501083a,
-
-                                             //dmi-2
-                                             0x50108a3,
-                                             0x50108a4,
-                                             0x50108a5,
-                                             0x50108a6,
-                                             0x50108a7,
-                                             0x50108a8,
-                                             0x50108a9,
-                                             0x50108aa,
-
-                                             //dmi-3
-                                             0x50108b3,
-                                             0x50108b4,
-                                             0x50108b5,
-                                             0x50108b6,
-                                             0x50108b7,
-                                             0x50108b8,
-                                             0x50108b9,
-                                             0x50108ba
-                                       };

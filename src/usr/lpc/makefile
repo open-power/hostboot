@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2021
+# Contributors Listed Below - COPYRIGHT 2014,2025
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -34,7 +34,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 
-OBJS = lpcdd.o lpcxscom.o
+OBJS  = lpcdd.o
+OBJS += $(if $(CONFIG_FSP_BUILD),lpcxscom.o)
 
 SUBDIRS = test.d
 

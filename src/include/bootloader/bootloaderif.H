@@ -35,12 +35,18 @@ namespace Bootloader{
 // Max logical size of HBBL without secure header, padding, or ECC.
 // Must match PNOR layout assumptions for eyeCatch HBBL
 // Must be aligned CACHELINE_SIZE of 128 bytes
-#define MAX_HBBL_SIZE (32 * KILOBYTE)
+// NOTE: was called MAX_HBBL_SIZE, but it started colliding with
+// a macro from src/import dir, so renamed to MAX_HBBL_SIZE_HB
+#define MAX_HBBL_SIZE_HB (94 * KILOBYTE)
 
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
 
-// Size of PNOR partition without ECC, page algined down, minus 4K header
+// Size of PNOR partition is 1MB, with ECC
+// - Without ECC, page aligned down to 908KB
+// - Then minus 4KB V1 header we get 904KB
+// - To keep this size consistent with previous bootloader code, ignore the
+//   15KB V3 header appended to the end: [V1 header][HBB data][V3 header]
 #define MAX_HBB_SIZE (904 * KILOBYTE)
 
 // Max Pairs

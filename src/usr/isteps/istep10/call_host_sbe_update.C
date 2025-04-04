@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -182,8 +182,7 @@ void* call_host_sbe_update (void *io_pArgs)
                 // Commit error
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
-
-#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+#if (defined(CONFIG_SUPPORT_EEPROM_CACHING) && defined(CONFIG_FSP_BUILD))
             else // Only do the copy if the basic access worked
             {
                 // We need to keep the alt-pnor's version of the EECACHE in sync with

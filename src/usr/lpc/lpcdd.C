@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -266,8 +266,9 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
 errlHndl_t create_altmaster_objects( bool i_create,
                                      TARGETING::Target* i_proc )
 {
-    TRACFCOMP(g_trac_lpc, "LPC::create_altmaster_objects> i_create=%d, i_proc=%.8X", i_create, TARGETING::get_huid(i_proc) );
     errlHndl_t l_err = NULL;
+#ifdef CONFIG_FSP_BUILD //Only create alt lpc on FSP based systems, remove for space on BMC sys
+    TRACFCOMP(g_trac_lpc, "LPC::create_altmaster_objects> i_create=%d, i_proc=%.8X", i_create, TARGETING::get_huid(i_proc) );
 
     do {
         if( i_create && g_altLpcDD )
@@ -368,6 +369,7 @@ errlHndl_t create_altmaster_objects( bool i_create,
             }
         }
     } while(0);
+#endif //CONFIG_FSP_BUILD
 
     return l_err;
 }

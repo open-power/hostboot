@@ -49,6 +49,7 @@
 #include "../hdat/hdattpmdata.H"
 #include "../runtime/hdatstructs.H"
 #include <secureboot/service.H>
+#include <secureboot/service_ext.H>
 #include <secureboot/trustedbootif.H>
 #include <secureboot/trustedboot_reasoncodes.H>
 #include <sys/mmio.h>

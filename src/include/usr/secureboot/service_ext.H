@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #define __SERVICE_EXT_H
 
 #include <errl/errlentry.H>
+#include <secureboot/service.H>
 
 namespace SECUREBOOT
 {
@@ -58,6 +59,38 @@ namespace SECUREBOOT
      * @return errlHndl_t   nullptr on success, otherwise an error log.
      */
     errlHndl_t verifyMeasurementSeepromSecurity(const TARGETING::TargetHandle_t& i_proc);
+
+    /**
+     *  @brief Adds the values of the Security Registers of the processors in
+     *         the system to an existing error log
+     *
+     *  @param[in,out] io_err  Error Log that the values of the security
+     *                         registers will be added to. Must not be nullptr.
+     *                         NOTE:  The state of the system/processors
+     *                         (ie, SCOM vs FSI) determines which registers can
+     *                         be included.
+     *  @param[in] i_calledByRP See the handleSecurebootFailure function's
+     *                         "called by resource provider" option.
+     *  @return N/A
+     */
+    void addSecurityRegistersToErrlog(errlHndl_t & io_err,
+                                      bool i_calledByRP = false);
+
+    /**
+     * @brief Retrieve values of Security Registers of the processors in the
+     *        system
+     *
+     * @param[out] o_regs       Vector of SecureRegisterValue structs that contain
+     *                          processor security register values
+     *                          NOTE:  The state of the system/processors (ie, SCOM vs
+     *                          FSI) determines which registers can be included
+     * @param[out] i_calledByRP See the handleSecurebootFailure function's
+     *                          "called by resource provider" option.
+     *
+     * @return errlHndl_t  nullptr on success, else pointer to error log
+     */
+    errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
+                                       const bool i_calledByRP = false);
 
 } // namespace SECUREBOOT
 #endif

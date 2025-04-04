@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -30,6 +30,5 @@
 #include <vector>
 
 extern std::vector<uint64_t> g_always_no_retry_addrs;
-extern std::vector<uint64_t> g_always_retry_addrs;
 
 #endif

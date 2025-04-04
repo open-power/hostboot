@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,13 +111,13 @@ class LpcDdTest : public CxxTest::TestSuite
     }
 
 
-
     /**
      * @brief LPC Alt Master
      *        Test creation/deletion of altmaster objects
      */
     void test_altmaster(void)
     {
+#ifdef CONFIG_FSP_BUILD //Only create alt lpc on FSP based systems, remove for space on BMC sys
         TRACFCOMP( g_trac_lpc, "LpcDdTest::test_altmaster>" );
         errlHndl_t l_err = NULL;
         TARGETING::Target* master = NULL;
@@ -190,6 +190,7 @@ class LpcDdTest : public CxxTest::TestSuite
                 errlCommit( l_err, LPC_COMP_ID );
             }
         }
+#endif // CONFIG_FSP_BUILD
     }
 
 

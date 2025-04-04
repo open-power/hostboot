@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2024
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -46,9 +46,7 @@ OBJS += scomtrans.o
 OBJS += errlud_pib.o
 OBJS += preopchecks.o
 OBJS += postopchecks.o
-OBJS += DmiScomWorkaround.o
 OBJS += ibscom_retry.o
-OBJS += handleSpecialWakeup.o
 OBJS += ibscom.o
 OBJS += ScomParityErrorWorkaround.o
 
@@ -57,3 +55,9 @@ OBJS += p10_scominfo.o
 OBJS += p10_scom_addr.o
 OBJS += odyssey_scominfo.o
 OBJS += odyssey_scom_addr.o
+
+# NOTE: handleSpecialWakeup.o has been removed from libscom.so as it
+# is not needed in the Hostboot Base (HBB) image.  This will reduce
+# the size of HBB.
+# It has been moved to libfsiscom.so, which is part of the Hostboot Extended (aka HBI) image.
+# It has also been added to the scom/runtime/makefile for Hostboot Runtime (aka HBRT) support.

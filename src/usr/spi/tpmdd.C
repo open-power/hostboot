@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <spi/tpmddif.H>
 #include <spi/tpmddreasoncodes.H>
 #include <secureboot/service.H>
+#include <secureboot/service_ext.H>
 #include <secureboot/trustedbootif.H>
 #include "tpmdd.H"
 #include <spi/spi.H> // spiInitEngine

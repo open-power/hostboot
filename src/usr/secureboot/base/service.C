@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
  */
 
 #include <secureboot/service.H>
+#include <secureboot/service_ext.H>
 #include <stdint.h>
 #include <sys/mm.h>
 #include <util/singleton.H>
@@ -86,7 +87,7 @@ errlHndl_t canXscomProc(const TargetHandle_t i_pProc)
     {
         do_op = true;
     }
-    else if (Util::isTargetingLoaded())
+    else if (Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
     {
         // Check that i_pProc isn't nullptr and is of type proc
         assert((i_pProc != nullptr) &&
@@ -308,296 +309,6 @@ errlHndl_t getSbeMeasurementRegister(SecureRegisterValues& io_reg)
         }
 
     } while(0);
-
-    return err;
-}
-
-
-/**
- * @brief Retrieve values of Security Registers of the processors in the
- *        system
- *
- * @param[out] o_regs       Vector of SecureRegisterValue structs that contain
- *                          processor security register values
- *                          NOTE:  The state of the system/processors (ie, SCOM vs
- *                          FSI) determines which registers can be included
- * @param[out] i_calledByRP See the handleSecurebootFailure function's
- *                          "called by resource provider" option.
- *
- * @return errlHndl_t  nullptr on success, else pointer to error log
- */
-errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
-                                   const bool i_calledByRP = false)
-{
-    // Note: If you add code to this function that calls into the extended
-    // image then it could cause a deadlock. Protect any such code with
-    // logic that checks if i_calledByRP is false before doing so.
-
-    SB_ENTER("getAllSecurityRegisters: isTargetingLoaded=%d calledByRP=%d",
-             Util::isTargetingLoaded(), i_calledByRP);
-    errlHndl_t err = nullptr;
-
-    // Clear output vector
-    o_regs.clear();
-
-    SecureRegisterValues l_secRegValues;
-    std::vector<SecureRegisterValues> l_sbeMeasurementRegValues;
-
-    do
-    {
-
-    TARGETING::TargetHandleList procList;
-    TARGETING::Target* masterProcChipTargetHandle = nullptr;
-
-    if ( Util::isTargetingLoaded() && !i_calledByRP )
-    {
-        // Try to get a list of functional processors
-
-        // Get Target Service, and the system target.
-        TargetService& tS = targetService();
-        TARGETING::Target* sys = nullptr;
-        (void) tS.getTopLevelTarget( sys );
-
-        assert(sys, "getAllSecurityRegisters() system target is nullptr");
-
-        TARGETING::getAllChips(procList,
-                               TARGETING::TYPE_PROC,
-                               true); // true: return functional targets
-
-        // Get the Master Proc Chip Target for comparisons later
-        err = tS.queryMasterProcChipTargetHandle(masterProcChipTargetHandle);
-
-        if (err)
-        {
-            SB_ERR("getAllSecurityRegisters: "
-                   "queryMasterProcChipTargetHandle returned error: "
-                   "RC=0x%X, PLID=0x%X",
-                   ERRL_GETRC_SAFE(err),
-                   ERRL_GETPLID_SAFE(err));
-
-            // Commit error and continue
-            errlCommit( err, SECURE_COMP_ID );
-            masterProcChipTargetHandle = nullptr;
-
-            // Since we can't get master proc, don't trust targeting and
-            // just use MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-            procList.clear();
-        }
-    }
-
-    if ( procList.size() != 0 )
-    {
-        // Grab data from all of the targets
-        uint64_t scomData = 0x0;
-        size_t   op_expected_size  = 0x0;
-        size_t   op_actual_size = 0x0;
-        uint64_t op_addr  = 0x0;
-
-        for( auto procTgt : procList )
-        {
-            SB_DBG("getAllSecurityRegisters: procTgt=0x%X: useXscom=%d",
-                   TARGETING::get_huid(procTgt), procTgt->getAttr<ATTR_SCOM_SWITCHES>().useXscom);
-
-            /****************************************/
-            // Get ProcSecurity::SwitchRegister
-            /****************************************/
-            // can only get register if processor target is scommable
-            // If the proc chip supports xscom..
-            if (procTgt->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
-            {
-                l_secRegValues.procTgt=procTgt;
-                l_secRegValues.addr=static_cast<uint32_t>(ProcSecurity::SwitchRegister);
-                err = getSecuritySwitch(l_secRegValues.data,
-                                        l_secRegValues.procTgt);
-                if( err )
-                {
-                    // Something failed on the read.  Commit the error
-                    // here but continue
-                    SB_ERR("getAllSecurityRegisters: Error from getSecuritySwitch: "
-                           "(0x%X) from Target 0x%.8X: RC=0x%X, PLID=0x%X",
-                           l_secRegValues.addr,
-                           TARGETING::get_huid(l_secRegValues.procTgt),
-                           ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
-
-                    // Commit error and continue
-                    errlCommit( err, SECURE_COMP_ID );
-                    continue;
-                }
-                o_regs.push_back(l_secRegValues);
-            }
-
-            /****************************************/
-            // Get ProcCbsControl::StatusRegister
-            /****************************************/
-            // Check to see if current target is master processor
-            if ( procTgt == masterProcChipTargetHandle)
-            {
-                SB_DBG("getAllSecurityRegisters: procTgt=0x%X is MASTER. ",
-                       TARGETING::get_huid(procTgt));
-
-                // Read ProcCbsControl::StatusRegister via SCOM
-                scomData = 0x0;
-                op_actual_size = sizeof(scomData);
-                op_expected_size = op_actual_size;
-                op_addr = static_cast<uint64_t>(ProcCbsControl::StatusRegister);
-
-                err = deviceRead( procTgt,
-                                  &scomData,
-                                  op_actual_size,
-                                  DEVICE_SCOM_ADDRESS(op_addr) );
-            }
-            else
-            {
-                SB_DBG("getAllSecurityRegisters: procTgt=0x%X is NOT MASTER. ",
-                       TARGETING::get_huid(procTgt));
-
-                // Not Master, so read ProcCbsControl::StatusRegister via FSI
-                scomData = 0x0;
-                op_actual_size = 4; // size for FSI
-                op_expected_size = op_actual_size;
-                op_addr = static_cast<uint64_t>(ProcCbsControl::StatusRegisterFsi);
-
-                err = deviceRead( procTgt,
-                                  &scomData,
-                                  op_actual_size,
-                                  DEVICE_FSI_ADDRESS(op_addr) );
-            }
-
-            if( err )
-            {
-                // Something failed on the read.  Commit the error
-                // here but continue
-                SB_ERR("getAllSecurityRegisters: Error reading CBS Control Reg "
-                       "(0x%X) from Target 0x%.8X: RC=0x%X, PLID=0x%X",
-                       op_addr, TARGETING::get_huid(procTgt),
-                       ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
-
-                // Commit error and continue
-                errlCommit( err, SECURE_COMP_ID );
-                continue;
-            }
-
-            if (op_actual_size != op_expected_size)
-            {
-                SB_ERR("getAllSecurityRegisters: size returned from device write (%d) is not the expected size of %d",
-                       op_actual_size, op_expected_size);
-                /*@
-                 * @errortype
-                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid        SECUREBOOT::MOD_SECURE_GET_ALL_SEC_REGS
-                 * @reasoncode      SECUREBOOT::RC_DEVICE_WRITE_ERR
-                 * @userdata1       Actual size written
-                 * @userdata2       Expected size written
-                 * @devdesc         Device write did not return expected size
-                 * @custdesc        Firmware Error
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                SECUREBOOT::MOD_SECURE_GET_ALL_SEC_REGS,
-                                SECUREBOOT::RC_DEVICE_WRITE_ERR,
-                                op_actual_size,
-                                op_expected_size,
-                                ErrlEntry::ADD_SW_CALLOUT);
-                addSecureUserDetailsToErrlog(err);
-                err->collectTrace(SECURE_COMP_NAME);
-                break;
-            }
-
-            // push back result
-            l_secRegValues.procTgt=procTgt;
-            l_secRegValues.addr=op_addr;
-            l_secRegValues.data=scomData;
-            o_regs.push_back(l_secRegValues);
-
-
-            /****************************************/
-            // Get SBE Measurement Registers
-            /****************************************/
-            // can only get these register if processor target is scommable
-            // ie, the the proc chip supports xscom..
-            if (procTgt->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
-            {
-                err = getSbeMeasurementRegisters(l_sbeMeasurementRegValues, procTgt);
-                if( err )
-                {
-                    // Something failed on the read.  Commit the error
-                    // here but continue
-                    SB_ERR("getAllSecurityRegisters: Error from getSbeMeasurementRegisters: "
-                           "Target 0x%.8X: "
-                           TRACE_ERR_FMT,
-                           TARGETING::get_huid(procTgt),
-                           TRACE_ERR_ARGS(err));
-                    // Commit error and continue
-                    errlCommit( err, SECURE_COMP_ID );
-                    continue;
-                }
-                else
-                {
-                    o_regs.insert(o_regs.end(),
-                                  l_sbeMeasurementRegValues.begin(),
-                                  l_sbeMeasurementRegValues.end());
-                }
-            }
-        } // end of targeting loop
-
-    } // TargetList has some targets
-
-    else
-    {
-        // Since targeting is NOT loaded or TargetList is empty only capture
-        // data for MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-        l_secRegValues.procTgt=TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        l_secRegValues.addr=static_cast<uint32_t>(ProcSecurity::SwitchRegister);
-        err = getSecuritySwitch(l_secRegValues.data,
-                                l_secRegValues.procTgt);
-
-        if( err )
-        {
-            // Something failed on the read.  Commit the error
-            // here but continue
-            SB_ERR("getAllSecurityRegisters: Error from getSecuritySwitch: "
-                   "(0x%X) from Target 0x%.8X: RC=0x%X, PLID=0x%X",
-                   l_secRegValues.addr,
-                   TARGETING::get_huid(l_secRegValues.procTgt),
-                   ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
-
-            // Commit error and continue
-            errlCommit( err, SECURE_COMP_ID );
-            break;
-        }
-        o_regs.push_back(l_secRegValues);
-
-        // Add SBE Mesasurement Registers
-        Target* l_procTgt = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-        err = getSbeMeasurementRegisters(l_sbeMeasurementRegValues,
-                                         l_procTgt);
-        if( err )
-        {
-            // Something failed; commit the error here but continue
-            SB_ERR("getAllSecurityRegisters: Error from getSbeMeasurementRegisters: "
-                   "Target 0x%.8X: "
-                   TRACE_ERR_FMT,
-                   TARGETING::get_huid(l_procTgt),
-                   TRACE_ERR_ARGS(err));
-
-            // Commit error and continue
-            errlCommit( err, SECURE_COMP_ID );
-        }
-        else
-        {
-            o_regs.insert(o_regs.end(),
-                           l_sbeMeasurementRegValues.begin(),
-                           l_sbeMeasurementRegValues.end());
-        }
-
-    } // using MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-
-    } while(0);
-
-    SB_EXIT("getAllSecurityRegisters(): err rc=0x%X, plid=0x%X, "
-            "o_regs.size()=%d",
-            ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err),
-            o_regs.size());
 
     return err;
 }
@@ -838,75 +549,18 @@ errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
     return err;
 }
 
-
-void addSecurityRegistersToErrlog(errlHndl_t & io_err,
-                                  const bool i_calledByRP)
-{
-    SB_ENTER("addSecurityRegistersToErrlog(): io_err rc=0x%X, plid=0x%X",
-             ERRL_GETRC_SAFE(io_err), ERRL_GETPLID_SAFE(io_err));
-
-    errlHndl_t new_err = nullptr;
-
-
-    std::vector<SecureRegisterValues> registerList;
-
-    do
-    {
-
-    new_err = getAllSecurityRegisters(registerList, i_calledByRP);
-
-    if (new_err)
-    {
-        SB_ERR("addSecurityRegistersToErrlog: getAllSecurityRegisters returned "
-               "error: RC=0x%X, PLID=0x%X. Commiting this error and NOT adding "
-               "data to io_err",
-               ERRL_GETRC_SAFE(new_err),
-               ERRL_GETPLID_SAFE(new_err));
-
-        // Commit error and break
-        errlCommit(new_err, SECURE_COMP_ID );
-        break;
-    }
-
-    for( auto l_reg : registerList )
-    {
-
-        if (l_reg.addr == static_cast<uint32_t>(ProcCbsControl::StatusRegisterFsi))
-        {
-            ERRORLOG::ErrlUserDetailsLogRegister l_logReg(l_reg.procTgt,
-                                                      &l_reg.data,
-                                                      sizeof(l_reg.data),
-                                                      DEVICE_FSI_ADDRESS(l_reg.addr));
-            l_logReg.addToLog(io_err);
-        }
-        else
-        {
-            ERRORLOG::ErrlUserDetailsLogRegister l_logReg(l_reg.procTgt,
-                                                      &l_reg.data,
-                                                      sizeof(l_reg.data),
-                                                      DEVICE_SCOM_ADDRESS(l_reg.addr));
-            l_logReg.addToLog(io_err);
-        }
-
-
-    } // end of registerList loop
-
-    } while(0);
-
-    SB_EXIT("addSecurityRegistersToErrlog(): io_err rc=0x%X, plid=0x%X",
-            ERRL_GETRC_SAFE(io_err), ERRL_GETPLID_SAFE(io_err));
-
-    return;
-}
-
 void addSecureUserDetailsToErrlog(errlHndl_t & io_err,
                                    const bool i_calledByRP)
 {
     // Add Security Settings
     UdSecuritySettings().addToLog(io_err);
 
-    // Add security register values
-    addSecurityRegistersToErrlog(io_err, i_calledByRP);
+    // Add security register values if secureboot extended image is available
+    // (if targeting is loaded, then secureboot extended image will be available)
+    if (Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
+    {
+        addSecurityRegistersToErrlog(io_err, i_calledByRP);
+    }
 
     // Add System HW Keys' Hash
     SHA512_t hash = {0};

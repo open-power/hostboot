@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2021
+# Contributors Listed Below - COPYRIGHT 2015,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -25,3 +25,4 @@
 # common objects with runtime
 OBJS += errlud_i2c.o
 OBJS += i2c_utils.o
+OBJS += errli2c.o

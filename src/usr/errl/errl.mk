@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -40,5 +40,9 @@ OBJS += errludlogregister.o
 OBJS += errludcallout.o
 OBJS += errludstate.o
 OBJS += errlmanager_common.o
-OBJS += errli2c.o
 OBJS += errludattribute.o
+
+# NOTE: this object was here, but has been moved to the i2c directory
+# to save space in the Hostboot Base code (HBB):
+# OBJS += errli2c.o
+

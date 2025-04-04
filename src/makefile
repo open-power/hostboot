@@ -455,18 +455,24 @@ $(IMGDIR)/hbotStringFile : $(IMAGES)
 	$(ROOTPATH)/src/build/trace/tracehash_hb.pl -c -d $(ROOTPATH)/obj -s $@
 
 .PHONY: imgsizecheck
-#make sure base image isn't over 904K (908K - 4K for secure header)
-#PROCESS: get size of hbicore.bin, sort with respect to 904k (925696), then see
-# if last word is 904k.  If not, the base image is too big.
-#NOTE: HBB size is 1MB in pnor layout. 908K is the size without ECC rounded down
-#      to the nearest 4K page.
-#make sure bootloader image isn't over 36k (36K = 12K for exception vectors +
-#24K for bootloader code and data)
-#PROCESS: get size of hbibl.bin, sort with respect to 36k (36864),
-#then see if last word is 36k.  If not, the bootloader image is too big.
 
-MAX_BASE_SIZE = 925696
-MAX_BTLDR_SIZE = 36864
+# MAX_BASE_SIZE is for hbicore.bin, aka HBB (Hostboot Base image)
+# - HBB size is 1MB in pnor layout
+# - 908KB is the size without ECC rounded down
+# - Then genPnorImages.pl will add 2 headers:
+#   - The V1 header (size 4KB) at the start o the image
+#   - The V3 header (size 15KB) to the end of the image
+#   - Rounding up the header sizes to a 4KB boundary and we need to account for 20KB
+# - This leaves us with a goal of 888KB for the raw hbicore.bin file
+MAX_BASE_SIZE = 909312
+
+# The maximum size of the bootloader image (hbibl.bin) is 94KB
+# - this includes 12KB for exception vectors
+# - bootloader code and data
+# - securerom binary
+# - HBBL does NOT have ecc added in the pnor layout files
+MAX_BTLDR_SIZE = 96256
+
 THRESH_HBIRT_SIZE = 10485760
 MAX_HBIRT_SIZE = 16252928
 

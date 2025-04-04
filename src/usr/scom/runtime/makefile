@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,7 @@ MODULE = scom_rt
 
 # add unique object modules
 OBJS += rt_scom.o
+OBJS += handleSpecialWakeup.o
 
 # include common ojects between hostboot and runtime hostboot
 include ../scom.mk

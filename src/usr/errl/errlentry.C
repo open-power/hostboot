@@ -48,7 +48,8 @@
 #include <errl/errluserdetails.H>
 #include <errl/errludattribute.H>
 #include <errl/errludstate.H>
-#include <errl/errli2c.H>
+
+#include <i2c/errli2c.H>
 
 #include <trace/interface.H>
 #include <trace/entry.H>
@@ -4001,7 +4002,12 @@ void ErrlEntry::addI2cDeviceCallout(const TARGETING::Target *i_i2cMaster,
         ep = nullptr;
     }
 
-    handleI2cDeviceCalloutWithinHostboot(this, i_i2cMaster, i_engine, i_port, i_address, i_priority);
+    // If targeting is loaded then we should be able to call into the i2c module
+    // for handleI2cDeviceCalloutWithinHostboot()
+    if (Util::isTargetingLoaded() && TARGETING::targetService().isInitialized())
+    {
+        I2C::handleI2cDeviceCalloutWithinHostboot(this, i_i2cMaster, i_engine, i_port, i_address, i_priority);
+    }
 
     } while (0);
 

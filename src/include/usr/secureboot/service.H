@@ -409,22 +409,6 @@ namespace SECUREBOOT
                                  bool i_calledByRP = false);
 
     /**
-     *  @brief Adds the values of the Security Registers of the processors in
-     *         the system to an existing error log
-     *
-     *  @param[in,out] io_err  Error Log that the values of the security
-     *                         registers will be added to. Must not be nullptr.
-     *                         NOTE:  The state of the system/processors
-     *                         (ie, SCOM vs FSI) determines which registers can
-     *                         be included.
-     *  @param[in] i_calledByRP See the handleSecurebootFailure function's
-     *                         "called by resource provider" option.
-     *  @return N/A
-     */
-    void addSecurityRegistersToErrlog(errlHndl_t & io_err,
-                                      bool i_calledByRP = false);
-
-    /**
      * @brief Common handler for adding all relevant secureboot information to
      *        the user details section of an error log
      * @param[in,out] io_err  Error Log to add secure info to.

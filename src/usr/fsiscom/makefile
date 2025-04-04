@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,21 @@ ROOTPATH = ../../..
 MODULE = fsiscom
 
 OBJS += fsiscom.o
+
+# Even though this file is in the scom/ directory, it is being built here
+# to reduce the size of HBB. (libfsiscom.so is part of the HBI extended image)
+# VPATH and EXTRAINCDIR added to support handleSpecialWakeup.o
+OBJS += handleSpecialWakeup.o
+VPATH += ../scom/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+
+
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

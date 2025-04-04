@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/errl/errli2c.C $                                      */
+/* $Source: src/usr/i2c/errli2c.C $                                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /*****************************************************************************/
 #include <stdio.h>
 #include <algorithm>
-#include <errl/errli2c.H>
+#include <i2c/errli2c.H>
 #include <errl/errlmanager.H>
 #include <trace/interface.H>
 #include <hwas/common/hwasCallout.H>
@@ -40,11 +40,14 @@
 using namespace ERRORLOG;
 using namespace HWAS;
 
-namespace ERRORLOG
-{
+// ----------------------------------------------
+// Trace definitions
+// ----------------------------------------------
+extern trace_desc_t* g_trac_i2c;
 
-// Trace definition
-extern trace_desc_t* g_trac_errl;
+
+namespace I2C
+{
 
 uint8_t I2cDevInfos::getDepth(const TARGETING::Target* i_target) const
 {
@@ -133,7 +136,7 @@ void addI2cFruPathCallouts(const TARGETING::Target* const i_target,
             // The target itself has already been added to the error log.
             if (callout.target != i_target)
             {
-                TRACFCOMP(g_trac_errl, "addI2cFruPathCallouts(plid=0x%08x): Calling out 0x%08x with priority %d",
+                TRACFCOMP(g_trac_i2c, "addI2cFruPathCallouts(plid=0x%08x): Calling out 0x%08x with priority %d",
                           ERRL_GETRC_SAFE(i_errl), get_huid(callout.target), i_priority);
 
                 i_errl->addHwCallout(callout.target, i_priority, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
@@ -183,7 +186,7 @@ void handleI2cDeviceCalloutWithinHostboot(
     // try to find a device match in the list of matching infos
     for (auto& i2cd : i2cdvs)
     {
-        TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: chipType "
+        TRACDCOMP(g_trac_i2c, "handleI2cDeviceCalloutWithinHostboot: chipType "
                  "%d Engine=%d, Port=%d, addr=0x%X, "
                  "i2cMasterHuid=0x%X huid=0x%X w/ %d chips",
                  i2cd.chipType,
@@ -216,7 +219,7 @@ void handleI2cDeviceCalloutWithinHostboot(
                     l_priority = i_priority; // priority passed in
                     l_devFound = true;
                 }
-                TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: "
+                TRACDCOMP(g_trac_i2c, "handleI2cDeviceCalloutWithinHostboot: "
                           "Match found! Adding part callout for chipType %d "
                           "Engine=%d, Port=%d, addr=0x%X, i2cMasterHuid=0x%X "
                           "w/ %d chips",
@@ -253,7 +256,7 @@ void handleI2cDeviceCalloutWithinHostboot(
                            i2cd.devAddr == matchedBefore.devAddr;
                 });
 
-                TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: "
+                TRACDCOMP(g_trac_i2c, "handleI2cDeviceCalloutWithinHostboot: "
                           "i2cdev chipType=%d  Engine=%d, Port=%d, addr=0x%X, "
                           "i2cHuid=0x%X, i2cd.targetAncestryDepth=%d",
                           i2cd.chipType,
@@ -273,7 +276,7 @@ void handleI2cDeviceCalloutWithinHostboot(
                     // dereference the duplicate device from its iterator
                     auto dupDev = *dupItr;
 
-                    TRACDCOMP(g_trac_errl,
+                    TRACDCOMP(g_trac_i2c,
                               "handleI2cDeviceCalloutWithinHostboot: "
                               "dupdev chipType=%d  Engine=%d, Port=%d, "
                               "addr=0x%X, i2cHuid=0x%X, "
@@ -314,7 +317,7 @@ void handleI2cDeviceCalloutWithinHostboot(
 
             addI2cFruPathCallouts(i2cd.tgt, i_errl, i_priority);
         }
-        TRACDCOMP(g_trac_errl, "handleI2cDeviceCalloutWithinHostboot: "
+        TRACDCOMP(g_trac_i2c, "handleI2cDeviceCalloutWithinHostboot: "
                   "Match found! Adding Hw callout for huid 0x%X",
                   TARGETING::get_huid(i2cd.tgt));
         i_errl->addHwCallout(i2cd.tgt,

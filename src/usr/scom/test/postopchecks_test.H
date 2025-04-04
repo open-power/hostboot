@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,6 @@
 #ifndef __SCOM_POSTOPCHECKS_TEST_H
 #define __SCOM_POSTOPCHECKS_TEST_H
 
-#include "../DmiScomWorkaround.H"
 #include "../ibscom_retry.H"
 #include "../postopchecks.H"
 
@@ -116,28 +115,10 @@ public:
                 break;
             }
 
-            //Create a DmiScomWorkaround_for_test object
-            std::shared_ptr<const PostOpRetryCheck>
-                               l_dmiptr(new DmiScomWorkaround_for_test);
-
-
-             if(not l_dmiptr)
-             {
-                FAIL_POSTOP_TEST("test_postOpRetry: "
-                                 "Unable to create a "
-                                 "DmiScomWorkaround_for_test "
-                                 "object."
-                                );
-
-                l_result = false;
-                break;
-             }
-
              //Create PostOpChecks_for_test object
              std::shared_ptr<const PostOpRetryCheck>
                          l_postopcheck(new PostOpChecks_for_test{
                                                                  l_IbscomPtr,
-                                                                 l_dmiptr
                                                                 });
 
              if(not l_postopcheck)
@@ -156,7 +137,6 @@ public:
              //to determine which workaround requested a retry.
              uint64_t l_total_retry_count{};
              uint64_t l_ibscom_retry_count{};
-             uint64_t l_dmi_retry_count{};
              uint64_t l_no_retry_addr{0x22334455}; //Address that does not
                                                    //need a retry.
              uint16_t l_reasonCodeForTrue{IBSCOM::IBSCOM_RETRY_DUE_TO_ERROR};
@@ -165,13 +145,10 @@ public:
              l_postopcheck->resetRetryCount();
              l_total_retry_count = l_postopcheck->getRetryCount();
              l_ibscom_retry_count = l_IbscomPtr->getRetryCount();
-             l_dmi_retry_count = l_dmiptr->getRetryCount();
 
              l_rc = checkExpectedRetryCounts("Pre Test",
                                              l_total_retry_count,
                                              l_ibscom_retry_count,
-                                             l_dmi_retry_count,
-                                             0,
                                              0,
                                              0
                                             );
@@ -209,8 +186,6 @@ public:
              // its contained children return false.
              //
              // No Errl pointer - IBSCOM will not request retry.
-             // Address not in the list of addresses that require a DMI retry.
-             //                        - DmiWorkaround will not request retry.
              //
              //Expected Result: FALSE
              //
@@ -239,13 +214,10 @@ public:
 
              l_total_retry_count = l_postopcheck->getRetryCount();
              l_ibscom_retry_count = l_IbscomPtr->getRetryCount();
-             l_dmi_retry_count = l_dmiptr->getRetryCount();
 
              l_rc = checkExpectedRetryCounts("Test 1",
                                              l_total_retry_count,
                                              l_ibscom_retry_count,
-                                             l_dmi_retry_count,
-                                             0,
                                              0,
                                              0
                                             );
@@ -268,8 +240,6 @@ public:
              // expected.
              //
              // Errl pointer should trigger IBSCOM Retry.
-             // Address not in the list of addresses that require a DMI retry.
-             //                        - DmiWorkaround will not request retry.
              //
              //Expected Result: TRUE.
              //
@@ -298,15 +268,12 @@ public:
 
              l_total_retry_count = l_postopcheck->getRetryCount();
              l_ibscom_retry_count = l_IbscomPtr->getRetryCount();
-             l_dmi_retry_count = l_dmiptr->getRetryCount();
 
              l_rc = checkExpectedRetryCounts("Test 2",
                                              l_total_retry_count,
                                              l_ibscom_retry_count,
-                                             l_dmi_retry_count,
                                              1, //total expected
-                                             1, //ibscom expected
-                                             0  //dmi retry expected
+                                             1  //ibscom expected
                                             );
 
              if(not l_rc)
@@ -315,61 +282,6 @@ public:
                 break;
              }
 
-             //=============================================
-             // DMI Retry test(s)
-             //============================================
-
-             //Test 3
-             //
-             // Ensure that the PostOpRetry composite returns true when the
-             // contained DmiScomWorkaround instance requests a retry and that
-             // the retry counts for both the children and composite are as
-             // expected.
-             //
-             // Errl pointer is NULL and should not trigger a IBSCOM Retry.
-             // Address is in the list of addresses that require a DMI retry.
-             //                        - DmiWorkaround will request a retry.
-             // Expected Result: TRUE.
-             //
-             l_rc = l_postopcheck->requestRetry(nullptr,
-                                                l_retryCount,
-                                                DeviceFW::READ,
-                                                iv_cumulus_proc_target,
-                                                nullptr,
-                                                0,
-                                                0,
-                                                g_always_retry_addrs.front()
-                                                );
-             if(not l_rc)
-             {
-                FAIL_POSTOP_TEST("test_postOpRetry: "
-                                 "requestRetry unexpectedly returned false "
-                                 "for a cumulus proc target, null "
-                                 "errlHndl_t pointer and address 0x%016X",
-                                 g_always_retry_addrs.front()
-                                );
-
-                l_result = false;
-                break;
-             }
-
-             l_total_retry_count = l_postopcheck->getRetryCount();
-             l_ibscom_retry_count = l_IbscomPtr->getRetryCount();
-             l_dmi_retry_count = l_dmiptr->getRetryCount();
-
-             l_rc = checkExpectedRetryCounts("Test 3",
-                                             l_total_retry_count,
-                                             l_ibscom_retry_count,
-                                             l_dmi_retry_count,
-                                             2, //total expected
-                                             1, //ibscom expected
-                                             1  //dmi retry expected
-                                            );
-             if(not l_rc)
-             {
-                l_result = false;
-                break;
-             }
         }
         while(0);
 
@@ -380,163 +292,6 @@ public:
         else
         {
             SCOM_POSTOP_TRACF("test_postOpRetry: Test Failed!");
-        }
-    }
-
-    //-----------------------------------------------------------
-    // Integration test for Scom workarounds
-    void test_scom_workaround_integration_test()
-    {
-        populateRealTargets();
-        bool l_result{true};
-
-        do
-        {
-            //integration test valid on CUMULUS system only
-            if(TARGETING::MODEL_CUMULUS != iv_model)
-            {
-                __TRACE_USE_ONLY__ const char* model_name = "";
-                if(TARGETING::MODEL_NIMBUS == iv_model)
-                {
-                    model_name = "NIMBUS";
-                }
-
-                SCOM_POSTOP_TRACF("test_integration_test: "
-                                  "Not a Cumulus system. "
-                                  "Model: %s, "
-                                  "Aborting integration test.",
-                                   model_name
-                                 );
-
-                break;
-            }
-            else if(0x00 != iv_ecLevel && 0x10 != iv_ecLevel)
-            {
-                SCOM_POSTOP_TRACF("test_integration_test: "
-                                  "EC Level not valid for Test"
-                                  "EC Level: 0x%0x, "
-                                  "Aborting integration test.",
-                                   iv_ecLevel
-                                 );
-                break;
-            }
-            else
-            {
-                SCOM_POSTOP_TRACF("test_scom_workaround_integration_test: "
-                                  "CUMULUS System Detected."
-                                 );
-            }
-
-            //Ensure that we have a real target for testing.
-            if(nullptr == iv_proc_target)
-            {
-                FAIL_POSTOP_TEST("test_scom_workaround_integration_test: "
-                                 "No Targets for test were found!"
-                                );
-
-                l_result = false;
-                break;
-            }
-
-            const PostOpChecks* l_postopptr = PostOpChecks::theInstance();
-            if(nullptr == l_postopptr)
-            {
-                FAIL_POSTOP_TEST("test_scom_workaround_integration_test: "
-                                 "PostOpChecks::theInstance "
-                                 "returned a nullptr!"
-                                );
-
-                l_result = false;
-                break;
-            }
-
-            l_postopptr->resetRetryCount();
-
-            //STEP 1
-            //
-            //Test Workarounds on Proc Targets
-            //
-            //Integration Test of Proc target and all
-            //retry addresses.
-            //
-            //TEST strategy. Iterate through all retry addresses and
-            //perform a deviceRead on that address. The retry count
-            //for the DmiScomWorkaround should increment for each retry.
-            //
-            if(iv_proc_target)
-            {
-                uint64_t l_retryCount{0};
-                uint64_t l_expected_retryCount{0};
-
-                //iterate over all retry addresses
-                for(uint64_t l_addr: g_always_retry_addrs)
-                {
-                    uint64_t l_buffer{0};
-                    size_t l_bufsize = sizeof(uint64_t);
-                    l_expected_retryCount = l_postopptr->getRetryCount();
-                    errlHndl_t l_errl = DeviceFW::deviceRead(
-                                                  iv_proc_target,
-                                                  &l_buffer,
-                                                  l_bufsize,
-                                                  DEVICE_SCOM_ADDRESS(l_addr)
-                                                );
-                    if(l_errl)
-                    {
-                        delete l_errl;
-                        l_errl = nullptr;
-                        SCOM_POSTOP_TRACF(
-                                    "test_scom_workaround_integration_test: "
-                                    "Failed to read address "
-                                    "0x%016llX for processor target.",
-                                    l_addr
-                                          );
-                    }
-                    else
-                    {
-                        //read succeeded, check that a retry occurred.
-                        ++l_expected_retryCount;
-                        l_retryCount = l_postopptr->getRetryCount();
-
-                        //Because tests are run concurrently we cannot
-                        //use equality to check the retry count. A test
-                        //running in another thread may have read a
-                        //register that requires a retry and thus bump
-                        //the retry count up in addition to this test.
-                        if(l_expected_retryCount > l_retryCount)
-                        {
-                            FAIL_POSTOP_TEST(
-                                    "test_scom_workaround_integration_test: "
-                                     "retry count not as expected. "
-                                     "Expected %d, Actual %d. "
-                                     "Target - Proc. Addr: 0x%016llX",
-                                     l_expected_retryCount,
-                                     l_retryCount,
-                                     l_addr
-                                           );
-
-                            l_result = false;
-                            break;
-                        }
-                    }
-                }
-
-                if(not l_result)
-                {
-                    break;
-                }
-            }
-        }
-        while(0);
-
-        if(l_result)
-        {
-            SCOM_POSTOP_TRACF("test_scom_workaround_integration_test: "
-                                                               "Test Passed!");
-        }
-        else
-        {
-            SCOM_POSTOP_TRACF("test_scom_workaround_integration_test: "
-                                                               "Test Failed!");
         }
     }
 
@@ -559,10 +314,8 @@ private:
                                     const char* i_test,
                                     uint64_t i_total,
                                     uint64_t i_ibscom,
-                                    uint64_t i_dmi,
                                     uint64_t i_expected_total,
                                     uint64_t i_expected_ibscom,
-                                    uint64_t i_expected_dmi,
                                     bool i_exactMatch = true
                                  )
     {
@@ -602,21 +355,6 @@ private:
                                  i_ibscom,
                                  i_expected_ibscom
                                );
-
-                l_result = false;
-                break;
-             }
-             else if((i_exactMatch && (i_expected_dmi != i_dmi)) ||
-                     (!i_exactMatch && (i_expected_dmi > i_dmi))
-                    )
-             {
-                 FAIL_POSTOP_TEST("test_postOpRetry: "
-                                  "Unexpected retry count for l_dmiptr. "
-                                  "Test: %s, Actual %d. Expected %d",
-                                  i_test,
-                                  i_dmi,
-                                  i_expected_dmi
-                                 );
 
                 l_result = false;
                 break;

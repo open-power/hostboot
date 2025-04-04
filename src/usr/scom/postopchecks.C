@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
 // Workarounds
 //  Each workaround needs to be added to the composite
 //  PostOpChecks instance.
-#include "DmiScomWorkaround.H"
 #include "ibscom_retry.H"
 #include "ScomParityErrorWorkaround.H"
 //=========================
@@ -49,7 +48,6 @@ const PostOpChecks* PostOpChecks::theInstance()
     static const PostOpChecks* ls_instance =
                    new PostOpChecks{
                                       IbscomRetry::theInstance(),
-                                      DmiScomWorkaround::theInstance(),
                                       ScomParityErrorWorkaround::theInstance()
                                    };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@
 #include "trustedboot.H"
 #include "trustedTypes.H"
 #include <secureboot/service.H>
+#include <secureboot/service_ext.H>
 #include <spidd.H>
 #include <p10_scom_proc_d.H>
 #include <errl/errludlogregister.H>
