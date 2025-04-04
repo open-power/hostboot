@@ -366,7 +366,9 @@ sub main
     writeResultsToXml($targetObj);
 
     # Uncomment this to get a print-out of the DIMM components
-    #extractDimmData($targetObj);
+    #extractDimmData($targetObj);  needs fixing
+    #extractOcmbData($targetObj);
+
 }
 
 ################################################################################
@@ -7337,6 +7339,103 @@ sub __extractDimmData__
 
     # Print all the data gathered
     print "$procNum   $ddimmAffinity    $dimmFapiPos   $ocmbFapiName   $dimmI2c  $omiId   $dimmPort      $dimmHuid   $ocmbHuid   $dimmLoc \n";
+}
+
+#--------------------------------------------------
+# @brief A utility function to extract the OCMB data
+#
+# @note Call this function as the last function in main to get the data.  It is
+#       self contained and only needs the global target object to run. Use the
+#       -s option to silence warnings.
+#
+# @param [in] $targetObj - The global target object.
+#--------------------------------------------------
+sub extractOcmbData
+{
+    my $targetObj = shift;
+    printf("-----------------------------------------------------------------------------------------------------------------------------\n");
+    printf("%-4s %-65s %-4s %-17s %-4s %-3s %-10s %-5s \n",    "",            "","OCMB","OCMB Cronus","OMI" ,   "","OCMB","DIMM");
+    printf("%-4s %-65s %-4s %-17s %-4s %-3s %-10s %-5s \n","PROC","Logical Path","FAPI","Target"     ,"Chan","I2C","HUID","LOC" );
+    foreach my $target (sort keys %{ $targetObj->getAllTargets() })
+    {
+        my $type = $targetObj->getType($target);
+        if ($type eq "OCMB_CHIP")
+        {
+            __extractOcmbData__($targetObj,$target);
+        }
+    }
+}
+
+#--------------------------------------------------
+# @brief A private method that does the actual gathering of the OCMB Layout Data
+#
+# @param [in] $targetObj  - The global target object.
+# @param [in] $dimmTarget - The OCMB target object to extract the data from
+#--------------------------------------------------
+sub __extractOcmbData__
+{
+    my $targetObj = shift;
+    my $ocmbTarget = shift;
+
+    my $ocmbAffinity = $targetObj->getAttribute($ocmbTarget, 'AFFINITY_PATH');
+
+    # Extract the PROC number from the OCMB's AFFINITY_PATH
+    my $procNum = $ocmbAffinity;
+    $procNum =~ s#.*proc#proc#; # Remove all the characters before the "proc" word
+    $procNum =~ s#/.*##; # Remove all characters after the forward slash that follows the 'proc-#" word
+    $procNum =~ s#proc-*#P#; # Replace "proc" with 'P'
+
+    # Extract the Logical Path (mc-#/mi-#/mcc-#/omi-#) from the OCMB's AFFINITY_PATH
+    my $dimmAffinity =~ s#affinity:sys-0/node-./proc-./##;
+    $dimmAffinity =~ s#/ocmb_chip-0/mem_port-./dimm-0##;
+
+    # Find the Logical DIMM - TODO
+
+    my $ocmbFapiName = $targetObj->getAttribute($ocmbTarget, "FAPI_NAME");
+
+    # Get the OCMB's FAPI_POS
+    my $ocmbFapiPos = $targetObj->getAttribute($ocmbTarget, "FAPI_POS");
+    my $ocmbFapiPos = sprintf("%0.3d", $ocmbFapiPos);
+
+    # Extract the I2C PATH
+    my $i2cEngine = $targetObj->getAttributeField($ocmbTarget, "EEPROM_VPD_PRIMARY_INFO", "engine");
+    my $i2cEngine2 = $targetObj->getAttributeField($ocmbTarget, "FAPI_I2C_CONTROL_INFO", "engine");
+    if( $i2cEngine != $i2cEngine2 )
+    {
+        print "ERROR : $ocmbTarget :: I2C engines inconsistent : $i2cEngine != $i2cEngine2\n";
+    }
+    if ($i2cEngine == 3)
+    {
+        $i2cEngine = "E";
+    }
+    else
+    {
+        $i2cEngine = "???";
+    }
+
+    my $i2cPort = $targetObj->getAttributeField($ocmbTarget, "EEPROM_VPD_PRIMARY_INFO", "port");
+    my $i2cPort2 = $targetObj->getAttributeField($ocmbTarget, "FAPI_I2C_CONTROL_INFO", "port");
+    if( $i2cPort != $i2cPort2 )
+    {
+        print "ERROR : $ocmbTarget :: I2C ports inconsistent : $i2cPort != $i2cPort2\n";
+    }
+    $i2cPort = sprintf("%0.2d", $i2cPort);
+    $i2cPort = $i2cEngine . $i2cPort;
+
+
+    # Get the OMI Channel
+    my $omiId = $targetObj->getAttribute($ocmbTarget, "BUS_POS");
+
+    # Get the DDIMM & OCMB HUID
+    my $dimmHuid = 9999; #$targetObj->getAttribute($ldimmTarget, "HUID");
+    my $ocmbHuid = $targetObj->getAttribute($ocmbTarget, "HUID");
+
+    # Get the DIMM Location
+    my $dimmLoc = $targetObj->getAttribute($ocmbTarget, "STATIC_ABS_LOCATION_CODE");
+    $dimmLoc =~ s#P0-##;
+
+    # Print all the data gathered
+    printf("%-4s %-65s %-4d %-17s %-4d %-3s %-10s %-5s\n",$procNum,$ocmbAffinity,$ocmbFapiPos,$ocmbFapiName,$omiId,$i2cPort,$ocmbHuid,$dimmLoc);
 }
 
 ################################################################################
