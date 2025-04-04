@@ -209,20 +209,26 @@ fapi2::ReturnCode ody_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                                     const mss::mcbist::speed i_speed,
                                     const bool i_resume_dqs)
 {
+
     if(!i_resume_dqs)
     {
         FAPI_TRY(mss::ody::suspend_dqs_track(i_target));
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
+                                     fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_TRUE));
     }
 
-    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
-                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_TRUE));
     FAPI_TRY(mss::memdiags::continue_cmd<mss::mc_type::ODYSSEY>(i_target, i_end, i_stop, i_speed));
 
-    // since PRD uses this API to resume tg scrub and also bg scrub we need flag to
-    // control dqs drift tracking post that, expected behavior is for targeted scrub dqs remains suspended
-    // and for background scrub we will resume dqs
+    // ody_continue_cmd is used by PRD to either resume background scrub (after a command complete attention
+    // that doesn't trigger targeted diagnostics) or to resume a targeted scrub (during VCM). In practice,
+    // it'd actually be rarely used as it can't be used when resuming background steer and it would only be used
+    // during VCM if row repair is disabled (which would be none of our systems right now).
+    // So the main use it would have right now is resuming mnfg background scrub after a command complete.
+    // ATTR_ODY_DQS_TRACKING_SUSPENDED is used by PMIC telemetry to disable resuming DQS drift tracking if it's supposed to be suspended
     if(i_resume_dqs)
     {
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
+                                     fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_FALSE));
         FAPI_TRY(mss::ody::resume_dqs_track(i_target));
     }
 
