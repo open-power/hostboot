@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -326,7 +326,7 @@ class hwp_bit_istream
          * @param[in] i_stream The hwp_data_istream to wrap around.
          */
         hwp_bit_istream(hwp_data_istream& i_stream) :
-            iv_stream(i_stream), iv_buf_ptr(buf_size) {};
+            iv_stream(i_stream), iv_buf(0), iv_buf_ptr(buf_size) {};
 
         /**
          * @brief Retrieve a value of 1-64 bits from the stream
