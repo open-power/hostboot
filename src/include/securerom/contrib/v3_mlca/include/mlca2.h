@@ -59,10 +59,12 @@
  * 
  */
 
-#ifndef MLCA_H
-#define MLCA_H
+#ifndef MLCA2_H
+#define MLCA2_H
 
-#include <mlca2_random.h>
+//MAB#include <mlca2_random.h>
+#include <securerom/contrib/v3_mlca/include/mlca2_random.h>
+#include <securerom/contrib/v3_mlca/include/mlca2_int.h>
 #include <stddef.h>
 
 /**

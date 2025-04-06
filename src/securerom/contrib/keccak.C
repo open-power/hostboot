@@ -356,10 +356,6 @@ static void keccak_sponge_absorb_final(Keccak_state* state, size_t rBytes, int d
     state->idx = 0;
 }
 
-// At this time Hostboot code is only supporting the sha3() function and
-// this function is not required for its implementation.  It will be compiled
-// out, but kept here for reference
-#if 0
 static void keccak_sponge_squeeze_blocks_update(Keccak_state* state, uint8_t* out, size_t blocks, size_t rBytes)
 {
     uint64_t* A = state->A;
@@ -374,7 +370,6 @@ static void keccak_sponge_squeeze_blocks_update(Keccak_state* state, uint8_t* ou
         }
     }
 }
-#endif
 
 static void keccak_sponge_squeeze_update(Keccak_state* state, size_t Ni, uint8_t* out, size_t rBytes)
 {
@@ -440,10 +435,6 @@ static void keccak_sponge_wipe(Keccak_state* state)
 
 /** Incremental API for SHAKE128 / SHAKE256 */
 
-// At this time Hostboot code is only supporting the sha3() function and
-// does not require any of these shake*() functions. They will be compiled
-// out, but kept here for reference
-#if 0
 void shake128_absorb(Keccak_state* state, const uint8_t* in, size_t inlen)
 {
     keccak_sponge_absorb_update(state, in, inlen, SHAKE128_RATE);
@@ -545,7 +536,6 @@ void shake256(uint8_t* out, size_t outlen, const uint8_t* in, size_t inlen)
     shake256_squeeze(out + rem, outlen - rem, &state);
     shake256_wipe(&state);
 }
-#endif
 
 // At this time Hostboot code is not support the sha3_256() function so
 // it will be compiled out, but kept here for reference
@@ -562,6 +552,9 @@ void sha3_256(uint8_t h[32], const uint8_t* in, size_t inlen)
 }
 #endif
 
+// @TODO JIRA PFHB-921 reinstate the asm() call so that the securerom
+// branch table can properly find this function
+//asm(".globl .L.sha3_512");
 void sha3_512(uint8_t h[64], const uint8_t* in, size_t inlen)
 {
     Keccak_state state;
@@ -600,6 +593,7 @@ void sha3_512_final(uint8_t md[64], Keccak_state* state)
 // At this time Hostboot code is only supporting the sha3() function so
 // these other functions will be compiled out, but kept here for reference
 #if 0
+
 int sha3_init(sha3_ctx_t* c)
 {
     sha3_512_init(c);
@@ -612,6 +606,7 @@ int sha3_update(sha3_ctx_t* c, const void* data, size_t len)
     return 1;
 }
 
+asm(".globl .L.sha3_final");
 int sha3_final(sha3_t* md, sha3_ctx_t* c)
 {
     sha3_512_final((uint8_t*)md, c);
@@ -619,6 +614,11 @@ int sha3_final(sha3_t* md, sha3_ctx_t* c)
 }
 #endif
 
+// This is the main sha3() function that hostboot uses, which essentially
+// just calls one other function in this file: sha3_512()
+// @TODO JIRA PFHB-921 reinstate the asm() call so that the securerom
+// branch table can properly find this function
+//asm(".globl .L.sha3");
 void* sha3(const void* in, size_t inlen, void* md, int mdlen)
 {
     sha3_t digest;

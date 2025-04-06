@@ -30,6 +30,7 @@
 #include <securerom/sha512.H>
 #include <securerom/sha3.H>
 #include <securerom/ecverify.H>
+#include <securerom/mlca.H>
 #include <string.h>
 #include <array>
 #include <vector>

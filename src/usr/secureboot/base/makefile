@@ -37,24 +37,37 @@ OBJS += $(if $(CONFIG_TPMDD),trustedbootMsg.o,)
 OBJS += ${SECUREBOOT_COMMON_OBJS}
 OBJS += targutilbase.o
 
+# @TODO JIRA PFHB-921 remove these temporary flags that are needed for
+# compiling MLCA and ecverify into the hostboot secureboot_base module
+# Flags for ecverify
+CFLAGS += -DBYTE_ORDER=BIG_ENDIAN
+CFLAGS += -DBN_POWER64_MUL
+CFLAGS += -DBN_POWER64_CMP
+CFLAGS += -DBN_POWER64_CPY
+CFLAGS += -DBN_POWER64_CLR
+CFLAGS += -DEC_POWER64_RED
+CFLAGS += -DEC_POWER64_ALG
+
+# Flags for MLCA/mldsa_verify() to reduce size
+CFLAGS += -DNO_CRYSTALS_CIP
+CFLAGS += -DNO_CRYSTALS_KEX
+CFLAGS += -DNO_DILITHIUM_SIGN
+CFLAGS += -DNO_MLDSA_SIGN
+CFLAGS += -DNO_DILITHIUM_VERIFY
+#CFLAGS += -DUSE_DYNAMIC_ALLOC
+
 # @TODO JIRA PFHB-921 Until securerom's call_rom_SHA3() function works by
-# calling it via the securerom branch table, build in the sha3() support
-# by including keccak.o (which implements sha3()) in this secureboot_base
-# module.
+# calling it via the securerom branch table, build in the sha3(), mldsa_verify()
+# and ROM_v3_verify() support by including these OBJs and VPATH
 OBJS += keccak.o
+OBJS += mlca.o
+OBJS += ROM_v3.o
+OBJS += ecverify.o
 
 
-# @TODO JIRA PFHB-921 Similar to above, until securerom's call_rom_v3_verify()
-# function works by calling it via the securerom branch table, the function
-# will be stubbed out in ROM.C.  Eventually, ROM_v3.o, and any other .o files
-# it needs to implement call_rom_v3_verify(), like ecverify.o, will also be
-# included in this secureboot_base module.
-#OBJS += ROM_v3.o
-#OBJS += ecverify.o
-
-
-
+# add this VPATH to find the above files
 VPATH += ${ROOTPATH}/src/securerom/contrib/
+EXTRAINCDIR += $(ROOTPATH)/src/include/securerom/
 
 
 VPATH += $(ROOTPATH)/src/usr/targeting/common

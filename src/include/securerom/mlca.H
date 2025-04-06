@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/securerom/keccak.H $                              */
+/* $Source: src/include/securerom/mlca.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __KECCAK_H
-#define __KECCAH_H
-#include <securerom/contrib/keccak.H>
+#ifndef __MLCA_H
+#define __MLCA_H
+#include <securerom/contrib/mlca.H>
 #endif

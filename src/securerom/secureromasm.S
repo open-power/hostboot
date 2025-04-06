@@ -87,20 +87,23 @@ _ROM_verify:
     li r0, .L.ROM_verify@l
     b remove_rom_verify_offset
 
-    .globl _sha3
-_sha3:
-    li r0, .L.sha3@l
-    b remove_sha3_offset
+# @TODO JIRA PFHB-921 reinstate these 3 sections so that the securerom
+# branch table can properly find and use these functions
 
-    .globl _sha3_512
-_sha3_512:
-    li r0, .L.sha3_512@l
-    b remove_sha3_512_offset
+#    .globl _sha3
+#_sha3:
+#    li r0, .L.sha3@l
+#    b remove_sha3_offset
 
-    .globl _ROM_v3_verify
-_ROM_v3_verify:
-    li r0, .L.ROM_v3_verify@l
-    b remove_rom_v3_verify_offset
+#    .globl _sha3_512
+#_sha3_512:
+#    li r0, .L.sha3_512@l
+#    b remove_sha3_512_offset
+
+#    .globl _ROM_v3_verify
+#_ROM_v3_verify:
+#    li r0, .L.ROM_v3_verify@l
+#    b remove_rom_v3_verify_offset
 
 # Helper Functions to load the negative offset into r10.
 #
@@ -147,20 +150,23 @@ remove_rom_verify_offset:
     neg r10,r10
     b springboard
 
-remove_sha3_offset:
-    li r10, _sha3
-    neg r10,r10
-    b springboard
+# @TODO JIRA PFHB-921 reinstate these 3 sections so that the securerom
+# branch table can properly find and use these functions
 
-remove_sha3_512_offset:
-    li r10, _sha3_512
-    neg r10,r10
-    b springboard
+#remove_sha3_offset:
+#    li r10, _sha3
+#    neg r10,r10
+#    b springboard
 
-remove_rom_v3_verify_offset:
-    li r10, _ROM_v3_verify
-    neg r10,r10
-    b springboard
+#remove_sha3_512_offset:
+#    li r10, _sha3_512
+#    neg r10,r10
+#    b springboard
+
+#remove_rom_v3_verify_offset:
+#    li r10, _ROM_v3_verify
+#    neg r10,r10
+#    b springboard
 
 springboard:
     b boingboing

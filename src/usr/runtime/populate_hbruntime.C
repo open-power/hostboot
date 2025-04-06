@@ -3319,6 +3319,7 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         // advance current offset to after the Hash and Verification Function
         // offsets array header
         l_currOffset += sizeof(*l_hdatHashVerifyFunc);
+//MAB verify this with new functions
 
         // Iterate through all function types available and obtain their current
         // version and offset

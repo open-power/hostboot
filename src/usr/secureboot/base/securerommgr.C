@@ -660,7 +660,7 @@ void SecureRomManager::hashBlob(const void * i_blob,
         // V3
         // Set startAddr to ROM_SHA3() function at an offset of Secure ROM
 
-        // @TODO JIRA PFHB-677 Until securerom's call_rom_SHA3() function is
+        // @TODO JIRA PFHB-921 Until securerom's call_rom_SHA3() function is
         // working, call the linked sha3() function directly below
 
         //uint64_t l_rom_SHA3_startAddr =

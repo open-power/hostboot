@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -239,18 +239,22 @@ const consts_t consts = {
         0xc44a36477663b851LL,
         0x449048e16ec79bf6LL,
     }
-} ;
+} ; // end of consts definition
 
 inline const consts_t* __attribute__((pure)) consts_p()
 {
 
-#ifdef EMULATE_HW
+#if defined EMULATE_HW || defined BOOTLOADER || defined __HOSTBOOT_MODULE
     return &consts;
+
+// SecureROM version
 #else
     consts_t* result_consts_p;
+
     asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work
         "sub  %0,2,%0 \n\t" // because subi does not work
         "addi %0,%0,(consts-0x8000)@l" : "=r" (result_consts_p) );
+
     return result_consts_p;
 #endif
 }
@@ -1620,7 +1624,10 @@ static int ec_multiply (bn_t *x, bn_t *y, bn_t *z, const bn_t *k)
 
 
 //=====================================================  public function  ====
+
+#ifndef __HOSTBOOT_MODULE
 asm(".globl .L.ec_verify");
+#endif
 int ec_verify (const unsigned char *publicpt,    /* 2*EC_COORDBYTES */
                const unsigned char *hash,        /*   EC_HASHBYTES  */
                const unsigned char *signature)   /* 2*EC_COORDBYTES */
@@ -1678,4 +1685,5 @@ int ec_verify (const unsigned char *publicpt,    /* 2*EC_COORDBYTES */
 
     return (! bn_cmp(r, px));
 }
+
 

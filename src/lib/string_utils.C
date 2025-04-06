@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,6 @@ extern "C" void *memcpy(void *vdest, const void *vsrc, size_t len)
     return vdest;
 }
 
-#ifndef BOOTLOADER
 extern "C" void *memmove(void *vdest, const void *vsrc, size_t len)
 {
     // Copy first-to-last
@@ -101,7 +100,6 @@ extern "C" void *memmove(void *vdest, const void *vsrc, size_t len)
 
     return vdest;
 }
-#endif
 
 extern "C" int memcmp(const void *p1, const void *p2, size_t len)
 {

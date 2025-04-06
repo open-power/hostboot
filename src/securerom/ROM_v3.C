@@ -24,9 +24,9 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <securerom/ROM.H>
-
 #include <securerom/ecverify.H>
 #include <securerom/status_codes.H>
+#include <securerom/mlca.H>
 #include <string.h>
 #include <algorithm>
 
@@ -102,12 +102,12 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     sha3_t digest;
     ROM_v3_prefix_header_raw* prefix;
     ROM_v3_prefix_data_raw* hw_data;
-    ROM_v3_fw_header_raw* header;
+    ROM_v3_fw_header_raw* fw_header;
     ROM_v3_fw_sig_raw* fw_sig;
     uint64_t size;
 
     // params->log is used to pass in a FW Secure Version to
-    // compare against the container's fw header's fw_secure_version field
+    // compare against the container's fw_header's fw_secure_version field
     uint8_t i_fw_secure_version = static_cast<uint8_t>(params->log);
 
     params->log=CONTEXT|BEGIN;
@@ -145,12 +145,12 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     }
 
     // test for valid prefix header signatures (all)
-    hw_data = (ROM_v3_prefix_data_raw*) (prefix
-                                      + V3_PREFIX_HEADER_SIZE(prefix));
+    hw_data = (ROM_v3_prefix_data_raw*) ((uint8_t*) prefix
+                                         + V3_PREFIX_HEADER_SIZE(prefix));
     sha3((uint8_t*)prefix, V3_PREFIX_HEADER_SIZE(prefix), &digest);
 
     // Test for HW Signatures:
-    // First ec_verify hw_ecdsa_public_key_A and hw_signature A, hw sig D
+    // First ec_verify hw_ecdsa_public_key_A and hw_signature A
     if (ec_verify (container->hw_pkey_a,
                    digest,
                    hw_data->hw_sig_a)<1)
@@ -158,18 +158,16 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
         FAILED(HW_SIGNATURE_TEST_ECDSA,"invalid hw signature - ECDSA");
     }
 
-
     // Then hw_mldsa_public_key_d (hw_pkey_d) and hw_signature_D
-    // @TODO JIRA:PFHB-677 enable mldsa_verify call
-    //if(mldsa_verify(hw_data->hw_sig_d,
-    //                MLDSA_SIG_SIZE,
-    //                digest,
-    //                SHA3_DIGEST_LENGTH,
-    //                container->hw_pkey_d,
-    //                MLDSA_PUBLIC_KEY_SIZE) == 0)
-    //{
-    //    FAILED(HW_SIGNATURE_TEST_MLDSA,"invalid hw signature - MLDSA");
-    //}
+    if(mldsa_verify(hw_data->hw_sig_d,
+                    MLDSA_SIG_SIZE,
+                    digest,
+                    SHA3_DIGEST_LENGTH,
+                    container->hw_pkey_d,
+                    MLDSA_PUBLIC_KEY_SIZE) == 0)
+    {
+        FAILED(HW_SIGNATURE_TEST_MLDSA,"invalid hw signature - MLDSA");
+    }
 
     // test for machine specific matching ecid
     // All ECID bytes must be 0
@@ -213,28 +211,26 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     }
 
     // start processing fw header
-    header = (ROM_v3_fw_header_raw*) (hw_data
-                                     + sizeof(ROM_v3_prefix_data_raw));
-
+    fw_header = (ROM_v3_fw_header_raw*) ((uint8_t*)hw_data
+                                       + sizeof(ROM_v3_prefix_data_raw));
 
     // test for fw secure version - compare what was passed in via
     // params->log to what the container's fw header has
-    if( header->fw_secure_version < i_fw_secure_version)
+    if( fw_header->fw_secure_version < i_fw_secure_version)
     {
         FAILED(SECURE_VERSION_TEST,"bad container fw secure version");
     }
 
-    // test for valid header version, hash & signature algorithms (sanity check)
-    if(!v3_valid_ver_alg(&header->ver_alg, 0))
+    // test for valid fw header version, hash & signature algorithms (sanity check)
+    if(!v3_valid_ver_alg(&fw_header->ver_alg, 0))
     {
         FAILED(HEADER_VER_ALG_TEST,"bad fw header version,alg");
     }
 
     // test for valid fw header signatures (all)
-    fw_sig = (ROM_v3_fw_sig_raw*) (header
+    fw_sig = (ROM_v3_fw_sig_raw*) ((uint8_t*)fw_header
                                    + sizeof(ROM_v3_fw_header_raw));
-    sha3((uint8_t*)header, V3_FW_HEADER_SIZE(header), &digest);
-
+    sha3((uint8_t*)fw_header, V3_FW_HEADER_SIZE(fw_header), &digest);
 
     // Test for FW (aka FW) Signatures:
     // First ec_verify fw_ecdsa_public_key_P and fw_signature P
@@ -245,35 +241,34 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
         FAILED(FW_SIGNATURE_TEST_ECDSA,"invalid fw signature - ECDSA");
     }
 
-
     // Then fw_mldsa_public_key_S and fw_signature_S
-    // @TODO JIRA:PFHB-677 enable mldsa_verify call
-    //if(mldsa_verify(sw_sig->sw_sig_s,
-    //                MLDSA_SIG_SIZE,
-    //                digest,
-    //                SHA3_DIGEST_LENGTH,
-    //                hw_data->sw_pkey_s,
-    //                MLDSA_PUBLIC_KEY_SIZE) == 0)
-    //{
-    //    FAILED(SW_SIGNATURE_TEST_MLDSA,"invalid sw signature - MLDSA");
-    //}
-
+    if(mldsa_verify(fw_sig->fw_sig_s,
+                    MLDSA_SIG_SIZE,
+                    digest,
+                    SHA3_DIGEST_LENGTH,
+                    hw_data->fw_pkey_s,
+                    MLDSA_PUBLIC_KEY_SIZE) == 0)
+    {
+        FAILED(FW_SIGNATURE_TEST_MLDSA,"invalid fw signature - MLDSA");
+    }
 
     // test for machine specific matching ecid
     // check for all 0; if not 0 fail
-    if (std::any_of(header->ecid, &header->ecid[ECID_SIZE], pred_notZero))
+    if (std::any_of(fw_header->ecid, &fw_header->ecid[ECID_SIZE], pred_notZero))
     {
-        FAILED(HEADER_ECID_TEST, "ecid bytes are not 0");
+        FAILED(HEADER_ECID_TEST, "fw header ecid bytes are not 0");
     }
 
-    if (header->reserved)
+    if (fw_header->reserved)
     {
-        FAILED(HEADER_RESERVED_TEST, "header reserved not 0");
+        FAILED(HEADER_RESERVED_TEST, "fw header reserved not 0");
     }
 
-    if (std::any_of(header->reserved1, &(header->reserved1[ARRAY_SIZE(header->reserved1)]), pred_notZero))
+    if (std::any_of(fw_header->reserved1,
+                    &(fw_header->reserved1[ARRAY_SIZE(fw_header->reserved1)]),
+                    pred_notZero))
     {
-        FAILED(HEADER_RESERVED1_TEST, "header reserved1 not 0");
+        FAILED(HEADER_RESERVED1_TEST, "fw header reserved1 not 0");
     }
 
     // Setup the ptr to the data for the sha3 hash call below
@@ -290,10 +285,10 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
         data_offset = reinterpret_cast<uint8_t*>(i_data);
     }
 
-    size = GET64(header->payload_size_protected);
+    size = GET64(fw_header->payload_size_protected);
     sha3(data_offset, size, &digest);
 
-    if(memcmp(header->payload_hash_protected, digest, sizeof(sha3_t)))
+    if(memcmp(fw_header->payload_hash_protected, digest, sizeof(sha3_t)))
     {
         FAILED(HEADER_HASH_TEST,"invalid fw payload hash");
     }
