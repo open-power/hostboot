@@ -71,7 +71,6 @@ void* call_host_sbe_update (void *io_pArgs)
 {
     errlHndl_t  l_errl  =   NULL;
     IStepError l_StepError;
-    bool l_testAltMaster = true;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_sbe_update entry" );
@@ -102,12 +101,18 @@ void* call_host_sbe_update (void *io_pArgs)
             break;
         }
 
+// Alternative Boot Processor (aka alternative master, TARGETING::PROC_MASTER_TYPE_MASTER_CANDIDATE)
+// is only available to connect to an alternative PNOR on FSP systems
+#ifdef CONFIG_FSP_BUILD
+
         // Run LPC Init on Alt Master Procs
         // Get list of all processors
         TARGETING::TargetHandleList l_procList;
         TARGETING::getAllChips(l_procList,
                                TARGETING::TYPE_PROC,
                                true); // true: return functional targets
+
+        bool l_testAltMaster = true;
 
         // Loop through all processors
         for (const auto & l_procTarg : l_procList)
@@ -192,6 +197,7 @@ void* call_host_sbe_update (void *io_pArgs)
             }
 #endif
         }
+#endif // #ifdef CONFIG_FSP_BUILD
 
         // Set SEEPROM_VERSIONS_MATCH attributes for each processor
         // this will be used later on by the sbe_retry code to determine

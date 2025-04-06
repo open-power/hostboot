@@ -289,17 +289,6 @@ namespace TRUSTEDBOOT
     void initBackupTpm();
 
     /**
-     * @brief A testcase to make sure the backup TPM's logs and PCR registers
-     *        look exactly as the primary's.
-     * @return errlHndl_t NULL if test ran successfully; otherwise a pointer to
-     *         the error log.
-     */
-    errlHndl_t testCmpPrimaryAndBackupTpm(); //TODO RTC:191761
-                                             // make this a Cxx standalone
-                                             // test when the simics model has
-                                             // support for both boot chips.
-
-    /**
      *  @brief Returns list of TPMs in the system meeting the specified critera
      *
      *  @param[out] o_tpmList Vector of TPM targeting target handles meeting the
