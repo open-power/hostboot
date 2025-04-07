@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,21 @@ class PldmPdrTestSuite;
 
 namespace PLDM
 {
+
+/**
+ * @brief Retrieves the PDRs from the BMC and adds them to the given
+ *        repository.
+ *
+ * @param[io/out] io_repo     Pointer to a PDR repository to store the BMC PDRs in.
+ *                            Must not be nullptr.
+ *
+ * @note  This function was moved from PLDM base code to the extended
+ *        code to save space in the Hostboot Base (aka HBB) image
+ *
+ * @return        errlHndl_t  Error if any, otherwise nullptr.
+ */
+errlHndl_t getRemotePdrRepository(pldm_pdr* io_repo);
+
 
 /* @brief  This class manages a global PDR repository for Hostboot (meant to be
  *         used through the Singleton class).

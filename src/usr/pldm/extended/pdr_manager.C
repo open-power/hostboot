@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,8 @@
 #include <pldm/pldm_response.H>
 #include <pldm/pldm_trace.H>
 #include <pldm/base/hb_patch.H>
+#include <pldm/pldm_request.H>
+#include "../requests/pldm_request_utils.H"
 
 #include <util/singleton.H>
 
@@ -62,6 +64,287 @@ namespace
 // Used with the libpldm pldm_pdr_add API
 const bool PDR_IS_NOT_REMOTE = false;
 const int PDR_AUTO_CALCULATE_RECORD_HANDLE = 0;
+
+/* @brief Retrieves one PDR from the BMC.
+ *
+ * @param[in] i_msgQ
+ *            A handle to the PLDM message queue
+ * @param[in/out] io_pdr_record_handle
+ *                The record handle for the PDR to retrieve. Set to the next PDR
+ *                in the repository as an output parameter.  Output not valid if
+ *                error returned.
+ * @param[out] o_pdr
+ *             The PDR from the BMC. Output not valid if error returned.
+ *             Pre-existing data will be cleared from the container.
+ * @param[in/out] io_pdr_usage_map
+ *                A usage map to keep track of the PDR's seen.
+ *                If, during the life cycle of the map, a duplicate PDR is seen,
+ *                an error log will be made and returned to caller for
+ *                proper handling.
+ *
+ * @note  This function was moved from PLDM base code to the extended
+ *        code to save space in the Hostboot Base (aka HBB) image
+ *
+ * @return Error if any, otherwise nullptr.
+ */
+errlHndl_t getPDR(const PLDM::pldm_outbound_req_msgq_t i_msgQ,
+                  pdr_handle_t& io_pdr_record_handle,
+                  pdr& o_pdr,
+                  std::map< pdr_handle_t, uint32_t > &io_pdr_usage_map)
+{
+    PLDM_DBG(ENTER_MRK"getPDR");
+
+    PLDM_INF("Making request for PDR 0x%08x from the BMC", io_pdr_record_handle);
+
+    struct get_pdr_response
+    {
+        uint8_t completion_code = 0;
+        pdr_handle_t next_record_hndl = 0;
+        pdr_handle_t next_data_transfer_hndl = 0;
+        uint8_t transfer_flag = 0;
+        uint16_t resp_cnt = 0;
+        std::vector<uint8_t> record_data;
+        uint8_t transfer_crc = 0;
+    };
+
+    o_pdr.data.clear();
+
+    pldm_get_pdr_req pdr_req
+    {
+        .record_handle = io_pdr_record_handle,
+        .data_transfer_handle = 0, // (0 if transfer op is FIRSTPART)
+        .transfer_op_flag = PLDM_GET_FIRSTPART, // transfer op flag
+        .request_count = SHRT_MAX, // Don't limit the size of the PDR
+        .record_change_number = 0 // record change number (0 for first request)
+    };
+
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+        /* Make the getPDR request and get the response message bytes */
+
+        std::vector<uint8_t> response_bytes;
+
+        {
+            errl =
+              sendrecv_pldm_request<PLDM_GET_PDR_REQ_BYTES> (
+                  response_bytes,
+                  i_msgQ,
+                  encode_get_pdr_req,
+                  DEFAULT_INSTANCE_ID,
+                  pdr_req.record_handle,
+                  pdr_req.data_transfer_handle,
+                  pdr_req.transfer_op_flag,
+                  pdr_req.request_count,
+                  pdr_req.record_change_number);
+
+            if (errl)
+            {
+                PLDM_ERR("getPDR: Error occurred trying to send pldm request.");
+                break;
+            }
+        }
+
+        /* Decode the message twice; the first time, the payload buffer will be
+         * null so that the decoder will simply tell us how big the buffer
+         * should be. Then we create a suitable payload buffer and call the
+         * decoder again, this time with the real buffer so that it can fill it
+         * with data from the message. */
+
+ get_pdr_response response { };
+        uint8_t* payload_buffer = nullptr;
+
+        for (int i = 0; i < 2; ++i)
+        {
+            errl =
+                decode_pldm_response(decode_get_pdr_resp,
+                                     response_bytes,
+                                     &response.completion_code,
+                                     &response.next_record_hndl,
+                                     &response.next_data_transfer_hndl,
+                                     &response.transfer_flag,
+                                     &response.resp_cnt,
+                                     payload_buffer,
+                                     response.record_data.size(),
+                                     &response.transfer_crc);
+
+            if (errl)
+            {
+                PLDM_ERR("getPDR: Error occurred trying to decode pldm response on pass %i", i);
+                break;
+            }
+
+            response.record_data.resize(response.resp_cnt);
+            payload_buffer = response.record_data.data();
+        }
+
+        if (errl)
+        {
+            // Message decoding failed; break out of the block;
+            break;
+        }
+
+        /*@
+          * @moduleid   MOD_GET_PDR
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_GET_PDR, RC_BAD_COMPLETION_CODE,
+                             response_bytes);
+        if(errl)
+        {
+            break;
+        }
+
+        /*@
+          * @moduleid   MOD_GET_PDR
+          * @reasoncode RC_BAD_NEXT_TRANSFER_HANDLE
+          * @userdata1  Actual Next Transfer Handle
+          * @userdata2  Expected Next Transfer Handle
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        /* HB does not support multipart transfers */
+        errl = validate_resp(response.next_data_transfer_hndl, static_cast<pdr_handle_t>(0),
+                             MOD_GET_PDR, RC_BAD_NEXT_TRANSFER_HANDLE,
+                             response_bytes);
+        if(errl)
+        {
+            break;
+        }
+
+        /*@
+          * @moduleid   MOD_GET_PDR
+          * @reasoncode RC_BAD_TRANSFER_FLAG
+          * @userdata1  Actual Transfer Flag
+          * @userdata2  Expected Transfer Flag
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.transfer_flag, PLDM_START_AND_END,
+                             MOD_GET_PDR, RC_BAD_TRANSFER_FLAG,
+                             response_bytes);
+        if(errl)
+        {
+            break;
+        }
+
+        /* Once we decode the message, then we can add the PDR to the caller's
+         * PDR byte buffer and return. */
+        o_pdr.data.assign(begin(response.record_data),
+                          begin(response.record_data) + response.resp_cnt);
+
+        const auto pdr_hdr = reinterpret_cast<pldm_pdr_hdr*>(o_pdr.data.data());
+        o_pdr.record_handle = le32toh(pdr_hdr->record_handle);
+        if ((io_pdr_record_handle != o_pdr.record_handle) && (io_pdr_record_handle != FIRST_PDR_HANDLE))
+        {
+            /*@
+             * @moduleid   MOD_GET_PDR_REPO
+             * @reasoncode RC_INVALID_RECORD_HANDLE
+             * @userdata1  Requested record handle
+             * @userdata2  Response record handle
+             * @devdesc    Bad data in PLDM message decode, response record handle not as expected
+             * @custdesc   Host firmware detected BMC communication error during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_GET_PDR_REPO,
+                                 RC_INVALID_RECORD_HANDLE,
+                                 io_pdr_record_handle,
+                                 o_pdr.record_handle,
+                                 ErrlEntry::NO_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+            break;
+        }
+        // Used to abort the IPL if PLDM PDRs are marked as having
+        // already been seen (integrity check the getPDR flow)
+        // If in the future any caller desires to -NOT- do a uniqueness check here
+        // the io_pdr_usage_map provided as input would need to be cleared prior to invocation.
+        bool pdr_abort = false;
+
+        if (io_pdr_usage_map.count(o_pdr.record_handle))
+        {
+            // Problem observed has been an infinite PDR loop where we -NEVER- receive
+            // the null terminator which causes Hostboot to hang/crash when resources
+            // are depleted
+            PLDM_ERR("PDR ENCOUNTERED already been seen -> io_pdr_usage_map[0x%08x]=%d",
+                o_pdr.record_handle, io_pdr_usage_map[o_pdr.record_handle]);
+            pdr_abort = true;
+        }
+        else
+        {
+            // first invocation will pass io_pdr_record_handle as FIRST_PDR_HANDLE
+            // so we need to get the REAL record_handle to log the usage properly
+            io_pdr_usage_map[o_pdr.record_handle] = 1;
+        }
+
+        io_pdr_record_handle = response.next_record_hndl;
+
+        if (pdr_abort)
+        {
+            /*@
+             * @moduleid   MOD_GET_PDR_REPO
+             * @reasoncode RC_DEFENSIVE_LIMIT
+             * @userdata1  Duplicate Record Handle that has already been seen
+             * @userdata2  Unused
+             * @devdesc    Duplicate PLDM Record Handle from PLDM getPDR
+             * @custdesc   Host firmware detected BMC communication error during system boot
+             */
+            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_GET_PDR_REPO,
+                                 RC_DEFENSIVE_LIMIT,
+                                 o_pdr.record_handle,
+                                 0,
+                                 ErrlEntry::NO_SW_CALLOUT);
+            addBmcErrorCallouts(errl);
+        }
+    } while (false);
+
+    PLDM_DBG(EXIT_MRK"getPDR");
+
+    return errl;
+}
+
+
+/* @brief Retrieves all the BMC PDRs.
+ *
+ * @param[out] o_pdrs  The list of PDRs from the BMC
+ *
+ * @note  This function was moved from PLDM base code to the extended
+ *        code to save space in the Hostboot Base (aka HBB) image
+ *
+ * @return errlHndl_t  Error if any, otherwise nullptr.
+ */
+errlHndl_t getAllPdrs(std::vector<pdr>& o_pdrs)
+{
+    pdr_handle_t pdr_handle = FIRST_PDR_HANDLE; // getPDR updates this for us
+    errlHndl_t errl = nullptr;
+    std::map< pdr_handle_t, uint32_t > pdr_usage_map;
+
+    do
+    {
+        pdr result_pdr { };
+
+        // Current implementation uses the same pdr_usage_map to track uniqueness.
+        // If in the future callers of getPDR do -NOT- wish to abort on duplicates,
+        // the pdr_usage_map should be cleared prior to invocation.
+        errl = getPDR(g_outboundPldmReqMsgQ, pdr_handle, result_pdr, pdr_usage_map);
+
+        if (errl)
+        {
+            PLDM_ERR("getAllPdrs encountered a problem in getPDR, look for an errlog");
+            break;
+        }
+
+        o_pdrs.push_back(result_pdr);
+    } while (pdr_handle != NO_MORE_PDR_HANDLES);
+
+    return errl;
+}
 
 /* @brief findPdr_impl
  *
@@ -100,6 +383,37 @@ bool findPdr_impl(pdr_handle_t& io_record_handle,
 
 namespace PLDM
 {
+
+
+// NOTE: This function was moved from PLDM base code to the extended
+// code to save space in the Hostboot Base (aka HBB) image
+errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
+{
+    std::vector<pdr> pdrs;
+
+    const errlHndl_t errl = getAllPdrs(pdrs);
+
+    if (!errl)
+    {
+        for (const auto& pdr : pdrs)
+        {
+            uint32_t record_handle = pdr.record_handle;
+            assert(pldm_pdr_add(io_repo,
+                                      pdr.data.data(),
+                                      pdr.data.size(),
+                                      false,
+                                      thePdrManager().hostbootTerminusId(),
+                                      &record_handle)
+                   == PLDM_SUCCESS);
+        }
+    }
+
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
+    return errl;
+}
+
 
 PdrManager::PdrManager()
     : iv_pdr_repo(nullptr, pldm_pdr_destroy),

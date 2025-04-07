@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,13 @@ namespace PLDM
 
 static constexpr pdr_handle_t FIRST_PDR_HANDLE = 0,
                               NO_MORE_PDR_HANDLES = 0;
+
+// (see DSP0248 v1.2.0, section 8 for general information about PDRs)
+struct pdr
+{
+    pdr_handle_t record_handle;
+    std::vector<uint8_t> data;
+};
 
 /**
  * @brief Retrieves the PDRs from the BMC and adds them to the given
