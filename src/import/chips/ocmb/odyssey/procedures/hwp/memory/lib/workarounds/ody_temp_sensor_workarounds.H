@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,19 @@ namespace workarounds
     ///
     fapi2::ReturnCode disable_unused_temp_sensor(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 #endif
+
+///
+/// @brief Set the sensor cache error bit if temperature read is a glitch (value changes more than it should between reads)
+/// @param[in] i_ocmb the OCMB target
+/// @param[in] i_reg_addr the register address with previous temperature value
+/// @param[in] i_sensor_pos the sensor position index
+/// @param[in,out] io_data register data to write to sensor cache
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode check_sensor_glitch(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                      const uint64_t i_reg_addr,
+                                      const uint8_t i_sensor_pos,
+                                      fapi2::buffer<uint64_t>& io_data);
 
 ///
 /// @brief Reads the octs, dts0, dts1, dts2, dts3 and writes to the scratch register

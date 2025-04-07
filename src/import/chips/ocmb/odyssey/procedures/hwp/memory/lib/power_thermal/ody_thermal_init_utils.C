@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -306,7 +306,7 @@ fapi2::ReturnCode thermal_sensor::read(const fapi2::Target<fapi2::TARGET_TYPE_OC
     (l_i2c_data);
 
 fapi_try_exit:
-    return process_results(i_ocmb, iv_reg_addr, l_data, i_sensor_pos);
+    return process_results(i_ocmb, iv_reg_addr, i_sensor_pos, l_data);
 }
 
 ///
@@ -389,14 +389,14 @@ fapi_try_exit:
 /// @brief Processes the results for this thermal sensor and writes them into the sensor cache register
 /// @param[in] i_ocmb the OCMB target
 /// @param[in] i_reg_addr the register address upon which to operate
-/// @param[in] i_data register data to write. Note: this is not a pass-by-reference as it could be updated internally
 /// @param[in] i_sensor_pos the sensor position index
+/// @param[in] io_data register data to write
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
                                   const uint64_t i_reg_addr,
-                                  fapi2::buffer<uint64_t> i_data,
-                                  const uint8_t i_sensor_pos)
+                                  const uint8_t i_sensor_pos,
+                                  fapi2::buffer<uint64_t>& io_data)
 {
     // NUM_DTS+1 since we need an attribute value for each DIMM sensor plus the on-chip sensor
     uint8_t l_err_track[NUM_DTS + 1] = {};
@@ -423,11 +423,16 @@ fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
         l_rc = fapi2::FAPI2_RC_SUCCESS;
 
         // Note: the cache registers use the same API, using D0THERM for the enumerated bits
-        i_data.setBit<scomt::ody::ODC_MMIO_SNSC_D0THERM_ERRORBIT>();
+        io_data.setBit<scomt::ody::ODC_MMIO_SNSC_D0THERM_ERRORBIT>();
+    }
+    else
+    {
+        // check if the new temperature is a glitch (changed more than it should from previous reading)
+        FAPI_TRY(mss::ody::workarounds::check_sensor_glitch(i_ocmb, i_reg_addr, i_sensor_pos, io_data));
     }
 
     // Write out the data to the storage address
-    FAPI_TRY(fapi2::putScom(i_ocmb, i_reg_addr, i_data));
+    FAPI_TRY(fapi2::putScom(i_ocmb, i_reg_addr, io_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -461,7 +466,7 @@ fapi2::ReturnCode read_oc_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     (static_cast<uint16_t>(l_oc_temp));
 
 fapi_try_exit:
-    return process_results(i_ocmb, scomt::ody::ODC_MMIO_SNSC_OCTHERM, l_data, l_sensor_pos);
+    return process_results(i_ocmb, scomt::ody::ODC_MMIO_SNSC_OCTHERM, l_sensor_pos, l_data);
 }
 
 ///

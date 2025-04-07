@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,6 +158,70 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 #endif
+
+///
+/// @brief Set the sensor cache error bit if temperature read is a glitch (value changes more than it should between reads)
+/// @param[in] i_ocmb the OCMB target
+/// @param[in] i_reg_addr the register address with previous temperature value
+/// @param[in] i_sensor_pos the sensor position index
+/// @param[in,out] io_data register data to write to sensor cache
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode check_sensor_glitch(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                      const uint64_t i_reg_addr,
+                                      const uint8_t i_sensor_pos,
+                                      fapi2::buffer<uint64_t>& io_data)
+{
+    using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    // Sensor read is a glitch if temperature changes more than 12C since the previous reading
+    constexpr uint8_t GLITCH_THRESHOLD = 12;
+
+    // Don't check for glitches on the on-chip sensor
+    if (i_sensor_pos == NUM_DTS)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Skip checking if the error bit is already set
+    if (io_data.getBit<scomt::ody::ODC_MMIO_SNSC_D0THERM_ERRORBIT>())
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    fapi2::buffer<uint64_t> l_cache_data;
+    uint8_t l_old_temp = 0;
+    uint8_t l_new_temp = 0;
+    uint8_t l_bigger_temp = 0;
+    uint8_t l_smaller_temp = 0;
+
+    // Read out the sensor cache data to get the previous temperature
+    FAPI_TRY(fapi2::getScom(i_ocmb, i_reg_addr, l_cache_data));
+
+    // Skip checking if the error bit is set in the previous value in cache
+    if (l_cache_data.getBit<scomt::ody::ODC_MMIO_SNSC_D0THERM_ERRORBIT>())
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    l_cache_data.extractToRight < TT::SENSOR_TEMP_MSB_INT_START,
+                                TT::SENSOR_TEMP_MSB_INT_LENGTH + TT::SENSOR_TEMP_LSB_INT_LENGTH > (l_old_temp);
+    io_data.extractToRight < TT::SENSOR_TEMP_MSB_INT_START,
+                           TT::SENSOR_TEMP_MSB_INT_LENGTH + TT::SENSOR_TEMP_LSB_INT_LENGTH > (l_new_temp);
+
+    // Check delta against the threshold and set the error bit if it jumped too far
+    l_bigger_temp = (l_new_temp > l_old_temp) ? l_new_temp : l_old_temp;
+    l_smaller_temp = (l_new_temp > l_old_temp) ? l_old_temp : l_new_temp;
+
+    if ((l_bigger_temp - l_smaller_temp) > GLITCH_THRESHOLD)
+    {
+        // Note: the cache registers use the same API, using D0THERM for the enumerated bits
+        io_data.setBit<scomt::ody::ODC_MMIO_SNSC_D0THERM_ERRORBIT>();
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Reads the octs, dts0, dts1, dts2, dts3 and writes to the scratch register
