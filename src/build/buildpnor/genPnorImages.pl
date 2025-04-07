@@ -417,13 +417,13 @@ my $OPEN_DEV_SIGN_PARAMS_V1 = "";
 my $OPEN_DEV_SIGN_PARAMS_V3 = "";
 if($secureboot)
 {
-    $OPEN_DEV_SIGN_PARAMS_V1 = "--mode $sign_mode "
+    $OPEN_DEV_SIGN_PARAMS_V1 = "--mode development "
     . "--hwKeyA $DEV_KEY_DIR_V1/hw_key_a.key "
     . "--hwKeyB $DEV_KEY_DIR_V1/hw_key_b.key "
     . "--hwKeyC $DEV_KEY_DIR_V1/hw_key_c.key "
     . "--swKeyP $DEV_KEY_DIR_V1/sw_key_a.key ";
 
-    $OPEN_DEV_SIGN_PARAMS_V3 = "--mode $sign_mode "
+    $OPEN_DEV_SIGN_PARAMS_V3 = "--mode development "
     . "--hwKeyA $DEV_KEY_DIR_V3/runtime_hw_key_a.key "
     . "--hwKeyD $DEV_KEY_DIR_V3/runtime_hw_key_d.key "
     . "--swKeyP $DEV_KEY_DIR_V3/runtime_sw_key_p.key "
