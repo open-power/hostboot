@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,8 +61,8 @@ p10_sbe_purge_hb(
     {
         fapi2::buffer<uint64_t> l_lco_target_id_ctl_reg = 0;
         fapi2::buffer<uint64_t> l_l3_fir_mask_or_reg = 0;
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
-        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num = 0;
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode = 0x0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_core_target,
                                l_core_num),
@@ -119,8 +119,8 @@ p10_sbe_purge_hb(
     {
         fapi2::buffer<uint64_t> l_lco_target_id_ctl_reg = 0;
         fapi2::buffer<uint64_t> l_l3_fir_mask_or_reg = 0;
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
-        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num = 0;
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode = 0x0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_core_target,
                                l_core_num),
