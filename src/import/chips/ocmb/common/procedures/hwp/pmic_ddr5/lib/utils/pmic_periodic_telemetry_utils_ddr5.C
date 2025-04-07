@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -593,6 +593,22 @@ fapi2::ReturnCode collect_periodic_tele_data(mss::pmic::ddr5::target_info_redund
         mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
 {
     uint8_t l_thermal_init_complete = 0;
+    uint16_t l_dram_mfg_id = 0;
+
+    // Read and store the dram manufacturing ID
+    // NOTE: Uses FAPI_ATTR_GET instead of get_dram_mfg_id to appease the SBE
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(io_target_info.iv_ocmb))
+    {
+        uint16_t l_value[2];
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MFG_ID, l_port, l_value));
+
+        // Logically there are two dimms but only DIMM0 is configured
+        l_dram_mfg_id = l_value[0];
+        break;
+    }
+
+    io_periodic_tele_info.iv_dram_mfg_id = l_dram_mfg_id;
 
     // Read and store serial number and CCIN number
     read_serial_ccin_number(io_target_info.iv_ocmb, io_periodic_tele_info.iv_serial_number);
@@ -698,6 +714,22 @@ fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGE
                          fapi2::TARGET_STATE_PRESENT);
 
     uint8_t l_pmic_aggregate_state = 0;
+    uint16_t l_dram_mfg_id = 0;
+
+    // Read and store the dram manufacturing ID
+    // NOTE: Uses FAPI_ATTR_GET instead of get_dram_mfg_id to appease the SBE
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_ocmb_target))
+    {
+        uint16_t l_value[2];
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MFG_ID, l_port, l_value));
+
+        // Logically there are two dimms but only DIMM0 is configured
+        l_dram_mfg_id = l_value[0];
+        break;
+    }
+
+    io_info.iv_dram_mfg_id = l_dram_mfg_id;
 
     for (const auto& l_pmic : l_pmics)
     {
