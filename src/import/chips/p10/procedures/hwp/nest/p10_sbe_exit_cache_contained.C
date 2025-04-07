@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,12 +66,12 @@ p10_sbe_exit_cache_contained_validate_core_inputs(
     FAPI_DBG("Start");
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::ATTR_FUSED_CORE_MODE_Type l_fused_core;
-    fapi2::ATTR_MASTER_CORE_Type l_master_core_num;
-    fapi2::ATTR_ACTIVE_CORES_VEC_Type l_attr_active_cores_vec;
-    fapi2::ATTR_ACTIVE_CORES_VEC_Type l_attr_backing_caches_vec;
-    fapi2::buffer<uint32_t> l_active_cores;
-    fapi2::buffer<uint32_t> l_backing_caches;
+    fapi2::ATTR_FUSED_CORE_MODE_Type l_fused_core = 0x0;
+    fapi2::ATTR_MASTER_CORE_Type l_master_core_num = 0x0;
+    fapi2::ATTR_ACTIVE_CORES_VEC_Type l_attr_active_cores_vec = 0x0;
+    fapi2::ATTR_ACTIVE_CORES_VEC_Type l_attr_backing_caches_vec = 0x0;
+    fapi2::buffer<uint32_t> l_active_cores = 0;
+    fapi2::buffer<uint32_t> l_backing_caches = 0;
     bool l_master_core_found = false;
     bool l_master_core_pair_found = false;
 
@@ -101,8 +101,8 @@ p10_sbe_exit_cache_contained_validate_core_inputs(
 
     for (auto& l_core_target : i_target.getChildren<fapi2::TARGET_TYPE_CORE>(fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
-        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num = 0x0;
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode = 0x0;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_core_target,
@@ -204,11 +204,11 @@ p10_sbe_exit_cache_contained(
     const p10_sbe_exit_cache_contained_step_t i_steps)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_ipl_type;
-    fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_is_master_sbe;
-    fapi2::ATTR_IS_MPIPL_Type l_is_mpipl;
+    fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_ipl_type = 0x0;
+    fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_is_master_sbe = 0x0;
+    fapi2::ATTR_IS_MPIPL_Type l_is_mpipl = 0x0;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::ATTR_IPL_TYPE_Type l_attr_ipl_type;
+    fapi2::ATTR_IPL_TYPE_Type l_attr_ipl_type = 0x0;
 
     FAPI_DBG("Start");
 
