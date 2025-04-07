@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,8 +56,8 @@ p10_sbe_stop_hb(
     // determine running threads and stop them
     for (auto l_core_target : i_active_core_targets)
     {
-        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num;
-        fapi2::ATTR_ECO_MODE_Type l_eco_mode;
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_core_num = 0x0;
+        fapi2::ATTR_ECO_MODE_Type l_eco_mode = 0x0;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
                                l_core_target,
