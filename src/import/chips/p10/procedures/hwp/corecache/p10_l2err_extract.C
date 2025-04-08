@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,7 +94,7 @@ fapi2::ReturnCode p10_l2err_extract(
     int32_t                 l_ce_trace_index = 0;
     uint32_t                l_indexes_index = 0;
     uint32_t                l_cycles = 0;
-
+    bool                    l_foundSyndrome = false;
 
     // mark function entry
     FAPI_INF("Entering p10_l2err_extract...");
@@ -310,36 +310,27 @@ fapi2::ReturnCode p10_l2err_extract(
     //Only try to gather the syndrome and back_of_2to1_nextcycle if we have a CE
     if (l_ce_ue)
     {
-        FAPI_ASSERT((l_trace_index + 1) < P10_TRACEARRAY_NUM_ROWS,
-                    fapi2::P10_L2ERR_EXTRACT_SYNDROME_NOT_FOUND()
-                    .set_TARGET(i_target)
-                    .set_TRACE_ARRAY_1(0xDEADDEADDEADDEADull)
-                    .set_TRACE_ARRAY_2(l_trace_index)
-                    .set_TRACE_ARRAY_3(0)
-                    .set_TRACE_ARRAY_4(0),
-                    "Error: could not find syndrome. Not enough data.  Error found at index: %d", l_trace_index);
+        // We don't use syndrome data for l2 line delete, so only show
+        // a warning trace if there's no syndrome data
+        if ( (l_trace_index + 1) >= P10_TRACEARRAY_NUM_ROWS )
+        {
+            FAPI_INF("WARNING: could not find syndrome. Not enough data. Error found at index: %d", l_trace_index);
+        }
+        else
+        {
+            // Find what cycle the CE occured on and calculate location of DW data
+            l_back_of_2to1_nextcycle = l_trace_array[l_trace_index + 1].isBitSet( 66 );
 
-        // Find what cycle the CE occured on and calculate location of DW data
-        l_back_of_2to1_nextcycle = l_trace_array[l_trace_index + 1].isBitSet( 66 );
-
-        //Get syndrome which is the cycle after the CE
-        FAPI_TRY(l_trace_array[ l_trace_index + 1 ].extractToRight( l_syndrome,  80,  8 ),
-                 "extractToRight() Syndrome data call returns an error.");
+            //Get syndrome which is the cycle after the CE
+            FAPI_TRY(l_trace_array[ l_trace_index + 1 ].extractToRight( l_syndrome,  80,  8 ),
+                     "extractToRight() Syndrome data call returns an error.");
+            FAPI_INF("Found syndrome: %2X", l_syndrome);
+            l_foundSyndrome = true;
+        }
     }
 
-    FAPI_ASSERT(!(l_ce_ue && (l_syndrome == 0)),
-                fapi2::P10_L2ERR_EXTRACT_SYNDROME_NOT_FOUND()
-                .set_TARGET(i_target)
-                .set_TRACE_ARRAY_1(0)
-                .set_TRACE_ARRAY_2(0)
-                .set_TRACE_ARRAY_3(0)
-                .set_TRACE_ARRAY_4(0),
-                "Error: could not find syndrome.");
-
-    FAPI_INF("Found syndrome: %2X", l_syndrome);
-
     // Look up column from syndrome
-    if ( l_ce_ue )
+    if ( (l_ce_ue) && (l_foundSyndrome) )
     {
         // Decodes the specified syndrome into a column offset
         bool found = false;

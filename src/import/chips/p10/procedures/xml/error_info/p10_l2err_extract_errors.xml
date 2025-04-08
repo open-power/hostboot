@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -68,21 +68,5 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P10_L2ERR_EXTRACT_SYNDROME_NOT_FOUND</rc>
-    <description>
-      Procedure: p10_l2err_extract
-      Could not find syndrome
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>TRACE_ARRAY_1</ffdc>
-    <ffdc>TRACE_ARRAY_2</ffdc>
-    <ffdc>TRACE_ARRAY_3</ffdc>
-    <ffdc>TRACE_ARRAY_4</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
+
 </hwpErrors>
