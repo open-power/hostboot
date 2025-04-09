@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,7 +175,7 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
 
         if (status != TASK_STATUS_EXITED_CLEAN)
         {
-            TRACFCOMP( g_trac_cxxtest, "Task %d (%s) crashed with status %d.",
+            TRACFCOMP( g_trac_cxxtest, "TS_FAIL Task %d (%s) crashed with status %d.",
                        t->tid, t->module, status );
             l_all_good = false;
             if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
@@ -233,7 +233,7 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
 
         if (status != TASK_STATUS_EXITED_CLEAN)
         {
-            TRACFCOMP( g_trac_cxxtest, "Task %d crashed with status %d.",
+            TRACFCOMP( g_trac_cxxtest, "TS_FAIL Task %d crashed with status %d.",
                        tidrc, status );
             l_all_good = false;
             if(CxxTest::g_FailedTests < CxxTest::CXXTEST_FAIL_LIST_SIZE)
