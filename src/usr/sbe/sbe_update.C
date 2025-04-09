@@ -7575,17 +7575,17 @@ errlHndl_t maskUnmaskMetaData( void*                     i_pSourceBfr,
             {
                 //Find metadata based on section offset + given metadata offset
                 uint64_t sourceBfrAddr = reinterpret_cast<uint64_t>(i_pSourceBfr);
-                uint64_t sectionBfrAddr = sourceBfrAddr + xipSection.iv_offset+ *(uint32_t*)xipMask.startOffsetMarker;
+                uint64_t totalOffset= xipSection.iv_offset + *reinterpret_cast<uint32_t *>(xipMask.startOffsetMarker);
+                uint64_t sectionBfrAddr = sourceBfrAddr + totalOffset;
                 uint64_t * pSectionBfrAddr = reinterpret_cast<uint64_t *>(sectionBfrAddr);
 
                 TRACFCOMP( g_trac_sbe,
-                    "maskUnmaskMetaData(%08x): section_str:(%-13s) section:%-3d "
-                    "totalOffset:%-8X = iv_offset:%-8X +  startOffset:%-8X "
+                    "maskUnmaskMetaData(0x%08X): section_str:(%s) section:%d "
+                    "totalOffset:0x%08X = IV_offset:0x%08X +  startOffset:0x%08X "
                     "size:%d",
-                    pSectionBfrAddr,
-                    section_str, xipMask.section,
-                    xipSection.iv_offset + *(uint32_t*)xipMask.startOffsetMarker,
-                    xipSection.iv_offset, *(uint32_t*)xipMask.startOffsetMarker,
+                    pSectionBfrAddr, section_str, xipMask.section,
+                    totalOffset,xipSection.iv_offset,
+                    *reinterpret_cast<uint32_t *>(xipMask.startOffsetMarker),
                     xipMask.numberOfBytesToMask);
 
                 //Save and mask out metadata
@@ -7650,9 +7650,9 @@ errlHndl_t maskUnmaskMetaData( void*                     i_pSourceBfr,
                 uint64_t markerOffset = (uint64_t)pIdStringBfr - (uint64_t)i_pSourceBfr;
 
                 TRACFCOMP( g_trac_sbe,
-                    "maskUnmaskMetaData(%8x): section_str:(%-13s) section:%-3d "
-                    "totalOffset:%-8X = iv_offset:%-8X + markerOffset:%-8X "
-                    "size:%-5d %.14s",
+                    "maskUnmaskMetaData(0x%08X): section_str:(%s) section:%d "
+                    "totalOffset:0x%08X = iv_offset:0x%08X + markerOffset:0x%08X "
+                    "size:%d marker:(%s)",
                     pIdStringBfr,
                     section_str, xipMask.section,
                     xipSection.iv_offset + markerOffset,
