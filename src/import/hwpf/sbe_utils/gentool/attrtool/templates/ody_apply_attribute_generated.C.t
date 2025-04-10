@@ -91,7 +91,7 @@ ReturnCode ody_apply_sbe_attribute_row<{{target_type}}>(
 
                 l_{{attr.name}}_found = true;
 
-                if(memcmp(&l_val, &l_original, sizeof({{attr.value_type}}_t)))
+                if(memcmp(&l_val, &l_original, sizeof(fapi2::{{attr.name}}_Type)))
                 {
                      FAPI_INF("Attribute {{attr.name}} original[%x] new[%x]"
                               " <<WARNING First word only", l_original, l_val);
