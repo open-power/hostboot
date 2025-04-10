@@ -1792,7 +1792,8 @@ sub create_sb_key_transition_container
     my $randPrefix = "rand-".POSIX::ceil(rand(0xFFFFFFFF));
     my %tempImages = (
         RAND_BLOB => "$bin_dir/$randPrefix.rand_blob.bin",
-        PRD_KEY_FILE => "$bin_dir/$randPrefix.sbkt_prod_key.bin"
+        PRD_KEY_FILE => "$bin_dir/$randPrefix.sbkt_prod_key.bin",
+        PRE_PAD_FILE => "$bin_dir/$randPrefix.sbkt_pre_pad.bin"
     );
 
     # Gen 4K blob of random data
@@ -1809,7 +1810,10 @@ sub create_sb_key_transition_container
     my $sbktComponentIdArg = "--sign-project-FW-token SBKT ";
     run_command("$OPEN_SIGN_KEY_TRANS_OLD ".$sbktComponentIdArg.OP_SIGNING_FLAG
         . "$sb_hdrs{SBKT}{outer}{flags} --protectedPayload $tempImages{PRD_KEY_FILE} "
-        . "--out $o_file");
+        . "--out $tempImages{PRE_PAD_FILE}");
+
+    # Pad to a multiple of page size (4K)
+    run_command("dd if=$tempImages{PRE_PAD_FILE} of=$o_file ibs=4k conv=sync");
 
     # Clean up temp images
     foreach my $image (keys %tempImages)
