@@ -39,13 +39,13 @@
 .set HBBL_END_ADDRESS,    end_load_address
 
 # @HBBL_SIZE_SYNC@
-# Should be HBBL_MAX_SIZE + 12K (0xB000 currently)
-.set HBBL_DATA_ADDR_OFFSET,      0x0000B000 ;// offset of external data
+# Should be HBBL_MAX_SIZE (112K, including securerom) + 12K (0x1F000 currently)
+.set HBBL_DATA_ADDR_OFFSET,      0x0001F000 ;// offset of external data
 
 # @sync_ti_area_size if bl_TIDataArea moves from the start of blData struct,
 # HBBL_TI_OFFSET will need to be updated to the new offset of the TI Data.
 .set HBBL_TI_OFFSET,             0x0        ;// offset within external data
-.set HBBL_SCRATCH_ADDR_OFFSET,   0x00010000 ;// offset of scratch space
+.set HBBL_SCRATCH_ADDR_OFFSET,   0x00050000 ;// offset of scratch space
 .set HBBL_system_reset,          0x100
 .set HBBL_machine_check,         0x200
 .set HBBL_data_storage,          0x300
@@ -106,9 +106,10 @@ _main:
     ori r2, r2, main@l
     ld r2,8(r2)
 
-    ;// Set up initial stack just before scratch space at 64k offset into HBBL
+    ;// Set up initial stack just before scratch space at 320KB offset into HBBL
+    ;// Note this must stay in sync with HBBL_SCRATCH_ADDR_OFFSET
     lis r1, _start@h
-    addis r1, r1, 1 ;// 64k (1 * 0x10000)
+    addis r1, r1, 5 ;// 320KB (5 * 0x10000)
 
     ;// Save HRMOR in r11 for use in multiple places
     mfspr r11, HRMOR    ;// save HRMOR

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,12 +83,18 @@ namespace SBE
     const uint64_t SBE_SEEPROM_SIZE_WO_ECC      = ((SBE_SEEPROM_SIZE - SBE_SEEPROM_ECC_PAD) / 9) * 8;
     // SBE Version (with ECC) kept at end of the 512KB memory
     // Adjust end of usable memory with ECC to be a multiple of 9 bytes
-    const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = PHYS_CHIPS_PER_LOGICAL_SEEPROM * SBE_SEEPROM_SIZE
+    // This is as far as a SBE Image with ECC should write on the seeprom so that it doesn't
+    // interfere with the SBE Version Struct
+    const uint64_t SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC  =
+                                                PHYS_CHIPS_PER_LOGICAL_SEEPROM * SBE_SEEPROM_SIZE
                                                 - SBE_SEEPROM_ECC_PAD
                                                 - SBE_VERSION_SPACE_WITH_ECC;
 
-    const uint64_t END_OF_SEEPROM_MINUS_READ_SIZE = PHYS_CHIPS_PER_LOGICAL_SEEPROM*SBE_SEEPROM_SIZE_WO_ECC
-                                               - SBE_SEEPROM_VERSION_READ_SIZE;
+    // This is the maximum size the SBE Image can be without ECC such that when ECC
+    // is added it doesn't interfere with the SBE Version Struct
+    const uint64_t END_OF_SEEPROM_MINUS_READ_SIZE_WO_ECC =
+                                            PHYS_CHIPS_PER_LOGICAL_SEEPROM*SBE_SEEPROM_SIZE_WO_ECC
+                                            - SBE_SEEPROM_VERSION_READ_SIZE;
 
     // Used to read SBE Boot Side from processor
     // (PERV_SB_CS_SCOM 0x00050008 or PERV_SB_CS_FSI 0x2808)

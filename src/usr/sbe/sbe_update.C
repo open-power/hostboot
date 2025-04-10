@@ -1412,7 +1412,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 {
     errlHndl_t err = nullptr;
 
-    // NOTE: Throughout this function some xip calls have kept the same p9 prefix for p10
+    // NOTE: Throughout this function some xip calls have kept the same p9 prefix for p10 and p11
     P9XipSection l_xipSection = {0};
     int xip_rc = 0;
     const char* i_section_str = P9_XIP_SECTION_NAME(g_sectionNamesSbe, i_section);
@@ -1460,7 +1460,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             TRACFCOMP(g_trac_sbe, "modifySbeSection(): p9_xip_get_section %s returned "
                       "unexpected return code, rc=0x%X",
                       i_section_str, xip_rc );
-
             /*@
              * @errortype
              * @moduleid     SBE_MODIFY_SBE_SECTION
@@ -1718,7 +1717,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         uint32_t l_coreMask = 0xFFFFFFFF; // Bits(0:31) = EC00:EC31
 
 
-        TRACUCOMP( g_trac_sbe, ENTER_MRK"procCustomizeSbeImg(): HUID=0x%X, i_sbeImgPtr= "
+        TRACFCOMP( g_trac_sbe, ENTER_MRK"procCustomizeSbeImg(): HUID=0x%X, i_sbeImgPtr= "
                    "%p, i_maxImgSize=%d, io_imgPtr=%p",
                    get_huid(i_target), i_sbeImgPtr, i_maxImgSize, io_imgPtr);
 
@@ -1889,6 +1888,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
         return l_err;
     }
+
 
 /////////////////////////////////////////////////////////////////////
     errlHndl_t getSetMVPDVersion(Target* i_target,
@@ -2909,7 +2909,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /*    ideally add some space for the HBBL Image        */
             /*******************************************************/
             uint32_t sbeHbblImgSize =
-                static_cast<uint32_t>(sbePnorImageSize + MAX_HBBL_SIZE);
+                static_cast<uint32_t>(sbePnorImageSize + MAX_HBBL_SIZE_HB);
 
             // copy SBE image from PNOR to memory
             sbeHbblImgPtr = (void*)(io_sbeState.sbe_update_space_vaddr + SBE_HBBL_IMG_VADDR_OFFSET);
@@ -3661,7 +3661,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                               sbeInfoSize_ECC,
                               DEVICE_EEPROM_ADDRESS(
                                             i_seepromSide,
-                                            SBE_VERSION_SEEPROM_ADDRESS,
+                                            SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                                             EEPROM::HARDWARE));
 
             if(err)
@@ -3691,7 +3691,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             eccStatus = removeECC(tmp_data_ECC,
                                   reinterpret_cast<uint8_t*>(&o_info),
                                   8,
-                                  SBE_VERSION_SEEPROM_ADDRESS,
+                                  SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                                   SBE_SEEPROM_SIZE);
 
             TRACUCOMP( g_trac_sbe, "getSeepromSideVersionViaSPI(): First 8-Bytes: "
@@ -3726,7 +3726,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             eccStatus = removeECC(tmp_data_ECC,
                                   reinterpret_cast<uint8_t*>(&o_info),
                                   sbeInfoSize,
-                                  SBE_VERSION_SEEPROM_ADDRESS,
+                                  SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                                   SBE_SEEPROM_SIZE);
 
             TRACFCOMP( g_trac_sbe, "getSeepromSideVersionViaSPI(): eccStatus=%d, "
@@ -3803,7 +3803,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             memset( &o_info, 0, sizeof(o_info) );
 
             l_err = SBEIO::sendPsuReadSeeprom(i_target,
-                               END_OF_SEEPROM_MINUS_READ_SIZE,
+                               END_OF_SEEPROM_MINUS_READ_SIZE_WO_ECC,
                                SBE_SEEPROM_VERSION_READ_SIZE,
                                mm_virt_to_phys(reinterpret_cast<void*>(
                                   l_seepromReadBufferAligned)));
@@ -3929,7 +3929,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             memset( sbeInfo_data_ECC, 0, sbeInfoSize_ECC);
             injectECC(sbeInfo_data,
                       sbeInfoSize,
-                      SBE_VERSION_SEEPROM_ADDRESS,
+                      SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                       SBE_SEEPROM_SIZE,
                       sbeInfo_data_ECC);
 
@@ -3944,7 +3944,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                                dd_op_size,
                                DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
-                                             SBE_VERSION_SEEPROM_ADDRESS,
+                                             SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                                              EEPROM::HARDWARE));
             if(err)
             {
@@ -3974,7 +3974,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                                   dd_op_size,
                                   DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
-                                             SBE_VERSION_SEEPROM_ADDRESS,
+                                             SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                                              EEPROM::HARDWARE));
 
                 if(err)
@@ -4001,7 +4001,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                 eccStatus = removeECC( sbeInfo_data_ECC_readBack,
                                        sbeInfo_data_readBack,
                                        sbeInfoSize,
-                                       SBE_VERSION_SEEPROM_ADDRESS,
+                                       SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                                        SBE_SEEPROM_SIZE);
 
                 TRACUCOMP( g_trac_sbe, "updateSeepromSide(): eccStatus=%d, "
@@ -4082,7 +4082,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             // for ECC injected SBE Image.
             rc = mm_remove_pages(RELEASE,
                                  reinterpret_cast<void*>(io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
-                                 SBE_ECC_IMG_MAX_SIZE);
+                                 SBE_SEEPROM_SIZE);
             if( rc )
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
@@ -4090,7 +4090,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                            "ECC_VADDR=0x%.16X, eccSize=0x%.8X.",
                            rc, get_huid(io_sbeState.target),
                            (io_sbeState.sbe_update_space_vaddr + SBE_ECC_IMG_VADDR_OFFSET),
-                           SBE_ECC_IMG_MAX_SIZE );
+                           SBE_SEEPROM_SIZE );
                 /*@
                  * @errortype
                  * @moduleid     SBE_UPDATE_SEEPROMS
@@ -4123,15 +4123,15 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             size_t sbeEccImgSize = setECCSize(sbeImgSize);
 
             // Check if assert below will fail and values should be traced
-            if(sbeEccImgSize > SBE_ECC_IMG_MAX_SIZE)
+            if(sbeEccImgSize >= SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide(): assert "
                            "values eccSize=0x%.8X <= ECC_MAX_SIZE=0x%.8X",
                            sbeEccImgSize,
-                           SBE_ECC_IMG_MAX_SIZE );
+                           SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC);
             }
 
-            assert(sbeEccImgSize <= SBE_ECC_IMG_MAX_SIZE,
+            assert(sbeEccImgSize < SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                    "updateSeepromSide() SBE Image with ECC too large");
 
             TRACUCOMP( g_trac_sbe, INFO_MRK"updateSeepromSide(): "
@@ -4366,7 +4366,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             memset( sbeInfo_data_ECC, 0, sbeInfoSize_ECC);
             injectECC(sbeInfo_data,
                       sbeInfoSize,
-                      SBE_VERSION_SEEPROM_ADDRESS,
+                      SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                       SBE_SEEPROM_SIZE,
                       sbeInfo_data_ECC);
 
@@ -4381,7 +4381,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                                dd_op_size,
                                DEVICE_EEPROM_ADDRESS(
                                              io_sbeState.seeprom_side_to_update,
-                                             SBE_VERSION_SEEPROM_ADDRESS,
+                                             SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                                              EEPROM::HARDWARE));
             if(err)
             {
@@ -4412,7 +4412,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                               dd_op_size,
                               DEVICE_EEPROM_ADDRESS(
                                          io_sbeState.seeprom_side_to_update,
-                                         SBE_VERSION_SEEPROM_ADDRESS,
+                                         SBE_VERSION_SEEPROM_ADDRESS_WITH_ECC,
                                          EEPROM::HARDWARE));
 
             if(err)

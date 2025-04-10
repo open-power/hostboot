@@ -32,7 +32,8 @@
 namespace Bootloader{
 
 // @HBBL_SIZE_SYNC@
-// Max logical size of HBBL without secure header, padding, or ECC.
+// Max logical size of HBBL without secure header, padding, or ECC,
+// but includes securerom size
 // Must match PNOR layout assumptions for eyeCatch HBBL
 // Must be aligned CACHELINE_SIZE of 128 bytes
 // NOTE: was called MAX_HBBL_SIZE, but it started colliding with

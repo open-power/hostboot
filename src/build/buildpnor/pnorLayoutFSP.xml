@@ -161,18 +161,18 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <!-- @HBBL_SIZE_SYNC@ -->
-        <description>Hostboot Bootloader (60KiB)</description>
+        <!-- @HBBL_SIZE_SYNC -->
+        <description>Hostboot Bootloader (152KiB)</description>
         <eyeCatch>HBBL</eyeCatch>
         <!-- Logical content of HBBL is -->
         <!-- V1 Secureboot Header of size 4KiB -->
-        <!-- + HBBL binary with a Max size is 32KiB -->
+        <!-- + HBBL binary (including securerom) with a Max size is 112KiB -->
         <!-- + V3 Secureboot header of size 15KiB -->
         <!-- Physical Size is Logical content + ECC overhead, then -->
-        <!-- rounded up to nearest page (4KiB) boundary, so 60KiB -->
-        <physicalRegionSize>0xF000</physicalRegionSize>
-        <sha512Version/>
+        <!-- rounded up to nearest page (4KiB) boundary, so 152KiB -->
+        <physicalRegionSize>0x26000</physicalRegionSize>
         <side>sideless</side>
+        <sha512Version/>
         <ecc/>
     </section>
     <section>

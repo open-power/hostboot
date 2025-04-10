@@ -799,7 +799,9 @@ const SecureRomManager::SecRomFuncTypeOffsetMap_t
             }
         }
     } ,
-    // SHA53 Hash Function
+// @TODO JIRA PFHB-921 Restore these after support in Secure ROM is confirmed
+#if 0
+    // SHA3 Hash Function
     { SB_FUNC_TYPES::SHA3,
         {
             { SB_FUNC_VERS::SHA3_INIT,
@@ -817,6 +819,7 @@ const SecureRomManager::SecRomFuncTypeOffsetMap_t
             }
         }
     }
+#endif
 };
 
 sbFuncVer_t SecureRomManager::getSecRomFuncVersion(const sbFuncType_t

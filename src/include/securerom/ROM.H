@@ -375,8 +375,6 @@ extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
    E.g.
     0000000000000040 <_SHA512_Hash>:
     0000000000000050 <_ROM_verify>:
-    0000000000000058 <_sha3>:
-    0000000000000068 <_ROM_v3_verify>:
 
     Search for branchtableoffset
     0000000000000010 <branchtableoffset>:
@@ -386,8 +384,6 @@ extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
     Subtraction (0x28) results in relative offset from branch table start
     0000000000000018 <_SHA512_Hash>:
     0000000000000028 <_ROM_verify>:
-    0000000000000030 <_sha3>:
-    0000000000000040 <_ROM_v3_verify>:
 
 
    Note: If the SecureRomInfo change size, these will be affected.
@@ -395,8 +391,11 @@ extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
 */
 #define SHA512_HASH_FUNCTION_OFFSET 0x18
 #define ROM_VERIFY_FUNCTION_OFFSET 0x28
-#define SHA3_HASH_FUNCTION_OFFSET 0x30
-#define ROM_V3_VERIFY_FUNCTION_OFFSET 0x40
+
+// @TODO JIRA PFHB-921 Restore after support in Secure ROM is confirmed
+//#define SHA3_HASH_FUNCTION_OFFSET 0x30
+//#define ROM_V3_VERIFY_FUNCTION_OFFSET 0x40
+
 
 // Version info at SECUREROM_VERSION_STRUCTURE_OFFSET
 // - [8 bytes] - eyeCatch

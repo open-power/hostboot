@@ -102,6 +102,10 @@ namespace SBE
     //  896K - 1350.8K   = Ring Section buf (~454.8K SBE_ECC_IMG_MAX_SIZE)
     // ---- Use 512K-1350.8K for SBE ECC image
     // 1350.8K - 1862.8K = SBE + HBBL image (512K size)
+    //
+    // NOTE: This enum covers the constants for calling p10_ipl_customize,
+    //       which does not care about ECC
+    //       See sbe_common.H for ECC-related constants
     enum {
         FIXED_SEEPROM_WORK_SPACE = 512 * 1024,
         SBE_IMG_VADDR = VMM_VADDR_SBE_UPDATE, // 3G address (1st space to use)
@@ -113,13 +117,6 @@ namespace SBE
         //steps in the process.
         SBE_ECC_IMG_VADDR_OFFSET = FIXED_SEEPROM_WORK_SPACE,
 
-        // for every 8 bytes of data use 1 byte for ECC = 9 bytes
-        // then take that result of the space needed to store ECC data
-        // and multiply by 8 bytes to know max data for ECC storage
-        // a 256 byte area left at tail for comfort
-        SBE_ECC_IMG_MAX_SIZE =
-        (/*MAX_SEEPROM_IMAGE_SIZE*/ (PHYS_CHIPS_PER_LOGICAL_SEEPROM * (SBE_SEEPROM_SIZE / 9 * 8)) - 256) +
-                               ((PHYS_CHIPS_PER_LOGICAL_SEEPROM-1) * SBE_SEEPROM_ECC_PAD),
         // to keep physical to logical algorithm above, put the unused ECC space
         // calculated for each physical chip back into the calculation to allow
         // logical jump of offsets from physical chip to physical chip

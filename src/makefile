@@ -79,6 +79,15 @@ BOOTLDR_OBJECTS += bl_tpm_spidd.o
 BOOTLDR_OBJECTS += p10_sbe_spi_cmd.o
 BOOTLDR_OBJECTS += p10_spi_clear_status_errors.o
 BOOTLDR_OBJECTS += hbbl_plat_attribute_service.o
+# @TODO JIRA PFHB-921 move these .o files back to the
+# SECUREROM_OBJECTS section once that support is working
+# Note: (bl_)ecverify.o is needed in both places to support both V1 (securerom)
+# and V3 (bootloader, for now) algorithms.  bl_ecverify.o is just the
+# compilation of ecverify.o but with the Bootloader compile flags
+BOOTLDR_OBJECTS += ROM_v3.o
+BOOTLDR_OBJECTS += bl_ecverify.o
+BOOTLDR_OBJECTS += keccak.o
+BOOTLDR_OBJECTS += mlca.o
 
 SECUREROM_OBJECTS += ROM.o
 SECUREROM_OBJECTS += ecverify.o
