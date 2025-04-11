@@ -40,6 +40,7 @@
 
 # @HBBL_SIZE_SYNC@
 # Should be HBBL_MAX_SIZE (112K, including securerom) + 12K (0x1F000 currently)
+# If this offset is updated then update BlData.pm and BlTrace.pm
 .set HBBL_DATA_ADDR_OFFSET,      0x0001F000 ;// offset of external data
 
 # @sync_ti_area_size if bl_TIDataArea moves from the start of blData struct,

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2022
+# Contributors Listed Below - COPYRIGHT 2016,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -37,7 +37,7 @@ my %traceText = (
     "14" => "Main verify started",
     "15" => "Main verify succeeded",
     "16" => "Main copy HBB to running location done",
-    "17" => "Main verify skip verification - no eyecatch ",
+    "17" => "Protected payload size mismatch between v1 and v3 headers ",
     # @TODO RTC:167740 TI on failed magic # check once signing is widespread
     "18" => "Main verify skip verification - no magic number ",
     "19" => "Main verify skip verification - SAB unset ",
@@ -45,6 +45,7 @@ my %traceText = (
     "1B" => "Main verify component ID failed",
     "1C" => "Main working length too big",
     "1D" => "Protected Size of HBB is too big",
+    "1E" => "Bad SB sign mode",
     "20" => "HandleMMIO started",
     "21" => "HandleMMIO started using BYTESIZE",
     "24" => "HandleMMIO started using WORDSIZE",
@@ -144,8 +145,9 @@ sub main
 
     my ($packName,$args) = @_;
 
-    # Offset from Hostboot's HRMOR (2MB + HBBL_MAX_SIZE + 12K exception vectors + size of TI area (128B))
-    my $traceAddr = 0x20B080;
+    # @HBBL_SIZE_SYNC@
+    # Offset from Hostboot's HRMOR (2MB + HBBL_DATA_ADDR_OFFSET + size of TI area (128B))
+    my $traceAddr = 0xE021F080;
     # refer to bootloader_trace.H @sync_trace_size for the Trace size
     my $traceSize = 64;
 

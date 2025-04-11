@@ -73,6 +73,9 @@ enum BootloaderTraces
     /** Bootloader main copy HBB to running location done */
     BTLDR_TRC_MAIN_COPY_HBB_DONE             = 0x16,
 
+    /** Bootloader verify mismatch between V1 and V3 header protected payload size */
+    BTLDR_TRC_PRTCTD_PAYLOAD_SIZE_MISMATCH   = 0x17,
+
     /** Unused hole from previously used traces */
 
     /** Bootloader main verifyContainer skip verification - SAB unset */

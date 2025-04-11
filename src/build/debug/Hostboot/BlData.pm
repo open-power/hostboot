@@ -65,9 +65,8 @@ sub main
     my $btLdrHrmorOffset  = 0x0000000000200000;
 
     # @HBBL_SIZE_SYNC@
-    # Data address is bootloader HRMOR + HBBL_MAX_SIZE + 12KB exception vectors
-    # NOTE: HBBL_MAX_SIZE of 94KB includes securerom size;
-    my $dataAddr = 0xE021A800; # HRMOR + 106KB
+    # Data address is bootloader HRMOR + HBBL_DATA_ADDR_OFFSET (see bl_start.S)
+    my $dataAddr = 0xE021F000;
     my $dataOffset = 0;
 
     # Parse data address from options.
