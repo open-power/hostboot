@@ -234,6 +234,7 @@ typedef struct
   ecc_key_t        fw_pkey_r;
 }__attribute__((packed)) ROM_prefix_data_raw;
 
+
 /**
  * @brief Secure Header V3 Prefix Header HW Signatures and SW/FW PUB Keys
  *
@@ -314,6 +315,15 @@ typedef struct
   // followed by protected fw payload_data
   // followed by unprotected fw payload_text
 }__attribute__((packed)) ROM_v3_fw_sig_raw;
+
+// @V3_FW_SIGNATURES_OFFSET@ static_assert added here to make sure that the
+// fw signatures offset from the start of the V3 header is the value of 10463,
+// which is used in genPnorImages.pl
+static_assert(10463 == offsetof(ROM_v3_container_raw, prefix)
+                       + sizeof(ROM_v3_prefix_header_raw)
+                       + sizeof(ROM_v3_prefix_data_raw)
+                       + sizeof(ROM_v3_fw_header_raw),
+              "FW Signatures offset does not equal 10463");
 
 
 typedef enum { ROM_DONE, ROM_FAILED } ROM_response;

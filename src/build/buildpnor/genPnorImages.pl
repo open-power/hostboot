@@ -1088,14 +1088,23 @@ sub manipulateImage
                         die "Error closing of $preReqImages->{HBB_SW_SIG_FILE} failed" if $!;
 
                         # V3: Save off HBB sw signatures for use by HBI
-                        open (HBB_SW_SIG_FILE_V3, ">",
-                              $preReqImages->{HBB_SW_SIG_FILE_V3}) or die "Error opening file $preReqImages->{HBB_SW_SIG_FILE_V3}: $!\n";
-                        binmode HBB_SW_SIG_FILE_V3;
-                        print HBB_SW_SIG_FILE_V3 getSwSignatures($tempImages{HDR_PHASE_V3});
-                        die "Error writing to $preReqImages->{HBB_SW_SIG_FILE_V3} failed" if $!;
-                        close HBB_SW_SIG_FILE_V3;
-                        die "Error closing of $preReqImages->{HBB_SW_SIG_FILE_V3} failed" if $!;
-
+                        # using dd cmd:
+                        #   input file (if): $tempImages{HDR_PHASE_V3}
+                        #
+                        #   offset for input file (skip): 10463
+                        #    - 10463 comes from the offset from the start of
+                        #      the V3 header to the start of the FW signatures
+                        #      A static_assert was added to
+                        #      src/include/securerom/ROM.H to confirm this value
+                        #      See @V3_FW_SIGNATURES_OFFSET@ comment in ROM.H
+                        #
+                        #   number of bytes to copy (count): 4759
+                        #    - 4759 is the combined size of
+                        #      ecc_signature_t fw_sig_p (132 bytes) and
+                        #      mldsa_signature_t fw_sig_s (4627)
+                        #
+                        #   output file (of): $preReqImages->{HBB_SW_SIG_FILE_V3}
+                        run_command("dd if=$tempImages{HDR_PHASE_V3} bs=1 count=4759 conv=notrunc skip=10463 of=$preReqImages->{HBB_SW_SIG_FILE_V3}");
                     }
                 }
                 elsif($secureboot && $isNormalSecure)
