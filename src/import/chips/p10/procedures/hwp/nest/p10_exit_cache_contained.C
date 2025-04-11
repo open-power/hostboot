@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -598,7 +598,7 @@ p10_exit_cache_contained_run_mcc_initfile_xscom(
     l_scom_data = 0;
     l_scom_mask = 0;
     //data
-    l_scom_data |= (uint64_t) 0x10 << (64 - (25 + 5));
+    l_scom_data |= (uint64_t) 0x03 << (64 - (25 + 5)); //HW673004 MCPERF0_PREFETCH_LIMIT = 0x10->0x03
     l_scom_data |= (uint64_t) 0x00 << (64 - (30 + 5));
     l_scom_data |= (uint64_t)  0x4 << (64 - (43 + 4));
 
