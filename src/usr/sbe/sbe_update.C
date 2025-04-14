@@ -172,8 +172,9 @@ P9_XIP_SECTION_NAMES_SBE(g_sectionNamesSbe);
 // Increasing the minimum size to assure enough space for
 // increases in various footprints (i.e. attributes and other demands
 // placed on the memory in current and future releases)
-constexpr uint8_t MIN_MB_PER_SBE_IMAGE_SPACE = 4;
-
+constexpr uint8_t  MIN_MB_PER_SBE_IMAGE_SPACE_SMALL_CACHE = 8;
+constexpr uint8_t  MIN_MB_PER_SBE_IMAGE_SPACE_BIG_CACHE   = 4;
+constexpr uint32_t HB_SMALL_CACHE = 16;
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -1083,8 +1084,20 @@ using namespace CxxTest;
         // calculate how many sbeImageVmmSpaces should be used
         auto l_cacheSize = g_BlToHbDataManager.getHbCacheSizeMb();
 
-        // need MIN_MB_PER_SBE_IMAGE_SPACE available per SBE image space
-        uint8_t numSbeImageVmmSpaces = l_cacheSize / MIN_MB_PER_SBE_IMAGE_SPACE;
+        uint32_t l_minMbPerSBE{};
+        if (l_cacheSize > HB_SMALL_CACHE)
+        {
+            // cache is big enough to run the max parallel SBE updates
+            l_minMbPerSBE = MIN_MB_PER_SBE_IMAGE_SPACE_BIG_CACHE;
+        }
+        else
+        {
+            // small cache, so use less parallel SBE updates
+            l_minMbPerSBE = MIN_MB_PER_SBE_IMAGE_SPACE_SMALL_CACHE;
+        }
+
+        // calc how many SBE updates can run in parallel
+        uint8_t numSbeImageVmmSpaces = l_cacheSize / l_minMbPerSBE;
         if (numSbeImageVmmSpaces > VMM_MAX_SBE_IMAGE_SPACES)
         {
             numSbeImageVmmSpaces = VMM_MAX_SBE_IMAGE_SPACES;
@@ -1098,8 +1111,8 @@ using namespace CxxTest;
         const int min_sbes_per_space = total_sbes / numSbeImageVmmSpaces;
         int leftover_sbes = total_sbes % numSbeImageVmmSpaces;
 
-        TRACFCOMP(g_trac_sbe, "distribute_sbe_list(%d sbes) - cacheSize %d MB -> max %d vmm spaces",
-          i_proc_sbes.size(), l_cacheSize, numSbeImageVmmSpaces);
+        TRACFCOMP(g_trac_sbe, "distribute_sbe_list(%d sbes) - cacheSize %d MB MIN_MB:%d -> max %d vmm spaces",
+          i_proc_sbes.size(), l_cacheSize, l_minMbPerSBE, numSbeImageVmmSpaces);
 
         auto pProcSbes = i_proc_sbes.begin();
 
