@@ -167,6 +167,7 @@ namespace SECUREBOOT
         RC_BAD_V3_FW_HDR_ECID              = SECURE_COMP_ID | 0x54,
         RC_BAD_V3_FW_HDR_RESERVED          = SECURE_COMP_ID | 0x55,
         RC_BAD_V3_FW_HDR_RESERVED1         = SECURE_COMP_ID | 0x56,
+        RC_BAD_MIX_OF_V1_AND_V3            = SECURE_COMP_ID | 0x57,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

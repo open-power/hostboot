@@ -267,6 +267,13 @@ void PnorRP::init( errlHndl_t   &io_rtaskRetErrl )
         #ifdef CONFIG_SECUREBOOT
         // Extend the base image to the TPM, regardless of how it was obtained
         l_errl = TRUSTEDBOOT::extendBaseImage();
+
+        if (l_errl == nullptr)
+        {
+            // if processHbhll fails, SECUREBOOT::handleSecurebootFailure() will
+            // be called and not return here
+            Singleton<SPnorRP>::instance().processHbHll();
+        }
         #endif
         #endif
     }

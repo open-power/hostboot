@@ -4678,7 +4678,8 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
                     payload_tmp_virt_addr);
             break;
         }
-    } else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+    }
+    else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
     {
         // HLL does not have a secure container header for the PowerVM payload
         TRACFCOMP(g_trac_runtime, "verifyAndMovePayload() processing group=%s", l_HLLStr);

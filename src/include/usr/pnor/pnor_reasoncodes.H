@@ -114,6 +114,7 @@ namespace PNOR
         MOD_SPNORRP_KEY_TRAN_CHK        = 0xD8, /**< SPnorRP::keyTransitionCheck */
         MOD_SPNORRP_REMOVE_PAGES        = 0xD9,
         MOD_SPNORRP_GET_HBBL_V3_HDR     = 0xDA, /**< SPnorRP::getHbblV3Header */
+        MOD_SPNORRP_PROCESS_HB_HLL      = 0xDB, /**< SPnorRP::processHbHll */
 
         // ast_mboxdd.C
         MOD_ASTMBOXDD_DO_MESSAGE        = 0xE0, /**< astMbox::doMessage */
@@ -213,6 +214,11 @@ namespace PNOR
         RC_INVALID_LID_ID            = PNOR_COMP_ID | 0x42,
         RC_HBBL_NOT_LOADED           = PNOR_COMP_ID | 0x43,
         RC_HBBL_V3_HDR_INVALID_SIZE  = PNOR_COMP_ID | 0x44,
+        RC_NO_MATCHING_HB_HLL_ENTRY  = PNOR_COMP_ID | 0x45,
+        RC_MISMATCHED_HASH           = PNOR_COMP_ID | 0x46,
+        RC_HB_HLL_TOO_SMALL          = PNOR_COMP_ID | 0x47,
+        RC_HB_HLL_BAD_EYECATCHER     = PNOR_COMP_ID | 0x48,
+
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
         RC_PNOR_CORRUPTION           = PNOR_COMP_ID | 0x99,

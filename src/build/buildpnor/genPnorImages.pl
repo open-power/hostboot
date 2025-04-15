@@ -649,6 +649,7 @@ sub manipulateImage
 
     my %sectionHash = %{$$i_pnorLayoutRef{sections}};
 
+    # Used for calling setCallerHwHdrFields for V1 Headers
     my %callerHwHdrFields = (
         configure => 0,
         totalContainerSize => 0,
@@ -656,12 +657,10 @@ sub manipulateImage
         instructionStartStackPointer => 0);
 
     # Because totalContainerSize can be different for V3, need a separate one
+    # Used for calling setV3HdrCntrSize for V3 Headers
     my %callerHwHdrFields_V3 = (
         configure => 0,
-        totalContainerSize => 0,
-        targetHrmor => 0,
-        instructionStartStackPointer => 0);
-
+        totalContainerSize => 0);
 
     my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
 
@@ -951,8 +950,12 @@ sub manipulateImage
                                     . "--out $tempImages{PROTECTED_PAYLOAD}");
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
 
+                        # While we have had separate default (V1) and V3 files so far,
+                        # for the actual signing we need to target the same default/V1
+                        # PAYLOAD_TEXT to ensure that the V3 header is signing the
+                        # EXACT same data
                         run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
-                                    . "--protectedPayload $tempImages{PAYLOAD_TEXT_V3} "
+                                    . "--protectedPayload $tempImages{PAYLOAD_TEXT} "
                                     . "--contrHdrOut $final_header_file_V3 "
                                     . "--out $tempImages{PROTECTED_PAYLOAD_V3}");
                         run_command("cat $tempImages{PROTECTED_PAYLOAD_V3} $bin_file > $tempImages{HDR_PHASE_V3}");
@@ -1140,10 +1143,11 @@ sub manipulateImage
             {
                 run_command("cp $bin_file $tempImages{HDR_PHASE}");
                 run_command("cp $bin_file $tempImages{HDR_PHASE_V3}");
-            }
+            } # end of Header Phase
 
             setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
-            setCallerHwHdrFields(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE});
+            setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
+
             # If so instructed, take the ecc-less, unpadded file, make it
             # 4KB byte aligned in size and emit it as EYE_CATCH.ipllid
             # This will be used in op-build as the ipl time lids for PLDM
@@ -1259,17 +1263,17 @@ sub manipulateImage
                 # Process HDR info
                 $callerHwHdrFields{configure} = 1;
                 setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
-                setCallerHwHdrFields(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
+                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
 
             }
             elsif ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
             {
-                $callerHwHdrFields{configure} = 1;
+                $callerHwHdrFields_V3{configure} = 1;
                 create_sb_key_transition_container($tempImages{PAD_PHASE});
-                setV3HdrCntrSize(\%callerHwHdrFields, $tempImages{PAD_PHASE});
+                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{PAD_PHASE});
 
                 create_sb_key_transition_container($tempImages{PAD_PHASE_V3});
-                setV3HdrCntrSize(\%callerHwHdrFields, $tempImages{PAD_PHASE_V3});
+                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{PAD_PHASE_V3});
             }
             else
             {
@@ -1315,11 +1319,12 @@ sub manipulateImage
                         setCallerHwHdrFields(\%callerHwHdrFields,
                                              $tempImages{PAD_PHASE});
 
+                        $callerHwHdrFields_V3{configure} = 1;
                         run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
                                     . "--protectedPayload $tempImages{TEMP_BIN_V3} "
                                     . "--contrHdrOut $final_header_file_V3 "
                                     . "--out $tempImages{PAD_PHASE_V3}");
-                        setCallerHwHdrFields(\%callerHwHdrFields,
+                        setV3HdrCntrSize(\%callerHwHdrFields_V3,
                                              $tempImages{PAD_PHASE_V3});
 
                     }
@@ -1429,6 +1434,15 @@ sub manipulateImage
             # sub-directory versus where it picks up all of the other binaries
             run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file");
             run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file_V3");
+
+            # For similar reasons, if the non-ecc version is required, use the V3 one
+            # from the pre-ecc phase PAD_PHASE_V3:
+            if ($emitEccless)
+            {
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/hb_hll.bin");
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/V3/hb_hll.bin");
+            }
+
         }
         else
         {
@@ -1840,7 +1854,7 @@ sub create_sb_key_transition_container
 #       files, pulls out the vital information, and builds up the HB_HLL lid.
 #
 #       HB HLL Format:
-#           Must be synced with definitions in spnorrp.H
+#           Must be synced with definitions in src/usr/pnor/hb_hll.H
 #
 #       struct HB_HLL_Header
 #       {
@@ -1885,17 +1899,19 @@ sub create_hb_hll
     # this is the file that will be returned
     my $HB_HLL_TEMP_HDR_BIN = "$v3_dir/HB_HLL.temp.hdr.bin";
 
-    # @TODO JIRA:PFHB-802 use static asserts in spnorrp.H to confirm these values
-    #       and add offsets from other run_command's below
+    # @HB_HLL_SYNC@ These contants need to be kept in sync with the constants
+    #               in src/usr/pnor/spnorrp.H
     # NOTE: Did not make these constants as that would still require creating a
     #       variable to use them below. So just directly created the variables here
-    my $HB_HLL_SIZE_OF_HEADER_TOC = 128, #128 bytes
+    my $HB_HLL_SIZE_OF_METADATA = 128, #128 bytes
     my $HB_HLL_EYE_CATCHER = "HB_HLL",
     my $HB_HLL_VERSION = 1,
     my $HB_HLL_COMPATIBLE_VERSION = 1,
     my $HB_HLL_HASH_SIGN_MODE = 1, # SHA3_512
     my $HB_HLL_HASH_ENTRY_STRUCT_SIZE = 96, # 96 bytes
     my $HB_HLL_OFFSET_TO_LIST_ENTRIES = 128, #128 bytes
+    my $HB_HLL_PART_NAME_SIZE = 16, #16 bytes - PART_NAME_MAX+1
+
 
     # Generate section entries from the existing *.header files and then
     # combine them into the single HB_HLL_Entries file
@@ -1916,7 +1932,7 @@ sub create_hb_hll
 
         # Get and set the partname - string left-justified (ie starts at bit0)
         # NOTE: this comes from Component ID
-        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc seek=0 skip=10347 of=$entry_file");
+        run_command("dd if=$v3_header_file bs=1 count=$HB_HLL_PART_NAME_SIZE conv=notrunc seek=0 skip=10347 of=$entry_file");
 
         # Get and set the ProtectedSize;
         run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc seek=16 skip=10360 of=$entry_file");
@@ -2024,6 +2040,7 @@ sub convertEyecatchToCompId
 # setV3HdrCntrSize
 #       Sets the caller hardware header total container size field for V3
 #       headers
+#       NOTE: Only supports V3 headers
 ################################################################################
 sub setV3HdrCntrSize
 {
@@ -2048,6 +2065,7 @@ sub setV3HdrCntrSize
 # setCallerHwHdrFields
 #       Sets the caller hardware header fields in the passed in file based on
 #       the input hash passed in.
+#       NOTE: Only suports V1 headers
 ################################################################################
 sub setCallerHwHdrFields
 {

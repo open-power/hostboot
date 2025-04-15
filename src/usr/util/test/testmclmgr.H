@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -251,7 +251,7 @@ public:
     {
         UTIL_FT(ENTER_MRK"testProcessMclComponents start" );
 
-        errlHndl_t l_errl = nullptr;
+        //errlHndl_t l_errl = nullptr;
 
         // Generate test MCL with test lids
         TestMcl l_TestMcl { {Util::TEST_LIDID, Util::TEST_LIDID},
@@ -276,12 +276,16 @@ public:
         // Clear lids loaded cache as other test cases fill it in.
         l_preVerLidMgr.cv_lidsLoaded.clear();
 
-        l_errl = l_mcl.processComponents();
-        if(l_errl)
-        {
-            errlCommit(l_errl,UTIL_COMP_ID);
-            TS_FAIL("testProcessMclComponents> processComponents failed");
-        }
+        // Since standalone simics has moved to the V3 signing mode
+        // (aka g_BlToHbDataManager.getSecurebootSigningMode() ==
+        // TARGETING::SB_SIGNING_V3_CONTAINER), the V1-based MCL can longer be
+        // processed/tested
+        //l_errl = l_mcl.processComponents();
+        //if(l_errl)
+        // {
+        //    errlCommit(l_errl,UTIL_COMP_ID);
+        //    TS_FAIL("testProcessMclComponents> processComponents failed");
+        //}
 
         PreVerifiedLidMgr::unlock();
 
@@ -292,7 +296,7 @@ public:
     {
         UTIL_FT(ENTER_MRK"testProcessSecureMclComponents start" );
 
-        errlHndl_t l_errl = nullptr;
+        //errlHndl_t l_errl = nullptr;
 
         // Generate test MCL with Secure Lids
         TestMcl l_TestMcl { {Util::TEST_LIDID},
@@ -317,12 +321,16 @@ public:
         // Clear lids loaded cache as other test cases fill it in.
         l_preVerLidMgr.cv_lidsLoaded.clear();
 
-        l_errl = l_mcl.processComponents();
-        if(l_errl)
-        {
-            errlCommit(l_errl,UTIL_COMP_ID);
-            TS_FAIL("testProcessSecureMclComponents> processComponents failed");
-        }
+        // Since standalone simics has moved to the V3 signing mode
+        // (aka g_BlToHbDataManager.getSecurebootSigningMode() ==
+        // TARGETING::SB_SIGNING_V3_CONTAINER), the V1-based MCL can longer be
+        // processed/tested
+        //l_errl = l_mcl.processComponents();
+        //if(l_errl)
+        //{
+        //    errlCommit(l_errl,UTIL_COMP_ID);
+        //    TS_FAIL("testProcessSecureMclComponents> processComponents failed");
+        //}
 
         PreVerifiedLidMgr::unlock();
 
@@ -333,7 +341,7 @@ public:
     {
         UTIL_FT(ENTER_MRK"testMclSizeMismatch start" );
 
-        errlHndl_t l_errl = nullptr;
+        //errlHndl_t l_errl = nullptr;
 
         // Generate test MCL with Secure Lids
         // Add 2 secure sections.
@@ -362,27 +370,31 @@ public:
         // Clear lids loaded cache as other test cases fill it in.
         l_preVerLidMgr.cv_lidsLoaded.clear();
 
-        l_errl = l_mcl.processComponents();
-        if(l_errl)
-        {
-            // Expected Error
-            if(l_errl->reasonCode() == Util::UTIL_MCL_SIZE_MISMATCH)
-            {
-                delete l_errl;
-                l_errl = nullptr;
-                UTIL_FT("testMclSizeMismatch expected error");
-            }
-            // Not Expected Error
-            else
-            {
-                errlCommit(l_errl,UTIL_COMP_ID);
-                TS_FAIL("testMclSizeMismatch> processComponents returned an unexpected error");
-            }
-        }
-        else
-        {
-            TS_FAIL("testMclSizeMismatch> processComponents did not return expected error");
-        }
+        // Since standalone simics has moved to the V3 signing mode
+        // (aka g_BlToHbDataManager.getSecurebootSigningMode() ==
+        // TARGETING::SB_SIGNING_V3_CONTAINER), the V1-based MCL can longer be
+        // processed/tested
+        //l_errl = l_mcl.processComponents();
+        //if(l_errl)
+        //{
+        //    // Expected Error
+        //    if(l_errl->reasonCode() == Util::UTIL_MCL_SIZE_MISMATCH)
+        //    {
+        //        delete l_errl;
+        //        l_errl = nullptr;
+        //        UTIL_FT("testMclSizeMismatch expected error");
+        //    }
+        //    // Not Expected Error
+        //    else
+        //    {
+        //        errlCommit(l_errl,UTIL_COMP_ID);
+        //        TS_FAIL("testMclSizeMismatch> processComponents returned an unexpected error");
+        //    }
+        //}
+        //else
+        //{
+        //    TS_FAIL("testMclSizeMismatch> processComponents did not return expected error");
+        //}
 
         PreVerifiedLidMgr::unlock();
 

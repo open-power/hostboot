@@ -325,6 +325,9 @@ static_assert(10463 == offsetof(ROM_v3_container_raw, prefix)
                        + sizeof(ROM_v3_fw_header_raw),
               "FW Signatures offset does not equal 10463");
 
+// Similar static_assert as above for this size used in genPnorImages.pl:
+static_assert(4759 == sizeof(ecc_signature_t) // fw_sig_p (132 bytes)
+                      + sizeof(mldsa_signature_t)); // fw_sig_s (4627 bytes)
 
 typedef enum { ROM_DONE, ROM_FAILED } ROM_response;
 

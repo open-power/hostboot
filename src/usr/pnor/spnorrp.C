@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include "pnorrp.H"
 #include "spnorrp.H"
+#include "hb_hll.H"
 #include <pnor/pnor_reasoncodes.H>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
@@ -41,6 +42,9 @@
 #include <secureboot/header.H>
 #include <sys/task.h>
 #include <arch/ppc.H>
+#include <errl/errludstring.H>
+#include <securerom/ROM.H>
+#include <errl/hberrltypes.H>
 
 extern trace_desc_t* g_trac_pnor;
 
@@ -63,6 +67,8 @@ namespace PNOR
 
 
 using namespace PNOR;
+// For SrcUserData
+using namespace errl_util;
 
 /********************
  Helper Methods
@@ -97,6 +103,8 @@ iv_msgQ(NULL)
     TRACDCOMP(g_trac_pnor, "SPnorRP::SPnorRP> " );
     // setup everything in a separate function
     initDaemon();
+
+    iv_hb_hll_loaded_secure = false;
 
     TRACFCOMP(g_trac_pnor, "< SPnorRP::PnorRP : Startup Errors=%X ", iv_startupRC );
 }
@@ -419,11 +427,10 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
             l_errhdl->collectTrace(SECURE_COMP_NAME);
             break;
         }
-        else
-        {
-            TRACFCOMP(g_trac_pnor,"PNOR::verifySections> called on secure section %s",
-                      PNOR::SectionIdToString(i_id));
-        }
+
+        auto const * const pPnorString = PNOR::SectionIdToString(i_id);
+        TRACFCOMP(g_trac_pnor,"PNOR::verifySections> called on secure section %s",
+                  pPnorString);
 
         // If hash table exists, need to adjust sizes
         if (l_info.hasHashTable)
@@ -437,9 +444,9 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
 
         // getSectionInfo already determined if the partition starts with a
         // V3 secure header.  If it doesn't, then expect a V1 secure header.
+        io_rec->hasV3Header = l_info.hasV3Header;
         size_t l_contHdrSize = l_info.hasV3Header ? V3_SECURE_HEADER_SIZE
                                                   : PAGESIZE;
-
 
         l_info.vaddr -= l_contHdrSize; // back up to expose the secure header
         l_info.size += l_contHdrSize; // add size to account for the header
@@ -535,12 +542,16 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
 
         size_t l_totalContainerSize = l_conHdr.totalContainerSize();
         auto l_prefixHdrFlags = l_conHdr.prefixHeaderFlags();
+        size_t payloadTextSize = l_conHdr.payloadTextSize();
 
         TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections> Prefix hdr flags:0x%X, "
                   "secure_version:0x%X", l_prefixHdrFlags, l_conHdr.secureVersion());
 
         TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections "
-                "Total container size = 0x%.16llX", l_totalContainerSize);
+                  "Total container size = 0x%.16llX, "
+                  "payloadTextSize = 0x%.16llX ",
+                  l_totalContainerSize,
+                  payloadTextSize);
 
         if (l_totalContainerSize <
             (l_contHdrSize + l_info.secureProtectedPayloadSize))
@@ -616,16 +627,151 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // verify while in temp space
         if (SECUREBOOT::enabled())
         {
-            l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr, {i_id});
-            if (l_errhdl)
+            // Only verify the container if the version of the header (V1 or V3)
+            // matches the system signing mode (also V1 or V3)
+            // Otherwise, if in V3 mode, hash the section and verify it against
+            // the hashes collected from processing the HB_HLL section
+            if(// V3 mode:
+               ((l_conHdr.isV3()==true) &&
+                (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+               ) ||
+               // V1 mode:
+               ((l_conHdr.isV3()==false) &&
+                (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V1_CONTAINER)
+               ))
             {
-                TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorrRP::verifySections - section "
-                      "with id 0x%08X failed verifyContainer", i_id);
-                failedVerify = true;
-                break;
+                l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr, {i_id});
+                if (l_errhdl)
+                {
+                    TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections - section "
+                          "with id 0x%08X failed verifyContainer", i_id);
+                    failedVerify = true;
+                    break;
+                }
+            }
+            else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+            {
+                // The system is in V3 signing mode, but the container has a V1 header.
+                // Therefore, we can't do verifyContainer() because the V1 container will
+                // fail with the V3 system keys.
+                // Instead, to verify the section this path will do a sha3 hash of the
+                // secure payload and compare that to the hash from processing the
+                // HB_HLL section.
+                sha3_t calculated_hash = {};
+
+                SECUREBOOT::hashBlob(reinterpret_cast<void*>(l_tempAddr+l_contHdrSize),
+                                     l_conHdr.payloadTextSize(),
+                                     calculated_hash);
+
+                TRACDBIN(g_trac_pnor,"SPnorRP::verifySections: l_tempAddr",
+                         l_tempAddr, 128);
+
+                // Uncomment the following line for following TRACDBIN
+                // uint8_t * debug_ptr = reinterpret_cast<uint8_t*>(l_tempAddr+l_contHdrSize);
+                TRACDBIN(g_trac_pnor,"SPnorRP::verifySections l_tempAddr+l_contHdrSize: ",
+                         debug_ptr, 128);
+
+
+                // Find matching entry from the HB_HLL for this section
+                const char * pPnorIdString = PNOR::SectionIdToString(i_id);
+                const auto entryItr =
+                    std::find_if(
+                        iv_v3_hashes.begin(),iv_v3_hashes.end(),
+                        [&](const HB_HLL_SectionEntry_t& i_entry)
+                        {
+                              // while the structure can hold 16 bytes for the
+                              // partName[PART_NAME_MAX+1], the V3 header's ROM_v3_fw_header_raw
+                              // structure's component_id field is currently limted to
+                              // 8 bytes (see FW_HDR_COMP_ID_SIZE_BYTES in ROM.H)
+                              return( !(memcmp(i_entry.partName,
+                                               pPnorIdString,
+                                               std::min(strlen(pPnorString),
+                                                        static_cast<size_t>(FW_HDR_COMP_ID_SIZE_BYTES)))));
+                        });
+
+                // Check to see if the HB_HLL had an entry for this section
+                if(entryItr == iv_v3_hashes.end())
+                {
+                    TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections - "
+                              "section %s with id 0x%08X DID NOT find matching HB_HLL entry",
+                              pPnorIdString, i_id);
+
+                    uint64_t userdata2 = 0;
+                    memcpy(&userdata2, pPnorIdString, sizeof(userdata2));
+
+                    /*@
+                     * @errortype
+                     * @severity     ERRL_SEV_CRITICAL_SYS_TERM
+                     * @moduleid     PNOR::MOD_SPNORRP_VERIFYSECTIONS
+                     * @reasoncode   PNOR::RC_NO_MATCHING_HB_HLL_ENTRY
+                     * @userdata1    PNOR section requested to verify
+                     * @userdata2    First 8 bytes of section name
+                     * @devdesc      Cannot verify unsigned PNOR section
+                     * @custdesc     Security failure: unable to securely load
+                     *               requested firmware.
+                     */
+                    l_errhdl = new ERRORLOG::ErrlEntry(
+                                   ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                   PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                                   PNOR::RC_NO_MATCHING_HB_HLL_ENTRY,
+                                   TO_UINT64(i_id),
+                                   userdata2,
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                    ERRORLOG::ErrlUserDetailsString(pPnorString).addToLog(l_errhdl);
+                    l_errhdl->collectTrace(PNOR_COMP_NAME);
+                    l_errhdl->collectTrace(SECURE_COMP_NAME);
+                    break;
+
+                }
+
+                TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections - section %s (id 0x%08X): "
+                          "found entry: partName=%s, protectedSize=0x%X, sectionSize=0x%X, "
+                          "expected hash=0x%04X, calculated hash=0x%04X",
+                          pPnorIdString, i_id, entryItr->partName, entryItr->protectedSize,
+                          entryItr->sectionSize, sha512_to_u32(entryItr->hash),
+                          sha512_to_u32(calculated_hash));
+
+                if(memcmp(entryItr->hash, calculated_hash, sizeof(sha3_t)))
+                {
+
+                    TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections - "
+                              "sha3 hash of protected part of section %s (id 0x%08X) DID NOT match "
+                              "value from HB_HLL: expected hash=0x%04X, calculated hash=0x%04X",
+                              pPnorIdString, i_id, sha512_to_u32(entryItr->hash),
+                              sha512_to_u32(calculated_hash));
+                    /*@
+                     * @errortype
+                     * @severity     ERRL_SEV_CRITICAL_SYS_TERM
+                     * @moduleid     PNOR::MOD_SPNORRP_VERIFYSECTIONS
+                     * @reasoncode        PNOR::RC_MISMATCHED_HASH
+                     * @userdata1[00:31]  PNOR section requested to verify
+                     * @userdata2[32:63]  Payload Text Size (used for hash)
+                     * @userdata2[00:31]  Expected Hash
+                     * @userdata2[32:63]  Calculated Hash
+                     * @devdesc           sha3() hashes did not match
+                     * @custdesc          Security failure: unable to securely load
+                     *                    requested firmware.
+                     */
+                    l_errhdl = new ERRORLOG::ErrlEntry(
+                                   ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                   PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                                   PNOR::RC_MISMATCHED_HASH,
+                                   SrcUserData(bits{0,31},  i_id,
+                                               bits{32,63}, l_conHdr.payloadTextSize()),
+                                   SrcUserData(bits{0,31},  sha512_to_u32(entryItr->hash),
+                                               bits{32,63}, sha512_to_u32(calculated_hash)),
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                    ERRORLOG::ErrlUserDetailsString(pPnorString).addToLog(l_errhdl);
+                    l_errhdl->collectTrace(PNOR_COMP_NAME);
+                    l_errhdl->collectTrace(SECURE_COMP_NAME);
+                    failedVerify = true;
+                    break;
+
+                }
             }
 
-            auto const * const pPnorString = PNOR::SectionIdToString(i_id);
             l_errhdl = SECUREBOOT::verifyComponentId(l_conHdr,pPnorString);
             if(l_errhdl)
             {
@@ -1206,7 +1352,10 @@ void SPnorRP::waitForMessage()
 
                             TRACDCOMP(g_trac_pnor, "SPnorRP::waitForMessage> MSG_UNLOAD_SECTION refCount is %i",l_rec->refCount);
 
-                            size_t l_sizeWithHdr = PAGESIZE + l_rec->textSize;
+                            size_t l_contHdrSize = l_rec->hasV3Header ? V3_SECURE_HEADER_SIZE
+                                                                      : PAGESIZE;
+
+                            size_t l_sizeWithHdr = l_contHdrSize + l_rec->textSize;
 
                             // if the section has an unsecured portion, unless
                             // it has a hashPageTable or is the HBBL (which
@@ -1773,8 +1922,7 @@ errlHndl_t SPnorRP::getHbblV3Header (uint64_t & o_hbblV3HdrAddr)
                                        // not including size of V1 header
 
         // This needs to be the size of a V3 Security Header - 15KB
-        // @TODO JIRA PFHB-802 use an official const for the V3 header size
-        size_t v3_header_size = 15 * KILOBYTE;
+        size_t v3_header_size = V3_SECURE_HEADER_SIZE;
         if (unprotectedPayloadSize != v3_header_size)
         {
             TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::getHbblV3Header() - "
@@ -1807,9 +1955,6 @@ errlHndl_t SPnorRP::getHbblV3Header (uint64_t & o_hbblV3HdrAddr)
         // Calculate virtual address offset of the "unprotected" section
         uint8_t * unprotected_vaddr = l_rec->secAddr + PAGESIZE + l_rec->textSize;
 
-        // @TODO JIRA PFHB-680 add additional checks on the validity of the
-        // V3 header here
-
         o_hbblV3HdrAddr = reinterpret_cast<uint64_t>(unprotected_vaddr);
     }
 
@@ -1820,3 +1965,225 @@ errlHndl_t SPnorRP::getHbblV3Header (uint64_t & o_hbblV3HdrAddr)
     return l_errl;
 }
 
+#ifndef BOOTLOADER
+void SPnorRP::processHbHll()
+{
+    // This gets called only once during PnorRP::init()
+    // NOTE: Tracing often not seen on eBMC HW so look for error logs
+    errlHndl_t l_errl = nullptr;
+    uint8_t * l_pHbHll = nullptr;
+    bool unload_HB_HLL = false;
+
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"SPnorRP::processHbHll");
+
+    do
+    {
+
+    // If system is not in V3 mode, then there's no reason to process the HB_HLL
+    if((SECUREBOOT::hashSignMode() != TARGETING::SB_SIGNING_V3_CONTAINER))
+    {
+        TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll: system not in V3 mode; "
+                  "no reason to process HB_HLL");
+        break;
+    }
+
+    // check to see if it's already been loaded
+    if (iv_hb_hll_loaded_secure)
+    {
+        TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll: HB_HLL has already "
+                  "been processed");
+        break;
+    }
+
+#ifndef  __HOSTBOOT_RUNTIME
+    // Do the getSectionInfo first as the least invasive method to check
+    // for the existence of the partition.
+    PNOR::SectionInfo_t l_sectionInfo_HB_HLL = {};
+    l_errl = PNOR::getSectionInfo(PNOR::HB_HLL, l_sectionInfo_HB_HLL);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll getSectionInfo problem, "
+                               "handleSecurebootFailure");
+        l_errl->collectTrace(PNOR_COMP_NAME, 256);
+        l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        SECUREBOOT::handleSecurebootFailure(l_errl);
+        assert(false,"Bug! handleSecurebootFailure shouldn't return from getSectionInfo() problem!");
+    }
+    else
+    {
+#ifdef CONFIG_SECUREBOOT // NOT RUNTIME and SECUREBOOT
+        // l_sectionInfo_HB_HLL.size is minus header
+        // (l_sectionInfo_HB_HLL.sizeActual is with header)
+        // If section is signed, only the protected size was loaded into memory
+        l_errl = PNOR::loadSecureSection(PNOR::HB_HLL);
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll loadSecureSection problem, "
+                                   "handleSecurebootFailure");
+            l_errl->collectTrace(PNOR_COMP_NAME, 256);
+            l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            SECUREBOOT::handleSecurebootFailure(l_errl);
+            assert(false,"Bug! handleSecurebootFailure shouldn't return from loadSecureSection() problem!");
+        }
+        else
+        {
+            unload_HB_HLL = true;
+
+            // Check that we have the absolute minimum amount of size to handle
+            // the HB_HLL_Metadata_t struct
+            if (l_sectionInfo_HB_HLL.secureProtectedPayloadSize < sizeof(HB_HLL_Metadata_t))
+            {
+                TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll size check problem: "
+                          "l_sectionInfo_HB_HLL.secureProtectedPayloadSize=0x%X, "
+                          "sizeof(HB_HLL_Metadata_t)=0x%X, calling handleSecurebootFailure",
+                          l_sectionInfo_HB_HLL.secureProtectedPayloadSize,
+                          sizeof(HB_HLL_Metadata_t));
+
+                /*@
+                 * @errortype
+                 * @severity     ERRL_SEV_CRITICAL_SYS_TERM
+                 * @moduleid     MOD_SPNORRP_PROCESS_HB_HLL
+                 * @reasoncode   PNOR::RC_HB_HLL_TOO_SMALL
+                 * @userdata1    HB_HLL Secure Protected Payload Size
+                 * @userdata2    Size of HB_HLL_Metadata_t struct
+                 * @devdesc      Secure Protected section of HB_HLL is too small
+                 * @custdesc     A problem occurred while initializing secure PNOR
+                 */
+
+                l_errl = new ERRORLOG::ErrlEntry(
+                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       MOD_SPNORRP_PROCESS_HB_HLL,
+                                       PNOR::RC_HB_HLL_TOO_SMALL,
+                                       l_sectionInfo_HB_HLL.secureProtectedPayloadSize,
+                                       sizeof(HB_HLL_Metadata_t),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_errl->collectTrace(PNOR_COMP_NAME, 256);
+                SECUREBOOT::handleSecurebootFailure(l_errl);
+                assert(false,"Bug! handleSecurebootFailure shouldn't return from HB_HLL too small problem");
+            }
+
+            // Set this flag here since it's already been securely loaded and it
+            // has at least a minimum size
+            iv_hb_hll_loaded_secure = true;
+
+            // loadSecureSection above will only load the protected payload, so the V3
+            // security header has already been bypassed; vaddr points directly to
+            // the HB_HLL_Metadata_t section
+            l_pHbHll = reinterpret_cast<uint8_t*>(l_sectionInfo_HB_HLL.vaddr);
+            auto l_pMetaData = reinterpret_cast<const HB_HLL_Metadata_t*>(l_pHbHll);
+            uint16_t l_offsetToSectionEntries =  l_pMetaData->offsetToHashListEntries;
+            size_t l_entrySize = l_pMetaData->sectionEntrySize;
+            auto l_numOfEntries = l_pMetaData->numberOfEntries;
+
+            TRACDBIN(g_trac_pnor, "SPnorRP::processHbHll HB_HLL_Metadata",
+                     l_pMetaData, sizeof(HB_HLL_Metadata_t));
+
+            // Increment l_pHbHll to start of entries
+            l_pHbHll += l_offsetToSectionEntries;
+            auto l_pEntry = reinterpret_cast<HB_HLL_SectionEntry_t*>(l_pHbHll);
+
+            TRACDBIN(g_trac_pnor, "SPnorRP::processHbHll Start of entries",
+                     l_pHbHll, 2*sizeof(HB_HLL_SectionEntry_t));
+
+            TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll: Key Data: "
+                      "l_pMetaData=%p, l_pEntry=%p, l_offsetToSectionEntries=0x%X, "
+                      "l_numOfEntries=0x%X, l_entrySize=0x%X",
+                      l_pMetaData, l_pEntry,l_offsetToSectionEntries,
+                      l_numOfEntries, l_entrySize);
+
+            if (l_pMetaData->eyeCatcher != HB_HLL_EYE_CATCHER)
+            {
+                TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll eyecatcher mismatch: "
+                          "HB_HLL_EYE_CATCHER=0x%X, see FFDC for l_pHdr->EyeCatcher; "
+                          "handleSecurebootFailure", HB_HLL_EYE_CATCHER);
+
+                uint64_t userdata2 = 0;
+                memcpy(&userdata2, l_pMetaData, sizeof(userdata2));
+
+                /*@
+                 * @errortype
+                 * @severity     ERRL_SEV_CRITICAL_SYS_TERM
+                 * @moduleid     MOD_SPNORRP_PROCESS_HB_HLL
+                 * @reasoncode   PNOR::RC_HB_HLL_BAD_EYECATCHER
+                 * @userdata1    HB_HLL_EYE_CATCHER define
+                 * @userdata2    First 8 bytes of HB_HLL_Metadata_t struct
+                 * @devdesc      Bad EYE_CATCHER in HB_HLL_Metadata_t
+                 * @custdesc     A problem occurred while initializing secure PNOR
+                 */
+
+                l_errl = new ERRORLOG::ErrlEntry(
+                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       MOD_SPNORRP_PROCESS_HB_HLL,
+                                       PNOR::RC_HB_HLL_BAD_EYECATCHER,
+                                       HB_HLL_EYE_CATCHER,
+                                       userdata2,
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                l_errl->collectTrace(PNOR_COMP_NAME);
+                l_errl->collectTrace(SECURE_COMP_NAME, 256);
+                SECUREBOOT::handleSecurebootFailure(l_errl);
+                assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+            }
+
+            // Start loading internal vector
+            iv_v3_hashes.clear();
+
+            for (size_t entry_count = 0;
+                 entry_count < l_numOfEntries;
+                 ++entry_count)
+            {
+                TRACDBIN(g_trac_pnor, "SPnorRP::processHbHll Entry",
+                         l_pEntry, sizeof(HB_HLL_SectionEntry_t));
+
+                TRACDCOMP(g_trac_pnor, "SPnorRP::processHbHll: Entry: "
+                      "l_pEntry=%p, partName=%s, "
+                      "protectedSize=0x%X, sectionSize=0x%X, hash=0x%4X "
+                      "(entry_count=%d, l_numOfEntries=%d)",
+                      l_pEntry,l_pEntry->partName,
+                      l_pEntry->protectedSize, l_pEntry->sectionSize,
+                      sha512_to_u32(l_pEntry->hash),
+                      entry_count, l_numOfEntries);
+
+                HB_HLL_SectionEntry_t l_entry;
+                // Copy HB_HLL copy onto local copy and then push back onto vector
+                memcpy (&l_entry,
+                        l_pEntry,
+                        sizeof(HB_HLL_SectionEntry_t));
+                iv_v3_hashes.push_back(l_entry);
+                l_pEntry++;
+            }
+
+            for (auto entry : iv_v3_hashes)
+            {
+                // Keep this useful trace active for now
+                TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll: Vector: Entry: partName=%s, "
+                      "protectedSize=0x%X, sectionSize=0x%X, hash=0x%4X ",
+                      entry.partName, entry.protectedSize, entry.sectionSize,
+                      sha512_to_u32(entry.hash));
+            }
+            if (unload_HB_HLL)
+            {
+                unload_HB_HLL = false;
+                l_errl = nullptr;
+                l_errl = PNOR::unloadSecureSection(PNOR::HB_HLL);
+                if (l_errl)
+                {
+                    TRACFCOMP(g_trac_pnor, "SPnorRP::processHbHll: unloadSecureSection(HB_HLL) "
+                              "FAILED, but this shouldn't fail the IPL. Going to delete the "
+                              "errlog and continue");
+                    delete l_errl;
+                    l_errl = nullptr;
+                }
+            }
+#endif // CONFIG_SECUREBOOT
+        }
+#endif // endif NOT __HOSTBOOT_RUNTIME
+    }
+
+    } while (0); // end of main do-while loop
+
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"SPnorRP::processHbHll");
+
+    return;
+}
+#endif // BOOTLOADER

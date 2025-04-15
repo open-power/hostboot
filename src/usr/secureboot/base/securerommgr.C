@@ -47,6 +47,9 @@
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
+// For SrcUserData
+using namespace errl_util;
+
 // Definition in ROM.H
 const std::array<sbFuncType_t, SB_FUNC_TYPES::MAX_TYPES> SecRomFuncTypes =
 {
@@ -129,7 +132,7 @@ errlHndl_t verifyComponentId(
             SECUREBOOT::RC_ROM_VERIFY,
             0,
             0,
-            true /*Add HB Software Callout*/ );
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
         ERRORLOG::ErrlUserDetailsStringSet stringSet;
         stringSet.add("Actual component ID",i_containerHeader.componentId());
@@ -304,7 +307,7 @@ errlHndl_t SecureRomManager::initialize()
                                    SECUREBOOT::RC_SET_PERMISSION_FAIL_EXE,
                                    TO_UINT64(l_rc),
                                    reinterpret_cast<uint64_t>(iv_securerom),
-                                   true /*Add HB Software Callout*/ );
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             l_errl->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
             break;
@@ -435,15 +438,42 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
             UdVerifyInfo("UNKNOWN", 0, i_ids, {}, {}, 0, 0, 0).addToLog(l_errl);
             break;
         }
-        // @TODO JIRA:PFHB-680 Complete the check by comparing l_signModeToUse
-        // to l_conHdr.isV3(); create an error log if the signing mode and the
-        // container version are out of sync. Something like this:
-        // if ( (l_signModeToUse == TARGETING::SB_SIGNING_V3_CONTAINER)
-        //      && (l_conHdr.isV3() == false)
-        //      ||
-        //      (l_signModeToUse == TARGETING::SB_SIGNING_V1_CONTAINER)
-        //      && (l_conHdr.isV3() == true))
-        //  {create error log}
+
+        // Catch any mis-matched security versions here BEFORE running it through
+        // the proper verification rountine below
+        if ( ((l_signModeToUse == TARGETING::SB_SIGNING_V3_CONTAINER)
+               && (l_conHdr.isV3() == false))
+             ||
+             ((l_signModeToUse == TARGETING::SB_SIGNING_V1_CONTAINER)
+               && (l_conHdr.isV3() == true)))
+        {
+            /*@
+             * @errortype
+             * @severity          ERRL_SEV_UNRECOVERABLE
+             * @moduleid          SECUREBOOT::MOD_SECURE_ROM_VERIFY
+             * @reasoncode        SECUREBOOT::RC_BAD_MIX_OF_V1_AND_V3
+             * @userdata1[00:31]  Sign Mode To Use
+             * @userdata1[32:63]  Input Sign Mode
+             * @userdata2         Is container header V3
+             * @devdesc           Mismatch between V1 and V3 headers/signing mode
+             * @custdesc          Failure to verify authenticity of software.
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             SECUREBOOT::MOD_SECURE_ROM_VERIFY,
+                                             SECUREBOOT::RC_BAD_MIX_OF_V1_AND_V3,
+                                             SrcUserData(bits{00,31}, l_signModeToUse,
+                                                         bits{31,63}, i_signMode),
+                                             l_conHdr.isV3(),
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            l_errl->collectTrace(PNOR_COMP_NAME);
+            l_errl->collectTrace(SECURE_COMP_NAME);
+            l_errl->collectTrace(UTIL_COMP_NAME);
+            l_errl->collectTrace(RUNTIME_COMP_NAME);
+
+            break;
+        }
+
 
         /*******************************************************************/
         /* Call ROM_verify() function via an assembly call                 */
@@ -455,8 +485,7 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
         {
 
             // V3 verification path
-// @TODO JIRA PFHB-680 put this path back in, but for now, continue to skip
-// V3 verification
+// @TODO JIRA PFHB-921 Use SecureROM access when it is available
 #if 0
             // Set startAddr to ROM_v3_verify() function at an offset of Secure ROM
             l_rom_verify_startAddr =
@@ -483,7 +512,23 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                      "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
                      l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
                      iv_securerom);
+
 #endif
+
+            ROM_v3_container_raw* l_v3_container =
+                                   reinterpret_cast<ROM_v3_container_raw*>(
+                                                                 i_container);
+
+            l_rc = ROM_v3_verify (l_v3_container,
+                                  &l_hw_parms);
+
+            TRACFCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                     "Back from ROM_v3_verify() via direct ROM_v3_verify: l_rc=0x%x, "
+                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
+                     l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
+                     iv_securerom);
+
+
         }
         else
         {
@@ -538,7 +583,7 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                                          SECUREBOOT::RC_ROM_VERIFY,
                                          l_rc,
                                          l_hw_parms.log,
-                                         true /*Add HB Software Callout*/ );
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             l_errl->collectTrace(PNOR_COMP_NAME);
             l_errl->collectTrace(SECURE_COMP_NAME);
             l_errl->collectTrace(UTIL_COMP_NAME);
@@ -658,11 +703,11 @@ void SecureRomManager::hashBlob(const void * i_blob,
     else
     {
         // V3
-        // Set startAddr to ROM_SHA3() function at an offset of Secure ROM
 
         // @TODO JIRA PFHB-921 Until securerom's call_rom_SHA3() function is
         // working, call the linked sha3() function directly below
 
+        // Set startAddr to ROM_SHA3() function at an offset of Secure ROM
         //uint64_t l_rom_SHA3_startAddr =
         //                        reinterpret_cast<uint64_t>(iv_securerom) +
         //                        getSecRomFuncOffset(SB_FUNC_TYPES::SHA3);
@@ -677,7 +722,6 @@ void SecureRomManager::hashBlob(const void * i_blob,
                   "call_rom_SHA3: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
                    i_blob, i_size, l_rom_SHA3_startAddr,
                    iv_securerom);
-
     }
 }
 

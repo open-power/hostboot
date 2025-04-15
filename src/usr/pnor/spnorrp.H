@@ -33,6 +33,7 @@
 #include <map>
 #include "pnor_common.H"
 #include "ffs.h"
+#include "hb_hll.H"
 #include <securerom/ROM.H>
 
 namespace SECUREBOOT
@@ -102,6 +103,19 @@ class SPnorRP
     errlHndl_t getHbblV3Header (uint64_t & o_hbblV3HdrPtr);
 
 
+#ifndef __HOSTBOOT_RUNTIME
+    /**
+     * @brief  Process the HB_HLL PNOR Partition
+     *         - The HB_HLL will be verified with its V3 secureboot header
+     *         - Then it will save off the hashes of the PNOR partitions
+     *
+     * @return No error log returned as any fails will result in
+     *         SECUREBOOT::handleSecurebootFailure() being called, and that
+     *         function does not return
+     */
+    void processHbHll();
+#endif
+
   protected:
     /**
      * @brief  Constructor, default TOC offsets to side A
@@ -129,6 +143,18 @@ class SPnorRP
     };
 
     /**
+     * Cached copy of section hash data
+     * Needs to be outside SectionData_t since HBBL also uses SectionData_t
+     * and need to keep size of SectionData_t minimal for HBBL
+     */
+    std::vector<HB_HLL_SectionEntry_t> iv_v3_hashes;
+
+    /**
+     * bool to keep track of whether or not HB_HLL has already been processed
+     */
+    bool iv_hb_hll_loaded_secure;
+
+    /**
      * Pointer to the message queue where we receive messages for
      * secure space.
      */
@@ -151,10 +177,12 @@ class SPnorRP
         size_t infoSize; // size of the entire partition
         size_t refCount;
         bool hasHashTable; // indicates if the record has a hash table
+        bool hasV3Header; // indicates if the record has a V3 header
 
         SHA512_t payloadTextHash;
         LoadRecord()
-        :secAddr(nullptr), hashTableVaddr(0), textSize(0), infoSize(0), refCount(0), hasHashTable(false)
+        :secAddr(nullptr), hashTableVaddr(0), textSize(0), infoSize(0),
+         refCount(0), hasHashTable(false), hasV3Header(false)
         {
             memset(&payloadTextHash[0], 0, SHA512_DIGEST_LENGTH);
         }
