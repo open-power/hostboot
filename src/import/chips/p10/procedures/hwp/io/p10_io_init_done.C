@@ -313,25 +313,37 @@ fapi_try_exit:
 /// @param[in] i_target Chip target to start
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode p10_iohs_fix_cdr_bw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+fapi2::ReturnCode p10_iohs_updates(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     using namespace scomt::iohs;
-    constexpr uint8_t c_cdr_bw = 0x18;
+    constexpr uint8_t c_cdr_bw = 0x26;
+    constexpr uint8_t c_peak1 = 6;
     const int c_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
     fapi2::ATTR_INTERPOSER_REV_Type l_interposer_rev = fapi2::ENUM_ATTR_INTERPOSER_REV_NONE;
+    fapi2::ATTR_IO_IOHS_XTALK_Type l_xtalk = fapi2::ENUM_ATTR_IO_IOHS_XTALK_NO_XTALK;
+    fapi2::ATTR_IO_IOHS_CHANNEL_LOSS_Type l_channel_loss = fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_HIGH_LOSS;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INTERPOSER_REV, i_target, l_interposer_rev));
-
-    // Only update CDR BW on P11 ISC2
-    if (l_interposer_rev != fapi2::ENUM_ATTR_INTERPOSER_REV_REV2)
-    {
-        goto fapi_try_exit;
-    }
 
     for (auto l_pauc_target : i_target.getChildren<fapi2::TARGET_TYPE_PAUC>())
     {
         for (auto l_iohs_target : l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
         {
+            // Update Peak1 to 6 if XTALK is set & Channel loss is set to  MID_LOSS
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS, l_iohs_target, l_channel_loss));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_XTALK, l_iohs_target, l_xtalk));
+
+            if (l_xtalk == fapi2::ENUM_ATTR_IO_IOHS_XTALK_HI_XTALK
+                && l_channel_loss == fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_MID_LOSS)
+            {
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
+                                                 c_num_lanes,
+                                                 c_peak1));
+            }
+
             // Update CDR Bandwidth (rx_pr_phase_step)
             FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
                                              IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL,
@@ -803,7 +815,7 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         fapi2::delay(IO_INIT_DONE_NS_DELAY, IO_INIT_DONE_CYCLES);
     }
 
-    FAPI_TRY(p10_iohs_fix_cdr_bw(i_target));
+    FAPI_TRY(p10_iohs_updates(i_target));
     FAPI_TRY(p10_omi_fix_cdr_bw(i_target));
 
 
