@@ -511,6 +511,7 @@
     <rc>RC_EXTRACT_SBE_RC_TPM_ERR</rc>
     <description>
         TPM fail occurred
+        Action: first time do a re IPL, second time do a TPM callout [REIPL_FIRST_THEN_TPM_CALLOUT]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>

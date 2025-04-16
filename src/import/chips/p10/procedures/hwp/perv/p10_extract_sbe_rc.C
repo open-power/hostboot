@@ -314,6 +314,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     l_data32_tpmRc.flush<0>();
     FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI, l_data32_tpmRc));
 
+    o_return_action = P10_EXTRACT_SBE_RC::REIPL_FIRST_THEN_TPM_CALLOUT;
     FAPI_ASSERT(!l_data32_tpmRc,
                 fapi2::EXTRACT_SBE_RC_TPM_ERR()
                 .set_TARGET_CHIP(i_target_chip),
