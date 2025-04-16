@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,7 +165,45 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode is_mds( const fapi2::Target<T>& i_target,
                           bool& o_is_mds );
 
+///
+/// @brief Get the memory frequency from any target
+/// @tparam T the fapi2::TargetType (derived)
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_freq - the value of ATTR_MEM_EFF_FREQ for the first encountered MEM_PORT
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode get_memory_freq(const fapi2::Target<T>& i_target, uint64_t& o_freq)
+{
+    o_freq = 0;
 
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port, o_freq);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Get the memory frequency from any target
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_freq - the value of ATTR_MEM_EFF_FREQ for the first encountered MEM_PORT
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note forward declaration (specializations exist in memory controller directories)
+///
+template<>
+fapi2::ReturnCode get_memory_freq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint64_t& o_freq);
+
+///
+/// @brief Get the memory frequency from any target - TARGET_TYPE_MEM_PORT specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_freq - the value of ATTR_MEM_EFF_FREQ for the first encountered MEM_PORT
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note forward declaration (specializations exist in memory controller directories)
+///
+template<>
+fapi2::ReturnCode get_memory_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, uint64_t& o_freq);
 
 } // ns mss
 

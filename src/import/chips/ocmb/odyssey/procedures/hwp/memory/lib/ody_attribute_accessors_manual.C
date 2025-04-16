@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <fapi2.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/num.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <lib/ody_attribute_accessors_manual.H>
 
 namespace mss
@@ -145,5 +146,34 @@ fapi_try_exit:
 }
 
 } // ns ody
+
+///
+/// @brief Get the memory frequency from any target - TARGET_TYPE_DIMM specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_freq - the value of ATTR_MEM_EFF_FREQ for the first encountered MEM_PORT
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_memory_freq(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint64_t& o_freq)
+{
+    o_freq = 0;
+    const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+    return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port, o_freq);
+}
+
+///
+/// @brief Get the memory frequency from any target - TARGET_TYPE_MEM_PORT specialization
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_freq - the value of ATTR_MEM_EFF_FREQ for the first encountered MEM_PORT
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_memory_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, uint64_t& o_freq)
+{
+    o_freq = 0;
+
+    return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, o_freq);
+}
 
 } // ns mss
