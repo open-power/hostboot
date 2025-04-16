@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -302,7 +302,6 @@ const DepModInfo g_istep12Dependancies = {
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libocmbupd.so),
         DEP_LIB(libistep12.so),
-        DEP_LIB(libsecureboot_ext.so),
         NULL
     }
 };
