@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -667,7 +667,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         }
         //End offset - starting offset divided by index
         //for calculating each PCIA size.
-        o_size = ((uint64_t)&this->iv_spPcia[index] - l_offset)/index;
+        o_size = index != 0 ? ((uint64_t)&this->iv_spPcia[index] - l_offset)/index : 0;
         o_count = index;
     }while(0);
 
