@@ -3045,7 +3045,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /*  Get the HW Keys' Hash and Secure Version */
             /*  from the uncustomized SBE Image in PNOR  */
             /*********************************************/
-            SHA512_t pnor_sbe_hash = {0};
+            SHA512_t pnor_sbe_hash{0};
             uint8_t pnor_sbe_secure_version = 0;
             uint8_t pnor_sbe_signing_mode = 0;
 
@@ -7407,9 +7407,9 @@ errlHndl_t getSecuritySettingsFromSbeImage(
     // Copy to output variables
     o_secure_version = sb_settings.msv;
     o_signing_mode = sb_settings.sbMode;
-    memcpy(o_hash,
-           &sb_settings.hwKeyHash,
-           sizeof(SHA512_t));
+    assert(o_hash!=nullptr,
+        "getSecuritySettingsFromSbeImage(): o_hash is uninitialized");
+    memcpy(o_hash, &sb_settings.hwKeyHash, sizeof(SHA512_t));
 
     TRACDBIN(g_trac_sbe,"getSecuritySettingsFromSbeImage - Hash:", o_hash, sizeof(SHA512_t));
 

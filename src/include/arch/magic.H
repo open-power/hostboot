@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,6 +237,7 @@ enum magicGetSbeTraceType
 
 inline bool magic_check_dce_enabled()
 {
+    // cppcheck-suppress syntaxError
     long register r3 asm("r3") = 0;
     MAGIC_INSTRUCTION(MAGIC_CHECK_DCE_ENABLED);
     return r3;
