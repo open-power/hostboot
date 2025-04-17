@@ -809,7 +809,10 @@ sub manipulateImage
         if ($buildType eq "fspbuild")
         {
             my @signatureFiles=
-                glob("$bin_dir/SIGNTOOL_*/$componentId/*sig_p.raw $bin_dir/SIGNTOOL_*/$componentId/*key_p.sig");
+                glob("$bin_dir/SIGNTOOL_*/$componentId/SW*sig "
+                     . "$bin_dir/V3/SIGNTOOL_*/$componentId/SW*.sig "
+                     . "$bin_dir/SIGNTOOL_*/$componentId/*sig_p.raw "
+                     . "$bin_dir/SIGNTOOL_*/$componentId/*key_p.sig");
             print "Deleting @signatureFiles\n";
             unlink @signatureFiles;
         }
@@ -1256,15 +1259,20 @@ sub manipulateImage
                 # might look for the V1 file
                 run_command("cp $tempImages{HDR_PHASE_V3} $tempImages{HDR_PHASE}");
 
-                # Pad the images
+                # Update header fields (basically total container size)
+                $callerHwHdrFields{configure} = 1;
+                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
+                $callerHwHdrFields_V3{configure} = 1;
+                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
+
+                # Pad the images ($size has previously been page aligned)
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
                 run_command("dd if=$tempImages{HDR_PHASE_V3} of=$tempImages{PAD_PHASE_V3} ibs=$size conv=sync");
 
-                # Process HDR info
-                $callerHwHdrFields{configure} = 1;
-                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
-                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
-
+                # The PAD_PHASE_3 has had its total container size updated and is
+                # page aligned.  Copy out this padded, non-ecc file to be picked up in FSP builds
+                # The FSP builds definitely need the file without ECC as they add it themselves
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/hb_hll.bin");
             }
             elsif ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
             {
@@ -1434,15 +1442,6 @@ sub manipulateImage
             # sub-directory versus where it picks up all of the other binaries
             run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file");
             run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file_V3");
-
-            # For similar reasons, if the non-ecc version is required, use the V3 one
-            # from the pre-ecc phase PAD_PHASE_V3:
-            if ($emitEccless)
-            {
-                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/hb_hll.bin");
-                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/V3/hb_hll.bin");
-            }
-
         }
         else
         {
