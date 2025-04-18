@@ -31,7 +31,7 @@ use Cwd qw(abs_path cwd);
 use lib dirname abs_path($0);
 use PnorUtils qw(loadPnorLayout getNumber traceErr trace run_command PAGE_SIZE
                  loadBinFiles findLayoutKeyByEyeCatch checkSpaceConstraints
-                 getSwSignatures getBinDataFromFile);
+                 getSwSignatures getBinDataFromFile getV1PayloadHash);
 use Getopt::Long qw(:config pass_through);
 
 # Hostboot base image constants for the hardware header portion of the
@@ -809,7 +809,7 @@ sub manipulateImage
         if ($buildType eq "fspbuild")
         {
             my @signatureFiles=
-                glob("$bin_dir/SIGNTOOL_*/$componentId/SW*sig "
+                glob("$bin_dir/SIGNTOOL_*/$componentId/SW*.sig "
                      . "$bin_dir/V3/SIGNTOOL_*/$componentId/SW*.sig "
                      . "$bin_dir/SIGNTOOL_*/$componentId/*sig_p.raw "
                      . "$bin_dir/SIGNTOOL_*/$componentId/*key_p.sig");
@@ -879,9 +879,9 @@ sub manipulateImage
                         {
                             # Pass HBB sw signatures as the salt entry.
                             $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,$bin_dir,
-                                                                          getBinDataFromFile($preReqImages->{HBB_SW_SIG_FILE}));
+                                                                          getBinDataFromFile($preReqImages->{HBB_PAYLOAD_HASH_FILE}));
                             $tempImages{hashPageTable_V3} = genHashPageTable($bin_file, $eyeCatch,"$bin_dir/V3/",
-                                                                          getBinDataFromFile($preReqImages->{HBB_SW_SIG_FILE_V3}));
+                                                                          getBinDataFromFile($preReqImages->{HBB_PAYLOAD_HASH_FILE_V3}));
                         }
                         else
                         {
@@ -1084,33 +1084,18 @@ sub manipulateImage
                         $callerHwHdrFields_V3{instructionStartStackPointer}
                         = BASE_IMAGE_INSTRUCTION_START_STACK_POINTER;
 
-                        # Save off HBB sw signatures for use by HBI
-                        open (HBB_SW_SIG_FILE, ">",
-                              $preReqImages->{HBB_SW_SIG_FILE}) or die "Error opening file $preReqImages->{HBB_SW_SIG_FILE}: $!\n";
-                        binmode HBB_SW_SIG_FILE;
-                        print HBB_SW_SIG_FILE getSwSignatures($tempImages{HDR_PHASE});
-                        die "Error writing to $preReqImages->{HBB_SW_SIG_FILE} failed" if $!;
-                        close HBB_SW_SIG_FILE;
-                        die "Error closing of $preReqImages->{HBB_SW_SIG_FILE} failed" if $!;
+                        # Save off HBB V1 Payload Hash for use by HBI to "salt" its hash page table
+                        open (HBB_PAYLOAD_HASH_FILE, ">",
+                              $preReqImages->{HBB_PAYLOAD_HASH_FILE}) or die "Error opening file $preReqImages->{HBB_SW_SIG_FILE}: $!\n";
+                        binmode HBB_PAYLOAD_HASH_FILE;
+                        print HBB_PAYLOAD_HASH_FILE getV1PayloadHash($tempImages{HDR_PHASE});
+                        die "Error writing to $preReqImages->{HBB_PAYLOAD_HASH_FILE} failed" if $!;
+                        close HBB_PAYLOAD_HASH_FILE;
+                        die "Error closing of $preReqImages->{HBB_PAYLOAD_HASH_FILE} failed" if $!;
 
-                        # V3: Save off HBB sw signatures for use by HBI
-                        # using dd cmd:
-                        #   input file (if): $tempImages{HDR_PHASE_V3}
-                        #
-                        #   offset for input file (skip): 10463
-                        #    - 10463 comes from the offset from the start of
-                        #      the V3 header to the start of the FW signatures
-                        #      A static_assert was added to
-                        #      src/include/securerom/ROM.H to confirm this value
-                        #      See @V3_FW_SIGNATURES_OFFSET@ comment in ROM.H
-                        #
-                        #   number of bytes to copy (count): 4759
-                        #    - 4759 is the combined size of
-                        #      ecc_signature_t fw_sig_p (132 bytes) and
-                        #      mldsa_signature_t fw_sig_s (4627)
-                        #
-                        #   output file (of): $preReqImages->{HBB_SW_SIG_FILE_V3}
-                        run_command("dd if=$tempImages{HDR_PHASE_V3} bs=1 count=4759 conv=notrunc skip=10463 of=$preReqImages->{HBB_SW_SIG_FILE_V3}");
+                        # V3: So that the hash page table is built exactly the same, use the
+                        #     same payload hash from V1 for V3
+                        run_command("cp $preReqImages->{HBB_PAYLOAD_HASH_FILE} $preReqImages->{HBB_PAYLOAD_HASH_FILE_V3}");
                     }
                 }
                 elsif($secureboot && $isNormalSecure)
@@ -1476,8 +1461,8 @@ sub manipulateImages
     my $parallelPrefix = RAND_PREFIX.POSIX::ceil(rand(0xFFFFFFFF)).$system_target;
 
     my %preReqImages = (
-        HBB_SW_SIG_FILE => "$bin_dir/$parallelPrefix.hbb_sw_sig.bin",
-        HBB_SW_SIG_FILE_V3 => "$bin_dir/V3/$parallelPrefix.hbb_sw_sig.bin"
+        HBB_PAYLOAD_HASH_FILE => "$bin_dir/$parallelPrefix.hbb_payload_hash.bin",
+        HBB_PAYLOAD_HASH_FILE_V3 => "$bin_dir/V3/$parallelPrefix.hbb_payload_hash.bin"
         );
 
     my @todo = keys %{$i_binFilesRef};
@@ -1699,12 +1684,12 @@ sub genHashPageTable
     }
     else
     {
-        # Generate random salt data
-        for (my $i = 0; $i < SHA_TRUNCATE_SIZE; $i++)
-        {
-            $salt_entry .= sha3_512(rand(0x7FFFFFFFFFFFFFFF));
-        }
-        $salt_entry = truncate_sha(sha3_512($salt_entry));
+        # Use the same salt data for all builds.
+        # For now use zero
+        # @TODO JIRA PFHB-932 will implement the use of a build-wide "salt"
+        # file created via a random number
+        $saltData=0;
+        $salt_entry = truncate_sha(sha3_512($saltData));
     }
     my @hashes = ($salt_entry);
     print OUTBINFILE $salt_entry;

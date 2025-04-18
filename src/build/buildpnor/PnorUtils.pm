@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -30,7 +30,8 @@ use File::Basename;
 use Exporter 'import';
 @EXPORT_OK = qw(loadPnorLayout getNumber traceErr trace run_command PAGE_SIZE
                 loadBinFiles findLayoutKeyByEyeCatch checkSpaceConstraints
-                getSwSignatures getBinDataFromFile checkFile displayPnorLayout);
+                getSwSignatures getBinDataFromFile checkFile displayPnorLayout
+                getV1PayloadHash);
 use strict;
 use Data::Dumper;
 
@@ -557,6 +558,60 @@ sub getSwSignatures
 
     return $sw_signatures;
 }
+
+###############################################################################
+# getV1PayloadHash -  Extracts payload hash from a V1 secure container header
+#                     Simplified to skip around to the data needed.
+################################################################################
+sub getV1PayloadHash
+{
+    my ($i_file) = @_;
+
+    # Constants defined in ROM code (see src/include/securerom/ROM.H).
+    use constant ecid_size => 16; #bytes
+    use constant sw_key_size => 132; #bytes
+
+    # Offsets defined in secure boot PLDD.
+    # Relative offset are based on the previous constant
+    use constant sw_key_count_offset => 450; #bytes
+    use constant relative_offset_to_hw_ecid_count => 73; #bytes
+    # Offset assuming Default of ECID count = 0 and SW count = 1
+    use constant relative_offset_to_payload_hash => 562; #bytes
+    use constant size_of_payload_hash => 64; #bytes
+
+    # Header info
+    my $sw_key_count = 0;
+    my $hw_ecid_count = 0;
+    my $payload_hash = 0;
+
+    # Get header data from file
+    my $header_data = getBinDataFromFile($i_file);
+
+    # get sw key count
+    my $cur_offset = sw_key_count_offset;
+    $sw_key_count  = unpack("x$cur_offset C", $header_data);
+
+    # get hw ecid counts
+    $cur_offset += relative_offset_to_hw_ecid_count;
+    $hw_ecid_count = unpack("x$cur_offset C", $header_data);
+
+    # Variable size elements of a secure header
+    # Note 1 sw_key is already considered in above constants
+    my $num_optional_keys = ($sw_key_count > 1) ?
+                             ($sw_key_count - 1) : 0;
+    my $variable_size_offset = ($num_optional_keys * sw_key_size)
+                                + ($hw_ecid_count * ecid_size);
+
+    # get payload hash offset
+    $cur_offset +=  relative_offset_to_payload_hash + $variable_size_offset;
+
+    # get payload hash
+    $payload_hash = substr($header_data, $cur_offset,
+                           size_of_payload_hash);
+
+    return $payload_hash;
+}
+
 
 ###############################################################################
 # getBinDataFromFile -   Extracts binary data from a given file into a variable

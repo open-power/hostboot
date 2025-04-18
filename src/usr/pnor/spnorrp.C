@@ -1716,8 +1716,19 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
     assert(i_vaddr != NULL);
 
     do {
-    // Check if measured and build time hashes of HBB sw signatures match.
-    // Query the HBB header
+
+    // HB_HLL covers syncing HBB and HBI, so if system is in V3 signing mode then
+    // this check can be skipped
+    if(SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+    {
+        TRACFCOMP(g_trac_pnor,INFO_MRK"SPnorRP::baseExtVersCheck> Skipping Check because "
+                  "system is in V3 Signing Mode (%d); covered by HB_HLL",
+                  SECUREBOOT::hashSignMode());
+        break;
+    }
+
+    // Check if HBB payload hash matches
+    // Query the HBB V1 header
     const void* l_pHbbHeader = NULL;
     SECUREBOOT::baseHeader().getHeader(l_pHbbHeader);
     // Fatal code bug if either address is NULL
@@ -1731,17 +1742,18 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
         break;
     }
 
-    // Calculate the hash of HBB's sw signatures using V3 sha3
-    SHA512_t l_hashSwSigs = {0};
-    SECUREBOOT::hashBlob(l_hbbContainerHeader.fw_sigs(),
-                         l_hbbContainerHeader.totalFwKeysSize(),
-                         l_hashSwSigs,
+    // Calculate the sha3() hash of HBB's payload hash, which is retrieved directly
+    // from its V1 secureboot header
+    sha3_t l_hashOfPayloadHash = {0};
+    SECUREBOOT::hashBlob(l_hbbContainerHeader.payloadTextHash(),
+                         sizeof(sha3_t),
+                         l_hashOfPayloadHash,
                          SB_SIGNING_V3_CONTAINER);
 
 
-    // Get build time hash of HBB's sw signatures. The hash of HBB's sw
-    // signatures are stored in the first entry (SALT) of HBI's hash page
-    // table. The first entry of HBI's hash pagle starts immediately after the
+    // Get build-time payload hash of HBB.  The payload hash of HBB
+    // is stored in the first entry (SALT) of HBI's hash page table.
+    // The first entry of HBI's hash pagle starts immediately after the
     // header so we can simply cast the vaddr to get our first entry (SALT)
     // Note: It is expected that i_vaddr points to the start of HBI's hash
     //       page table.
@@ -1750,26 +1762,25 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
 
     // Throw an error if the hashes do not match to the truncated length
     // of a hash page table entry.
-    if ( memcmp(l_hashSwSigs, l_hashPageTableSaltEntry,
-                HASH_PAGE_TABLE_ENTRY_SIZE) != 0 )
+    if ( memcmp(l_hashOfPayloadHash, l_hashPageTableSaltEntry,
+                HASH_PAGE_TABLE_ENTRY_SIZE != 0))
     {
         TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::baseExtVersCheck Hostboot Base and Extended image mismatch");
-        TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck Measured sw key hash",
-                            l_hashSwSigs, HASH_PAGE_TABLE_ENTRY_SIZE);
+        TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck hash of payload hash",
+                             l_hashOfPayloadHash, HASH_PAGE_TABLE_ENTRY_SIZE);
         TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck HBI's hash page table salt entry",
-                        l_hashPageTableSaltEntry, HASH_PAGE_TABLE_ENTRY_SIZE);
+                             l_hashPageTableSaltEntry, HASH_PAGE_TABLE_ENTRY_SIZE);
 
         // Memcpy needed for measured hash to avoid gcc error: dereferencing
         // type-punned pointer will break strict-aliasing rules
         uint64_t l_measuredHash = 0;
-        memcpy(&l_measuredHash, l_hashSwSigs, sizeof(l_measuredHash));
+        memcpy(&l_measuredHash, l_hashOfPayloadHash, sizeof(l_measuredHash));
         /*@ errorlog
          * @severity        ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid        MOD_SPNORRP_BASE_EXT_VER_CHK
          * @reasoncode      RC_BASE_EXT_MISMATCH
-         * @userdata1       First 8 bytes of hash of measured SW signatures
-         * @userdata2       First 8 bytes of hash of stored SW signatures in
-         *                  hash page table
+         * @userdata1       First 8 bytes of hash of payload hash from V1 secure header
+         * @userdata2       First 8 bytes of hash of stored in hash page table
          * @devdesc         Hostboot Base and Extend code do not match versions.
          * @custdesc        Firmware level mismatch.
          */
