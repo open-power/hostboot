@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <console/consoleif.H>
 #include <kernel/console.H>
 #include <kernel/bltohbdatamgr.H>
+#include <util/misc.H> // isSimicsRunning()
 
 // SECUREBOOT : General driver traces
 #include "../common/securetrace.H"
@@ -78,6 +79,17 @@ namespace SECUREBOOT
         SHA512_t l_system_hash = {0};
         getHwKeyHash(l_system_hash);
         uint32_t l_hkh = sha512_to_u32(l_system_hash);
+
+#if CONFIG_FSP_BUILD
+        // @TODO JIRA PFHB-931 Temporarily disable security for FSP builds (config flag above)
+        // and if simics is running
+        if (Util::isSimicsRunning())
+        {
+            iv_enabled = false;
+            SB_INF("Temporary FSP Simics override to disable security: state:%i", iv_enabled);
+        }
+#endif
+
 
         SB_INF("Security Settings: state:%i, msv=0x%.02X, sb signing mode=0x%.02X, backdoor=%d, system hash=0x%08X",
                iv_enabled, l_min_secure_version, l_sb_signing_mode, l_backdoor, l_hkh);

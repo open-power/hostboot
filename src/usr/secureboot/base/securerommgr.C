@@ -560,33 +560,6 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                      iv_securerom);
         }
 
-
-#ifdef CONFIG_FSP_BUILD
-        // Temporary workaround until hb_hll verification is resolved
-        // If there is a V3 verification fail in a FSP-environment, this workaround will
-        // termpoarily set the l_rc to 0 to bypass the fail under the following condition:
-        // - the driver on the system is a lab/imprint/dev (aka non-production) driver
-        //   - the presence of the security backdoor will be used to verify this is
-        //     lab/imprint/dev driver
-        if((l_rc != 0) // verification fail
-            && (l_signModeToUse == TARGETING::SB_SIGNING_V3_CONTAINER) // running in V3 signing mode
-            && (SECUREBOOT::getSbeSecurityBackdoor())  // it's a lab/imprint/dev driver
-            && (INITSERVICE::spBaseServicesEnabled())) // confirming this is running on a FSP-based system
-        {
-            TRACFCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
-                     "ROM_verify() failed in V3 signing mode (%d), with an imprint (%d) "
-                     "driver on a FSP (%d) system: l_rc=0x%x. Temporarily ignoring this "
-                     "error by setting l_rc to 0",
-                     l_rc, l_signModeToUse, SECUREBOOT::getSbeSecurityBackdoor,
-                     INITSERVICE::spBaseServicesEnabled());
-            l_rc = 0;
-        }
-
-
-
-// End of workaround
-#endif
-
         if (l_rc != 0)
         {
             TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager::verifyContainer():"
