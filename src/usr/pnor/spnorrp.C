@@ -624,8 +624,23 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         TRACDCOMP(g_trac_pnor,"section start address in secure space is "
                               "0x%.16llX",io_rec->secAddr);
 
+        //Temporarily skip verification of WOFDATA and HBD until
+        //we sort out how to make unique HB_HLLs for every system
+        bool l_skip_section = false;
+#ifdef CONFIG_FSP_BUILD
+        TRACFCOMP(g_trac_pnor,"new1");
+        if( ((i_id == PNOR::HB_DATA)
+             || l_info.hasHashTable)
+            && (i_id != PNOR::HB_EXT_CODE) )
+        {
+            TRACFCOMP(g_trac_pnor,"SKIPPING VERIFICATION for section %s",
+                      pPnorString);
+            l_skip_section = true;
+        }
+#endif
+
         // verify while in temp space
-        if (SECUREBOOT::enabled())
+        if (SECUREBOOT::enabled() && !l_skip_section)
         {
             // Only verify the container if the version of the header (V1 or V3)
             // matches the system signing mode (also V1 or V3)
