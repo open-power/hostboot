@@ -1384,6 +1384,26 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
                     "lidInfo.Unsigned=0x%X",
                     lidInfo.id, l_lidSize, lidInfo.size, lidInfo.Unsigned);
         }
+
+        else if ((lidInfo.id == 0x80d00048)      // rainier 2U
+                 || (lidInfo.id == 0x80d00049)  // rainier 4U
+                 || (lidInfo.id == 0x80d0004A)  // everest)
+                 || (lidInfo.id == 0x80d0004B)  // bonnell)
+                 || (lidInfo.id == 0x80d0004C)  // blueridge 2U
+                 || (lidInfo.id == 0x80d0004D)  // blueridge 4U
+                 || (lidInfo.id == 0x80d0004E)  // fuji
+                 || (lidInfo.id == 0x80d0004F)) // balcones
+        {
+            // These LIDs are the different system-specific variations of HB_HLL and PHYP
+            // doesn't need them.  Temporarily skip checking them here until PHYP's HLL is
+            // updated to not look for them
+            // @TODO JIRA PFHB-933 Remove this workaround
+            UTIL_FT("HLLMgr::loadLids Skipping checks on HB_HLL Lid: "
+                    "lidInfo.id=0x%X l_lidSize=%d lidInfo.size=%d "
+                    "lidInfo.Unsigned=0x%X",
+                    lidInfo.id, l_lidSize, lidInfo.size, lidInfo.Unsigned);
+        }
+
         else if (SECUREBOOT::enabled() && (lidInfo.id != Util::HLL_LIDID))
         {
             // LIDs that are not the HLL are verified by hashing their
