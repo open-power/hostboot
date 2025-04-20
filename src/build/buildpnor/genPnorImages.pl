@@ -1348,6 +1348,7 @@ sub manipulateImage
                     run_command("cp -n $tempImages{TEMP_BIN_V3} $staged_bin_file_V3");
 
                 }
+
                 # Corrupt section if user specified to do so, before ECC injection.
                 if ($secureboot && exists $partitionsToCorrupt{$eyeCatch})
                 {
@@ -1364,9 +1365,17 @@ sub manipulateImage
                                       $tempImages{PAD_PHASE_V3});
                 }
             }
+
             # if we are requested to emit ipl lid artifacts ensure that the generated binary
             # from above is 4KB byte aligned and write a copy to the $bin_dir
-            if ($emitIplLids)
+            if ($eyeCatch eq "HB_HLL" && $emitIplLids)
+            {
+                # Since HB_HLL has already been padded to a boundary, just copy that out for ipllid
+                # For HB_HLL, use V3 version for both sub-dirs
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/$eyeCatch.ipllid");
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/V3/$eyeCatch.ipllid");
+            }
+            elsif ($emitIplLids)
             {
                 # Get the files size and round it up to the next multiple of 4096
                 my $file_size = -s $tempImages{PAD_PHASE};
@@ -1391,6 +1400,8 @@ sub manipulateImage
                 # Write the contents of tempImages[PAD_PHASE_V3} to the begining of the file we just made
                 run_command("dd if=$tempImages{PAD_PHASE_V3} conv=notrunc of=$bin_dir/V3/$eyeCatch.ipllid");
             }
+
+
             if ($eyeCatch eq "SBKT" && $emitEccless)
             {
                 run_command("cp $tempImages{PAD_PHASE} $bin_dir/sbkt.bin");
