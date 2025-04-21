@@ -624,16 +624,39 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         TRACDCOMP(g_trac_pnor,"section start address in secure space is "
                               "0x%.16llX",io_rec->secAddr);
 
-        //Temporarily skip verification of WOFDATA and HBD until
-        //we sort out how to make unique HB_HLLs for every system
+        // There are reasons to temporarily skip V3 verification for some
+        // sections. More details below.
         bool l_skip_section = false;
+
+        // For FSP builds temporarily skip verification HBD and any sections
+        // with hash page tables (like WOFDATA), wiht the exception of HBI,
+        // until it's sorted out how to make unique HB_HLLs for every system
+        // @TODO JIRA PFHB-934 remove this workaround when issue resolved
 #ifdef CONFIG_FSP_BUILD
-        TRACFCOMP(g_trac_pnor,"new1");
         if( ((i_id == PNOR::HB_DATA)
              || l_info.hasHashTable)
             && (i_id != PNOR::HB_EXT_CODE) )
         {
-            TRACFCOMP(g_trac_pnor,"SKIPPING VERIFICATION for section %s",
+            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections: SKIPPING VERIFICATION for section %s",
+                      pPnorString);
+            l_skip_section = true;
+        }
+#endif
+
+        // For BMC builds temporarily skip verifications for some sections
+        // with hash page tables that are unique for each system.
+        // Currently, this list is OCMBFW, SBE, and WOFDATA.
+        // Once it is sorted out how to make unique HB_HLLs for every system
+        // this workaround will be removed.
+        // Using CONFIG_FILE_XFER_VIA_PLDM as it will be set for all BMC drivers,
+        // but not for Hostboot standalone or FSP environments
+        // @TODO JIRA PFHB-935 remove this workaround when issue resolved
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
+        if( (i_id == PNOR::OCMBFW)
+             || (i_id == PNOR::SBE_IPL)
+             || (i_id == PNOR::WOFDATA))
+        {
+            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections: SKIPPING VERIFICATION for section %s",
                       pPnorString);
             l_skip_section = true;
         }
