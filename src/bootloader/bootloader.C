@@ -340,15 +340,16 @@ namespace Bootloader{
 
         uint64_t l_rc = 0;
 
-        // Format of HBB container:
-        // [V1 Header][HBB content padded to page boundary][V3 Header]
-        // where
-        // - V1 and V3 headers measured HBBL content *after* padding to
-        //   page boundary
-        // - V1 Header is at offset 0 and V1_MAX_SECURE_HEADER_SIZE (4KB)
-        // - HBB content starts at 0x1000 (4KB) and ends on page boundary
-        // - V3 Header has a size of V3_SECURE_HEADER_SIZE (15KB)
+        // In non-secure mode the following will happen:
+        // 1) Assume that the Container starts with a secureboot header
+        // 2) Measure the container from after the secureboot header until the end
+        //    - Use the "protected size" value in the secure header for the measurement
+        //    - This ensures that we are measuring (and eventually extending to the TPM)
+        //      EXACTLY what is being loaded on the system
+        // 3) Put the hash value from that measurement into the secureboot header
+        //    - The call_rom_SHA512() function below accomplishes tasks 2 and 3 at the same time
 
+        // In non-secure mode must skip past the secure header at the start of the container
         // Create some offsets that are used below
         // - offset of V1 header is 0
         const uint8_t* l_v1_header_addr =
@@ -356,52 +357,24 @@ namespace Bootloader{
 
         // - offset of HBB content is 0x1000
         const uint8_t* l_hbb_blob_addr = l_v1_header_addr
-                                          + V1_MAX_SECURE_HEADER_SIZE;
+                                        + V1_MAX_SECURE_HEADER_SIZE;
 
         // - offset of V3 content needs to be calculated based on payload size
         //   in V1 header
-        // While the protected size section in the secure header is 8 bytes/uint64_t,
-        // the hash function takes in a uint32_t
-        uint64_t l_protectedSize_u64 = 0;
-        memcpy(&l_protectedSize_u64,
-               l_v1_header_addr + V1_CONTENT_PROTECTED_SIZE_OFFSET,
-               sizeof(l_protectedSize_u64));
-        uint32_t l_protectedSize = l_protectedSize_u64;
+        size_t l_protectedSize = 0;
+        memcpy(&l_protectedSize,
+            l_v1_header_addr + V1_CONTENT_PROTECTED_SIZE_OFFSET,
+            sizeof(l_protectedSize));
 
-        const uint8_t* l_v3_header_addr =  l_hbb_blob_addr
-                                           + l_protectedSize;
+        const uint8_t* l_v3_header_addr = l_hbb_blob_addr + l_protectedSize;
 
-        memcpy(&l_protectedSize_u64,
-            l_v3_header_addr + V3_CONTENT_PROTECTED_SIZE_OFFSET,
-            sizeof(l_protectedSize_u64));
-        uint32_t l_v3_hdr_protectedSize = l_protectedSize_u64;
+        // Location of hash of the "protected payload" into the secure header
+        // - This location is used for extending the hash to the TPM
+        uint64_t l_v1_hash = reinterpret_cast<uint64_t>(i_pContainer) +
+                                V1_CONTENT_HASH_OFFSET;
 
-        if (l_protectedSize != l_v3_hdr_protectedSize)
-        {
-            BOOTLOADER_TRACE(BTLDR_TRC_PRTCTD_PAYLOAD_SIZE_MISMATCH);
-
-            /*@
-            * @errortype
-            * @moduleid         Bootloader::MOD_BOOTLOADER_MAIN
-            * @reasoncode       Bootloader::RC_PRTCTD_PAYLOAD_MISMATCH
-            * @userdata1[0:15]  TI_WITH_SRC
-            * @userdata1[16:31] TI_BOOTLOADER
-            * @userdata1[32:63] Failing address = 0
-            * @userdata2[0:31]  V1 header protected size
-            * @userdata2[32:63] V3 header protected size
-            * @errorInfo[0:31]  0 (unused)
-            * @devdesc          Mismatch between v1 and v3 header protected payload size
-            * @custdesc         Failed to load boot firmware
-            */
-            bl_terminate(
-            MOD_BOOTLOADER_MAIN,
-            RC_PRTCTD_PAYLOAD_MISMATCH,
-            l_protectedSize,
-            l_v3_hdr_protectedSize,
-            true,
-            0,
-            0);
-        }
+        // uint64_t l_v3_hash = reinterpret_cast<uint64_t>(l_v3_header_addr) +
+        //                        V3_CONTENT_HASH_OFFSET;
 
         // Used in multiple places below: Set startAddr to SHA512_HASH_FUNCTION_OFFSET
         // call_rom_SHA512() function at an offset of Secure ROM
@@ -410,64 +383,22 @@ namespace Bootloader{
                 + g_blData->blToHbData.branchtableOffset
                 + SHA512_HASH_FUNCTION_OFFSET;
 
-        // Location of V1 hash of the "protected payload" into the V1 header
-        // - This location is used for extending the hash to the TPM
-        uint64_t l_v1_hash = reinterpret_cast<uint64_t>(i_pContainer)
-                             + V1_CONTENT_HASH_OFFSET;
-
-        // For V3: Set startAddr to SHA3_HASH_FUNCTION_OFFSET to call
-        // call_rom_SHA512() function at an offset of Secure ROM
-        // @TODO JIRA PFHB-677 uncomment this when function is fixed
-        // const uint64_t l_rom_SHA3_startAddr =
-        //     reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
-        //         + g_blData->blToHbData.branchtableOffset
-        //         + SHA3_HASH_FUNCTION_OFFSET;
-
-        // Location of V3 hash of the "protected payload" into the V3 header
-        // - This location is used for extending the hash to the TPM
-        uint64_t l_v3_hash = reinterpret_cast<uint64_t>(l_v3_header_addr)
-                             + V3_CONTENT_HASH_OFFSET;
-
         // Check if Secure Access Bit is set
         // @TODO JIRA:PFHB-679 Also temporarily treat V3 signmode (==0x02)
         // as unsecure until full V3 validation is ready.
         // This temporary change will only work on imprint drivers.
         // The presence of a security backdoor will be used to imply that
         // the code is running for an imprint driver.
-        if (!g_blData->blToHbData.secureAccessBit)
+        if (!g_blData->blToHbData.secureAccessBit ||
+            ((g_blData->blToHbData.sb_signing_mode == 0x02) &&
+             (g_blData->blToHbData.secBackdoorBit != 0 )))
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SAB_UNSET);
 
-            // In non-secure mode the following will happen:
-            // 1) Measure (hash) the HBB blob
-            //    - Use the "protected size" value in the V1 header for the
-            //      measurement
-            //    - This ensures that we are measuring (and eventually extending to the TPM)
-            //      EXACTLY what is being loaded on the system
-            //    - For V1 signing mode, use the SHA512 hash function;
-            //      for V3 signing mode, use the SHA3 hash function
-            // 2) Put the hash value from that measurement into the secureboot header
-            //    - The call_rom_SHA512() function below accomplishes tasks 1 and 2 at the same time
-            //    - The call_rom_SHA3() does the same
-            if (g_blData->blToHbData.sb_signing_mode == 0x00)
-            {
-                call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
-                                l_hbb_blob_addr,
-                                l_protectedSize,
-                                reinterpret_cast<SHA512_t*>(l_v1_hash));
-            }
-            else
-            {
-                // @TODO JIRA PFHB-677 Until securerom's call_rom_SHA3() function is
-                // working, call the linked sha3() function directly below
-
-                // call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
-                //               l_hbbl_blob_addr,
-                //               l_protectedSize,
-                //               reinterpret_cast<sha3_t*>(l_v3_hash));
-
-                sha3(l_hbb_blob_addr, l_protectedSize, reinterpret_cast<void*>(l_v3_hash));
-            };
+            call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
+                            l_hbb_blob_addr,
+                            l_protectedSize,
+                            reinterpret_cast<SHA512_t*>(l_v1_hash));
 
         }
         // Terminate if a valid securerom is not present
@@ -492,6 +423,11 @@ namespace Bootloader{
         else
         {
             bl_console::putString("Validating boot firmware\r\n");
+            // Set startAddr to ROM_verify() function at an offset of Secure ROM
+            uint64_t l_rom_verify_startAddr =
+                reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
+                + g_blData->blToHbData.branchtableOffset
+                + ROM_VERIFY_FUNCTION_OFFSET;
 
             // Declare local input struct
             ROM_hw_params l_hw_parms;
@@ -508,46 +444,13 @@ namespace Bootloader{
             // Use current system minimum FW secure version
             l_hw_parms.log = g_blData->blToHbData.min_secure_version;
 
-            // Set startAddr to ROM_verify() or ROM_v3_verify() function
-            // at an offset of Secure ROM
-            if (g_blData->blToHbData.sb_signing_mode == 0x00)
-            {
-                // Set startAddr to ROM_verify() or ROM_v3_verify() function
-                // at an offset of Secure ROM
-                uint64_t l_rom_verify_startAddr =
-                    reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
-                    + g_blData->blToHbData.branchtableOffset
-                    + ROM_VERIFY_FUNCTION_OFFSET;
+            const auto l_container = reinterpret_cast<const ROM_container_raw*>
+                                                                 (i_pContainer);
 
-                const auto l_container = reinterpret_cast<const ROM_container_raw*>
-                                                                    (i_pContainer);
-
-                l_rc = call_rom_verify(reinterpret_cast<void*>
-                                    (l_rom_verify_startAddr),
-                                    l_container,
-                                    &l_hw_parms);
-            }
-            else
-            {
-                // Set startAddr to ROM_verify() or ROM_v3_verify() function
-                // at an offset of Secure ROM
-                // uint64_t l_rom_v3_verify_startAddr =
-                //     reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
-                //     + g_blData->blToHbData.branchtableOffset
-                //     + ROM_V3_VERIFY_FUNCTION_OFFSET;
-
-                const auto l_v3_container = reinterpret_cast<const ROM_v3_container_raw*>
-                                                                    (l_v3_header_addr);
-
-                // l_rc = call_rom_v3_verify(reinterpret_cast<void*>
-                //                             (l_rom_v3_verify_startAddr),
-                //                             l_v3_container,
-                //                             &l_hw_parms);
-
-                l_rc = ROM_v3_verify(const_cast<ROM_v3_container_raw*>(l_v3_container),
-                            &l_hw_parms,
-                            reinterpret_cast<uint8_t*>(const_cast<void*>(i_pContainer)) + PAGESIZE);
-            }
+            l_rc = call_rom_verify(reinterpret_cast<void*>
+                                   (l_rom_verify_startAddr),
+                                   l_container,
+                                   &l_hw_parms);
 
             if (l_rc != 0)
             {
@@ -1144,21 +1047,10 @@ namespace Bootloader{
                 // Grab the HBB content signature hash out of the secureboot
                 // header and extended into TPM
 
-                 // Current offset of the hash of protected payload in the v1
+                // Current offset of the hash of protected payload in the
                 // secure header
-                const uint8_t* l_hash = reinterpret_cast<uint8_t*>(l_src_addr) + V1_CONTENT_HASH_OFFSET;
-                // if we are in V3 mode get hash from V3 header instead
-                if (g_blData->blToHbData.sb_signing_mode == 0x2)
-                {
-                    // - offset of HBB content is 0x1000
-                    const uint64_t* l_hbb_blob_addr = l_src_addr
-                                                     + V1_MAX_SECURE_HEADER_SIZE;
-
-                    // location of v3 header is at end of hbb blob
-                    const uint64_t* l_v3_header_addr =  l_hbb_blob_addr + l_protectedSize;
-
-                    l_hash = reinterpret_cast<const uint8_t*>(l_v3_header_addr) + V3_CONTENT_HASH_OFFSET;
-                }
+                uint8_t* l_hash = reinterpret_cast<uint8_t*>(l_src_addr) +
+                                  V1_CONTENT_HASH_OFFSET;
 
                 bool isMpipl = false;
                 Bootloader::hbblReasonCode l_rc = XSCOM::get_mpipl_setting(isMpipl);
