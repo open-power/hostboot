@@ -73,7 +73,11 @@ enum BootloaderTraces
     /** Bootloader main copy HBB to running location done */
     BTLDR_TRC_MAIN_COPY_HBB_DONE             = 0x16,
 
-    /** Unused hole from previously used traces */
+    /** Bootloader verify mismatch between V1 and V3 header protected payload size */
+    BTLDR_TRC_PRTCTD_PAYLOAD_SIZE_MISMATCH   = 0x17,
+
+    /** Bootloader verify expected v3 header appended to HBB but found none */
+    BTLDR_TRC_HBB_MISSING_V3_HDR             = 0x18,
 
     /** Bootloader main verifyContainer skip verification - SAB unset */
     BTLDR_TRC_MAIN_VERIFY_SAB_UNSET          = 0x19,
@@ -92,6 +96,9 @@ enum BootloaderTraces
 
     /** Bootloader bad SB signing mode */
     BTLDR_TRC_BAD_SB_SIGN_MODE               = 0x1E,
+
+    /** Bootloader verifyContainer Passed */
+    BTLDR_TRC_MAIN_VERIFY_PASSED             = 0x1F,
 
     /** Bootloader handleMMIO started */
     BTLDR_TRC_HANDLEMMIO_START               = 0x20,

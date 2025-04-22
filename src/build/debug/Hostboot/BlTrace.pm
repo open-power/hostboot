@@ -46,6 +46,7 @@ my %traceText = (
     "1C" => "Main working length too big",
     "1D" => "Protected Size of HBB is too big",
     "1E" => "Bad SB sign mode",
+    "1F" => "verifyContainer Passed",
     "20" => "HandleMMIO started",
     "21" => "HandleMMIO started using BYTESIZE",
     "24" => "HandleMMIO started using WORDSIZE",

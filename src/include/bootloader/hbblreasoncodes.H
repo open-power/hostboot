@@ -113,6 +113,8 @@ namespace Bootloader
         RC_BAD_PROTECTED_SIZE_LEN  = HBBL_COMP_ID | 0x28,  /**< Protected Size of HBB is too large */
         RC_TPM_STS_TIMEOUT_REG     = HBBL_COMP_ID | 0x29,  /**< Timeout out waiting for TPM status reg */
         RC_BAD_SB_SIGN_MODE        = HBBL_COMP_ID | 0x2a,  /**< sb_signing_mode value not V1(0x0) or V3(0x2) */
+        RC_PRTCTD_PAYLOAD_MISMATCH = HBBL_COMP_ID | 0x2b,  /**< Mismatch between size of protected payload in V1 and V3 headers */
+        RC_HBB_MISSING_V3_HDR      = HBBL_COMP_ID | 0x2c,  /**< Expected V3 header appended to HBB but found none */
 
         RC_TPM_INITIALIZE          = 0x100, /**< Special TPM RC that signals if TPM's been initialized already */
 
