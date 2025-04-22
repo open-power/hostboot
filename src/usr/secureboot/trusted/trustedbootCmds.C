@@ -711,6 +711,7 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
         cmd->property = TPM_PT_FIRMWARE_VERSION_2;
         cmd->propertyCount = 1;
 
+
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
                                  sizeof(dataBuf),
@@ -1239,10 +1240,6 @@ errlHndl_t tpmCmdPcrRead(TpmTarget* io_target,
         cmd->pcrSelectionIn.pcrSelections[0].pcrSelect[i_pcr / 8] =
             0x01 << (i_pcr % 8);
 
-        resp->pcrValues.digests[0].size = 0;
-        resp->pcrValues.count = 0;
-        resp->base.responseCode = TPM_RC_NOT_INITIALIZED;
-
         err = tpmTransmitCommand(io_target,
                                  dataBuf,
                                  sizeof(dataBuf),
@@ -1331,9 +1328,7 @@ errlHndl_t tpmCmdCreateAttestationKeys(TpmTarget* i_target)
     l_cmd->inSensitive.size = TPM_IN_SENSITIVE_SIZE;
     l_cmd->inSensitive.sensitive.userAuth = TPM_RS_PW;
 
-    //Ensure that the struct buffer only consumes what is within the l_cmdData array.
-    static_assert(sizeof(l_cmdData) >= sizeof(l_cmd->inSensitive.sensitive.data));
-    memcpy(l_cmd->inSensitive.sensitive.data, l_cmdData, sizeof(l_cmd->inSensitive.sensitive.data));
+    memcpy(l_cmd->inSensitive.sensitive.data, l_cmdData, sizeof(l_cmdData));
 
     size_t l_dataSize = MAX_TRANSMIT_SIZE;
 
@@ -1410,9 +1405,7 @@ errlHndl_t tpmCmdReadAKCertificate(TpmTarget* i_target, TPM2B_MAX_NV_BUFFER* o_d
     l_cmd->base.commandSize = TPM_NV_READ_SIZE;
     l_cmd->base.commandCode = TPM_CC_NV_Read;
 
-    //Ensure that the struct buffer only consumes what is within the l_cmdData array.
-    static_assert(sizeof(l_cmdData) >= sizeof(l_cmd->data));
-    memcpy(l_cmd->data, l_cmdData, sizeof(l_cmd->data));
+    memcpy(l_cmd->data, l_cmdData, sizeof(l_cmdData));
 
     l_errl = tpmTransmit(i_target,
                          l_dataBuf,
@@ -1528,9 +1521,7 @@ errlHndl_t tpmCmdGenerateQuote(TpmTarget* i_target,
     l_cmd->base.commandSize = TPM_QUOTE_SIZE;
     l_cmd->base.commandCode = TPM_CC_Quote;
 
-    //Ensure that the struct buffer only consumes what is within the tpmiDhObject array.
-    static_assert(sizeof(l_tpmiDhObject) >= sizeof(l_cmd->quoteData.tpmiDhObject));
-    memcpy(l_cmd->quoteData.tpmiDhObject,l_tpmiDhObject,sizeof(l_cmd->quoteData.tpmiDhObject));
+    memcpy(l_cmd->quoteData.tpmiDhObject,l_tpmiDhObject,sizeof(l_tpmiDhObject));
 
     memcpy(l_cmd->quoteData.nonce,
            *i_nonce,
