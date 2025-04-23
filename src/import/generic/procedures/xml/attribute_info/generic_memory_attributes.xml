@@ -586,6 +586,20 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_SKIP_PLUG_RULES_IN_EFF_CONFIG_THERMAL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      This attribute is used to avoid running duplicate
+      plug rule testing in the eff_config_thermal istep.
+      Set internally by HWP code.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>NO = 0, YES = 1</enum>
+  </attribute>
+
+  <attribute>
     <id>ATTR_OMI_X4_DEGRADE_ACTION</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>

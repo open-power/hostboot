@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,11 +76,19 @@ extern "C"
 
         const uint64_t l_min_util = TT::MIN_UTIL;
         uint8_t l_thermal_count = 0;
+        uint8_t l_skip_plug_rules = 0;
 
         // Enforces the plug rules on all targets passed in
         // This should be on the per-backplane level
         // Mixing of DRAM generation is not allowed w/in a backplane but is allowed in systems w/ multiple backplanes
-        FAPI_TRY( mss::plug_rule::enforce_pre_eff_config_thermal<mss::mc_type::ODYSSEY>(i_targets));
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_SKIP_PLUG_RULES_IN_EFF_CONFIG_THERMAL,
+                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                l_skip_plug_rules ));
+
+        if (l_skip_plug_rules == fapi2::ENUM_ATTR_SKIP_PLUG_RULES_IN_EFF_CONFIG_THERMAL_NO)
+        {
+            FAPI_TRY( mss::plug_rule::enforce_pre_eff_config_thermal<mss::mc_type::ODYSSEY>(i_targets));
+        }
 
         for ( const auto& l_ocmb : i_targets)
         {
