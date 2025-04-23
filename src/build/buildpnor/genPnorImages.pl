@@ -1262,12 +1262,23 @@ sub manipulateImage
             }
             elsif ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
             {
-                $callerHwHdrFields_V3{configure} = 1;
-                create_sb_key_transition_container($tempImages{PAD_PHASE});
-                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{PAD_PHASE});
+                # Create SBKT container with header (no padding)
+                # - only need to create for V3.
+                create_sb_key_transition_container($tempImages{HDR_PHASE_V3});
 
-                create_sb_key_transition_container($tempImages{PAD_PHASE_V3});
-                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{PAD_PHASE_V3});
+                # Copy V3 file over to V1 file, as some shared logic below
+                # might look for the V1 file
+                run_command("cp $tempImages{HDR_PHASE_V3} $tempImages{HDR_PHASE}");
+
+                # Update header fields (basically total container size)
+                $callerHwHdrFields{configure} = 1;
+                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
+                $callerHwHdrFields_V3{configure} = 1;
+                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
+
+                # Pad the images ($size has previously been page aligned)
+                run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
+                run_command("dd if=$tempImages{HDR_PHASE_V3} of=$tempImages{PAD_PHASE_V3} ibs=$size conv=sync");
             }
             else
             {
@@ -1376,6 +1387,13 @@ sub manipulateImage
                 run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/$eyeCatch.ipllid");
                 run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/V3/$eyeCatch.ipllid");
             }
+            elsif ($eyeCatch eq "SBKT" && $emitIplLids)
+            {
+                # Since SBKT has already been padded to a boundary, just copy that out for ipllid
+                # For SBKT, use V3 version for both sub-dirs
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/$eyeCatch.ipllid");
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/V3/$eyeCatch.ipllid");
+            }
             elsif ($emitIplLids)
             {
                 # Get the files size and round it up to the next multiple of 4096
@@ -1401,7 +1419,6 @@ sub manipulateImage
                 # Write the contents of tempImages[PAD_PHASE_V3} to the begining of the file we just made
                 run_command("dd if=$tempImages{PAD_PHASE_V3} conv=notrunc of=$bin_dir/V3/$eyeCatch.ipllid");
             }
-
 
             if ($eyeCatch eq "SBKT" && $emitEccless)
             {
@@ -1436,6 +1453,17 @@ sub manipulateImage
             # so it can be more easily found by some build tools.
             # In other words, by doing this, build tools won't have to
             # be updated to look for the HB_HLL in the different V3/
+            # sub-directory versus where it picks up all of the other binaries
+            run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file");
+            run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file_V3");
+        }
+        elsif ($eyeCatch eq "SBKT")
+        {
+            # No need for V1 SBKT, so overwrite it with V3 SBKT
+            # This will also put the V3 SBKT in the base $bin_dir
+            # so it can be more easily found by some build tools.
+            # In other words, by doing this, build tools won't have to
+            # be updated to look for the SBKT in the different V3/
             # sub-directory versus where it picks up all of the other binaries
             run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file");
             run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file_V3");
@@ -1812,7 +1840,6 @@ sub create_sb_key_transition_container
     my %tempImages = (
         RAND_BLOB => "$bin_dir/$randPrefix.rand_blob.bin",
         PRD_KEY_FILE => "$bin_dir/$randPrefix.sbkt_prod_key.bin",
-        PRE_PAD_FILE => "$bin_dir/$randPrefix.sbkt_pre_pad.bin"
     );
 
     # Gen 4K blob of random data
@@ -1829,10 +1856,7 @@ sub create_sb_key_transition_container
     my $sbktComponentIdArg = "--sign-project-FW-token SBKT ";
     run_command("$OPEN_SIGN_KEY_TRANS_OLD ".$sbktComponentIdArg.OP_SIGNING_FLAG
         . "$sb_hdrs{SBKT}{outer}{flags} --protectedPayload $tempImages{PRD_KEY_FILE} "
-        . "--out $tempImages{PRE_PAD_FILE}");
-
-    # Pad to a multiple of page size (4K)
-    run_command("dd if=$tempImages{PRE_PAD_FILE} of=$o_file ibs=4k conv=sync");
+        . "--out $o_file");
 
     # Clean up temp images
     foreach my $image (keys %tempImages)

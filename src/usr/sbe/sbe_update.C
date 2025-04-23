@@ -7431,6 +7431,8 @@ errlHndl_t secureKeyTransition()
     bool l_loaded = false;
     PNOR::SectionInfo_t l_secInfo;
 
+    TRACFCOMP( g_trac_sbe, "secureKeyTransition() - Looking for PNOR::SBKT, which might not exist");
+
     // Get SBKT PNOR section info from PNOR RP
     l_errl = getSectionInfo(PNOR::SBKT, l_secInfo);
     // SBKT section is optional so just delete error and no-op
