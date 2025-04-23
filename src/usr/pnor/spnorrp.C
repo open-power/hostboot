@@ -653,8 +653,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // @TODO JIRA PFHB-935 remove this workaround when issue resolved
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
         if( (i_id == PNOR::OCMBFW)
-             || (i_id == PNOR::SBE_IPL)
-             || (i_id == PNOR::WOFDATA))
+             || (i_id == PNOR::SBE_IPL))
         {
             TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections: SKIPPING VERIFICATION for section %s",
                       pPnorString);
