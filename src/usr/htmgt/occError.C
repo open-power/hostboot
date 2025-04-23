@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,7 +139,10 @@ namespace HTMGT
         }
 
         // Read data from SRAM (length must be multiple of 8 bytes)
-        const uint16_t l_length = (i_length) & 0xFFF8;
+        //     To prevent truncation of length for the read we do a +7
+        //        then the & 0xFFF8 will bring it back to the nearest 8 bytes
+        //        boundary.
+        const uint16_t l_length = ((i_length+7) & 0xFFF8);
         if ((l_length > 0) && (i_address != 0))
         {
             fapi2::variable_buffer l_buffer(l_length*8); //convert to bits

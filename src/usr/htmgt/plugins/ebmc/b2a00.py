@@ -248,47 +248,7 @@ class errludP_occ:
                 i, line = errludP_occ.printSensor("CHOMTEMPVDDP"+str(s), data, i)
                 lines.append(line)
             lines.append("Instructions per Second:")
-            ### DEBUG:
-            #value  = (data[i]<<24) + (data[i+1]<<16) + (data[i+2]<<8) + data[i+3]
-            #value2 = (data[i+4]<<24) + (data[i+5]<<16) + (data[i+6]<<8) + data[i+7]
-            #value3 = (data[i+8]<<24) + (data[i+9]<<16) + (data[i+10]<<8) + data[i+11]
-            #lines.append("CHOMIPS DEBUG: i="+str(i)+" data: "+"0x{:08x}".format(value)+" "+ \
-            #        "0x{:08x}".format(value2)+" "+"0x{:08x}".format(value3))
-            if m == 1:
-                ### NOT WORKING RIGHT
-                if 1 == 0:
-                    ### WHY DOESNT THIS WORK????
-                    i, line = errludP_occ.printSensor("CHOMIPS**", data, i)
-                elif 1 == 1:
-                    i += 2 ### THIS MAKES IT WORK!!! (any increment from 1-5...) BUT OFF AFTER THIS POINT
-                    i, line = errludP_occ.printSensor("CHOMIPS**", data, i)
-                else:
-                    ### THIS ALSO DOES NOT - TRYING TO DEBUG
-                    saccum = 0
-                    scur = (data[i]<<8) + data[i+1]
-                    i += 2
-                    smin = (data[i]<<8) + data[i+1]
-                    i += 2
-                    smax = (data[i]<<8) + data[i+1]
-                    i += 2
-                    savg = (data[i]<<8) + data[i+1]
-                    i += 2
-                    i += 3
-                    lines.append("i="+str(i))
-                    break
-                    lines.append("i="+str(i)+"cur="+str(cur))
-                    lines.append("i="+str(i)+"cur="+str(cur)+", min="+str(min))
-                    i += 1
-                    #smin = (data[i+2]<<8) + data[i+3]
-                    #smax = (data[i+4]<<8) + data[i+5]
-                    #savg = (data[i+6]<<8) + data[i+7]
-                    #i += 12
-                    line="  CHOMIPS****: Sample:["+str(int(scur,16)).rjust(5)+ \
-                        "] Avg:["+str(int(savg,16)).rjust(5)+ \
-                        "] Min["+str(int(smin,16)).rjust(5)+ \
-                        "] Max["+str(int(smax,16)).rjust(5)+"] acc["+str(saccum)+"]"
-            else:
-                i, line = errludP_occ.printSensor("CHOMIPS", data, i)
+            i, line = errludP_occ.printSensor("CHOMIPS", data, i)
             lines.append(line)
             if version < 17: # this is for version 16 or below.
                 lines.append("Memory Bandwidth:")
@@ -345,12 +305,16 @@ class errludP_occ:
                     lines.append(line)
             # Acceleration Factor section for 8 processors
             if version >= 18: # this is for version 18 and above.
-                lines.append("Acceleration Factor:B1")
+                lines.append("Acceleration Factor")
                 for p in range(0,8):
                     i, line = errludP_occ.printAF("CHOMAFP"+str(p), data, i)
                     lines.append(line)
 
         # List of call home sensors END
+
+        # If there are only 1 modes skip the data section that would have the 2nd Mode.
+        if nummodes == 1:
+            i = len(data)
 
         return i, lines
 
@@ -486,6 +450,12 @@ class errludP_occ:
         errud = {}
         j = 0
         while i < len(data):
+
+            # During loop prevent exception by validation the next 11 bytes
+            # can be read.  Reading udSize will then handle next action.
+            if i+11 >= len(data):
+                break
+
             start = i
             errud[j] = dict()
             udstring='UserDetail['+str(j)+']'
@@ -497,6 +467,12 @@ class errludP_occ:
             errud[j]['Size'], i=hexConcat(data, i, i+2)
             errud[j]['reserved'], i=hexConcat(data, i, i+4)
             endUd = i + udSize
+
+            if udSize > len(data)-i:
+                d['Size to big for data left (starting offset '+str(hex(start))+")"] = \
+                    data_to_hexstring(data, start, len(data))
+                i = len(data)
+                break
 
             if DEBUG_USER_DATA > 0:
                 print("USER DATA HEADER "+str(j)+":")
