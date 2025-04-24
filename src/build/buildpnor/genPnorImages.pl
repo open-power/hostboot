@@ -1241,21 +1241,19 @@ sub manipulateImage
                 # - only need to create for V3.
                 create_hb_hll($tempImages{HDR_PHASE_V3},$CUR_OPEN_SIGN_REQUEST_V3);
 
+                # Update header fields (basically total container size)
+                $callerHwHdrFields_V3{configure} = 1;
+                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
+
                 # Copy V3 file over to V1 file, as some shared logic below
                 # might look for the V1 file
                 run_command("cp $tempImages{HDR_PHASE_V3} $tempImages{HDR_PHASE}");
-
-                # Update header fields (basically total container size)
-                $callerHwHdrFields{configure} = 1;
-                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
-                $callerHwHdrFields_V3{configure} = 1;
-                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
 
                 # Pad the images ($size has previously been page aligned)
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
                 run_command("dd if=$tempImages{HDR_PHASE_V3} of=$tempImages{PAD_PHASE_V3} ibs=$size conv=sync");
 
-                # The PAD_PHASE_3 has had its total container size updated and is
+                # The PAD_PHASE_V3 has had its total container size updated and is
                 # page aligned.  Copy out this padded, non-ecc file to be picked up in FSP builds
                 # The FSP builds definitely need the file without ECC as they add it themselves
                 run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/hb_hll.bin");
@@ -1266,15 +1264,13 @@ sub manipulateImage
                 # - only need to create for V3.
                 create_sb_key_transition_container($tempImages{HDR_PHASE_V3});
 
+                # Update header fields (basically total container size)
+                $callerHwHdrFields_V3{configure} = 1;
+                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
+
                 # Copy V3 file over to V1 file, as some shared logic below
                 # might look for the V1 file
                 run_command("cp $tempImages{HDR_PHASE_V3} $tempImages{HDR_PHASE}");
-
-                # Update header fields (basically total container size)
-                $callerHwHdrFields{configure} = 1;
-                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
-                $callerHwHdrFields_V3{configure} = 1;
-                setV3HdrCntrSize(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
 
                 # Pad the images ($size has previously been page aligned)
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
@@ -1422,7 +1418,12 @@ sub manipulateImage
 
             if ($eyeCatch eq "SBKT" && $emitEccless)
             {
-                run_command("cp $tempImages{PAD_PHASE} $bin_dir/sbkt.bin");
+                # The PAD_PHASE_V3 has had its total container size updated and is
+                # page aligned.  Copy out this padded, non-ecc file to be picked up in FSP builds
+                # The FSP builds definitely need the file without ECC as they add it themselves
+                # Copy to both directories just to be safe, even though the first (non-V3) one
+                # should be used
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/sbkt.bin");
                 run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/V3/sbkt.bin");
             }
         }
