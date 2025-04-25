@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1737,7 +1737,7 @@ errlOwner ody_upd_init()
             continue;
         }
 
-        alignas(uint64_t) ocmbfw_hash_t combined_hash = { };
+        alignas(uint64_t) ocmbfw_hash_t combined_hash = {0};
         auto pnor_err = pnor_combined_images_hash(ocmb, combined_hash);
 
         if (errl)
