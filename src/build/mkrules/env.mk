@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -43,6 +43,14 @@ GENDIR = $(ROOTPATH)/obj/genfiles
 GENDIR_PLUGINS = $(ROOTPATH)/obj/genfiles/plugins
 IMGDIR = $(ROOTPATH)/img
 endif
+
+CPPCHECK_INCDIR += $(PROJECT_ROOT)/src/include/usr/
+CPPCHECK_INCDIR += $(PROJECT_ROOT)/src/include/
+CPPCHECK_INCDIR += $(PROJECT_ROOT)/src/subtree/
+CPPCHECK_INCDIR += $(PROJECT_ROOT)/src/subtree/openbmc/pldm/libpldm/src/
+CPPCHECK_INCDIR += $(PROJECT_ROOT)/src/include/sys/
+CPPCHECK_INCDIR += $(PROJECT_ROOT)/src/include/runtime/
+CPPCHECK_INCDIR += $(PROJECT_ROOT)/src/import/
 
 INCDIR += $(ROOTPATH)/src/include/
 INCDIR += $(ROOTPATH)/src/subtree/
