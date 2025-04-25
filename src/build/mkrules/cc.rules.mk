@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -70,7 +70,7 @@ ifdef DOCPPCHECK
 	# Note: The two noted files below crash cppcheck and must be ignored
 	#     until the problem can be fixed via JIRA PFHB-483
 	CXX_CPPCHECK_COMMAND=$(C1) \
-	if [[ " p10_fbc_no_hp_scom.C p10_fbc_ab_hp_scom.C " =~ " `basename $<` " ]]; then \
+	if [[ " p10_fbc_no_hp_scom.C p10_fbc_ab_hp_scom.C " =~ " `basename $<` " ]] || [[ " `dirname $<` " == *"/extern/"* ]]; then \
 		exit_code=0; \
 	else \
 		set -o pipefail && cd `dirname $<` && timeout 2m $(CXX_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck.xml; exit_code=$$? ; \

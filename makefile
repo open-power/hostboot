@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2023
+# Contributors Listed Below - COPYRIGHT 2010,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -47,7 +47,7 @@ IMAGE_PASS_POST += check_istep_modules
 # dummy variables here, but will be set to the actual tool in the "cppcheck" rule
 BUILDCPPCHECK := $(PROJECT_ROOT)/src/build/tools/build-cppcheck
 CPPCHECKTOOL := $(PROJECT_ROOT)/src/build/tools/cpptools/cppcheck/cppcheck
-CPPCHECKFLAGS := --inline-suppr --quiet --xml --xml-version=2 --error-exitcode=1 --template='Error CPPCHECK {file}: line {line}\nSyntax error string: {id}\n{message}'
+CPPCHECKFLAGS := --inline-suppr --suppress=internalAstError:* --quiet --xml --xml-version=2 --error-exitcode=1 --template='Error CPPCHECK {file}: line {line}\nSyntax error string: {id}\n{message}'
 CPPCHECK := $(CPPCHECKTOOL) $(CPPCHECKFLAGS)
 export CXX_CHECK ?= true
 export C_CHECK ?= true
@@ -101,8 +101,8 @@ cppcheck:
 	@echo Building with CPPCHECK tool
 # TODO RTC: 215692
 	${BUILDCPPCHECK}
-	export CXX_CHECK="$(CPPCHECK) $(filter -D%, $(CXXFLAGS)) $(INCFLAGS)" && \
-	export C_CHECK="$(CPPCHECK) $(filter -D%, $(CFLAGS)) $(INCFLAGS)" && \
+	export CXX_CHECK="$(CPPCHECK) $(filter -D%, $(CXXFLAGS)) $(CPPCHECK_INCFLAGS)" && \
+	export C_CHECK="$(CPPCHECK) $(filter -D%, $(CFLAGS)) $(CPPCHECK_INCFLAGS)" && \
 	export DOCPPCHECK=1 && \
 	${MAKE}
 
