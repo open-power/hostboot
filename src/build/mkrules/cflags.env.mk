@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -50,6 +50,8 @@ ASMFLAGS += $(COMMONFLAGS) -mcpu=power9 -mbig-endian -ffreestanding -mabi=elfv1
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Werror -Wall \
 	    -fuse-cxa-atexit -std=gnu++17 -Wno-register
 LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
+
+CPPCHECK_INCFLAGS = $(addprefix -I, $(CPPCHECK_INCDIR) )
 
 INCFLAGS = $(addprefix -I, $(INCDIR) )
 ASMINCFLAGS = $(addprefix $(lastword -Wa,-I), $(INCDIR))
