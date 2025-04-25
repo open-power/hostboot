@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,7 @@ ReturnCode platGetI2c( const Target<TARGET_TYPE_ALL>& i_target,
         {
             // deviceRead() requires data pointer
             // copy data from const vector to data ptr
-            uint8_t * l_configDataPtr = new uint8_t[ i_cfgData.size() ];
+            uint8_t * l_configDataPtr = new uint8_t[ i_cfgData.size() ]();
             std::copy(i_cfgData.begin(), i_cfgData.end(), l_configDataPtr);
 
             // if trace is enabled,
@@ -218,7 +218,7 @@ ReturnCode platPutI2c(const Target<TARGET_TYPE_ALL>& i_target,
         }
 
         //copy data from const vector to data ptr
-        uint8_t * l_dataPtr = new uint8_t[ i_data.size() ];
+        uint8_t * l_dataPtr = new uint8_t[ i_data.size() ]();
         std::copy(i_data.begin(), i_data.end(), l_dataPtr);
         size_t l_dataSize = i_data.size();
 
