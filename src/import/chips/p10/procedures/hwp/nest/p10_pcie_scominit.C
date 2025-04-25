@@ -460,8 +460,8 @@ fapi2::ReturnCode p10_load_iop_override(
             if ((l_attr_pcie_fw_legacy_mode == fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_FALSE) ||
                 (l_attr_pcie_fw_legacy_mode_in_hwimg == 0))
             {
-                // write entirety of DIG_ADAPT_CTL_21 = 0x010F
-                l_data = 0x000000000000010FULL;
+                // write entirety of DIG_ADAPT_CTL_21 = 0x011F
+                l_data = 0x000000000000011FULL;
                 FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_21[i], l_data));
             }
         }
