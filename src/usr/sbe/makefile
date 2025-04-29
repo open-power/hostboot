@@ -42,6 +42,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/secureboot/common/
 
 OBJS += sbe_update.o
+OBJS += errlud_sbe.o
 
 SUBDIRS += test.d
 
