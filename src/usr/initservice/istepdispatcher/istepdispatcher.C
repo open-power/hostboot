@@ -573,7 +573,7 @@ void IStepDispatcher::moduleInitFailed(errlOwner i_errl)
 // ----------------------------------------------------------------------------
 errlHndl_t IStepDispatcher::executeAllISteps()
 {
-    errlHndl_t errhdl = NULL;
+    errlHndl_t istepErrl = NULL;
     uint32_t istep = 0;
     uint32_t substep = 0;
     bool l_doReconfig = false;
@@ -635,7 +635,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
             //-----------------------------------------
             // Issue the Istep
-            errhdl = doIstep(istep, substep, l_doReconfig);
+            istepErrl = doIstep(istep, substep, l_doReconfig);
             //-----------------------------------------
 
             INITSERVICE::stop_substep_inprogress(istep, substep);
@@ -677,9 +677,9 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         TRACFCOMP(g_trac_initsvc,
                             ERR_MRK"Error from checkMinimumHardware");
 
-                        if (errhdl == NULL)
+                        if (istepErrl == NULL)
                         {
-                            errhdl = l_errl;
+                            istepErrl = l_errl;
                             l_errl = NULL;
                         }
                         else
@@ -692,19 +692,19 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             // commit it otherwise. This will be replaced by
                             // the checkMinimumHardware error with the same
                             // plid that matches the real errors
-                            const uint32_t l_plid = errhdl->plid();
-                            if (ISTEP::RC_FAILURE == errhdl->reasonCode())
+                            const uint32_t l_plid = istepErrl->plid();
+                            if (ISTEP::RC_FAILURE == istepErrl->reasonCode())
                             {
-                                delete errhdl;
-                                errhdl = nullptr;
+                                delete istepErrl;
+                                istepErrl = nullptr;
                             }
                             else
                             {
-                                errlCommit(errhdl, INITSVC_COMP_ID);
+                                errlCommit(istepErrl, INITSVC_COMP_ID);
                             }
-                            errhdl = l_errl;
+                            istepErrl = l_errl;
                             l_errl = NULL;
-                            errhdl->plid(l_plid);
+                            istepErrl->plid(l_plid);
                         }
 
                         // Break out of the istep loop with the error
@@ -715,7 +715,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     numReconfigs++;
                     uint32_t l_plid = 0;
 
-                    if (errhdl)
+                    if (istepErrl)
                     {
                         // The IStep returned an error, This is the generic
                         // 'IStep failed' from the IStepError class, the real
@@ -723,19 +723,18 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                         // committed. Record the PLID and commit it. This will
                         // be replaced by the ReconfigLoop info error with the
                         // same plid that matches the real errors
-                        l_plid = errhdl->plid();
+                        l_plid = istepErrl->plid();
 
                         // Commit the istep log as informational since it
                         // might include some useful information
-                        errhdl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                        errlCommit(errhdl, INITSVC_COMP_ID);
-                        errhdl = NULL;
+                        istepErrl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                        errlCommit(istepErrl, INITSVC_COMP_ID);
+                        istepErrl = NULL;
                     }
 
                     // Create a new info error stating that a reconfig loop is
                     // about to be performed
-                    uint64_t errWord = FOUR_UINT16_TO_UINT64(
-                        istep, substep, newIstep, newSubstep);
+                    using namespace errl_util;
                     /*@
                      * @errortype
                      * @reasoncode       ISTEP_RECONFIG_LOOP_ENTERED
@@ -751,20 +750,22 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                      *                   (Reconfigure loop).
                      * @custdesc         System partially rebooting to recover from previous event.
                      */
-                    errhdl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                        ISTEP_INITSVC_MOD_ID,
-                        ISTEP_RECONFIG_LOOP_ENTERED,
-                        errWord,
-                        numReconfigs);
-                    errhdl->collectTrace("HWAS_I", 1024);
+                    istepErrl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                        ISTEP_INITSVC_MOD_ID,
+                                                        ISTEP_RECONFIG_LOOP_ENTERED,
+                                                        SrcUserData(bits{0,15},  istep,
+                                                                    bits{16,31}, substep,
+                                                                    bits{32,47}, newIstep,
+                                                                    bits{48,63}, newSubstep),
+                                                        numReconfigs);
+                    istepErrl->collectTrace("HWAS_I", 1024);
 
                     if (l_plid != 0)
                     {
                         // Use the same plid as the IStep error
-                        errhdl->plid(l_plid);
+                        istepErrl->plid(l_plid);
                     }
-                    errlCommit(errhdl, INITSVC_COMP_ID);
+                    errlCommit(istepErrl, INITSVC_COMP_ID);
                     istep = newIstep;
                     substep = newSubstep;
                     TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: "
@@ -780,10 +781,10 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
                     // FSP and not a doIstep error then
                     // return an error to cause termination
-                    if (!errhdl && iv_spBaseServicesEnabled)
+                    if (!istepErrl && iv_spBaseServicesEnabled)
                     {
                         l_termToReconfig = true;
-                        errhdl = failedDueToDeconfig(istep, substep,
+                        istepErrl = failedDueToDeconfig(istep, substep,
                                                      newIstep, newSubstep);
                     }
                     // Not FSP and not in mfg mode,
@@ -792,13 +793,13 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     // --OR--
                     // If in manufacturing mode, but there is no error
                     else if ((!iv_spBaseServicesEnabled && !l_manufacturingMode) ||
-                             (l_manufacturingMode && (errhdl == nullptr)))
+                             (l_manufacturingMode && (istepErrl == nullptr)))
                     {
                         // If there was a doIstep error then commit it
                         // before the reconfig loop
-                        if (errhdl)
+                        if (istepErrl)
                         {
-                            errlCommit(errhdl, INITSVC_COMP_ID);
+                            errlCommit(istepErrl, INITSVC_COMP_ID);
                         }
 
 #ifdef CONFIG_CONSOLE
@@ -873,7 +874,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
             }
 #endif
 
-            if (errhdl)
+            if (istepErrl)
             {
                 TRACFCOMP(g_trac_initsvc, ERR_MRK"executeAllISteps: "
                           "IStep Error on %d:%d", istep, substep);
@@ -895,16 +896,16 @@ errlHndl_t IStepDispatcher::executeAllISteps()
             substep++;
         }
 
-        if (errhdl)
+        if (istepErrl)
         {
             // If we are terminating the IPL to force a reconfig loop on the
             //  FSP then leave the severity alone
             if( !l_termToReconfig )
             {
                 // Ensure severity reflects IPL will be terminated
-                if (errhdl->sev() != ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM)
+                if (istepErrl->sev() != ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM)
                 {
-                    errhdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    istepErrl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                 }
             }
             break;
@@ -919,7 +920,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 
     TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::executeAllISteps()");
 
-    return errhdl;
+    return istepErrl;
 }
 
 
@@ -1055,7 +1056,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                                     uint32_t i_substep,
                                     bool & o_doReconfig)
 {
-    errlHndl_t err = nullptr;
+    errlHndl_t istepErrl = nullptr;
     o_doReconfig = false;
 
     INITSERVICE::ShadowIstepData( static_cast<uint8_t>(i_istep),
@@ -1114,7 +1115,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                  * @devdesc          Istep skip prevented in secure mode
                  * @custdesc         An internal firmware error occured
                  */
-                err = new ERRORLOG::ErrlEntry(
+                istepErrl = new ERRORLOG::ErrlEntry(
                                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                          ISTEP_INITSVC_MOD_ID,
                                          ISTEP_SKIP_ATTEMPTED,
@@ -1136,14 +1137,14 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         iv_curSubStep = i_substep;
 
         // Send Progress Code
-        err = this->sendProgressCode(false);
+        istepErrl = this->sendProgressCode(false);
 
         mutex_unlock(&iv_mutex);
 
-        if(err)
+        if(istepErrl)
         {
             // Commit the error and continue
-            errlCommit(err, INITSVC_COMP_ID);
+            errlCommit(istepErrl, INITSVC_COMP_ID);
         }
 
         // Handle shutdown and start progress thread
@@ -1173,9 +1174,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             unLoadModules(iv_istepModulesLoaded);
 
             // load modules for this step
-            err = loadModules(i_istep).release();
+            istepErrl = loadModules(i_istep).release();
 
-            if (err)
+            if (istepErrl)
             {
                 TRACFCOMP(g_trac_initsvc,
                           ERR_MRK"loadModules() failed for istep %d.%d",
@@ -1211,11 +1212,11 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
         //---------------------------------------------------------
         // Run the Istep
-        err = InitService::getTheInstance().executeFn(theStep, NULL);
-        if( err )
+        istepErrl = InitService::getTheInstance().executeFn(theStep, NULL);
+        if( istepErrl )
         {
             TRACFCOMP(g_trac_initsvc,"Error returned from istep : %.8X=%.4X",
-                      err->eid(), err->reasonCode());
+                      ERRL_GETEID_SAFE(istepErrl), ERRL_GETRC_SAFE(istepErrl));
         }
 
         //  flush contTrace immediately after each i_istep/substep  returns
@@ -1284,10 +1285,10 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
         TRACFCOMP(g_trac_initsvc,
                   INFO_MRK":doIstep: reconfig=%d mpipl=%d err=%p FailOrAttnAttr=%d"
-                  " taskFlagsChkAtn=%d", l_reconfigLoopAttr, iv_mpiplMode, err,
+                  " taskFlagsChkAtn=%d", l_reconfigLoopAttr, iv_mpiplMode, istepErrl,
                   l_checkAttnAttr, theStep->taskflags.check_attn);
 
-        if ((!l_reconfigLoopAttr) && (!iv_mpiplMode) && (!err)) // NOT A, B, E, G & mpipl
+        if ((!l_reconfigLoopAttr) && (!iv_mpiplMode) && (!istepErrl)) // NOT A, B, E, G & mpipl
         {
             if (l_checkAttnAttr != TARGETING::CHECK_ATTN_AFTER_ISTEP_FAIL_NO) // NOT C & F
             {
@@ -1296,9 +1297,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                     // Run PRD
                     l_runCheckAttn = true;
                     TRACFCOMP(g_trac_initsvc,
-                              INFO_MRK"doIstep: reconfig=%d mpipl=%d err=%p "
+                              INFO_MRK"doIstep: reconfig=%d mpipl=%d istepErrl=%p "
                               "AttnAttr=%d taskChkAttn=%d RUN-PRD=%d",
-                              l_reconfigLoopAttr, iv_mpiplMode, err, l_checkAttnAttr,
+                              l_reconfigLoopAttr, iv_mpiplMode, istepErrl, l_checkAttnAttr,
                               theStep->taskflags.check_attn, l_runCheckAttn);
                 }
             }
@@ -1317,14 +1318,14 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                 TRACFCOMP( g_trac_initsvc, ERR_MRK"doIstep: error from "
                           "checkForIplAttentions");
 
-                if (err)
+                if (istepErrl)
                 {
-                    l_errl->plid(err->plid());
+                    l_errl->plid(istepErrl->plid());
                     errlCommit(l_errl, INITSVC_COMP_ID);
                 }
                 else
                 {
-                    err = l_errl;
+                    istepErrl = l_errl;
                     l_errl = nullptr;
                 }
             }
@@ -1341,11 +1342,11 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
         // If ATTR_RECONFIG_LOOP_TESTS_ENABLE is non-zero and if there is no
         // previous error then call the reconfig loop test runner
-        if ((l_reconfigAttrTestsEn) && (!err))
+        if ((l_reconfigAttrTestsEn) && (!istepErrl))
         {
             TRACFCOMP(g_trac_initsvc, INFO_MRK"doIstep: "
                     "Reconfig Loop Tests Enabled");
-            reconfigLoopTestRunner(i_istep, i_substep, err);
+            reconfigLoopTestRunner(i_istep, i_substep, istepErrl);
         }
 #endif // CONFIG_RECONFIG_LOOP_TESTS_ENABLE
 
@@ -1425,7 +1426,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
     } while (0); // if there was an error break here
 
-    if (!err && theStep)
+    if (!istepErrl && theStep)
     {
         // update high watermark for istep and substep but don't ever
         // decrease it. Note: this code assumes you were allowed to execute
@@ -1444,7 +1445,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         // than the watermark
     }
 
-    return err;
+    return istepErrl;
 }
 
 

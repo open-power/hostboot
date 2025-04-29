@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@
 #include <pldm/requests/pldm_fileio_requests.H>
 #include <pldm/pldm_errl.H>
 #endif
+
+using namespace TARGETING;
 
 namespace ERRORLOG
 {
@@ -328,6 +330,14 @@ void ErrlManager::handleSpareCoreErrors(errlHndl_t & io_err)
                        true, // This setting is final, i.e. cannot be changed anymore after this
                        propagation_t::NO_PROPAGATE); // This function will be called recursively already
                                                      // we're handling each error as they come.
+#ifndef __HOSTBOOT_RUNTIME
+        // During IPL, when a target is spared out there will be an istep log that has this log's error details added to
+        // it. However, because those details are added prior to commit the istep log doesn't know that this logs
+        // severity has been reduced to non-visible. That leads to the undesirable effect where the istep log is visible
+        // but the related log is not. To resolve that, request a reconfig loop directly.
+        Target * system = UTIL::assertGetToplevelTarget();
+        system->setAttr<ATTR_RECONFIGURE_LOOP>(RECONFIGURE_LOOP_UNIT_SPARED);
+#endif
         // Regardless of the error type this log had, set it to identify as spare. Since we are in the commit path, code
         // which would have cared about error type will have already seen the existing type and from this point forward
         // the commit path needs a way to identify a log being committed as a spare-type log. We do this so later the
