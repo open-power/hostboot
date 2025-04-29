@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbe/plugins/sbeUdParserFactory.H $                    */
+/* $Source: src/usr/sbe/errlud_sbe.H $                                    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2025                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,30 +22,44 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _SBEUDPARSERFACTORY_H
-#define _SBEUDPARSERFACTORY_H
+#ifndef ERRL_UD_SBE_H
+#define ERRL_UD_SBE_H
 
-#include "errludparserfactory.H"
-#include "errludP_sbe.H"
+/**
+ *  @file errlud_sbe.H
+ *
+ *  Defines the classes that logs and parses SBE UD data
+ */
 
-namespace SBE
+#include <errl/errluserdetails.H>
+
+namespace SBE {
+/**
+ * @class UdSBEParms
+ *
+ * Adds SBE information to an error log as user detail data
+ */
+class UdXIPSectionSizeParms : public ERRORLOG::ErrlUserDetails
 {
-    class UserDetailsParserFactory : public ERRORLOG::ErrlUserDetailsParserFactory
-    {
-        public:
-            UserDetailsParserFactory()
-            {
-                registerParser<SBE::UdParserSbeNoFormat>(SBE_UDT_NO_FORMAT);
-                registerParser<SBE::UdParserSbeMessageCommand>(SBE_UDT_SBE_MESSAGE_CMD);
-                registerParser<SBE::UdParserSbeMessageData>(SBE_UDT_SBE_MESSAGE_DATA);
-                registerParser<SBE::UdParserXIPSectionSize>(SBE_UDT_XIP_SECTION_SIZES);
-            }
+public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_image Target of XIP sections
+     */
+    UdXIPSectionSizeParms(const void * i_image);
 
-        private:
-            UserDetailsParserFactory(const UserDetailsParserFactory &);
-            UserDetailsParserFactory & operator=(const UserDetailsParserFactory &);
-    };
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdXIPSectionSizeParms();
+
+private:
+    // Disabled
+    UdXIPSectionSizeParms(UdXIPSectionSizeParms &) = delete;
+    UdXIPSectionSizeParms & operator=(UdXIPSectionSizeParms &) = delete;
 };
 
-#endif
+} // end SBE namespace
 
+#endif

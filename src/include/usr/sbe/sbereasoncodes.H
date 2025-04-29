@@ -130,6 +130,7 @@ enum UserDetailsTypes
         SBE_UDT_NO_FORMAT       = 0x0,
         SBE_UDT_SBE_MESSAGE_CMD = 0x1,
         SBE_UDT_SBE_MESSAGE_DATA = 0x2,
+        SBE_UDT_XIP_SECTION_SIZES = 0x3,
 };
 
 };  // end SBE

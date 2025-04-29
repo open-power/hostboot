@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
  */
 
 #include "errluserdetails.H"
+#include <cstring>
 
 namespace SBE
 {
@@ -218,6 +219,81 @@ class UdParserSbeMessageData : public ERRORLOG::ErrlUserDetailsParser
     UdParserSbeMessageData(const UdParserSbeMessageData&);
     UdParserSbeMessageData & operator=(const UdParserSbeMessageData&);
 };
+
+/**
+ * @class UdParserSbeMessageCommand
+ *
+ */
+class UdParserXIPSectionSize : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+  /**
+   *  @brief Constructor
+   */
+  UdParserXIPSectionSize() = default;
+
+  /**
+   *  @brief Destructor
+   */
+  virtual ~UdParserXIPSectionSize() = default;
+
+  /**
+   *  @brief Parses string user detail data from an error log
+   *
+   *  @param  i_version Version of the data
+   *  @param  i_parse   ErrlUsrParser object for outputting information
+   *  @param  i_pBuffer Pointer to buffer containing detail data
+   *  @param  i_buflen  Length of the buffer
+   */
+  virtual void parse(errlver_t       i_version,
+                     ErrlUsrParser & i_parser,
+                     void          * i_pBuffer,
+                     const uint32_t  i_buflen) const
+  {
+    i_parser.PrintBlank();
+    i_parser.PrintHeading("SBE XIP Section Sizes");
+
+    if (i_version == 0)
+    {
+      //***** Memory Layout *****
+      // 4 Bytes  :  Num sections
+      // For Num sections:
+      //      16 Bytes : XIP section name
+      //      4 Bytes  : XIP section size
+
+      uint32_t num_entries = ntohl(*reinterpret_cast<uint32_t*>(i_pBuffer));
+      XIPSizeEntry_t* data = reinterpret_cast<XIPSizeEntry_t*>(
+                              reinterpret_cast<char*>(i_pBuffer) + sizeof(uint32_t));
+
+      for (int i = 0; i < num_entries; i++)
+      {
+        XIPSizeEntry_t* curEntry = data + i;
+
+        // null terminate name
+        char sectionNameStr[SECT_NAME_SIZE+1] = {};
+        memcpy(&sectionNameStr, curEntry->XIPSectionName, sizeof(curEntry->XIPSectionName));
+
+        i_parser.PrintString("Section Name", sectionNameStr);
+        i_parser.PrintNumber("Size","0x%X", ntohl(curEntry->SectionSize));
+        i_parser.PrintBlank();
+      }
+    }
+  }
+
+private:
+  static constexpr uint8_t SECT_NAME_SIZE = 16;
+
+  typedef struct XIPSectionSizeEntry
+  {
+    char XIPSectionName[SECT_NAME_SIZE];
+    uint32_t SectionSize;
+  } XIPSizeEntry_t;
+
+  // Disabled
+  UdParserXIPSectionSize(const UdParserXIPSectionSize&) = delete;
+  UdParserXIPSectionSize & operator=(const UdParserXIPSectionSize&) = delete;
+};
+
 } // end SBE namespace
 
 #endif

@@ -73,6 +73,7 @@
 #include "../spi/spidd.H"
 #include <kernel/bltohbdatamgr.H> // CacheSize
 #include <util/threadpool.H>
+#include "errlud_sbe.H"
 
 #include <initservice/istepdispatcherif.H>
 #ifdef CONFIG_SECUREBOOT
@@ -5791,6 +5792,9 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
 
             ErrlUserDetailsTarget(io_sbeState.target, "SBE Target Updated")
                                  .addToLog(err_info);
+
+            // Add UD data with sizes of each XIP section
+            UdXIPSectionSizeParms(reinterpret_cast<void*>(io_sbeState.sbe_update_space_vaddr)).addToLog(err_info);
 
             errlCommit( err_info, SBE_COMP_ID );
 

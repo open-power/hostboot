@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2023
+# Contributors Listed Below - COPYRIGHT 2023,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -77,13 +77,37 @@ class errludP_sbe:
             d["SBE Message Data - See Ver+Code for hdr"] = hexdump(mv)
             return json.dumps(d)
 
+    def UdParserXIPSectionSize(subType, ver, data):
+
+        # ***** Memory Layout *****
+        # 4 Bytes  :  Num sections
+        # For Num sections:
+        #      16 Bytes : XIP section name
+        #      4 Bytes  : XIP section size
+        if ver == 0:
+            d = dict()
+            d["SBE XIP Section Name"] = "Section Size"
+            p = 0
+
+            num_entries, p = memConcat(data, p, p+4)
+            num_entries = int(num_entries, 16)
+
+            for _ in range(num_entries):
+                name, p = memConcat(data, p, p+16)
+                name = bytearray.fromhex(name).decode('ascii').replace('\x00','')
+                size, p = memConcat(data, p, p+4)
+                d[name] = "0x" + size
+
+            return json.dumps(d)
+
 # Dictionary with parser functions for each subtype
 # values are taken from UserDetailsTypes enum in src/include/usr/sbe/sbereasoncodes.H
 # Note: The values defined in that file will be what are passed into the parser so they must be
 #       kept in sync between this file and the listed one.
 UserDetailsTypes = { 0 : "UdParserNoFormat",
                      1 : "UdParserSbeMessageCommand",
-                     2 : "UdParserSbeMessageData" }
+                     2 : "UdParserSbeMessageData",
+                     3 : "UdParserXIPSectionSize" }
 
 # Required function which handles calling the appropriate class function from above.
 def parseUDToJson(subType, ver, data):
