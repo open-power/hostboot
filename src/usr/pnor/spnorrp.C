@@ -763,7 +763,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
 
                 }
 
-                TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections - section %s (id 0x%08X): "
+                TRACFCOMP(g_trac_pnor, INFO_MRK"SPnorRP::verifySections - section %s (id 0x%08X): "
                           "found entry: partName=%s, protectedSize=0x%X, sectionSize=0x%X, "
                           "expected hash=0x%04X, calculated hash=0x%04X",
                           pPnorIdString, i_id, entryItr->partName, entryItr->protectedSize,

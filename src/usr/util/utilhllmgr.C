@@ -712,11 +712,6 @@ errlHndl_t HLLMgr::verifyPowerVM(void * i_payload)
                         "of size 0x%X at l_pLidVaddr=%p",
                         lidInfo.id, lidInfo.size, l_pLidVaddr);
 
-// Comment this out once things are working and just keep the one in the fail path
-                UTIL_FBIN("HLLMgr::verifyPowerVM",
-                          reinterpret_cast<void*>(l_pLidVaddr),
-                          64);
-
                 HashEntry hash = {0};
                 SECUREBOOT::hashBlob(reinterpret_cast<void*>(l_pLidVaddr),
                                      lidInfo.size,
@@ -1384,26 +1379,6 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
                     "lidInfo.Unsigned=0x%X",
                     lidInfo.id, l_lidSize, lidInfo.size, lidInfo.Unsigned);
         }
-
-        else if ((lidInfo.id == 0x80d00048)      // rainier 2U
-                 || (lidInfo.id == 0x80d00049)  // rainier 4U
-                 || (lidInfo.id == 0x80d0004A)  // everest)
-                 || (lidInfo.id == 0x80d0004B)  // bonnell)
-                 || (lidInfo.id == 0x80d0004C)  // blueridge 2U
-                 || (lidInfo.id == 0x80d0004D)  // blueridge 4U
-                 || (lidInfo.id == 0x80d0004E)  // fuji
-                 || (lidInfo.id == 0x80d0004F)) // balcones
-        {
-            // These LIDs are the different system-specific variations of HB_HLL and PHYP
-            // doesn't need them.  Temporarily skip checking them here until PHYP's HLL is
-            // updated to not look for them
-            // @TODO JIRA PFHB-933 Remove this workaround
-            UTIL_FT("HLLMgr::loadLids Skipping checks on HB_HLL Lid: "
-                    "lidInfo.id=0x%X l_lidSize=%d lidInfo.size=%d "
-                    "lidInfo.Unsigned=0x%X",
-                    lidInfo.id, l_lidSize, lidInfo.size, lidInfo.Unsigned);
-        }
-
         else if (SECUREBOOT::enabled() && (lidInfo.id != Util::HLL_LIDID))
         {
             // LIDs that are not the HLL are verified by hashing their

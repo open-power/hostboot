@@ -483,8 +483,6 @@ namespace Bootloader{
         //         + SHA3_HASH_FUNCTION_OFFSET;
 
         // Check if Secure Access Bit is set
-        // The presence of a security backdoor will be used to imply that
-        // the code is running for an imprint driver.
         if (!g_blData->blToHbData.secureAccessBit)
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SAB_UNSET);
@@ -564,8 +562,7 @@ namespace Bootloader{
             // at an offset of Secure ROM
             if (l_signMode == 0x00)
             {
-                // Set startAddr to ROM_verify() or ROM_v3_verify() function
-                // at an offset of Secure ROM
+                // Set startAddr to ROM_verify() function at an offset of Secure ROM
                 uint64_t l_rom_verify_startAddr =
                     reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
                     + g_blData->blToHbData.branchtableOffset
@@ -581,8 +578,7 @@ namespace Bootloader{
             }
             else
             {
-                // Set startAddr to ROM_verify() or ROM_v3_verify() function
-                // at an offset of Secure ROM
+                // Set startAddr to ROM_v3_verify() function at an offset of Secure ROM
                 // uint64_t l_rom_v3_verify_startAddr =
                 //     reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
                 //     + g_blData->blToHbData.branchtableOffset

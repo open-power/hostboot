@@ -878,7 +878,7 @@ sub manipulateImage
                     {
                         if ($eyeCatch eq "HBI")
                         {
-                            # Pass HBB sw signatures as the salt entry.
+                            # Pass HBB payload hash as the salt entry.
                             $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,$bin_dir,
                                                                           getBinDataFromFile($preReqImages->{HBB_PAYLOAD_HASH_FILE}));
                             $tempImages{hashPageTable_V3} = genHashPageTable($bin_file, $eyeCatch,"$bin_dir/V3/",
