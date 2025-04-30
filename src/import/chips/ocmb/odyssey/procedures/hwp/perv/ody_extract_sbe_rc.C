@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,7 @@ SCOMT_ODY_USE_T_TPCHIP_PIB_SPPE_SBEPM_SBEPPE_MIB_PPE_XIMEM;
 SCOMT_ODY_USE_T_TPCHIP_PIB_SPPE_SBEPRV_ACS_CTRL_COMP_PIBMEM_STATUS_REG;
 SCOMT_PERV_USE_CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_13;
 
-enum ODY_EXTRACT_SBE_RC_Private_Constants
+enum ODY_EXTRACT_SBE_RC_Private_Constants : uint32_t
 {
     NUM_OF_LOCATION = 16,
     ADDR_REG_PIB  = 0xD0011,

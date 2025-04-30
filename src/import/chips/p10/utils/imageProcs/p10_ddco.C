@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,7 +217,7 @@ int p9_dd_add(
     enlarged = p9_dd_size(cont) + sizeof(struct p9_dd_block) + i_buf_size;
 
     // re-allocate to enlarge container (content is retained and consistent)
-    cont = (struct p9_dd_cont*)realloc(cont, enlarged);
+    cont = reinterpret_cast<struct p9_dd_cont*>(realloc(cont, enlarged));
 
     if (!cont)
     {
