@@ -532,6 +532,23 @@ if ($max_processes < 1)
     $max_processes = 1;
 }
 
+my $salt_to_use = 0;
+if (-e "hb_salt")
+{
+    open(my $fh, '<', "hb_salt") or die "cannot open file hb_salt";
+    {
+        local $/;
+        $salt_to_use = <$fh>;
+    }
+    close($fh);
+    print "Found hb_salt = $salt_to_use\n";
+}
+elsif ($ENV{'SALT_FOR_HASH_PAGE_TABLES'})
+{
+    $salt_to_use = $ENV{'SALT_FOR_HASH_PAGE_TABLES'};
+    print "Found SALT_FOR_HASH_PAGE_TABLES = $salt_to_use\n";
+}
+
 ################################################################################
 # main
 ################################################################################
@@ -555,6 +572,7 @@ $SETTINGS .= $key_transition && $secureboot ? "Key Transition Mode = $key_transi
 $SETTINGS .= "Lab security override (valid for SBE partition only) = ";
 $SETTINGS .= $labSecurityOverride ? "Yes\n" : "No\n";
 $SETTINGS .= "Max number of parallel subprocesses: $max_processes\n";
+$SETTINGS .= "Salt for hash page tables = $salt_to_use\n";
 $SETTINGS .= "//======================================================//\n\n";
 print $SETTINGS;
 
@@ -1726,10 +1744,7 @@ sub genHashPageTable
     else
     {
         # Use the same salt data for all builds.
-        # For now use zero
-        # @TODO JIRA PFHB-932 will implement the use of a build-wide "salt"
-        # file created via a random number
-        $saltData=0;
+        $saltData = $salt_to_use;
         $salt_entry = truncate_sha(sha3_512($saltData));
     }
     my @hashes = ($salt_entry);

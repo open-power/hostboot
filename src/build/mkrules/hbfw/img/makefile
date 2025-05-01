@@ -46,11 +46,11 @@ SRCPATH = ${DEFAULT_PATH:M*src*}
 
 # Modify the dependency list when building a CFM test image
 .if (${CFM_TEST_IMAGE} != "")
-    BUILD_ALL_DEPS = cp_hbfiles gen_default_images update_image_id
-    GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles update_image_id dump-secureboot-config
+    BUILD_ALL_DEPS = cp_hbfiles gen_default_images update_image_id hb_salt
+    GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles update_image_id dump-secureboot-config hb_salt
 .else
-    BUILD_ALL_DEPS = cp_hbfiles gen_default_images
-    GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles dump-secureboot-config
+    BUILD_ALL_DEPS = cp_hbfiles gen_default_images hb_salt
+    GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles dump-secureboot-config hb_salt
 .endif
 
 OBJECTS=hcode_lid
@@ -294,6 +294,9 @@ gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_DEFAULT_IMAGES}
+
+hb_salt:
+	xxd -l 16 -p /dev/urandom > hb_salt
 
 #################################################
 ###  SAMPLE for building an SBE Partition with multiple ECs
