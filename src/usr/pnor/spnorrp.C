@@ -643,24 +643,6 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         }
 #endif
 
-        // For BMC builds temporarily skip verifications for some sections
-        // with hash page tables that are unique for each system.
-        // Currently, this list is OCMBFW, SBE, and WOFDATA.
-        // Once it is sorted out how to make unique HB_HLLs for every system
-        // this workaround will be removed.
-        // Using CONFIG_FILE_XFER_VIA_PLDM as it will be set for all BMC drivers,
-        // but not for Hostboot standalone or FSP environments
-        // @TODO JIRA PFHB-935 remove this workaround when issue resolved
-#ifdef CONFIG_FILE_XFER_VIA_PLDM
-        if( (i_id == PNOR::OCMBFW)
-             || (i_id == PNOR::SBE_IPL))
-        {
-            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections: SKIPPING VERIFICATION for section %s",
-                      pPnorString);
-            l_skip_section = true;
-        }
-#endif
-
         // verify while in temp space
         if (SECUREBOOT::enabled() && !l_skip_section)
         {
