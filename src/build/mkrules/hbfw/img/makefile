@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2025
+# Contributors Listed Below - COPYRIGHT 2025
 # [+] International Business Machines Corp.
 #
 #
@@ -62,7 +62,7 @@ build_all: $(BUILD_ALL_DEPS)
 .endif
 
 build_all: $(BUILD_ALL_DEPS)
-install_all: build_all gen_system_specific_images build_sbe_partitions build_pnor_images
+install_all: build_all gen_system_specific_images build_sbe_partitions build_pnor_images make_all_hll
 
 .NOTPARALLEL: install_all
 
@@ -420,8 +420,8 @@ MCKINLEY_HBD_FINAL_IMG = MCKINLEY.HBD_NODE_0.bin
 # NOTE: Because this is the last call to GEN_PNOR_IMAGE_SCRIPT, add HB_HLL_to the list
 #       so that HB_HLL can be created again with all possible images
 GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},HCODE_LID=${${P10_HCODE_LID_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P},HB_HLL=EMPTY
-GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P},${DENALI_HBD_IMGS}
-GEN_MCKINLEY_BIN_FILES = MCKINLEY:${MCKINLEY_HBD_IMGS}
+GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P},${DENALI_HBD_IMGS},HB_HLL=EMPTY
+GEN_MCKINLEY_BIN_FILES = MCKINLEY:WOFDATA=${${DENALI_WOFDATA_IMG}:P},${MCKINLEY_HBD_IMGS},HB_HLL=EMPTY
 
 SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
 			 --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
@@ -524,3 +524,96 @@ update_images_for_sandbox:  gen_default_images gen_system_specific_images build_
 
 .endif
 
+
+#################################################
+# After we are done building all of the pieces, we can now construct
+# the set of config-specific hb_hll binaries to match the unique
+# targeting binaries.
+
+# Temporarily just echo the command as a placeholder
+MAKE_HB_HLL_SCRIPT = echo MAKE_HB_HLL_SCRIPT
+#MAKE_HB_HLL_SCRIPT = ${make_hb_hll.pl:P}
+
+#This must stay in sync with DENALI_HBD_IMGS
+DENALI_HLLS = DENALI_node_0.hb_hll.bin DENALI_node_1.hb_hll.bin DENALI_node_2.hb_hll.bin DENALI_node_3.hb_hll.bin DENALI_SMP_WRAP_node_0.hb_hll.bin DENALI_2N_node_0.hb_hll.bin DENALI_2N_node_1.hb_hll.bin
+
+#This must stay in sync with MCKINLEY_HBD_IMGS
+MCKINLEY_HLLS = MCKINLEY_node_0.hb_hll.bin MCKINLEY_node_1.hb_hll.bin MCKINLEY_node_2.hb_hll.bin MCKINLEY_node_3.hb_hll.bin MCKINLEY_SMP_WRAP_node_0.hb_hll.bin MCKINLEY_2N_node_0.hb_hll.bin MCKINLEY_2N_node_1.hb_hll.bin
+
+ALL_HB_HLL = ${DENALI_HLLS} ${MCKINLEY_HLLS}
+
+# Ideally we could do this generically somehow but that is very complicated...
+#%hb_hll.bin: build_all gen_system_specific_images build_sbe_partitions build_pnor_images
+#	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --output=${.TARGET}
+
+# Use a common target to share dependencies
+common_hb_hll_deps: build_all gen_system_specific_images build_sbe_partitions build_pnor_images
+
+# This is the list of the sections that are common to all HB_HLL generation
+COMMON_HLL_BINS = ${V3/HBB.entry:P} ${V3/HBI.entry:P} ${V3/HBBL.entry:P} ${V3/HBRT.entry:P} ${V3/OCMBFW.entry:P} ${V3/P10.SBE.entry:P} ${V3/P10.HCODE.entry:P} ${V3/P10.HCODE_LID.entry:P} ${V3/P10.OCC.entry:P}
+
+## @TODO JIRA PFHB-934: Need a rule for every hb_hll we need to create
+## For now just copy initial hb_hll.bin for each config specific (ie systen and
+## node combination) target. Ultimately will be built with ${MAKE_HB_HLL_SCRIPT}
+DENALI_node_0.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=DENALI_node_0 ${COMMON_HLL_BINS} ${V3/DENALI.WOFDATA.entry:P} ${V3/DENALI.HBD_node_0.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+DENALI_node_1.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=DENALI_node_1 ${COMMON_HLL_BINS} ${V3/DENALI.WOFDATA.entry:P} ${V3/DENALI.HBD_node_1.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+DENALI_node_2.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=DENALI_node_2 ${COMMON_HLL_BINS} ${V3/DENALI.WOFDATA.entry:P} ${V3/DENALI.HBD_node_2.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+DENALI_node_3.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=DENALI_node_3 ${COMMON_HLL_BINS} ${V3/DENALI.WOFDATA.entry:P} ${V3/DENALI.HBD_node_3.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+DENALI_2N_node_0.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=DENALI_2N_node_0 ${COMMON_HLL_BINS} ${V3/DENALI.WOFDATA.entry:P} ${V3/DENALI.HBD_2N_node_0.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+DENALI_2N_node_1.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=DENALI_2N_node_1 ${COMMON_HLL_BINS} ${V3/DENALI.WOFDATA.entry:P} ${V3/DENALI.HBD_2N_node_1.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+DENALI_SMP_WRAP_node_0.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=DENALI_SMP_WRAP_node_0 ${COMMON_HLL_BINS} ${V3/DENALI.WOFDATA.entry:P} ${V3/DENALI.HBD_SMP_WRAP_node_0.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+MCKINLEY_node_0.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=MCKINLEY_node_0 ${COMMON_HLL_BINS} ${V3/MCKINLEY.WOFDATA.entry:P} ${V3/MCKINLEY.HBD_node_0.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+MCKINLEY_node_1.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=MCKINLEY_node_1 ${COMMON_HLL_BINS} ${V3/MCKINLEY.WOFDATA.entry:P} ${V3/MCKINLEY.HBD_node_1.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+MCKINLEY_node_2.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=MCKINLEY_node_2 ${COMMON_HLL_BINS} ${V3/MCKINLEY.WOFDATA.entry:P} ${V3/MCKINLEY.HBD_node_2.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+MCKINLEY_node_3.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=MCKINLEY_node_3 ${COMMON_HLL_BINS} ${V3/MCKINLEY.WOFDATA.entry:P} ${V3/MCKINLEY.HBD_node_3.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+MCKINLEY_2N_node_0.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=MCKINLEY_2N_node_0 ${COMMON_HLL_BINS} ${V3/MCKINLEY.WOFDATA.entry:P} ${V3/MCKINLEY.HBD_2N_node_0.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+MCKINLEY_2N_node_1.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=MCKINLEY_2N_node_1 ${COMMON_HLL_BINS} ${V3/MCKINLEY.WOFDATA.entry:P} ${V3/MCKINLEY.HBD_2N_node_1.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+MCKINLEY_SMP_WRAP_node_0.hb_hll.bin: common_hb_hll_deps
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${MAKE_HB_HLL_SCRIPT} --prefix=MCKINLEY_SMP_WRAP_node_0 ${COMMON_HLL_BINS} ${V3/MCKINLEY.WOFDATA.entry:P} ${V3/MCKINLEY.HBD_SMP_WRAP_node_0.entry:P}
+	cp ${hb_hll.bin:P} ${.TARGET}
+
+
+# Generic rule to force building all of the individual pieces
+make_all_hll: ${ALL_HB_HLL} .SPECTARG
+
+# end of HB_HLL section
+#################################################
