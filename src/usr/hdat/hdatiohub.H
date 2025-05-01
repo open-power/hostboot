@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,7 @@ namespace HDAT
 #define NUM_BYTES_PER_LANE 2
 #define NUM_LANES_PER_PHB 16
 #define HDAT_PROC_EC_DD1 0x10
+#define HDAT_PCIE_MAX_SPEED_GEN4 4
 #define HDAT_PCIE_MAX_SPEED_GEN5 5
 const uint16_t HDAT_VPD_VERSION = 0x0020;
 const uint16_t HDAT_IO_VERSION = 0x8B;

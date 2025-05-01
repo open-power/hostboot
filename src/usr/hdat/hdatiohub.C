@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1676,7 +1676,17 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             HDAT_DBG("Module type: %X",l_modType);
 
             // Setting the Maximum PCIe Link Training Speed
-            l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN5;
+            // IoSCMs use GEN4 other procs GEN5
+            if(l_pProcTarget->getAttr<TARGETING::ATTR_IS_IOSCM>())
+            {
+                HDAT_INF("Setting hdatMaxPCIeLinkSpeed on ioSCM to %d", HDAT_PCIE_MAX_SPEED_GEN4);
+                l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN4;
+            }
+            else
+            {
+                HDAT_INF("Setting hdatMaxPCIeLinkSpeed to %d", HDAT_PCIE_MAX_SPEED_GEN5);
+                l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN5;            
+            }
 
             l_hub->hdatEcLvl = l_procEcLevel;
             l_hub->hdatProcChipID = l_procOrdId;
