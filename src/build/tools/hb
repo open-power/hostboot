@@ -334,6 +334,12 @@ hb_prime()
 {
     export_key_variables
 
+    # set salt for genPnorImages.pl to use
+    # if not HB standalone then this should be set somewhere else
+    if [ $HB_STANDALONE -eq 1 ]; then
+        export SALT_FOR_HASH_PAGE_TABLES=$(xxd -l 16 -p /dev/urandom)
+    fi
+
     # Priming for P10 Standalone without ODE SB
 
     if [[ $HB_STANDALONE -eq 1 ]] && [[ $PNOR_LAYOUT_SELECTED != "FSP" ]]; then
@@ -397,6 +403,10 @@ cp ${SANDBOXBASE}/obj/ppc/hbfw/img/hbbl.header.bin ${HB_NFS_DIR}/test/pnor/hbbl.
 
         # Execute the command in a ODE sandbox workon.
         execute_in_sandbox "${prepareFspPatch}" "ppc"
+    fi
+
+    if [ $HB_STANDALONE -eq 1 ]; then
+        unset SALT_FOR_HASH_PAGE_TABLES
     fi
 }
 
