@@ -840,7 +840,10 @@ sub manipulateImage
         # have a node ID included.
         if (scalar @binFilesArray > 1)
         {
-            $nodeIDstr = "_NODE_$node_id";
+            # input filename should look like SYSTEM_unique_descriptor_with_underscores.bin
+            $nodeIDstr = basename($bin_file,".bin");
+            $nodeIDstr =~ s/$system_target//; # trim SYSTEM
+            $nodeIDstr =~ s/_hb_targeting//; # trim known string to make it pretty
         }
 
         # Check if bin file is system specific and prefix target to the front
