@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2025
+# Contributors Listed Below - COPYRIGHT 2012,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -230,6 +230,10 @@ BUILD_TYPE_PARAMS = --build-type fspbuild
 .endif
 
 # Decide which images to use for each PNOR layout
+# NOTE: HB_HLL is listed here for the first call to ${GEN_PNOR_IMAGE_SCRIPT} in
+#       case a user just needs to build and patch the main Hostboot files. It's
+#       final form will be made if/when ${GEN_PNOR_IMAGE_SCRIPT} is called again
+#       later for the "install_all" path
 GEN_COMMON_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},HBEL=EMPTY,GUARD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY,HB_HLL=EMPTY
 GEN_STANDALONE_BIN_FILES = ${GEN_COMMON_BIN_FILES},TEST=EMPTY,TESTRO=EMPTY,TESTLOAD=EMPTY,PAYLOAD=EMPTY
 .if (${FAKEPNOR} == "")
@@ -237,9 +241,9 @@ GEN_STANDALONE_BIN_FILES = ${GEN_COMMON_BIN_FILES},TEST=EMPTY,TESTRO=EMPTY,TESTL
     .if (${PNOR_LAYOUT_SELECTED} == "STANDALONE")
 	GEN_DEFAULT_BIN_FILES = ${GEN_STANDALONE_BIN_FILES},MEMD=${${ZZ_MEMD_IMG}:P}DJVPD=EMPTY,MVPD=EMPTY,EECACHE=EMPTY
     .elif(${PNOR_LAYOUT_SELECTED} == "P10")
-	GEN_DEFAULT_BIN_FILES = ${GEN_STANDALONE_BIN_FILES},EECACHE=EMPTY,OCMBFW=${${OCMBFW_IMG}:P},SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P}
+	GEN_DEFAULT_BIN_FILES = ${GEN_STANDALONE_BIN_FILES},EECACHE=EMPTY,OCMBFW=${${OCMBFW_IMG}:P}
     .else
-	GEN_DEFAULT_BIN_FILES = ${GEN_COMMON_BIN_FILES},MEMD=${${ZZ_MEMD_IMG}:P},EECACHE=EMPTY,OCMBFW=${${OCMBFW_IMG}:P},SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P}
+	GEN_DEFAULT_BIN_FILES = ${GEN_COMMON_BIN_FILES},MEMD=${${ZZ_MEMD_IMG}:P},EECACHE=EMPTY,OCMBFW=${${OCMBFW_IMG}:P}
     .endif
     DEFAULT_PARAMS = --build-all --emit-eccless ${TARGET_TEST:b--test} ${HB_STANDALONE:b--hb-standalone} \
                      ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
@@ -410,7 +414,9 @@ MCKINLEY_HBD_FINAL_IMG = MCKINLEY.HBD_NODE_0.bin
 
 # Decide which PNOR to build
 # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
-GEN_P10_BIN_FILES = OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
+# NOTE: Because this is the last call to GEN_PNOR_IMAGE_SCRIPT, add HB_HLL_to the list
+#       so that HB_HLL can be created again with all possible images
+GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},HCODE_LID=${${P10_HCODE_LID_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P},HB_HLL=EMPTY
 GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P},${DENALI_HBD_IMGS}
 GEN_MCKINLEY_BIN_FILES = MCKINLEY:${MCKINLEY_HBD_IMGS}
 
