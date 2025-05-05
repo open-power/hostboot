@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -195,5 +195,13 @@ enum HDATReasonCode
 * @custdesc   Firmware error detected while converting the Vital
 *             Product Data for memory to IPZ format
 */
+
+/*@
+ * @errortype
+ * @moduleid         HDAT::MOD_SLCA_DESTRUCTOR
+ * @reasoncode       HDAT::RC_DEV_MAP_FAIL
+ * @devdesc          Unmap a mapped region failed
+ * @custdesc         Firmware encountered an internal error.
+ */
 
 #endif // HDATSERVICECODES_H

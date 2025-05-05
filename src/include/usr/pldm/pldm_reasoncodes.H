@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -192,6 +192,7 @@ namespace PLDM
         RC_DUMP_TARGET_NOT_FOUND      = PLDM_COMP_ID | 0x44,
         RC_SBE_DUMP_FAILED            = PLDM_COMP_ID | 0x45,
         RC_READ_TOO_BIG               = PLDM_COMP_ID | 0x46,
+        RC_OCMB_SBE_DUMP_FAILED       = PLDM_COMP_ID | 0x47, //graveyard
     };
 
     /**
@@ -246,5 +247,16 @@ namespace PLDM
     * @devdesc     Software problem, PS input Voltage Data from BMC not found.
     * @custdesc    A software error occurred during system boot
     */
+
+/*@
+ *@moduleid         MOD_SBE_DUMP
+ *@reasoncode       RC_OCMB_SBE_DUMP_FAILED
+ *@userdata1        Dump target HUID
+ *@userdata2[0:31]  OCMB SBE SensorStateId
+ *@userdata2[32:63] Host's SBE dump-complete SensorState ID
+ *@devdesc          SBE dump request failed.
+ *@custdesc         Error occurred during failure-data capture.
+ */
+
 
 #endif

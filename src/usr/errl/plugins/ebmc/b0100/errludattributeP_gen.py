@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2024
+# Contributors Listed Below - COPYRIGHT 2025
 # [+] International Business Machines Corp.
 #
 #
@@ -115,6 +115,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x010fb1f:
             #simpleType:uint
             label = "CLOCK_MUX3_INPUT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x0157499:
+            #simpleType:uint
+            label = "MSS_OMI_VDD_UPLIFT_APPLIED"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -407,6 +413,19 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0x0663f9d:
+            #simpleType:uint
+            label = "SKIP_PLUG_RULES_IN_EFF_CONFIG_THERMAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x06668e3:
+            #simpleType:uint
+            label = "WTH_OVERRIDE_EFFICIENCY_CEFF_ADJUST"
+            traceEntry.append("[8][4]:")
+            for x in range(32):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x06716dc:
             #simpleType:uint
             label = "PROC_INT_IC_BAR_PAGE_SIZE"
@@ -667,6 +686,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x0b391d7:
+            #simpleType:uint
+            label = "SYSTEM_MAX_OPERATING_FREQ_MHZ"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x0b4a2fc:
             #simpleType:uint
             label = "MEM_EFF_REGISTER_TYPE"
@@ -781,6 +806,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x0dcd6cd:
+            #simpleType:uint
+            label = "WTH_OVERRIDE_EFFICIENCY_IDLE_THRESH"
+            traceEntry.append("[8][2]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x0dddcbc:
             #simpleType:uint
             label = "PROC_ENABLE_DL_TMPL_1"
@@ -1079,6 +1111,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0x13fdcc3:
+            #simpleType:uint
+            label = "INTERPOSER_REV"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x140ddc8:
             #simpleType:uint
             label = "MEM_EFF_PMIC2_SWA_VOLTAGE_OFFSET"
@@ -1390,12 +1428,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
-        elif attrEnum == 0x192b80e:
-            #simpleType:uint
-            label = "FAPINAME_POS"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+4)[0])
-                i += 4
         elif attrEnum == 0x1949903:
             #simpleType:uint
             label = "MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3"
@@ -1712,6 +1744,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0x2022c38:
+            #simpleType:uint
+            label = "IPL_TYPE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x203d77f:
             #simpleType:uint
             label = "MSS_OCMB_CHECKSTOP_OBJ_HANDLE"
@@ -1791,6 +1829,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x216a1a7:
+            #simpleType:uint
+            label = "ODY_SWIZZLE_DETECT_FAIL_VALUE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x21889e5:
             #simpleType:uint
             label = "MEM_EFF_PMIC1_SWB_CURRENT_WARNING"
@@ -1990,6 +2034,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x24a0f92:
             #simpleType:uint
             label = "MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x24a8d09:
+            #simpleType:uint
+            label = "SKIP_HBRT_ATTR_UPDATE"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -2215,6 +2265,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x2754e20:
             #simpleType:uint
             label = "HTMSC_FILT_OCC_PAT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x2763107:
+            #simpleType:uint
+            label = "PMIC_CALLBACK_STAGGER_TIME"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
@@ -3314,6 +3370,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x3c0bdfa:
+            #simpleType:uint
+            label = "WTH_OVERRIDE_EFFICIENCY_IDLE_TIMES"
+            traceEntry.append("[8][2]:")
+            for x in range(16):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x3c26b28:
             #simpleType:uint
             label = "MSS_IS_APOLLO"
@@ -3512,6 +3575,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x3f8999b:
+            #simpleType:uint
+            label = "MSS_MRW_IDLE_PSMODE_MIN_DOMAIN_REDUCTION_TIME"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x3fa5781:
             #simpleType:uint
             label = "MEM_EFF_PMIC2_SWA_CURRENT_WARNING"
@@ -3720,6 +3789,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x433cfe9:
             #simpleType:uint
             label = "CORE_WEIGHT_TENTHS"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x434f057:
+            #simpleType:uint
+            label = "ODY_DRAMINIT_ERROR_ON_FAILURE"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -4655,6 +4730,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x53689d6:
+            #simpleType:uint
+            label = "IO_IOHS_CHANNEL_LOSS_ISC1_WORKAROUND"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5390d2b:
             #simpleType:uint
             label = "HTMSC_MODE_WRAP"
@@ -5103,12 +5184,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
-        elif attrEnum == 0x5c3de20:
-            #simpleType:uint
-            label = "FAPINAME_NODE"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
         elif attrEnum == 0x5c4a180:
             #simpleType:uint
             label = "IO_O_MFG_CHK"
@@ -5256,6 +5331,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x5edbee6:
+            #simpleType:uint
+            label = "PCIE_FW_LEGACY_MODE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x5ee2cf9:
             #simpleType:uint
             label = "ODY_MSG_MISC"
@@ -5330,6 +5411,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             #simpleType:uint
             label = "PDR_ENTITY_INSTANCE"
             for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
+        elif attrEnum == 0x609c749:
+            #simpleType:uint
+            label = "WTH_OVERRIDE_EFFICIENCY_FREQ_LIMITS"
+            traceEntry.append("[8][4]:")
+            for x in range(32):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
         elif attrEnum == 0x60af368:
@@ -6457,6 +6545,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x75e33d3:
+            #simpleType:uint
+            label = "PCIE_FW_LEGACY_MODE_IN_HWIMG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x75ef2a9:
             #simpleType:uint
             label = "WOF_DCM_TRACKING_ENABLE"
@@ -6852,12 +6946,25 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x7d6c44c:
+            #simpleType:uint
+            label = "MSS_MRW_CONFIG_FREQ_LIMIT"
+            traceEntry.append("[8]:")
+            for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x7d95979:
             #simpleType:uint
             label = "CP_PLLIOSSFLT_BYPASS"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x7dfffde:
+            #simpleType:uint
+            label = "MSS_MRW_MIN_DOMAIN_REDUCTION_TIME_FOR_POWER_CONTROL_OFF"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x7e1fa3b:
             #simpleType:uint
             label = "PCIE_64BIT_DMA_SIZE"
@@ -7268,6 +7375,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x854b79b:
             #simpleType:uint
             label = "MEM_EFF_PMIC3_SWC_VOLTAGE_SETTING"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0x85528b9:
+            #simpleType:uint
+            label = "IO_IOHS_PRE1_ISC1_WORKAROUND"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -7792,6 +7905,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x8f2556b:
+            #simpleType:uint
+            label = "MSS_CONFIG_FREQ_LIMIT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0x8f2a29b:
             #simpleType:uint
             label = "ODY_TMPL_5_PACING"
@@ -8917,6 +9036,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(2):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x9c25304:
+            #simpleType:uint
+            label = "SBE_DUMP_SENSOR_ID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0x9c3a3d6:
             #simpleType:uint
             label = "MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS"
@@ -9066,6 +9191,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0x9e6ab5c:
+            #simpleType:uint
+            label = "WTH_OVERRIDE_EFFICIENCY_ALG"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x9ebf155:
             #simpleType:uint
             label = "MEM_EFF_DRAM_BANK_BITS"
@@ -9162,6 +9293,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0xa0cb35b:
+            #simpleType:uint
+            label = "MEM_OVERRIDE_FREQ_LIMITATION"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa0dd16a:
             #simpleType:uint
             label = "MNFG_TH_L3_DIR_CES"
@@ -9483,12 +9620,24 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0xa6640ef:
+            #simpleType:uint
+            label = "INTERPOSER_ECID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xa6645a7:
             #simpleType:uint
             label = "CEN_MSS_VOLT_VPP_OFFSET_MILLIVOLTS"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xa687574:
+            #simpleType:uint
+            label = "INTERPOSER_FEATURE_HW632898"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xa6a5da4:
             #simpleType:uint
             label = "SAFE_MODE_NODDS_UPLIFT_0P5PCT"
@@ -9557,6 +9706,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xa7b26cf:
+            #simpleType:uint
+            label = "MRW_MAX_DDR_FREQ_ON_IOSCM"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xa7e62d3:
             #simpleType:uint
             label = "MEM_EFF_PMIC1_SWB_VOLTAGE_RANGE_SELECT"
@@ -9928,6 +10083,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xada1fc2:
+            #simpleType:uint
+            label = "ODY_DISABLE_DRAM_WITH_BAD_DQ0"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xadb2ae7:
             #simpleType:uint
             label = "ODY_PHY_DFIMRL_MARGIN"
@@ -10142,12 +10303,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xafb2cd2:
             #simpleType:uint
             label = "MEMCTRL_READ_TIMEOUT_SEC"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xafd5e02:
-            #simpleType:uint
-            label = "FAPINAME_UNIT"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -10688,6 +10843,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xb8b3f00:
+            #simpleType:uint
+            label = "REPLACED_BY_SPARE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xb8cb525:
             #simpleType:uint
             label = "OCMB_IGNORE_SCOM_CHECK_DISABLE"
@@ -10854,6 +11015,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             #simpleType:uint
             label = "PROC_INT_NVPG_BAR_SET_DIVISION_SELECTOR"
             for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xbbc3ceb:
+            #simpleType:uint
+            label = "WTH_OVERRIDE_CORE_COUNT_INDEX_ARRAY"
+            traceEntry.append("[8]:")
+            for x in range(8):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xbbd2eef:
@@ -11421,12 +11589,24 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xc4be99d:
+            #simpleType:uint
+            label = "MSS_MRW_IDLE_PSMODE_ENTER_STR_TIME"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xc4ced6c:
             #simpleType:uint
             label = "EXTEND_TPM_MEAS_TO_OTHER_NODES"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xc4d3c24:
+            #simpleType:uint
+            label = "SBE_LOAD_BOOTLOADER_HBBL_SIZE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xc4fcb9a:
             #simpleType:uint
             label = "PROC_PCIE_PCS_RX_PHASE_ROTATOR_CNTL"
@@ -11523,6 +11703,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             label = "MEM_SI_DRAM_DRV_IMP_DQ_DQS"
             traceEntry.append("[2][4]:")
             for x in range(8):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xc6cf6dd:
+            #simpleType:uint
+            label = "WTH_OVERRIDE_CORE_COUNT_INDEX"
+            for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xc6d3718:
@@ -12179,9 +12365,21 @@ def ErrlUserDetailsParserAttribute(ver, data):
                 i += 1
         elif attrEnum == 0xd2401e6:
             pass
+        elif attrEnum == 0xd282763:
+            #simpleType:uint
+            label = "SPARE_CORES_DEPLOYED"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xd2942c8:
             #simpleType:uint
             label = "DDS_BIAS_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xd29c2de:
+            #simpleType:uint
+            label = "SPARE_CORE_ACTIONS_DISABLED"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -12236,6 +12434,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xd3b25a9:
+            #simpleType:uint
+            label = "MSS_MRW_ENTER_STR_TIME"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xd3dcb59:
             #simpleType:uint
             label = "MEM_EFF_ATXDLY_A"
@@ -12793,6 +12997,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xdbb83fc:
+            #simpleType:uint
+            label = "ODY_DQS_TRACKING_HALF_DIMM_TARGET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xdbe5186:
             pass #complexType - skipping
         elif attrEnum == 0xdbfb744:
@@ -12827,6 +13037,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xdca883d:
+            #simpleType:uint
+            label = "IQ_STATIC_DATA_ENABLE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xdcbd688:
             #simpleType:uint
             label = "MSS_VOLT_VDD_MILLIVOLTS"
@@ -13014,6 +13230,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+8)[0])
                 i += 8
+        elif attrEnum == 0xdfa0ab1:
+            #simpleType:uint
+            label = "ODY_DQS_TRACKING_MISSED_QUIESCE_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xdfb2703:
             #simpleType:uint
             label = "MSS_EXP_RESP_VREF_DQ_TRAIN_RANGE"
@@ -13256,6 +13478,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xe53583f:
+            #simpleType:uint
+            label = "HB_SETTINGS_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xe54617c:
             #simpleType:uint
             label = "MSS_CENT_VDD_INTERCEPT"
@@ -13534,6 +13762,19 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xea0b51a:
+            #simpleType:uint
+            label = "POWERVS_P10_FW_VER"
+            traceEntry.append("[3][3]:")
+            for x in range(9):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xea3d478:
+            #simpleType:uint
+            label = "SBE_LOAD_BOOTLOADER_CHUNK_OFFSET"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xea4c21f:
             #simpleType:uint
             label = "MEM_EFF_PMIC3_SWA_SEQUENCE_DELAY"
@@ -14027,6 +14268,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xf278a76:
+            #simpleType:uint
+            label = "MSS_MRW_MIN_DOMAIN_REDUCTION_TIME"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xf322cf5:
             #simpleType:uint
             label = "ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE"
@@ -14156,6 +14403,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xf517753:
             #simpleType:uint
             label = "MEM_EFF_DRAM_TRRD_DLR"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xf578144:
+            #simpleType:uint
+            label = "EEPROM_VPD_ACTIVE_COPY"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -14530,6 +14783,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xfafcbf2:
+            #simpleType:uint
+            label = "MAIL_MESSAGE_BITMAP"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
         elif attrEnum == 0xfb5ce79:
             #simpleType:uint
             label = "TLB_DATA_ENTRIES"
@@ -14631,6 +14890,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xfdd950c:
             #simpleType:uint
             label = "ATTN_POLL_PLID"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
+        elif attrEnum == 0xfe2fc3a:
+            #simpleType:uint
+            label = "WTH_OVERRIDE_TEST_CORE_COUNT"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
