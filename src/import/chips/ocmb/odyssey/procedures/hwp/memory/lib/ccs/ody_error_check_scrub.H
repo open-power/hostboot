@@ -193,15 +193,15 @@ fapi2::ReturnCode read_mr_error_regs(const mss::rank::info<mss::mc_type::ODYSSEY
 
 
 ///
-/// @brief Run the workaround for Hynix DIMMS
+/// @brief Run the workaround for all DRAMS which runs ecs and does not record the results
 /// @param[in] i_vec_rank_infos vector of rank infos for allports on a single rank
 /// @param[in] i_srank the srank that currently being executed
 /// @param[in] i_pattern data pattern to test
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode run_hynix_workaround(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_infos,
-                                       const uint8_t i_srank,
-                                       const uint64_t i_pattern);
+fapi2::ReturnCode run_ecs_workaround(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_infos,
+                                     const uint8_t i_srank,
+                                     const uint64_t i_pattern);
 
 ///
 /// @brief Run the ecs test

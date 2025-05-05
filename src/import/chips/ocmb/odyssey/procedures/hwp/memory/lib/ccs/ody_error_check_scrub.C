@@ -907,38 +907,33 @@ fapi_try_exit:
 
 
 ///
-/// @brief Run the workaround for Hynix DIMMS
+/// @brief Run the workaround for all DRAMS which runs ecs and does not record the results
 /// @param[in] i_vec_rank_infos vector of rank infos for all ports on a single rank
 /// @param[in] i_srank the srank that currently being executed
 /// @param[in] i_pattern data pattern to test
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode run_hynix_workaround(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_infos,
-                                       const uint8_t i_srank,
-                                       const uint64_t i_pattern)
+fapi2::ReturnCode run_ecs_workaround(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_infos,
+                                     const uint8_t i_srank,
+                                     const uint64_t i_pattern)
 {
 
     if (i_vec_rank_infos.empty())
     {
-        FAPI_INF_NO_SBE("Vector of rank_infos is empty, exiting run_hynix_workaround()");
+        FAPI_INF_NO_SBE("Vector of rank_infos is empty, exiting run_ecs_workaround()");
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    uint16_t l_dram_mfg_id = 0;
     fapi2::buffer<uint64_t> l_ecc_reg_data;
     fapi2::buffer<uint64_t> l_periodic_calib_data;
     const auto& l_port = i_vec_rank_infos[0].get_port_target();
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
 
-    // Get the dram mfg id
-    FAPI_TRY( mss::attr::get_dram_mfg_id(i_vec_rank_infos[0].get_dimm_target(), l_dram_mfg_id));
-
-    // Workaround for Hynx fails, run an extra pattern
+    // Workaround for all DRAMs, run an extra pattern
     // to get a clean MR20 for the later patterns
-    if(l_dram_mfg_id == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MFG_ID_HYNIX &&
-       i_pattern == mss::mcbist::PATTERN_0)
+    if(i_pattern == mss::mcbist::PATTERN_0)
     {
-        FAPI_INF_NO_SBE("Starting workaround for Hynix dimms running on port:  "
+        FAPI_INF_NO_SBE("Starting workaround for dimms running on port:  "
                         GENTARGTIDFORMAT
                         ", mrank: %u, srank: %u for pattern: %u",
                         GENTARGTID(l_port),
@@ -1020,9 +1015,9 @@ fapi2::ReturnCode run_ecs_helper(const std::vector<mss::rank::info<mss::mc_type:
     // Run this for each SRANK for the rank info that the user selected
     for(uint8_t l_srank = 0; l_srank < l_num_sranks; l_srank++)
     {
-        // Workaround for HYNIX DIMM
+        // Workaround for all DIMMs
         // should take full set of ranks i_vec_ranks
-        FAPI_TRY(run_hynix_workaround(i_vec_ranks, l_srank, i_pattern));
+        FAPI_TRY(run_ecs_workaround(i_vec_ranks, l_srank, i_pattern));
 
         // Do mem init for each srank
         FAPI_TRY(memory_init_via_memdiags(i_vec_ranks[0], l_srank, i_pattern, l_ecc_reg_data));
