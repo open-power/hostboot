@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2024
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -1441,11 +1441,15 @@ print PYFILE "srcInfo = {\n";
 my %ALLdisplayDataEntries;
 foreach my $modID ( keys(%PYdisplayDataEntries))
 {
-    @ALLdisplayDataEntries{ keys %{$PYdisplayDataEntries{$modID}}}= values %{$PYdisplayDataEntries{$modID}};
+    foreach my $rc ( keys(%{$PYdisplayDataEntries{$modID}}))
+    {
+        my $combokey = "0x".$rc.$modID;
+        @ALLdisplayDataEntries{$combokey} = $PYdisplayDataEntries{$modID}{$rc};
+    }
 }
-foreach my $rc (sort hexToDecCmp keys(%ALLdisplayDataEntries))
+foreach my $thekey (sort hexToDecCmp keys(%ALLdisplayDataEntries))
 {
-    print PYFILE $ALLdisplayDataEntries{$rc};
+    print PYFILE $ALLdisplayDataEntries{$thekey};
 }
 print PYFILE "          }\n";
 
