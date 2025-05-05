@@ -5076,7 +5076,7 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
     // This must be done after all stretch and biasing as the reference
     // frequency can be modified
 
-    if ((iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable) ||
+    if ((iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable) || 
         ((iv_pdv_model_data & PDV_MODEL_DATA_PNEXT) == PDV_MODEL_DATA_PNEXT))
     {
         iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
