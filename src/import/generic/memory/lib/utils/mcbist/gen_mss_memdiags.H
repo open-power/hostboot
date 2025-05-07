@@ -1605,6 +1605,7 @@ fapi2::ReturnCode sf_init_per_srank( const fapi2::Target<T>& i_target,
                                      const uint64_t i_pattern = PATTERN_0 )
 {
     using ET = mss::mcbistMCTraits<MC>;
+    const auto& l_ocmb = mss::find_target<ET::MC_TARGET_TYPE>(i_target);
 
     FAPI_INF_NO_SBE("superfast init per srank start for " TARGTIDFORMAT, TARGTID);
 
@@ -1626,7 +1627,7 @@ fapi2::ReturnCode sf_init_per_srank( const fapi2::Target<T>& i_target,
         sf_init_per_srank_operation<MC> l_init_op(i_target, l_const, i_srank, l_rc);
 
         FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                     ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
+                     ET::memdiags_sf_init_failed_init().set_MC_TARGET(l_ocmb),
                      "Unable to initialize the MCBIST engine for a sf init " TARGTIDFORMAT, TARGTID );
 
         return l_init_op.execute();
