@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -604,7 +604,7 @@ fapi2::ReturnCode limit_freq_by_config(const fapi2::Target<TT::FREQ_DOMAIN_TARGE
     // Note: OCMB chips are used instead of DIMM's as at this time they are the same (OCMB chips are soldered on DDIMMs)
     //       if ISDIMM systems are used in the future, this algorithm will need an update
     {
-        const auto& l_domains = SYSTEM_TARGET.getChildren<TT::FREQ_DOMAIN_TARGET_TYPE>();
+        const auto& l_domains = mss::find_targets<TT::FREQ_DOMAIN_TARGET_TYPE>(SYSTEM_TARGET, fapi2::TARGET_STATE_PRESENT);
 
         for(const auto& l_domain : l_domains)
         {
