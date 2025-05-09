@@ -319,11 +319,8 @@ fapi2::ReturnCode p10_iohs_updates(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     constexpr uint8_t c_cdr_bw = 0x26;
     constexpr uint8_t c_peak1 = 6;
     const int c_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
-    fapi2::ATTR_INTERPOSER_REV_Type l_interposer_rev = fapi2::ENUM_ATTR_INTERPOSER_REV_NONE;
     fapi2::ATTR_IO_IOHS_XTALK_Type l_xtalk = fapi2::ENUM_ATTR_IO_IOHS_XTALK_NO_XTALK;
     fapi2::ATTR_IO_IOHS_CHANNEL_LOSS_Type l_channel_loss = fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_HIGH_LOSS;
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INTERPOSER_REV, i_target, l_interposer_rev));
 
     for (auto l_pauc_target : i_target.getChildren<fapi2::TARGET_TYPE_PAUC>())
     {
@@ -336,6 +333,13 @@ fapi2::ReturnCode p10_iohs_updates(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             if (l_xtalk == fapi2::ENUM_ATTR_IO_IOHS_XTALK_HI_XTALK
                 && l_channel_loss == fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_MID_LOSS)
             {
+                FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
+                                                 IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
+                                                 c_num_lanes,
+                                                 c_peak1));
+
                 FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
                                                  IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
                                                  IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
