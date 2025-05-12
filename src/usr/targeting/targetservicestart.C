@@ -809,7 +809,10 @@ static void initializeAttributes(TargetService& i_targetService,
                     // targets that are not the master proc chip
                     l_chip->setAttr<ATTR_PROC_SBE_MASTER_CHIP>(0);
                 }
+            }
 
+            for (auto & l_chip : l_allProcChips)
+            {
                 // Need to clobber most of the spare core attributes for this chip and its FC/COREs
                 // so the selection algorithm can re-run with a fresh start. Presently, HDAT
                 // communicates which cores are spare but not if those spares were
