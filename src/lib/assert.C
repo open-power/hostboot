@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
     switch (i_assertb)
     {
         case ASSERT_TRACE_DONE: // Custom trace was provided.
+            //cppcheck-suppress nullPointer
             task_crash();
             break;
 
@@ -76,6 +77,7 @@ extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
                 printk("Assertion failed @%p at %s:%d.\n",
                        linkRegister(), i_file, i_line);
             }
+            //cppcheck-suppress nullPointer
             task_crash();
             break;
 
