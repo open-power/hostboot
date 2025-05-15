@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -135,6 +137,7 @@
                              _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, \
                               WHICH, ...)   WHICH
 /** Preprocessor redirection to PREPROCESSOR_COUNT_N_ */
+//cppcheck-suppress preprocessorErrorDirective
 #define PREPROCESSOR_COUNT_N(...) PREPROCESSOR_COUNT_N_(__VA_ARGS__)
 
 /** Concatenates two keywords together to make a preprocessor tag */
