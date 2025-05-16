@@ -92,8 +92,9 @@
     <persistency>non-volatile</persistency>
     <readable/>
     <simpleType>
-      <default>0xFFFFFFFF</default>
-      <uint32_t/>
+      <uint32_t>
+        <default>0xFFFFFFFF</default>
+      </uint32_t>
     </simpleType>
     <no_export/>
   </attribute>
@@ -108,8 +109,9 @@
     <readable/>
     <writeable/>
     <simpleType>
-      <default>0xFFFFFFFF</default>
-      <uint32_t/>
+      <uint32_t>
+        <default>0xFFFFFFFF</default>
+      </uint32_t>
     </simpleType>
     <no_export/>
   </attribute>
@@ -123,8 +125,9 @@
     <persistency>volatile</persistency>
     <readable/>
     <simpleType>
-      <default>0xFFFFFFFF</default>
-      <uint32_t/>
+      <uint32_t>
+        <default>0xFFFFFFFF</default>
+      </uint32_t>
     </simpleType>
     <no_export/>
   </attribute>
