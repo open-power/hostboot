@@ -1338,6 +1338,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Compute dds slopes
         compute_dds_slopes(io_globalppb);
 
+
         float pstatef = 0;
         if (iv_attrs.attr_extended_freq_mode &&
             iv_extended_freq_enable)
@@ -2836,6 +2837,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         FAPI_INF("> Applying WOF Overrides");
 
         bool wof_state = is_wof_enabled();
+
 
         FAPI_TRY(wof_apply_overrides(iv_procChip, p_poundV_data,wof_state));
         FAPI_INF("< Applying WOF Overrides");
@@ -6895,6 +6897,13 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
     {
         if (!is_wof_enabled())
         {
+            //In cronus mode, usually WOF is not enabled,in that
+            //case we need to enable iv_extended_freq_enable to 1, so that
+            //max frequency will be set to 5050Mhz
+            if (fapi2::is_platform<fapi2::PLAT_CRONUS>())
+            {
+                iv_extended_freq_enable = 1;
+            }
             FAPI_INF("WOF is not enabled");
             iv_wof_enabled = false;
             break;
