@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,10 +273,18 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
 
                         MemoryMru mm( i_trgt, rank, port, sym );
 
-                        // Add all parts to the error log.
+                        // Add all parts to the error log, if they haven't
+                        // already been added.
                         for ( const auto & dimm : mm.getCalloutList() )
                         {
-                            calloutList[dimm] = 1;
+                            if (0 == calloutList.count(dimm))
+                            {
+                                bool nvdimmNoGard = false;
+                                __calloutDimm<T>(errl, i_trgt, dimm,
+                                                 nvdimmNoGard);
+
+                                calloutList[dimm] = 1;
+                            }
                         }
 
                         // Add the MemoryMru to the capture data.
@@ -286,13 +294,6 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
                     o_calloutMade = true;
                 }
             }
-        }
-
-        // Callout all DIMMs in the map.
-        for ( const auto & dimm : calloutList )
-        {
-            bool nvdimmNoGard = false;
-            __calloutDimm<T>( errl, i_trgt, dimm.first, nvdimmNoGard );
         }
 
         // Commit the error log, if needed.
