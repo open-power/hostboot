@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -27,7 +29,7 @@
 /**
  *  @file targeting/common/iterators/rangefilter.H
  *
- *  @brief Interface describing an object which takes an iterator range and 
+ *  @brief Interface describing an object which takes an iterator range and
  *      allows caller to iterate through the elements which match a supplied
  *      predicate (filter)
  */
@@ -75,7 +77,7 @@ class RangeFilter
     public:
 
         /**
-         *  @var Forward the type of iterated elements to help build the 
+         *  @var Forward the type of iterated elements to help build the
          *      class generically
          */
         typedef typename IteratorType::value_type value_type;
@@ -83,8 +85,8 @@ class RangeFilter
         /**
          *  @var fake_bool is a pointer to a member function of RangeFilter
          *      which takes no arguments and returns void.
-         *      Used to implement ability to check if range iterator is valid 
-         */ 
+         *      Used to implement ability to check if range iterator is valid
+         */
         typedef void (RangeFilter::*fake_bool)() const;
 
         /**
@@ -96,9 +98,9 @@ class RangeFilter
          *  @param[in] i_pPredicate Predicate evaluated against each pointed to
          *      item
          *
-         *  @note Begin iterator must point to element prior to end iterator, 
+         *  @note Begin iterator must point to element prior to end iterator,
          *      otherwise result is undefined
-         */  
+         */
         RangeFilter(
             const IteratorType&  i_begin,
             const IteratorType&  i_end,
@@ -112,24 +114,24 @@ class RangeFilter
         }
 
         /**
-         *  @brief Dummy function used to implement ability to check if range 
-         *      iterator is valid 
-         */ 
+         *  @brief Dummy function used to implement ability to check if range
+         *      iterator is valid
+         */
         operator fake_bool() const;
 
         /**
          *  @brief Pre-increment operator which advances the range's iterator
          *      to point to the next valid element
-         *  
+         *
          *  @return Reference to this range filter
-         */ 
+         */
         RangeFilter& operator++();
 
         /**
          *  @brief Dereference the range filter, returning the element pointed
          *
          *  @return The element pointed to by the range filter
-         */ 
+         */
         value_type operator*() const
         {
             return *iv_current;
@@ -140,7 +142,7 @@ class RangeFilter
          *      for use by the dereference and call member operator
          *
          *  @return The element pointed to by the range filter
-         */ 
+         */
         value_type operator->() const
         {
             return *iv_current;
@@ -150,15 +152,15 @@ class RangeFilter
          *  @brief Reset the range's internal iterator to point to the first
          *      item in the range that matches the predicate (or the first if no
          *      predicate)
-         */ 
+         */
         void reset();
 
         /**
          *  @brief Set the range's predicate filter
          *
-         *  @param[in] i_pPredicate Predicate to evaluate against elements 
+         *  @param[in] i_pPredicate Predicate to evaluate against elements
          *      pointed to by the range
-         */  
+         */
         void setPredicate(
             const PredicateBase* i_pPredicate);
 
@@ -166,7 +168,7 @@ class RangeFilter
          *  @brief Assignment operator; assign one range filter to another
          *
          *  @param[in] i_rhs Range filter to assign
-         */  
+         */
         RangeFilter& operator=(
             const RangeFilter& i_rhs);
 
@@ -175,37 +177,37 @@ class RangeFilter
          *      filter as a prototype for it
          *
          *  @param[in] i_rhs Range filter to assign on create
-         */ 
+         */
         RangeFilter(
             const RangeFilter& i_rhs);
 
     private:
 
         /**
-         *  @brief Update internal cursor to point to the next element of the 
+         *  @brief Update internal cursor to point to the next element of the
          *      underlying range
          *
-         *  @note If the internal cursor is at the end of the range, then do 
+         *  @note If the internal cursor is at the end of the range, then do
          *      nothing
-         */  
+         */
         void advance();
 
         /**
-         *  @brief Update internal cursor to point to the next element of the 
+         *  @brief Update internal cursor to point to the next element of the
          *      underlying range only if not past the end of the range and the
          *      predicate doesn't match the current item
          *
-         *  @note If the internal cursor is at the end of the range, then do 
+         *  @note If the internal cursor is at the end of the range, then do
          *      nothing
-         */   
+         */
         void advanceIfNoMatch();
 
         /**
-         *  @brief Dummy function used to implement ability to check if range 
-         *      iterator is valid 
+         *  @brief Dummy function used to implement ability to check if range
+         *      iterator is valid
          */
-        void notComparable() const 
-        { 
+        void notComparable() const
+        {
         }
 
         IteratorType         iv_current;    ///< Iterator pointing to the
@@ -221,7 +223,7 @@ typedef RangeFilter<TargetIterator>      TargetRangeFilter;
 typedef RangeFilter<ConstTargetIterator> ConstTargetRangeFilter;
 
 //******************************************************************************
-// RangeFilter::RangeFilter 
+// RangeFilter::RangeFilter
 //******************************************************************************
 
 template<typename IteratorType>
@@ -230,7 +232,7 @@ RangeFilter<IteratorType>::RangeFilter(
     const IteratorType&        i_end,
     const PredicateBase* const i_pPredicate)
 : iv_current(i_begin),
-  iv_begin(i_begin), 
+  iv_begin(i_begin),
   iv_end(i_end),
   iv_pPredicate(i_pPredicate)
 {
@@ -238,7 +240,7 @@ RangeFilter<IteratorType>::RangeFilter(
 }
 
 //******************************************************************************
-// RangeFilter::operator= 
+// RangeFilter::operator=
 //******************************************************************************
 
 template<typename IteratorType>
@@ -249,6 +251,7 @@ RangeFilter<IteratorType>& RangeFilter<IteratorType>::operator=(
     iv_begin = i_rhs.iv_begin;
     iv_end = i_rhs.iv_end;
     iv_pPredicate = i_rhs.iv_pPredicate;
+    return *this;
 }
 
 //******************************************************************************
@@ -300,33 +303,33 @@ RangeFilter<IteratorType>& RangeFilter<IteratorType>::operator++()
 }
 
 /**
- *  @brief Disable meaningless "bool" comparisons that can occur when 
+ *  @brief Disable meaningless "bool" comparisons that can occur when
  *      evaluating a range as a bool by forcing a compilation failure.
- *      Function interfaces not documented since they are not used. 
+ *      Function interfaces not documented since they are not used.
  */
-template <typename T> 
-bool operator!=(const TargetRangeFilter& i_lhs, const T& i_rhs) 
-{
-    i_lhs.notComparable();
-    return false;
-} 
-
 template <typename T>
-bool operator==(const TargetRangeFilter& i_lhs, const T& i_rhs) 
+bool operator!=(const TargetRangeFilter& i_lhs, const T& i_rhs)
 {
     i_lhs.notComparable();
     return false;
 }
 
-template <typename T> 
-bool operator!=(const ConstTargetRangeFilter& i_lhs, const T& i_rhs) 
+template <typename T>
+bool operator==(const TargetRangeFilter& i_lhs, const T& i_rhs)
 {
     i_lhs.notComparable();
     return false;
-} 
+}
 
 template <typename T>
-bool operator==(const ConstTargetRangeFilter& i_lhs, const T& i_rhs) 
+bool operator!=(const ConstTargetRangeFilter& i_lhs, const T& i_rhs)
+{
+    i_lhs.notComparable();
+    return false;
+}
+
+template <typename T>
+bool operator==(const ConstTargetRangeFilter& i_lhs, const T& i_rhs)
 {
     i_lhs.notComparable();
     return false;

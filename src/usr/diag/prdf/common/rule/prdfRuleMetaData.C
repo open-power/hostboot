@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,7 +168,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
     errlHndl_t l_errl = nullptr ;
     SharedThreshold_t l_sharedThresholds;
 
-    Prdr::Chip * l_chip;
+    Prdr::Chip * l_chip = nullptr;
 
     /* Initialize local data struct to pass to sub-functions */
     RuleFileData l_localData = { l_regMap, l_groupMap, l_actionMap,
