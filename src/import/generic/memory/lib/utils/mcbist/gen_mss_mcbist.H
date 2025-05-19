@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3239,7 +3239,7 @@ fapi2::ReturnCode load_mcbmr( const fapi2::Target<T>& i_target, const mcbist::pr
         0, 0, 0, 0, 0, 0, 0, 0,
     };
 
-    ssize_t l_bin = -1;
+    size_t l_bin = 0;
     size_t l_register_shift = 0;
 
     // We'll shift this in to position to indicate which subtest is the last
@@ -3258,7 +3258,7 @@ fapi2::ReturnCode load_mcbmr( const fapi2::Target<T>& i_target, const mcbist::pr
     // We need the index, so increment thru i_program.iv_subtests.size()
     for (size_t l_index = 0; l_index < l_program_size; ++l_index)
     {
-        l_bin = (l_index % TT::SUBTEST_PER_REG) == 0 ? l_bin + 1 : l_bin;
+        l_bin = l_index / TT::SUBTEST_PER_REG;
         l_register_shift = (l_index % TT::SUBTEST_PER_REG) * TT::BITS_IN_SUBTEST;
 
         l_memory_register_buffers[l_bin] |=
@@ -3277,7 +3277,7 @@ fapi2::ReturnCode load_mcbmr( const fapi2::Target<T>& i_target, const mcbist::pr
 
     // ... and slam the values in to the registers.
     // Could just decrement l_bin, but that scoms the subtests in backwards and is confusing
-    for (auto l_index = 0; l_index <= l_bin; ++l_index)
+    for (size_t l_index = 0; l_index <= l_bin; ++l_index)
     {
         FAPI_TRY( fapi2::putScom(i_target, l_memory_registers[l_index], l_memory_register_buffers[l_index]) );
     }
