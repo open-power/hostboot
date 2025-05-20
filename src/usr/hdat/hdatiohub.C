@@ -86,6 +86,7 @@ const char HDAT_BONNELL_SYSTEM_TYPE[] = "ibm,bonnell";
 const char HDAT_BLUERIDGE2U_SYSTEM_TYPE[] = "ibm,blueridge-2s2u";
 const char HDAT_BLUERIDGE4U_SYSTEM_TYPE[] = "ibm,blueridge-2s4u";
 const char HDAT_FUJI_SYSTEM_TYPE[] = "ibm,fuji";
+const char HDAT_BALCONES_SYSTEM_TYPE[] = "ibm,balcones";
 
 extern trace_desc_t *g_trac_hdat;
 
@@ -122,6 +123,18 @@ const uint32_t PROC1_NUM_SLOT_BONNELL_ENTRY_INFO  = 9;
 const uint32_t PROC0_BONNELL_NUM_SLOTS = 4;
 const uint32_t PROC1_BONNELL_NUM_SLOTS = 9;
 const uint32_t TOTAL_BONNELL_NUM_SLOTS = 13;
+
+//Balcones slot table areas/entry info for each proc
+const uint32_t PROC0_NUM_SLOT_BALCONES_TABLE_AREAS = 4;
+const uint32_t PROC1_NUM_SLOT_BALCONES_TABLE_AREAS = 9;
+const uint32_t PROC0_NUM_SLOT_BALCONES_ENTRY_INFO  = 4;
+const uint32_t PROC1_NUM_SLOT_BALCONES_ENTRY_INFO  = 9;
+
+//Balcones slot numbers for each proc
+const uint32_t PROC0_BALCONES_NUM_SLOTS = 4;
+const uint32_t PROC1_BALCONES_NUM_SLOTS = 9;
+const uint32_t TOTAL_BALCONES_NUM_SLOTS = 13;
+
 
 //const uint32_t MAX_NUM_OF_PROCS           = 2;
 //const uint32_t MAX_NUM_OF_SLOT_TABLE_AREAS =
@@ -295,6 +308,43 @@ hdatSlotEntryInfo_t hdatSlotMapEntriesBonnell[TOTAL_BONNELL_NUM_SLOTS]=
 { 12,0,8, 128, 32,2,0,0,0,0,0,75,29, 256,0,0,0,0,0,0 },
 { 13,0,1,2040,256,2,0,0,0,0,0,75,29,4072,0,0,0,0,0,0 },
 };
+
+hdatSlotMapArea_t hdatSlotMapAreasBalcones[TOTAL_BALCONES_NUM_SLOTS] =
+{
+    { 1, 0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C3" },
+    { 2, 0,1,0,0,0,0x00F0,0,0,0,1,0,0,0,0,0,0,0,"002" },
+    { 3, 0,2,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"001" },
+    { 4, 0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C2" },
+
+    { 5, 0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C1" },
+    { 6, 0,1,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"003" },
+    { 7, 0,1,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"004" },
+    { 8, 0,1,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"005" },
+    { 9, 0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"P1-C0" },
+    { 10,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"P1-C1" },
+    { 11,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"P1-C2" },
+    { 12,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"P1-C3" },
+    { 13,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C0" },
+};
+
+hdatSlotEntryInfo_t hdatSlotMapEntriesBalcones[TOTAL_BALCONES_NUM_SLOTS] =
+{
+    { 1,0,4,2040,256,2,0,0,0,0,0,75,11,4072,0,0,0,0,0,0 },
+    { 2,0,0,128,0,2,0,0,0,0,0,75,0,32,0,0,0,0,0,0 },
+    { 3,0,0,64,0,2,0,0,0,0,0,75,0,32,0,0,0,0,0,0 },
+    { 4,0,2,2040,256,2,0,0,0,0,0,75,15,4072,0,0,0,0,0,0 },
+
+    { 5,0,3,2040,256,2,0,0,0,0,0,75,11,4072,0,0,0,0,0,0 },
+    { 6,0,0,8,0,2,0,0,0,0,0,75,0,0,0,0,0,0,0,0 },
+    { 7,0,0,8,0,2,0,0,0,0,0,75,0,0,0,0,0,0,0,0 },
+    { 8,0,0,128,0,2,0,0,0,0,0,75,0,32,0,0,0,0,0,0 },
+    { 9,0,8,128,32,2,0,0,0,0,0,75,0,256,0,0,0,0,0,0 },
+    { 10,0,7,128,32,2,0,0,0,0,0,75,0,256,0,0,0,0,0,0 },
+    { 11,0,6,128,32,2,0,0,0,0,0,75,0,256,0,0,0,0,0,0 },
+    { 12,0,5,128,32,2,0,0,0,0,0,75,0,256,0,0,0,0,0,0 },
+    { 13,0,1,2040,256,2,0,0,0,0,0,75,11,4072,0,0,0,0,0,0 },
+};
+
 
 /*******************************************************************************
  * IO HUB constructor
@@ -999,7 +1049,7 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
                  (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
                  (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) 
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0)
                ) //Rainier and Blueridge
             {
                 if(i_iohubNum == 1)
@@ -1019,6 +1069,11 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
             {
                 arrayCount = PROC0_NUM_SLOT_BONNELL_TABLE_AREAS +
                              PROC1_NUM_SLOT_BONNELL_TABLE_AREAS;
+            }
+            else if(!strcmp(i_systemType, HDAT_BALCONES_SYSTEM_TYPE)) //Balcones
+            {
+                arrayCount = PROC0_NUM_SLOT_BALCONES_TABLE_AREAS +
+                             PROC1_NUM_SLOT_BALCONES_TABLE_AREAS;
             }
             else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
                      !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
@@ -1081,6 +1136,11 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
                 memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasBonnell+startIndex),
                 sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
             }
+            else if(!strcmp(i_systemType, HDAT_BALCONES_SYSTEM_TYPE)) //Balcones
+            {
+                memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasBalcones+startIndex),
+                sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            }
             else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
                      !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
                      ) //Everest and Fuji
@@ -1121,6 +1181,11 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
             {
                 arrayCount = PROC0_NUM_SLOT_BONNELL_TABLE_AREAS +
                              PROC1_NUM_SLOT_BONNELL_TABLE_AREAS;
+            }
+            else if(!strcmp(i_systemType, HDAT_BALCONES_SYSTEM_TYPE)) //Balcones
+            {
+                arrayCount = PROC0_NUM_SLOT_BALCONES_TABLE_AREAS +
+                             PROC1_NUM_SLOT_BALCONES_TABLE_AREAS;
             }
             else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
                      !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
@@ -1180,6 +1245,12 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
             {
                 memcpy(iv_hdatSlotMapAreaPtr,
                     (hdatSlotMapAreasBonnell + startIndex),
+                sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_BALCONES_SYSTEM_TYPE)) //Balcones
+            {
+                memcpy(iv_hdatSlotMapAreaPtr,
+                    (hdatSlotMapAreasBalcones + startIndex),
                 sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
             }
             else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
@@ -1278,6 +1349,11 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                 arrayCount = PROC0_NUM_SLOT_BONNELL_ENTRY_INFO +
                              PROC1_NUM_SLOT_BONNELL_ENTRY_INFO;
             }
+            else if(!strcmp(i_systemType, HDAT_BALCONES_SYSTEM_TYPE)) //Balcones
+            {
+                arrayCount = PROC0_NUM_SLOT_BALCONES_ENTRY_INFO +
+                             PROC1_NUM_SLOT_BALCONES_ENTRY_INFO;
+            }
             else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
                      !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
                      ) //Everest and Fuji
@@ -1343,6 +1419,13 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                        sizeof(hdatSlotEntryInfo_t) *
                        iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
             }
+            else if(!strcmp(i_systemType, HDAT_BALCONES_SYSTEM_TYPE)) //Balcones
+            {
+                memcpy(iv_hdatSlotMapEntryInfoPtr,
+                       (hdatSlotMapEntriesBalcones+startIndex),
+                       sizeof(hdatSlotEntryInfo_t) *
+                       iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+            }
             else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
                      !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
                      ) //Everest and Fuji
@@ -1385,6 +1468,11 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
             {
                 arrayCount = PROC0_NUM_SLOT_BONNELL_ENTRY_INFO +
                              PROC1_NUM_SLOT_BONNELL_ENTRY_INFO;
+            }
+            else if(!strcmp(i_systemType, HDAT_BALCONES_SYSTEM_TYPE)) //Balcones
+            {
+                arrayCount = PROC0_NUM_SLOT_BALCONES_ENTRY_INFO +
+                             PROC1_NUM_SLOT_BALCONES_ENTRY_INFO;
             }
             else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
                      !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
@@ -1445,6 +1533,13 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
             {
                 memcpy(iv_hdatSlotMapEntryInfoPtr,
                    (hdatSlotMapEntriesBonnell + startIndex),
+                   sizeof(hdatSlotEntryInfo_t) *
+                   iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_BALCONES_SYSTEM_TYPE)) //Balcones
+            {
+                memcpy(iv_hdatSlotMapEntryInfoPtr,
+                   (hdatSlotMapEntriesBalcones + startIndex),
                    sizeof(hdatSlotEntryInfo_t) *
                    iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
             }
@@ -1685,7 +1780,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
             else
             {
                 HDAT_INF("Setting hdatMaxPCIeLinkSpeed to %d", HDAT_PCIE_MAX_SPEED_GEN5);
-                l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN5;            
+                l_hub->hdatMaxPCIeLinkSpeed = HDAT_PCIE_MAX_SPEED_GEN5;
             }
 
             l_hub->hdatEcLvl = l_procEcLevel;
