@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,7 +175,7 @@ public:
                                    uint64_t& o_type) const
     {
         msg_t* msg = msg_allocate();
-        msg->extra_data = i_msg.get();
+        msg->extra_data = i_msg.release(); // ownership transferred to message recipient
 
         const int rc = msg_sendrecv(iv_msgq, msg);
 
@@ -190,8 +190,6 @@ public:
         msg->extra_data = nullptr;
         msg_free(msg);
         msg = nullptr;
-
-        i_msg.release(); // ownership transferred to message recipient
 
         return result;
     }
