@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1154,7 +1154,6 @@ PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(17);
 PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(18);
 PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(20);
 PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(23);
-PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(26);
 PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(27);
 
 /**

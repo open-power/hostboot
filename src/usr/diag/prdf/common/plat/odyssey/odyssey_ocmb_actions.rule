@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022,2024
+# Contributors Listed Below - COPYRIGHT 2022,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -1068,13 +1068,6 @@ actionclass level2_M_ocmb_L_th1_CrcRootPhy23
 {
     level2_M_ocmb_L_th1;
     funccall("crcErrorRootCausePhy_23"); # must be called after threshold
-};
-
-# OCMB_PHY_FIR[26]
-actionclass level2_M_ocmb_L_th_32perDay_CrcRootPhy26
-{
-    level2_M_ocmb_L_th_32perDay;
-    funccall("crcErrorRootCausePhy_26"); # must be called after threshold
 };
 
 # OCMB_PHY_FIR[27]

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -453,9 +453,9 @@ int32_t odyCrcSideEffect( ExtensibleChip * i_chip,
         io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_LOW);
         return SUCCESS;
     }
-    // Check for root causes in OCMB_PHY_FIR[16,26,27] - switch callout to
+    // Check for root causes in OCMB_PHY_FIR[16,27] - switch callout to
     // level2 high, Odyssey OCMB low
-    else if (phy->IsBitSet(16) || phy->IsBitSet(26) || phy->IsBitSet(27))
+    else if (phy->IsBitSet(16) || phy->IsBitSet(27))
     {
         io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_HIGH);
         io_sc.service_data->SetCallout(i_chip->getTrgt(), MRU_LOW);
