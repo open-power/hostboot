@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -470,10 +470,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
     do
     {
-        // Keep track of if there was a false alarm and if we added a VCM
-        // event to the targeted diagnostics queue.
+        // Keep track of if there was a false alarm
         bool tpsFalseAlarm = false;
-        bool vcmQueued = false;
 
         // Get the Bad DQ Bitmap.
         TargetHandle_t trgt = iv_chip->getTrgt();
@@ -559,7 +557,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
                     iv_rank, newCM, iv_port };
                 MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
-                vcmQueued = true;
             }
             // Else we can't place a spare
             else
@@ -588,8 +585,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                             iv_rank, newCM, iv_port, true, false };
 
                         MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
-                        vcmQueued = true;
-
                     }
                     // If the sum above one nibble count is <= 1 or sum above
                     // one nibble count == 2 and single sym nibble count == 2
@@ -695,7 +690,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
                             iv_rank, newCM, iv_port };
                         MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
-                        vcmQueued = true;
 
                         // Only have the one chip mark to apply, break out.
                         break;
@@ -729,7 +723,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                             iv_rank, newCM, iv_port, true, false };
 
                         MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
-                        vcmQueued = true;
                     }
                     // If the sum above one nibble count is = 0 or sum above one
                     // nibble count = 1 and single sym nibble count = 1
@@ -836,7 +829,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
                             MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>(iv_chip,
                                                                     vcm);
-                            vcmQueued = true;
                         }
                     }
                     else
@@ -895,7 +887,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
                         iv_rank, newChipMark, iv_port };
                     MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
-                    vcmQueued = true;
                 }
                 else
                 {
@@ -1002,7 +993,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
                         iv_rank, newChipMark, iv_port };
                     MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
-                    vcmQueued = true;
                 }
                 else
                 {
@@ -1136,24 +1126,6 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed",
                       getHuid(memport), iv_rank.getKey() );
             break;
-        }
-
-        // We may have placed a chip mark so do any necessary cleanup. This must
-        // be called after writing the bad DQ bitmap because this function
-        // will also write it if necessary. If we added a VCM event to the
-        // queue, we will skip this and let that VCM event handle the cleanup
-        // of the chip mark once it finishes.
-        if ( !vcmQueued )
-        {
-            bool junk = false;
-            o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>(iv_chip, iv_rank,
-                iv_port, io_sc, junk);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "MarkStore::chipMarkCleanup(0x%08x,0x%02x) "
-                          "failed", iv_chip->getHuid(), getKey() );
-                break;
-            }
         }
 
     } while (0);
