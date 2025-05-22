@@ -405,10 +405,9 @@ P10_HCODE_LID_FINAL_IMG = P10.HCODE_LID.bin
 P10_SBE_FINAL_IMG = P10.SBE.bin
 P10_OCC_FINAL_IMG = P10.OCC.bin
 ## System Specific
-DENALI_HBD_FINAL_IMG = DENALI.HBD_NODE_0.bin
+DENALI_HBD_FINAL_IMG = DENALI.HBD_node_0.bin
 DENALI_WOFDATA_FINAL_IMG = DENALI.WOFDATA.bin
-
-MCKINLEY_HBD_FINAL_IMG = MCKINLEY.HBD_NODE_0.bin
+MCKINLEY_HBD_FINAL_IMG = MCKINLEY.HBD_node_0.bin
 
 # Fips has its own build process and will not use these, but rather what's
 # defined in fipsfs.db.
