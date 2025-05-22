@@ -4451,6 +4451,31 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
                 revle64(iv_poundW_data.other.ftc_misc_droop_mode_reg_setting);
 #endif
 
+            //Find the max FDCR inst delay value from all cores and CF points and
+            //assign that value to the core FDCR inst delay that has zero.
+            uint8_t l_inst_delay_max[NUM_OP_POINTS];
+            for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
+            {
+                l_inst_delay_max[i] = 0;
+                for (uint8_t j = 0; j < 32; ++j)
+                {
+                    if (  iv_poundW_data.entry[i].entry[j].ddsc.fields.insrtn_dely > l_inst_delay_max[i] )
+                    {
+                        l_inst_delay_max[i] = iv_poundW_data.entry[i].entry[j].ddsc.fields.insrtn_dely;
+                    }
+                }//end of core loop
+
+                //Find any of the data is zero and assign max value
+                for (uint8_t c = 0; c < 32; ++c)
+                {
+                    if ( !iv_poundW_data.entry[i].entry[c].ddsc.fields.insrtn_dely)
+                    {
+                        FAPI_INF("Hit DDS (Inst delay) value 0 in #W CF %d Core %d",i,c);
+                        iv_poundW_data.entry[i].entry[c].ddsc.fields.insrtn_dely = l_inst_delay_max[i];
+                        FAPI_INF("Update Max DDS Inst delay value %d",l_inst_delay_max[i]);
+                    }
+                }//end of core loop
+            }
         }
 
 
