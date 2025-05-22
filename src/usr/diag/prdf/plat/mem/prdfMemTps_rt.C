@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -460,6 +460,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // event to the targeted diagnostics queue.
         bool tpsFalseAlarm = false;
         bool vcmQueued = false;
+        bool chipMarkPlaced = false;
 
         // Get the Bad DQ Bitmap.
         TargetHandle_t trgt = iv_chip->getTrgt();
@@ -536,6 +537,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                               "failed", iv_chip->getHuid(), getKey() );
                     break;
                 }
+                chipMarkPlaced = true;
             }
             // Else we can't place a spare
             else
@@ -626,6 +628,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                               "failed", iv_chip->getHuid(), getKey() );
                     break;
                 }
+                chipMarkPlaced = true;
             }
             // Else we can't place a spare
             else
@@ -747,6 +750,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                   "failed", iv_chip->getHuid(), getKey() );
                         break;
                     }
+                    chipMarkPlaced = true;
 
                     io_sc.service_data->setSignature( iv_chip->getHuid(),
                                                       PRDFSIG_TpsChipMark );
@@ -828,6 +832,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                   "failed", iv_chip->getHuid(), getKey() );
                         break;
                     }
+                    chipMarkPlaced = true;
 
                     // Check if the current symbol mark is on the same DRAM as
                     // this newly placed chip mark.
@@ -1001,7 +1006,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // will also write it if necessary. If we added a VCM event to the
         // queue, we will skip this and let that VCM event handle the cleanup
         // of the chip mark once it finishes.
-        if ( !vcmQueued )
+        if ( !vcmQueued && chipMarkPlaced )
         {
             bool junk = false;
             o_rc = MarkStore::chipMarkCleanup<T>(iv_chip, iv_rank, io_sc, junk);
