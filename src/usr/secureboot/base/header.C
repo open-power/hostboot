@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,8 +90,10 @@ namespace SECUREBOOT
         assert(i_pHeader != nullptr,"BUG! In Header::_set(), "
             "caller passed a nullptr header address.");
 
-        void* pData = malloc(PAGESIZE);
-        memcpy(pData,i_pHeader,PAGE_SIZE);
+        size_t header_size = g_BlToHbDataManager.getHbbHeaderSize();
+
+        void* pData = malloc(header_size);
+        memcpy(pData,i_pHeader,header_size);
         iv_data = pData;
         pData = nullptr;
     }

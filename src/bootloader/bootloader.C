@@ -188,6 +188,24 @@ namespace Bootloader{
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;
             g_blData->blToHbData.hbbHeaderSize = PAGE_SIZE;
 
+            if (l_blConfigData->sbSettings.sbMode == 0x2) // v3 mode
+            {
+                uint64_t l_protectedSize = 0;
+                memcpy(&l_protectedSize,
+                       reinterpret_cast<const uint8_t*>(i_pHbbSrc) + V1_CONTENT_PROTECTED_SIZE_OFFSET,
+                       sizeof(l_protectedSize));
+
+                // - offset of HBB content is 0x1000
+                const uint8_t* const l_hbb_blob_addr = reinterpret_cast<const uint8_t*>(i_pHbbSrc)
+                                                + V1_MAX_SECURE_HEADER_SIZE;
+
+                // location of v3 header is at end of hbb blob
+                const uint8_t* const l_v3_header_addr =  l_hbb_blob_addr + l_protectedSize;
+
+                g_blData->blToHbData.hbbHeader = l_v3_header_addr;
+                g_blData->blToHbData.hbbHeaderSize = V3_SECURE_HEADER_SIZE;
+            }
+
             // Set Bootloader preceived size of structure
             g_blData->blToHbData.sizeOfStructure = sizeof(BlToHbData);
 
