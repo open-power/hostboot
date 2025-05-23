@@ -34,7 +34,7 @@
 # openbmc project's meta-openpower/recipes-phosphor/logging/hostboot-pel-parsers_git.bb
 # file to reference the Hostboot commit with the change.
 
-# Last generated: Mon May  5 20:18:01 2025 GMT
+# Last generated: Fri May 23 21:52:20 2025 GMT
 
 import json
 from udparsers.helpers.errludP_Helpers import memConcat, hexDump, intConcat
@@ -30261,3 +30261,8 @@ def hbfwParseHwpFfdc(ver, data):
     # if nothing is in dictionary yet, then ffdcId was not found
     if len(d) == 0:
         d["Unrecognized FFDC"] = f'0x{ffdcId:X}'
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+
+    jsonStr = json.dumps(d)
+    return jsonStr

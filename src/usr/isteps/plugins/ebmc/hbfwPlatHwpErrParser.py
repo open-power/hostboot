@@ -34,7 +34,7 @@
 # openbmc project's meta-openpower/recipes-phosphor/logging/hostboot-pel-parsers_git.bb
 # file to reference the Hostboot commit with the change.
 
-# Last generated: Mon May  5 20:18:01 2025 GMT
+# Last generated: Fri May 23 21:52:20 2025 GMT
 
 import json
 from udparsers.helpers.errludP_Helpers import intConcat
