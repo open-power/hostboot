@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2024
+# Contributors Listed Below - COPYRIGHT 2015,2025
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 # [+] YADRO
@@ -648,6 +648,14 @@ print EDISFILE "}\n\n";
 print TGFILEPY "    # if nothing is in dictionary yet, then ffdcId was not found\n";
 print TGFILEPY "    if len(d) == 0:\n";
 print TGFILEPY "        d[\"Unrecognized FFDC\"] = f\'0x{ffdcId:X}\'\n";
+print TGFILEPY "        if (len(data) - i):\n";
+print TGFILEPY "            d[\"Hex Dump\"]=hexDump(data, i, len(data))\n\n";
+print TGFILEPY "    jsonStr = json.dumps(d)\n";
+print TGFILEPY "    return jsonStr\n";
+
+#------------------------------------------------------------------------------
+# Print end of file info
+#------------------------------------------------------------------------------
 print TGFILE "}\n\n";
 print TGFILE "#endif\n";
 print TGFILE "#endif\n";
