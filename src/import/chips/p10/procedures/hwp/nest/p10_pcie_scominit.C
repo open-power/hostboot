@@ -449,17 +449,17 @@ fapi2::ReturnCode p10_load_iop_override(
 
             FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
 
-            // 613951, set bits 0/3 in DIG_ADAPT_CTL_9
-            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
-            l_data.setBit<60>();
-            l_data.setBit<63>();
-            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
-
             // selected 'current' FW, or selected 'legacy' FW but running with an old reference image
             // which does not have this capability
             if ((l_attr_pcie_fw_legacy_mode == fapi2::ENUM_ATTR_PCIE_FW_LEGACY_MODE_FALSE) ||
                 (l_attr_pcie_fw_legacy_mode_in_hwimg == 0))
             {
+                // 613951, set bits 0/3 in DIG_ADAPT_CTL_9
+                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
+                l_data.setBit<60>();
+                l_data.setBit<63>();
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
+
                 // write entirety of DIG_ADAPT_CTL_21 = 0x011F
                 l_data = 0x000000000000011FULL;
                 FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_21[i], l_data));
