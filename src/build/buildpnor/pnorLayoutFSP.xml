@@ -227,6 +227,7 @@ Layout Description - Used when building an FSP driver
     </section>
     <section>
         <description>HB_HLL (24K)</description>
+        <!-- @HB_HLL_SIZE need to keep in sync with make_hb_hll.pl script -->
         <!-- Purposely skipping <sha512Version/> as this section will just
              be a V3 Header + less than 4KB of data (+ECC) -->
         <eyeCatch>HB_HLL</eyeCatch>
