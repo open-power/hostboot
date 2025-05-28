@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -311,6 +311,7 @@ fsp.tar_CONTENTS = \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/genfakeheader.pl \
     src/build/buildpnor/genPnorImages.pl \
+    src/build/buildpnor/make_hb_hll.pl \
     src/build/buildpnor/buildUcdFlashImages.pl \
     src/build/buildpnor/buildBpmFlashImages.pl \
     src/build/buildpnor/PnorUtils.pm \
