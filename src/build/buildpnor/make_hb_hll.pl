@@ -252,6 +252,22 @@ else
     $SIGN_REQUEST_V3 .= $DEV_SIGN_PARAMS_V3;
 }
 
+# Comment block from genPnorImages.pl
+    # @TODO RTC 182358
+    # This is a tactical workaround for the signing tooling not being
+    # able to handle muliple different platform binary (or multiple
+    # node) contents for the same component ID.  The signing tooling
+    # should be modified to tolerate this scenario, at which point the
+    # workaround can be removed.
+# Unlike the code in genPnorImages.pl, which also removes some V1 files, for
+# make_hb_hll.pl the code will only remove the SW .sig files in the V3 directory
+if ($buildType eq "fspbuild")
+{
+    my @signatureFiles=
+        glob("$bin_dir/V3/SIGNTOOL_*/$componentId/SW*.sig");
+    print "Deleting @signatureFiles\n";
+    unlink @signatureFiles;
+}
 
 ### Secureboot headers
 # Contains the appropriate flags, prefix, and file names.
