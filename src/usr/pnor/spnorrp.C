@@ -628,19 +628,6 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // sections. More details below.
         bool l_skip_section = false;
 
-        // For FSP builds temporarily skip verification of HBD and WOFDATA
-        // until it's sorted out how to make unique HB_HLLs for every system
-        // @TODO JIRA PFHB-934 remove this workaround when issue resolved
-#ifdef CONFIG_FSP_BUILD
-        if( (i_id == PNOR::HB_DATA) ||
-            (i_id == PNOR::WOFDATA))
-        {
-            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections: SKIPPING VERIFICATION for section %s",
-                      pPnorString);
-            l_skip_section = true;
-        }
-#endif
-
         // verify while in temp space
         if (SECUREBOOT::enabled() && !l_skip_section)
         {
