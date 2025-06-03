@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,7 +168,8 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT        = 26,
     PGPE_FLAG_USE_RDP                       = 27,
     PGPE_FLAG_DDS_CALIBRATION_ENABLE        = 28,
-    PGPE_FLAG_MAX_DEFINED                   = 29
+    PGPE_FLAG_IOSCM_ENABLE                  = 29,
+    PGPE_FLAG_MAX_DEFINED                   = 30
 };
 
 //WOF Vratio vdd attribute indices

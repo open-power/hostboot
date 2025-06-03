@@ -725,7 +725,9 @@ fapi2::ReturnCode pec_iodlr_static_config(
                     FAPI_INF("DISABLED PHB target %d", l_phb_unit_pos);
                     g_io_pci_disable_link |= BIT64(l_phb_unit_pos);
                     g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe32(l_sub_type);
-                    g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe32(link_powers[l_sub_type].power_mw[DISABLED]);
+                    g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe32(
+                                link_powers[l_sub_type].power_mw[DISABLED]);
+                    g_link_data[l_phb_unit_pos + PCI0_0].vio_base_power_mw = htobe32(link_powers[l_sub_type].vio_power_mw[DISABLED]);
                     FAPI_TRY(putScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
                     continue;
                 }
@@ -775,7 +777,9 @@ fapi2::ReturnCode pec_iodlr_static_config(
 
 
                 g_link_data[l_phb_unit_pos + PCI0_0].sub_type = htobe32(l_sub_type);
-                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe32(link_powers[l_sub_type].power_mw[l_width]);
+                g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw = htobe32(
+                            link_powers[l_sub_type].power_mw[l_width]);
+                g_link_data[l_phb_unit_pos + PCI0_0].vio_base_power_mw = htobe32(link_powers[l_sub_type].vio_power_mw[l_width]);
                 FAPI_INF("PCIE g_link_data[%d] = %08x width %d, l_sub_type %d", l_phb_unit_pos + PCI0_0,
                          htobe32(g_link_data[l_phb_unit_pos + PCI0_0].base_power_mw), l_width, l_sub_type);
             }
@@ -910,6 +914,8 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                             g_io_iohs_ax_disable_link |= BIT64(iohs_pos + x);
                             g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
                                         link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                            g_link_data[iohs_pos + x + OPT0_AX0].vio_base_power_mw = htobe32(
+                                        link_powers[l_sub_speed_type].vio_power_mw[DISABLED] >> 1);
                         }
                         else
                         {
@@ -917,6 +923,8 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                             g_io_iohs_oc_disable_link |= BIT64((iohs_pos) + x);
                             g_link_data[iohs_pos + x + OPT0_O0].base_power_mw = htobe32(
                                         link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                            g_link_data[iohs_pos + x + OPT0_O0].vio_base_power_mw = htobe32(
+                                        link_powers[l_sub_speed_type].vio_power_mw[DISABLED] >> 1);
                         }
                     }
                     {
@@ -926,6 +934,8 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                             g_io_iohs_ax_disable_link |= BIT64(iohs_pos + x + 1);
                             g_link_data[iohs_pos + x + OPT0_AX0 + 1].base_power_mw = htobe32(
                                         link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                            g_link_data[iohs_pos + x + OPT0_AX0 + 1].vio_base_power_mw = htobe32(
+                                        link_powers[l_sub_speed_type].vio_power_mw[DISABLED] >> 1);
                         }
                         else
                         {
@@ -933,6 +943,8 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                             g_io_iohs_oc_disable_link |= BIT64((iohs_pos) + x + 1);
                             g_link_data[iohs_pos + x + OPT0_O0 + 1].base_power_mw = htobe32(
                                         link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                            g_link_data[iohs_pos + x + OPT0_O0 + 1].vio_base_power_mw = htobe32(
+                                        link_powers[l_sub_speed_type].vio_power_mw[DISABLED] >> 1);
                         }
                     }
                     continue;
@@ -952,8 +964,12 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                         g_io_iohs_ax_active_link |= BIT64(iohs_pos + x + 1);
                         g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
                                     link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                        g_link_data[iohs_pos + x + OPT0_AX0].vio_base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].vio_power_mw[FULL] >> 1);
                         g_link_data[iohs_pos + x + OPT0_AX0 + 1].base_power_mw = htobe32(
                                     link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                        g_link_data[iohs_pos + x + OPT0_AX0 + 1].vio_base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].vio_power_mw[FULL] >> 1);
                     }
                     else if ( l_data64.getBit<DLP_DLL_STATUS_0_LINK_UP>())
                     {
@@ -961,6 +977,8 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                         g_io_iohs_ax_active_link |= BIT64(iohs_pos + x);
                         g_link_data[iohs_pos + x + OPT0_AX0].base_power_mw = htobe32(
                                     link_powers[l_sub_speed_type].power_mw[HALF]);
+                        g_link_data[iohs_pos + x + OPT0_AX0].vio_base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].vio_power_mw[HALF]);
                     }
                     else if(l_data64.getBit<DLP_DLL_STATUS_1_LINK_UP>())
                     {
@@ -968,6 +986,8 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                         g_io_iohs_ax_active_link |= BIT64(iohs_pos + x + 1);
                         g_link_data[iohs_pos + x + OPT0_AX0 + 1].base_power_mw = htobe32(
                                     link_powers[l_sub_speed_type].power_mw[HALF]);
+                        g_link_data[iohs_pos + x + OPT0_AX0 + 1].vio_base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].vio_power_mw[HALF]);
                     }
 
                     FAPI_INF("AX0 g_link_data[%d] = %08x", iohs_pos + x + OPT0_AX0,
@@ -1002,8 +1022,12 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                         g_io_iohs_oc_active_link |= BIT64((iohs_pos) + x + 1);
                         g_link_data[index + x + OPT0_O0].base_power_mw = htobe32(
                                     link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                        g_link_data[index + x + OPT0_O0].vio_base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].vio_power_mw[FULL] >> 1);
                         g_link_data[index + x + OPT0_O0 + 1].base_power_mw = htobe32(
                                     link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                        g_link_data[index + x + OPT0_O0 + 1].vio_base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].vio_power_mw[FULL] >> 1);
 
                     }
                     else if ( l_data64.getBit<DLP_DLL_STATUS_0_LINK_UP>())
@@ -1012,6 +1036,8 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                         g_io_iohs_oc_active_link |= BIT64((iohs_pos) + x);
                         g_link_data[index + x + OPT0_O0].base_power_mw = htobe32(
                                     link_powers[l_sub_speed_type].power_mw[HALF]);
+                        g_link_data[index + x + OPT0_O0].vio_base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].vio_power_mw[HALF]);
                     }
                     else if(l_data64.getBit<DLP_DLL_STATUS_1_LINK_UP>())
                     {
@@ -1019,6 +1045,8 @@ fapi2::ReturnCode iohs_iodlr_static_config(
                         g_io_iohs_oc_active_link |= BIT64((iohs_pos) + x + 1);
                         g_link_data[index + x + OPT0_O0 + 1].base_power_mw = htobe32(
                                     link_powers[l_sub_speed_type].power_mw[HALF]);
+                        g_link_data[index + x + OPT0_O0 + 1].vio_base_power_mw = htobe32(
+                                    link_powers[l_sub_speed_type].vio_power_mw[HALF]);
                     }
 
                     FAPI_INF("OC0 g_link_data[%d] = %08x", index + OPT0_O0, htobe32(g_link_data[index + OPT0_O0].base_power_mw));
@@ -1243,7 +1271,10 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 {
                     g_io_omi_disable_link |= BIT64(l_omi_pos);
                     g_link_data[l_omi_pos + MC00_OMI0].sub_type = htobe32(l_sub_speed_type);
-                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw += htobe32(link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw += htobe32(
+                                link_powers[l_sub_speed_type].power_mw[DISABLED] >> 1);
+                    g_link_data[l_omi_pos + MC00_OMI0].vio_base_power_mw += htobe32(link_powers[l_sub_speed_type].vio_power_mw[DISABLED]
+                            >> 1);
                     FAPI_TRY(putScom(l_omic_target, apcr_address, l_data64));
                     continue;
                 }
@@ -1266,12 +1297,17 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 if ( omi_lane_width == 8)
                 {
                     omi_prev_cnt = l_omi_pos + MC00_OMI0;
-                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[HALF]);
+                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw = htobe32(
+                                link_powers[l_sub_speed_type].power_mw[HALF]);
+                    g_link_data[l_omi_pos + MC00_OMI0].vio_base_power_mw = htobe32(link_powers[l_sub_speed_type].vio_power_mw[HALF]);
                 }
                 else
                 {
                     g_link_data[omi_prev_cnt].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
-                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw = htobe32(link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                    g_link_data[omi_prev_cnt].vio_base_power_mw = htobe32(link_powers[l_sub_speed_type].vio_power_mw[FULL] >> 1);
+                    g_link_data[l_omi_pos + MC00_OMI0].base_power_mw = htobe32(
+                                link_powers[l_sub_speed_type].power_mw[FULL] >> 1);
+                    g_link_data[l_omi_pos + MC00_OMI0].vio_base_power_mw = htobe32(link_powers[l_sub_speed_type].vio_power_mw[FULL] >> 1);
                 }
 
                 FAPI_INF("OMI g_link_data[%d] = %08x", l_omi_pos + MC00_OMI0,
@@ -1383,7 +1419,10 @@ fapi2::ReturnCode iodlr_pgated_validation(
 
             l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_iohs_unit_pos + PAU0);
             g_cntrlr_data[l_iohs_unit_pos + PAU0].sub_type = htobe32(g_io_iohs_sub_type);
-            g_cntrlr_data[l_iohs_unit_pos + PAU0].base_power_mw = htobe32(link_powers[g_io_iohs_sub_type].power_mw[PGATED]);
+            g_cntrlr_data[l_iohs_unit_pos + PAU0].base_power_mw = htobe32(
+                        link_powers[g_io_iohs_sub_type].power_mw[PGATED]);
+            g_cntrlr_data[l_iohs_unit_pos + PAU0].vio_base_power_mw = htobe32(
+                        link_powers[g_io_iohs_sub_type].vio_power_mw[PGATED]);
 
 
         }
@@ -1425,7 +1464,10 @@ fapi2::ReturnCode iodlr_pgated_validation(
                         l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_mc_unit_pos + EMO01);
                         l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_omic_pos + OMIC0);
                         g_cntrlr_data[l_mc_unit_pos + EMO01].sub_type = htobe32(g_io_omi_sub_type);
-                        g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw += htobe32(link_powers[g_io_omi_sub_type].power_mw[PGATED]);
+                        g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw += htobe32(
+                                    link_powers[g_io_omi_sub_type].power_mw[PGATED]);
+                        g_cntrlr_data[l_mc_unit_pos + EMO01].vio_base_power_mw += htobe32(
+                                    link_powers[g_io_omi_sub_type].vio_power_mw[PGATED]);
                         FAPI_INF("OMIC controller %d is not functional ", l_omic_pos);
                     }
                 }
@@ -1437,7 +1479,10 @@ fapi2::ReturnCode iodlr_pgated_validation(
             FAPI_INF("MC controller %d is power gated ", l_mc_unit_pos);
 
             g_cntrlr_data[l_mc_unit_pos + EMO01].sub_type = htobe32(g_io_omi_sub_type);
-            g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw = htobe32(link_powers[g_io_omi_sub_type].power_mw[PGATED] * 2);
+            g_cntrlr_data[l_mc_unit_pos + EMO01].base_power_mw = htobe32(
+                        link_powers[g_io_omi_sub_type].power_mw[PGATED] * 2);
+            g_cntrlr_data[l_mc_unit_pos + EMO01].vio_base_power_mw = htobe32(link_powers[g_io_omi_sub_type].vio_power_mw[PGATED] *
+                    2);
 
         }//end of MC
 
@@ -1472,7 +1517,9 @@ fapi2::ReturnCode iodlr_pgated_validation(
                         l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_pec_unit_pos + PEC0);
                         l_static_data.io_pwr_gated_cntrlrs |= BIT32(l_phb_unit_pos + PHB0);
                         g_cntrlr_data[l_pec_unit_pos + PEC0].sub_type = htobe32(G4_32G_VIO_1V);
-                        g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw += htobe32(link_powers[G4_32G_VIO_1V].power_mw[PGATED]);
+                        g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw += htobe32(
+                                    link_powers[G4_32G_VIO_1V].power_mw[PGATED]);
+                        g_cntrlr_data[l_pec_unit_pos + PEC0].vio_base_power_mw += htobe32(link_powers[G4_32G_VIO_1V].vio_power_mw[PGATED]);
                     }
                 }
 
@@ -1485,7 +1532,9 @@ fapi2::ReturnCode iodlr_pgated_validation(
             FAPI_INF("PEC controller %d is power gated", l_pec_unit_pos);
 
             g_cntrlr_data[l_pec_unit_pos + PEC0].sub_type = htobe32(G4_32G_VIO_1V);
-            g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw = htobe32(link_powers[G4_32G_VIO_1V].power_mw[PGATED] * 3);
+            g_cntrlr_data[l_pec_unit_pos + PEC0].base_power_mw = htobe32(
+                        link_powers[G4_32G_VIO_1V].power_mw[PGATED] * 3);
+            g_cntrlr_data[l_pec_unit_pos + PEC0].vio_base_power_mw = htobe32(link_powers[G4_32G_VIO_1V].vio_power_mw[PGATED] * 3);
         } //end of PEC
 
         FAPI_INF("PEC l_static_data.io_pwr_gated_cntrlrs %08x ", l_static_data.io_pwr_gated_cntrlrs);

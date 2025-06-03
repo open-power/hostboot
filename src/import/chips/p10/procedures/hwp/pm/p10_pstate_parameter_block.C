@@ -197,6 +197,10 @@ using namespace ppb;
     if ( ((!a) || (!b) || (!c) || (!d) || (!e) || (!f) || (!g) || (!h) || (!i)))  \
     { state = 0; }
 
+#define SET_ATTR(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_SET(attr_name, target, attr_assign),"Attribute set failed"); \
+    FAPI_INF("Setting %-46s[0] = 0x%08x %d", #attr_name, attr_assign, attr_assign);
+
 uint8_t g_wof_ipl_skip = 0;
 
 char const* vpdSetStr[] = VPD_PT_SET_STR;
@@ -255,82 +259,88 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 
         if (l_coreList.size() == 0)
         {
+            uint8_t l_ps_enabled = (fapi2::ATTR_PSTATES_ENABLED_Type)fapi2::ENUM_ATTR_PSTATES_ENABLED_TRUE;
             FAPI_INF("Skip p10_pstate_parameter_block as we don't have any cores in the proc");
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
+            SET_ATTR(fapi2::ATTR_PSTATES_ENABLED, i_target, l_ps_enabled);
 
-        //if PSTATES_MODE is off then we don't need to execute further to collect
-        //the data.
-        if (!(l_pmPPB->isPstateModeEnabled()))
+            FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
+        }
+        else
         {
-            FAPI_INF("Pstate mode is to not boot the PGPE.  Thus, none of the parameter blocks will be constructed");
 
-            // Set the io_size to 0 so that memory allocation issues won't be
-            // detected by the caller.
-            io_size = 0;
-            break;
-        }
+            //if PSTATES_MODE is off then we don't need to execute further to collect
+            //the data.
+            if (!(l_pmPPB->isPstateModeEnabled()))
+            {
+                FAPI_INF("Pstate mode is to not boot the PGPE.  Thus, none of the parameter blocks will be constructed");
 
-        //_HOSTBOOT_RUNTIME is not defined for HOSTBOOT builds
-        //used for IPL (eg istep 15) so WOF Table access can be skipped.
+                // Set the io_size to 0 so that memory allocation issues won't be
+                // detected by the caller.
+                io_size = 0;
+                break;
+            }
+
+            //_HOSTBOOT_RUNTIME is not defined for HOSTBOOT builds
+            //used for IPL (eg istep 15) so WOF Table access can be skipped.
 #ifndef __HOSTBOOT_RUNTIME
-        g_wof_ipl_skip = true;
+            g_wof_ipl_skip = true;
 #endif
-        // ----------------
-        // get VPD data (#V,#W,IQ)
-        // ----------------
-        FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
+            // ----------------
+            // get VPD data (#V,#W,IQ)
+            // ----------------
+            FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
 
-        // ----------------
-        // WOF initialization
-        // ----------------
-        io_size = 0;
-        FAPI_TRY(l_pmPPB->wof_init(
-                 ppb::STORE_WOF_TABLE_ON,
-                 o_buf,
-                 io_size),
-                 "WOF initialization failure");
+            // ----------------
+            // WOF initialization
+            // ----------------
+            io_size = 0;
+            FAPI_TRY(l_pmPPB->wof_init(
+                        ppb::STORE_WOF_TABLE_ON,
+                        o_buf,
+                        io_size),
+                    "WOF initialization failure");
 
-        // ----------------
-        // Compute VPD points for different regions
-        // ----------------
-        FAPI_TRY(l_pmPPB->compute_vpd_pts());
+            // ----------------
+            // Compute VPD points for different regions
+            // ----------------
+            FAPI_TRY(l_pmPPB->compute_vpd_pts());
 
-        // ----------------
-        // Safe mode freq and volt init
-        // ----------------
-        FAPI_TRY(l_pmPPB->safe_mode_init());
+            // ----------------
+            // Safe mode freq and volt init
+            // ----------------
+            FAPI_TRY(l_pmPPB->safe_mode_init());
 
-        // ----------------
-        // Retention voltage computation
-        // ----------------
-        FAPI_TRY(l_pmPPB->compute_retention_vid());
+            // ----------------
+            // Retention voltage computation
+            // ----------------
+            FAPI_TRY(l_pmPPB->compute_retention_vid());
 
-        // ----------------
-        // RVRM enablement state
-        // ----------------
-        FAPI_TRY(l_pmPPB->rvrm_enablement());
+            // ----------------
+            // RVRM enablement state
+            // ----------------
+            FAPI_TRY(l_pmPPB->rvrm_enablement());
 
-        // ----------------
-        // RESCLK Initialization
-        // ----------------
-        l_pmPPB->resclk_init();
+            // ----------------
+            // RESCLK Initialization
+            // ----------------
+            l_pmPPB->resclk_init();
 
-        // ----------------
-        // Initialize GPPB structure
-        // ----------------
-        FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
+            // ----------------
+            // Initialize GPPB structure
+            // ----------------
+            FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
 
-        // ----------------
-        //Initialize OPPB structure
-        // ----------------
-        FAPI_TRY(l_pmPPB->oppb_init(&l_occppb));
+            // ----------------
+            //Initialize OPPB structure
+            // ----------------
+            FAPI_TRY(l_pmPPB->oppb_init(&l_occppb));
 
-        // ----------------
-        //Initialize pstate feature attribute state
-        // ----------------
-        FAPI_TRY(l_pmPPB->set_global_feature_attributes());
+            // ----------------
+            //Initialize pstate feature attribute state
+            // ----------------
+            FAPI_TRY(l_pmPPB->set_global_feature_attributes());
 
+        }
         // Put out the Parmater Blocks to the trace
         gppb_print(i_target, l_globalppb);
         oppb_print(i_target, &l_occppb);
@@ -1368,6 +1378,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Set PGPE Flags
         io_globalppb->pgpe_flags[PGPE_FLAG_RESCLK_ENABLE] = is_resclk_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_CURRENT_READ_DISABLE] = iv_attrs.attr_system_current_read_disable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_IOSCM_ENABLE] = iv_core_count ?  0 : 1;
         io_globalppb->pgpe_flags[PGPE_FLAG_OCS_DISABLE] = !is_ocs_enabled();
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_ENABLE] = iv_wof_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_DISABLE_VRATIO] = iv_attrs.attr_system_wof_disable_dimension[4];
@@ -2251,9 +2262,6 @@ void PlatPmPPB::attr_init( void )
     iv_vio_sysparam.distloss_uohm = iv_attrs.attr_proc_r_distloss_uohm[3];
     iv_vio_sysparam.distoffset_uv = iv_attrs.attr_proc_vrm_voffset_uv[3];
 
-#define SET_ATTR(attr_name, target, attr_assign) \
-    FAPI_TRY(FAPI_ATTR_SET(attr_name, target, attr_assign),"Attribute set failed"); \
-    FAPI_INF("Setting %-46s[0] = 0x%08x %d", #attr_name, attr_assign, attr_assign);
 
     iv_pstates_enabled = true;
     iv_resclk_enabled  = true;

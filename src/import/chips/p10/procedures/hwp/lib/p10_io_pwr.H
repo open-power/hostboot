@@ -33,7 +33,7 @@ static io_link_powers_data_t link_powers[] =
     {
         PWR_OMI,                    // IO Power Type
         OMI,                        // Sub Type
-        S_25G,                      // Speed
+        S_25G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -50,11 +50,19 @@ static io_link_powers_data_t link_powers[] =
         0x98,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            1684,
+            950,
+            950,
+            950,
+            60,
+            0,
+        },
     },
     {
         PWR_OMI,                    // IO Power Type
         OMI,                        // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -71,11 +79,19 @@ static io_link_powers_data_t link_powers[] =
         0xAE,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            1877,
+            1049,
+            1049,
+            1049,
+            60,
+            0,
+        },
     },
     {
         PWR_OMI,                    // IO Power Type
         OMI,                        // Sub Type
-        S_38G,                      // Speed
+        S_38G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -92,11 +108,19 @@ static io_link_powers_data_t link_powers[] =
         0xD3,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            2252,
+            1259,
+            1259,
+            1259,
+            60,
+            0,
+        },
     },
     {
         PWR_OMI,                    // IO Power Type
         OMI,                        // Sub Type
-        S_25G,                      // Speed
+        S_25G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -113,11 +137,19 @@ static io_link_powers_data_t link_powers[] =
         0xB9,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            2146,
+            1210,
+            1210,
+            1210,
+            77,
+            0,
+        },
     },
     {
         PWR_OMI,                    // IO Power Type
         OMI,                        // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -134,11 +166,19 @@ static io_link_powers_data_t link_powers[] =
         0xD3,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            2392,
+            1337,
+            1337,
+            1337,
+            77,
+            0,
+        },
     },
     {
         PWR_OMI,                    // IO Power Type
         OMI,                        // Sub Type
-        S_38G,                      // Speed
+        S_38G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -155,11 +195,19 @@ static io_link_powers_data_t link_powers[] =
         0xFF,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            2870,
+            1604,
+            1604,
+            1604,
+            77,
+            0,
+        },
     },
     {
         PWR_AX,                     // IO Power Type
         AX,                         // Sub Type
-        S_25G,                      // Speed
+        S_25G,                        // Speed
         900,                        // VIO
         18,                         // #AC lanes
         {
@@ -176,11 +224,19 @@ static io_link_powers_data_t link_powers[] =
         0x9E,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x0,                        // 1/4 Width
+        {
+            1859,
+            1037,
+            672,
+            672,
+            62,
+            0,
+        },
     },
     {
         PWR_AX,                     // IO Power Type
         AX,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         18,                         // #AC lanes
         {
@@ -197,11 +253,19 @@ static io_link_powers_data_t link_powers[] =
         0xBC,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x1,                        // 1/4 Width
+        {
+            2105,
+            1164,
+            745,
+            745,
+            62,
+            0,
+        },
     },
     {
         PWR_AX,                     // IO Power Type
         AX,                         // Sub Type
-        S_25G,                      // Speed
+        S_25G,                        // Speed
         1000,                       // VIO
         18,                         // #AC lanes
         {
@@ -218,11 +282,19 @@ static io_link_powers_data_t link_powers[] =
         0xC2,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x0,                        // 1/4 Width
+        {
+            2368,
+            1322,
+            857,
+            857,
+            80,
+            0,
+        },
     },
     {
         PWR_AX,                     // IO Power Type
         AX,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         18,                         // #AC lanes
         {
@@ -239,11 +311,19 @@ static io_link_powers_data_t link_powers[] =
         0xE5,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x2,                        // 1/4 Width
+        {
+            2682,
+            1483,
+            950,
+            950,
+            80,
+            0,
+        },
     },
     {
         PWR_OC,                     // IO Power Type
         OC,                         // Sub Type
-        S_25G,                      // Speed
+        S_25G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -260,11 +340,19 @@ static io_link_powers_data_t link_powers[] =
         0xA9,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x7,                        // 1/4 Width
+        {
+            1676,
+            946,
+            946,
+            946,
+            62,
+            0,
+        },
     },
     {
         PWR_OC,                     // IO Power Type
         OC,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -281,11 +369,19 @@ static io_link_powers_data_t link_powers[] =
         0xC5,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x7,                        // 1/4 Width
+        {
+            1896,
+            1059,
+            1059,
+            1059,
+            62,
+            0,
+        },
     },
     {
         PWR_OC,                     // IO Power Type
         OC,                         // Sub Type
-        S_25G,                      // Speed
+        S_25G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -302,11 +398,19 @@ static io_link_powers_data_t link_powers[] =
         0xCA,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            2136,
+            1206,
+            1206,
+            1206,
+            80,
+            0,
+        },
     },
     {
         PWR_OC,                     // IO Power Type
         OC,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -323,11 +427,19 @@ static io_link_powers_data_t link_powers[] =
         0xEA,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x7,                        // 1/4 Width
+        {
+            2416,
+            1350,
+            1350,
+            1350,
+            80,
+            0,
+        },
     },
     {
         PWR_AXO_Base,               // IO Power Type
         AXO_Base,                   // Sub Type
-        S_25G,                      // Speed
+        S_25G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -344,11 +456,19 @@ static io_link_powers_data_t link_powers[] =
         0x1C,                       // PSLF encode
         0xA,                        // 1/2 Width
         0x5,                        // 1/4 Width
+        {
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        },
     },
     {
         PWR_AXO_Base,               // IO Power Type
         AXO_Base,                   // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -365,11 +485,19 @@ static io_link_powers_data_t link_powers[] =
         0x22,                       // PSLF encode
         0xA,                        // 1/2 Width
         0x5,                        // 1/4 Width
+        {
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        },
     },
     {
         PWR_AXO_Base,               // IO Power Type
         AXO_Base,                   // Sub Type
-        S_25G,                      // Speed
+        S_25G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -386,11 +514,19 @@ static io_link_powers_data_t link_powers[] =
         0x1C,                       // PSLF encode
         0xA,                        // 1/2 Width
         0x5,                        // 1/4 Width
+        {
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        },
     },
     {
         PWR_AXO_Base,               // IO Power Type
         AXO_Base,                   // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -407,11 +543,19 @@ static io_link_powers_data_t link_powers[] =
         0x22,                       // PSLF encode
         0xA,                        // 1/2 Width
         0x5,                        // 1/4 Width
+        {
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G5,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         8,                          // #AC lanes
         {
@@ -428,11 +572,19 @@ static io_link_powers_data_t link_powers[] =
         0x0,                        // PSLF encode
         0xF,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            2812,
+            2812,
+            1406,
+            243,
+            122,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G4,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -449,11 +601,19 @@ static io_link_powers_data_t link_powers[] =
         0x0,                        // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
+        {
+            3294,
+            1647,
+            823,
+            243,
+            122,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G3,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -470,11 +630,19 @@ static io_link_powers_data_t link_powers[] =
         0x0,                        // PSLF encode
         0x9,                        // 1/2 Width
         0x5,                        // 1/4 Width
+        {
+            2431,
+            1414,
+            746,
+            357,
+            201,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G2,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -491,11 +659,19 @@ static io_link_powers_data_t link_powers[] =
         0xF5,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
+        {
+            2205,
+            1102,
+            590,
+            357,
+            201,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G1,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         900,                        // VIO
         16,                         // #AC lanes
         {
@@ -512,11 +688,19 @@ static io_link_powers_data_t link_powers[] =
         0xD9,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
+        {
+            1935,
+            967,
+            523,
+            357,
+            201,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G5,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         8,                          // #AC lanes
         {
@@ -533,11 +717,19 @@ static io_link_powers_data_t link_powers[] =
         0x0,                        // PSLF encode
         0xF,                        // 1/2 Width
         0x8,                        // 1/4 Width
+        {
+            2812,
+            2812,
+            1406,
+            243,
+            122,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G4,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -554,11 +746,19 @@ static io_link_powers_data_t link_powers[] =
         0x0,                        // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
+        {
+            3294,
+            1647,
+            823,
+            243,
+            122,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G3,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -575,11 +775,19 @@ static io_link_powers_data_t link_powers[] =
         0x0,                        // PSLF encode
         0x9,                        // 1/2 Width
         0x5,                        // 1/4 Width
+        {
+            2431,
+            1414,
+            746,
+            357,
+            201,
+            0,
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G2,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -596,11 +804,19 @@ static io_link_powers_data_t link_powers[] =
         0xF5,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
+        {
+            2205,
+            1102,
+            590,
+            357,
+            201,
+            0
+        },
     },
     {
-        PWR_PCIE_IO,                // IO Power Type
+        PWR_PCIE_IO,              // IO Power Type
         G1,                         // Sub Type
-        S_32G,                      // Speed
+        S_32G,                        // Speed
         1000,                       // VIO
         16,                         // #AC lanes
         {
@@ -617,6 +833,14 @@ static io_link_powers_data_t link_powers[] =
         0xD9,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
-    },
+        {
+            1935,
+            967,
+            523,
+            357,
+            201,
+            0
+        },
+    }
 };
 #endif

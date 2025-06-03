@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,12 @@
 #ifndef __P10_IO_PWR_TYPES_H__
 #define __P10_IO_PWR_TYPES_H__
 
+typedef enum
+{
+    VDN_VIO = 0,
+    VIO = 1,
+    MAX_IO = 2,
+} io_types_t;
 
 typedef enum
 {
@@ -249,6 +255,7 @@ typedef struct
     uint8_t         plsf;                       // Per Link Scaling Factor - encoded
     uint8_t         half_weight;                // Weight for half width mode for APCR (1/16th)
     uint8_t         qtr_weight;                 // Weight for quarter width mode for APCR (1/16th)
+    uint16_t        vio_power_mw[NUM_OF_IO_PWRS];   // Total IO power types that comprise a link type
 } io_link_powers_data_t;
 
 
@@ -267,6 +274,8 @@ typedef struct
 //    uint32_t io_magic;
     uint32_t  sub_type;
     uint32_t base_power_mw;
+    uint32_t vio_base_power_mw;
+    uint32_t rsvd;
 #if 0
     uint32_t ct_address;  // Activity Proxy Control Address
     uint32_t sm_address;  // Activity Proxy Sample Address
@@ -280,6 +289,8 @@ typedef struct
 //   uint32_t io_magic;
     uint32_t  sub_type;
     uint32_t base_power_mw;  // only applies to A/X and OC links
+    uint32_t vio_base_power_mw;
+    uint32_t rsvd;
 #if 0
     uint32_t ct_address;  // Activity Proxy Control Address
     uint32_t sm_address;  // Activity Proxy Sample Address

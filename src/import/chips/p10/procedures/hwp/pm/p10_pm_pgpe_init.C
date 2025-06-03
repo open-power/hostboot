@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,8 +152,7 @@ fapi2::ReturnCode pgpe_start(
               "Error getting ATTR_PSTATES_ENABLED");
 
     // Boot if not OFF and core count is non-zero
-    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF &&
-        (l_ccsr & 0xFFFFFFFF00000000))
+    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF)
     {
         // Set auto mode if needed
         if (l_pstates_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_AUTO)
