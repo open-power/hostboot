@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,12 +96,6 @@ fapi2::ReturnCode p10_rcs_transient_check(const
 
 
     FAPI_DBG("Begin RCS Transient Error Check");
-
-    // SW526040
-    FAPI_DBG("RCS Transient Code is Disabled. Returning Hard Fail...");
-    o_status = false; // Return Hard Fail
-    goto fapi_try_exit;
-
 
     // Error Recovery Step 2:  Disable ALTREFCLK on selected side
     FAPI_DBG("Disable RCS filter PLL altrefclk selects");
