@@ -628,6 +628,9 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // sections. More details below.
         bool l_skip_section = false;
 
+        // Variable to track if section should be extended to the TPM below
+        bool l_extend_section = false;
+
         // verify while in temp space
         if (SECUREBOOT::enabled() && !l_skip_section)
         {
@@ -644,6 +647,9 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                 (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V1_CONTAINER)
                ))
             {
+                // Since the container and system modes match, extend this section below
+                l_extend_section = true;
+
                 l_errhdl = SECUREBOOT::verifyContainer(l_tempAddr, {i_id});
                 if (l_errhdl)
                 {
@@ -658,7 +664,13 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                 // The system is in V3 signing mode, but the container has a V1 header.
                 // Therefore, we can't do verifyContainer() because the V1 container will
                 // fail with the V3 system keys.
-                // Instead, to verify the section this path will do a sha3 hash of the
+
+                // Since this section does not have its own V3 header and the system is in
+                // V3 mode, do not extend the section.  The fact that the HB_HLL has already
+                // been extended is enough for attestation purposes.
+                l_extend_section = false;
+
+                // To verify the section this path will do a sha3 hash of the
                 // secure payload and compare that to the hash from processing the
                 // HB_HLL section.
                 sha3_t calculated_hash = {};
@@ -848,15 +860,33 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // keep track of info size in load record (Includes Header)
         io_rec->infoSize = l_totalContainerSize;
 
-        // if not loaded previously or...
-        if (!i_loadedPreviously ||
-        // loading after a prior unload and...
-            (i_loadedPreviously &&
-            // the protected payload measurement doesn't match the old one
-            memcmp(&io_rec->payloadTextHash[0],
-                   l_conHdr.payloadTextHash(),
-                   SHA512_DIGEST_LENGTH)!=0
-            )
+
+        // Optional: Extend Section
+        // There are 3 levels of checks on whether or not a section should be extended
+        // LEVEL 1: MUST HAVE: l_extend_section is set to true.
+        //          l_extend_section is set above.
+        //          l_extend_section will be set to true if the section has a V1 header
+        //          and the system is in V1 mode, OR if the section has a V3 header
+        //          and the system is in V3 mode.
+        // If LEVEL 1 passes (ie l_extend_section == true) then extend
+        //   if LEVEL 2 --OR-- Level 3 are true:
+        // LEVEL 2: if the section has not been loaded previously, then extend it
+        // LEVEL 3: if the section has been loaded previously, then only extend again
+        //          if protected payload measurement doesn't match the old one
+
+        if ( // LEVEL 1:
+             (l_extend_section == true)
+             &&
+               // LEVEL 2:
+             ( (!i_loadedPreviously)
+               ||
+               // LEVEL 3:
+               (i_loadedPreviously &&
+                memcmp(&io_rec->payloadTextHash[0],
+                       l_conHdr.payloadTextHash(),
+                       SHA512_DIGEST_LENGTH)!=0
+               )
+             )
            )
         {
             // pcr extension of PNOR hash
