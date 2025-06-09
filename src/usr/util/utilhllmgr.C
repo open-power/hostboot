@@ -825,7 +825,7 @@ errlHndl_t HLLMgr::tpmExtendContainer(const GroupID& i_groupId,
     // Extend SW keys hash
     l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_5,
               TRUSTEDBOOT::EV_COMPACT_HASH,
-              reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
+              reinterpret_cast<const uint8_t*>(i_conHdr.fwKeyHash()),
               sizeof(HashEntry),
               reinterpret_cast<uint8_t*>(pcr5Msg),
               pcr5Len);
