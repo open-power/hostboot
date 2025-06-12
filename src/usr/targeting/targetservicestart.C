@@ -177,7 +177,7 @@ void mpipl_targeting_update()
             && (pnorSize <= pnorDataSize) )
     {
         l_newMem = calloc(pnorDataSize,1);
-        memcpy( l_newMem, pnorVaddr, pnorSize );
+        decompressTargetingBinary(reinterpret_cast<TargetingHeader *>(pnorVaddr), l_newMem);
         // note - original PNOR data is no longer used after this,
         //        PNOR memory is deleted as part of object destructor
     }

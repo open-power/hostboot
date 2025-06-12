@@ -373,6 +373,33 @@ namespace TARGETING
                                    *l_pComparisonAttrId,
                                    l_pnorTargetHuid);
 
+                        // Get the PNOR attribute value pointer
+                        void* l_pPnorAttr = nullptr;
+                        l_pnorTarget->_getAttrPtr(*l_pComparisonAttrId,
+                                                 l_pPnorAttrRP,
+                                                 l_pPnorAttrId,
+                                                 l_ppPnorAttrAddr,
+                                                 l_pPnorAttr);
+                        if (l_pPnorAttr == nullptr)
+                        {
+                            // This should never happen but just in case...
+                            TRACFCOMP(g_trac_targeting,
+                                      "Could not find attr ID 0x%.8X, for target[0x%0.8X] in PNOR, "
+                                      "skipping value print.",
+                                      *l_pComparisonAttrId,
+                                      l_pnorTargetHuid);
+                        }
+                        else
+                        {
+                            // Look up the size of the attribute
+                            uint32_t l_comparisonAttrSize = attrSizeLookup(*l_pComparisonAttrId);
+                            TRACFBIN( g_trac_targeting,
+                                      "PNOR value",
+                                      l_pPnorAttr,
+                                      l_comparisonAttrSize);
+                        }
+
+
                         // Increment for keeping value because attribute was added
                         ++l_kept_for_added_attr;
 
@@ -1739,6 +1766,7 @@ namespace TARGETING
                 if ( (iv_sections[i].type == SECTION_TYPE_HEAP_ZERO_INIT) ||
                      (iv_sections[i].type == SECTION_TYPE_HB_HEAP_ZERO_INIT) )
                 {
+                    // The zero init sections are not persistent
                     l_msgQ = NULL;
                 }
 
@@ -2328,7 +2356,6 @@ namespace TARGETING
             TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::updatePreservedAttrSection: Skipping update in MPIPL");
             break;
         }
-
         #ifdef CONFIG_SECUREBOOT
         l_errl = PNOR::loadSecureSection(PNOR::HB_DATA);
         if(l_errl)

@@ -357,6 +357,32 @@ errlHndl_t saveRestoreAttrs(void *i_rsvdMemPtr,
                                "LID Structure",
                                *l_pAttrId,
                                l_huidLid);
+                    // Get the LID Structure attribute value pointer
+                    void* l_pAttrLid = nullptr;
+                    l_targetLid->_getAttrPtr(*l_pAttrId,
+                                             l_attrRPLid,
+                                             l_pAttrIdLid,
+                                             l_ppAttrAddrLid,
+                                             l_pAttrLid);
+                    if (l_pAttrLid == nullptr)
+                    {
+                        // This should never happen but just in case...
+                        TRACFCOMP(g_trac_targeting,
+                                  "Could not find attr ID 0x%.8X, for target[0x%0.8X] in LID, "
+                                  "skipping value print.",
+                                  *l_pAttrId,
+                                  l_huidLid);
+                    }
+                    else
+                    {
+                        // Look up the size of the attribute
+                        uint32_t l_attrSize = attrSizeLookup(*l_pAttrId);
+                        TRACFBIN( g_trac_targeting,
+                                  "LID Structure value",
+                                  l_pAttrLid,
+                                  l_attrSize);
+                    }
+
 
                     // Increment for keeping value because attribute was added
                     ++l_kept_for_added_attr;
@@ -494,7 +520,7 @@ int hbrt_update_prep(void)
             && (l_lidSize <= l_lidDataSize) )
         {
             l_newMem = calloc(l_lidDataSize,1);
-            memcpy( l_newMem, l_lidStructPtr, l_lidSize );
+            decompressTargetingBinary(reinterpret_cast<TargetingHeader *>(l_lidStructPtr), l_newMem);
             // note - original lid data is no longer used after this,
             //        lid memory is deleted as part of object destructor
         }
