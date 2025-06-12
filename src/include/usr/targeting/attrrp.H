@@ -79,6 +79,22 @@ struct AttrRP_Section
 errlHndl_t saveRestoreAttrs(void * i_rsvdMemPtr,
                             void * io_pnorPtr);
 
+/*
+ * @brief During MPIPL/HBRT concurrent code updates, the reserved memory and PNOR/LID memory has to be reconciled with
+ *        each other to determine what attributes changed or were added. To do that, the PNOR/LID binary has to be
+ *        decompressed because zero init sections take up no space in the binary. So any sections following
+ *        them will actually start at the offset of the first zero init section. This function will expand the zero init
+ *        sections to fill their section space so that all sections line up properly in the temporary buffer. That way
+ *        when reserved memory is compared to PNOR/LID memory everything lines up and the temporary buffer can be
+ *        written back to reserved memory properly.
+ *
+ * @param[in]  i_header     The targeting header for the PNOR/LID memory.
+ * @param[out] o_destBuffer The temporary buffer that will be used to reconcile PNOR/LID memory against reserved memory.
+ *                          This must already be initialized to the correct size by the caller.
+ */
+void decompressTargetingBinary(TargetingHeader * i_header,
+                               void            * o_destBuffer);
+
 // These constexprs are used by editPagePermissions function
 constexpr uint32_t DEFAULT_PERMISSIONS = 0xFFFFFFFF;
 constexpr uint8_t ALL_SECTION_TYPES = 0xFF;

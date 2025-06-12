@@ -81,6 +81,61 @@ namespace TARGETING
         Singleton<AttrRP>::instance().startup(io_taskRetErrl, i_isMpipl);
     }
 
+    void decompressTargetingBinary(TargetingHeader * i_header,
+                                   void            * o_destBuffer)
+    {
+
+        // Find start to the first section:
+        //          (header address + size of header + offset in header)
+        TargetingSection* l_section =
+            reinterpret_cast<TargetingSection*>(
+                    reinterpret_cast<uint64_t>(i_header) +
+                    sizeof(TargetingHeader) + i_header->offsetToSections
+                    );
+
+        // The running offset into the destination buffer where the sections will be copied.
+        uint64_t l_newOffset = 0;
+
+        for (size_t i = 0; i < i_header->numSections; ++i, ++l_section)
+        {
+            // The place where the current section in the PNOR/LID will be copied into the output buffer
+            void * destOffset = reinterpret_cast<void*>(reinterpret_cast<uint64_t>(o_destBuffer) + l_newOffset);
+            // The offset to the start of the current section in the PNOR/LID
+            void * sourceOffset = reinterpret_cast<void*>(
+                    reinterpret_cast<uint64_t>(i_header) + l_section->sectionOffset);
+
+            TRACDCOMP(g_trac_targeting, "destOffset=%p, sourceOffset=%p", destOffset, sourceOffset);
+
+            if ((l_section->sectionType != SECTION_TYPE_HEAP_ZERO_INIT)
+                 && (l_section->sectionType != SECTION_TYPE_HB_HEAP_ZERO_INIT))
+            {
+                // These are not zero init sections. Copy the data into the output buffer.
+                TRACDCOMP(g_trac_targeting, "copy size=0x%X from 0x%X for type %d",
+                                            l_section->sectionSize, sourceOffset, l_section->sectionType);
+                memcpy(destOffset, sourceOffset, l_section->sectionSize);
+            }
+            else
+            {
+                // The zero init sections occupy no space in the PNOR/LID. Instead, the IPL code uses page faults to
+                // generate zero pages when the reserved memory is being populated. Since we're decompressing to a
+                // buffer from the PNOR/LID we will just memset these sections to 0 for the full size of the section.
+                TRACDCOMP(g_trac_targeting, "memset 0s for size=0x%X for type %d at 0x%X",
+                                            l_section->sectionSize, l_section->sectionType, destOffset);
+                memset(destOffset, 0, l_section->sectionSize);
+            }
+
+            l_newOffset += ALIGN_PAGE(l_section->sectionSize);
+            TRACDCOMP(g_trac_targeting, "l_newOffset= 0x%X", l_newOffset);
+
+        }
+        // NOTE: We are not updating the sectionOffset fields in the new destination buffer for two reasons. First,
+        //       the sectionOffset field is where to find the section in the compressed PNOR. From this point
+        //       on in the decompressed buffer it's possible to add current offset + sectionSize to get to the next
+        //       section. This is how most hostboot code handles iterating on these sections. Second, the sectionOffset
+        //       field is const and best left that way so "live" memory is able to find data in compressed PNOR images.
+
+    }
+
     errlHndl_t AttrRP::nodeInfoInit(NodeInfo& io_nodeCont,
                                     TargetingHeader* i_header,
                                     const NODE_ID i_nodeId)
