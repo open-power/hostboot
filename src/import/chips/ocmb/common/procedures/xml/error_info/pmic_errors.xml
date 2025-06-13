@@ -697,9 +697,7 @@
     </description>
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>NUM_PMICS</ffdc>
-    <ffdc>NUM_DT</ffdc>
     <ffdc>EXPECTED_MIN_PMICS</ffdc>
-    <ffdc>EXPECTED_MIN_DT</ffdc>
     <ffdc>PRESENT_PMIC_DT_TARGETS</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
@@ -708,6 +706,22 @@
     <deconfigure>
       <target>OCMB_TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INCOMPLETE_PMIC_DT_DDR5_TARGET_CONFIG</rc>
+    <description>
+       Pmic_enable given fewer targets than full redundant set. This indicates system presence detection failed on a
+       PMIC or DT component. This is a non fatal error used to differentiate from pmic_enable fails.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_PMICS</ffdc>
+    <ffdc>EXPECTED_MAX_PMICS</ffdc>
+    <ffdc>PRESENT_PMIC_DT_TARGETS</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>

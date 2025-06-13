@@ -68,52 +68,46 @@ fapi2::ReturnCode inline __attribute__((always_inline)) update_vdd_ov_threshold(
         i_target_info)
 {
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-    bool l_pmic_present = 0;
+    using PMIC_POS  = mss::pmic::id;
 
-    // We need to get nominal voltage from just 1 PMIC. This loop has been added so as to skip to next PMIC if
-    // the first PMIC returns error
     // VDD is support by SWC from PMIC0,1 and 3
-    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
+    for (auto l_pmic_id = 0; l_pmic_id < CONSTS::NUM_PMICS_4U; l_pmic_id++)
     {
-        l_pmic_present = 0;
-
-        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [l_pmic_count, i_target_info,
-                          &l_pmic_present]
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_id, [l_pmic_id, i_target_info]
                           (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
             uint32_t l_nominal_voltage = 0;
+            uint8_t l_relative_pmic_id = 0;
+            uint8_t l_pmic_dt_array_index = 0;
+            bool l_index_found = false;
+
+            // Skip PMIC/DT 2 as VDD is not present on it
+            if(l_pmic_id == PMIC_POS::PMIC2)
+            {
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+
             // Get nominal ddr5 voltage
             FAPI_TRY_LAMBDA(mss::pmic::ddr5::get_nominal_voltage_ddr5(
-                i_target_info,
-                l_pmic_count,
+                i_pmic,
+                l_pmic_id,
                 mss::pmic::rail::SWC,
                 l_nominal_voltage));
 
-            // Update VDD OV threshold
-            FAPI_TRY_LAMBDA(mss::pmic::ddr5::update_ov_threshold(i_target_info.iv_ocmb,
-            mss::pmic::volt_domains::VDD,
-            l_nominal_voltage));
+            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_pmic, l_relative_pmic_id));
+            l_index_found = get_pmic_dt_index_number(i_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
 
-            l_pmic_present = true;
+            if(l_index_found)
+            {
+                FAPI_TRY_LAMBDA(mss::pmic::ddr5::update_dt_vdd_ov_threshold(i_target_info.iv_pmic_dt_map[l_pmic_dt_array_index].iv_dt,
+                l_pmic_id, l_nominal_voltage));
+            }
 
             return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit_lambda:
-            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_pmic_count);
+            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_pmic_id);
         }));
-
-        // If true, means that we could calculate nominal voltage from the previous PMIC.
-        // Skip the rest
-        if(l_pmic_present)
-        {
-            break;
-        }
-
-        // If PMIC 0 and 1 have returned error, skip PMIC 2 as it does not support VDD and go to PMIC3
-        if(l_pmic_count == mss::pmic::id::PMIC1)
-        {
-            l_pmic_count++;
-        }
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -906,7 +900,22 @@ fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_tar
                           &i_target_info, l_simics]
                           (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
         {
-            uint8_t l_breadcrumb = i_health_check_info.iv_dt[l_dt_count].iv_breadcrumb;
+            uint8_t l_relative_pmic_id = 0;
+            uint8_t l_pmic_dt_array_index = 0;
+            bool l_index_found = false;
+            uint8_t l_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+
+            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_dt, l_relative_pmic_id));
+            l_index_found = get_pmic_dt_index_number(i_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
+
+            if(l_index_found)
+            {
+                l_breadcrumb = i_health_check_info.iv_dt[l_pmic_dt_array_index].iv_breadcrumb;
+            }
+            else
+            {
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
 
             if (l_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL)
             {
@@ -923,10 +932,10 @@ fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_tar
                     FAPI_ASSERT_NOEXIT(false,
                     fapi2::PMIC_ENABLE_FAIL_DDR5_4U(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                     .set_OCMB_TARGET(i_target_info.iv_ocmb)
-                    .set_PMIC_TARGET(i_target_info.iv_pmic_dt_map[l_dt_count].iv_pmic)
+                    .set_PMIC_TARGET(i_target_info.iv_pmic_dt_map[l_pmic_dt_array_index].iv_pmic)
                     .set_RETURN_CODE(static_cast<uint32_t>(fapi2::current_err)),
                     "PMIC " GENTARGTIDFORMAT " failed to enable.",
-                    GENTARGTID(i_target_info.iv_pmic_dt_map[l_dt_count].iv_pmic));
+                    GENTARGTID(i_target_info.iv_pmic_dt_map[l_pmic_dt_array_index].iv_pmic));
 
                     mss::attr::set_n_mode_helper(i_target_info.iv_ocmb, l_dt_count, mss::pmic::n_mode::N_MODE);
                 }
@@ -937,6 +946,9 @@ fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_tar
             }
 
             return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
         }));
     }
 
@@ -1653,7 +1665,6 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
 
     fapi2::buffer<uint8_t> l_reg_contents;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    static constexpr uint8_t PMIC0 = 0;
     pmic_enable_return_code_data l_rc_data;
 
     // Grab the targets as a struct, if they exist
@@ -1675,10 +1686,10 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
 
     // Validate the vendor_id and revision
     // 1a, Validate pmic vendor id
-    FAPI_TRY((mss::pmic::check::matching_vendors(i_ocmb_target, l_target_info.iv_pmic_dt_map[PMIC0].iv_pmic)));
+    FAPI_TRY((mss::pmic::check::matching_vendors(i_ocmb_target, l_target_info.iv_pmic_dt_map[0].iv_pmic)));
 
     // 1b, Validate and return revision number
-    FAPI_TRY(validate_pmic_revisions(i_ocmb_target, l_target_info.iv_pmic_dt_map[PMIC0].iv_pmic));
+    FAPI_TRY(validate_pmic_revisions(i_ocmb_target, l_target_info.iv_pmic_dt_map[0].iv_pmic));
 
     // Second, initialize PMIC
     FAPI_TRY(mss::pmic::ddr5::initialize_pmic(i_ocmb_target, l_target_info));
