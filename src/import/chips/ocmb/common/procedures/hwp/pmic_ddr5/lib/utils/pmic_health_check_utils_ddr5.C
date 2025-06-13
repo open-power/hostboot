@@ -35,6 +35,7 @@
 // EKB-Mirror-To: hostboot
 
 #include <fapi2.H>
+#include <lib/utils/pmic_common_utils_ddr5.H>
 #include <lib/utils/pmic_health_check_utils_ddr5.H>
 #include <lib/utils/pmic_periodic_telemetry_utils_ddr5.H>
 #include <lib/i2c/i2c_pmic.H>
@@ -62,9 +63,24 @@ void reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_in
         mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, l_dt_count]
                                            (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
         {
-            // Clear breadcrumb reg
-            mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::ALL_GOOD);
+            uint8_t l_relative_pmic_id = 0;
+            uint8_t l_pmic_dt_array_index = 0;
+            bool l_index_found = false;
+
+            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_dt, l_relative_pmic_id));
+            l_index_found = get_pmic_dt_index_number(io_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
+
+            if(l_index_found)
+            {
+                // Clear breadcrumb reg
+                mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], DT_REGS::BREADCRUMB,
+                mss::pmic::ddr5::bread_crumb::ALL_GOOD);
+            }
+
             return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
         });
 
         // Resetting the struct bread crumb variable
@@ -511,10 +527,20 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
             using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
             using FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
             fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ];
+            uint8_t l_pmic_dt_array_index = 0;
+            uint8_t l_relative_pmic_id = 0;
+            bool l_index_found = false;
 
-            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Reading PMIC data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Reading PMIC data", GENTARGTID(i_pmic));
 
-            mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R04, l_data_buffer);
+            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_pmic, l_relative_pmic_id));
+            l_index_found = get_pmic_dt_index_number(io_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
+
+            if(l_index_found)
+            {
+                mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], REGS::R04,
+                l_data_buffer);
+            }
 
             io_health_check_info.iv_pmic[l_pmic_count].iv_r04 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0];
             io_health_check_info.iv_pmic[l_pmic_count].iv_r05 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
@@ -533,7 +559,16 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
             io_health_check_info.iv_pmic[l_pmic_count].iv_swd_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_11] *
             mss::pmic::ddr5::CURRENT_MULTIPLIER;
 
-            mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R73, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+            for (auto l_count = 0; l_count < NUMBER_PMIC_REGS_READ; l_count++)
+            {
+                l_data_buffer[l_count].flush<0>();
+            }
+
+            if(l_index_found)
+            {
+                mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], TPS_REGS::R73,
+                l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+            }
 
             if (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].getBit<FIELDS::R73_VIN_OK_Z>())
             {
@@ -543,6 +578,9 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
             io_health_check_info.iv_pmic[l_pmic_count].iv_r73_status_5 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].reverse();
 
             return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
         });
     }
 }
@@ -563,25 +601,42 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     {
         // If the pmic is not overridden to disabled, run the below code
         mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, l_dt_count, &io_health_check_info]
-                                           (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_pmic) -> fapi2::ReturnCode
+                                           (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
         {
             static constexpr uint8_t BITS_PER_BYTE = 8;
             using DT_REGS  = mss::dt::regs;
             fapi2::buffer<uint8_t> l_data_buffer[NUMBER_DT_REGS_READ];
             fapi2::buffer<uint8_t> l_data_breadcrumb = 0;
+            uint8_t l_pmic_dt_array_index = 0;
+            uint8_t l_relative_pmic_id = 0;
+            bool l_index_found = false;
 
-            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Reading DT data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt));
+            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_dt, l_relative_pmic_id));
+            l_index_found = get_pmic_dt_index_number(io_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
 
-            mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RO_INPUTS_1, l_data_buffer);
-            io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_1 = (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
+            if(l_index_found)
+            {
+                FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Reading DT data", GENTARGTID(i_dt));
 
-            mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RO_INPUTS_0, l_data_buffer);
-            io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_0 = (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
+                mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index],
+                DT_REGS::RO_INPUTS_1, l_data_buffer);
+                io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_1 = (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0] <<
+                BITS_PER_BYTE) | l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
 
-            mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, l_data_breadcrumb);
-            io_health_check_info.iv_dt[l_dt_count].iv_breadcrumb = l_data_breadcrumb;
+                mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index],
+                DT_REGS::RO_INPUTS_0, l_data_buffer);
+                io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_0 = (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0] <<
+                BITS_PER_BYTE) | l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
+
+                mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], DT_REGS::BREADCRUMB,
+                l_data_breadcrumb);
+                io_health_check_info.iv_dt[l_dt_count].iv_breadcrumb = l_data_breadcrumb;
+            }
 
             return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
         });
     }
 }
@@ -696,18 +751,32 @@ void collect_additional_pmic_data(mss::pmic::ddr5::target_info_redundancy_ddr5& 
         {
             fapi2::buffer<uint8_t> l_pmic_buffer;
             fapi2::buffer<uint8_t> l_pmic_buffer1[NUM_BYTES_TO_READ];
+            uint8_t l_pmic_dt_array_index = 0;
+            uint8_t l_relative_pmic_id = 0;
+            bool l_index_found = false;
 
-            mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R2F, l_pmic_buffer);
-            io_additional_info.iv_pmic[l_pmic_count].iv_r2f_pmic_config = l_pmic_buffer;
+            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_pmic, l_relative_pmic_id));
+            l_index_found = get_pmic_dt_index_number(io_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
 
-            mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R32, l_pmic_buffer1);
-            io_additional_info.iv_pmic[l_pmic_count].iv_r32_pmic_enable = l_pmic_buffer1[0];
-            io_additional_info.iv_pmic[l_pmic_count].iv_r33_temp_status = l_pmic_buffer1[1];
+            if(l_index_found)
+            {
+                mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], REGS::R2F, l_pmic_buffer);
+                io_additional_info.iv_pmic[l_pmic_count].iv_r2f_pmic_config = l_pmic_buffer;
 
-            mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_pmic_buffer);
-            io_additional_info.iv_pmic[l_pmic_count].iv_r9c_on_off_config = l_pmic_buffer;
+                mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], REGS::R32,
+                l_pmic_buffer1);
+                io_additional_info.iv_pmic[l_pmic_count].iv_r32_pmic_enable = l_pmic_buffer1[0];
+                io_additional_info.iv_pmic[l_pmic_count].iv_r33_temp_status = l_pmic_buffer1[1];
+
+                mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL,
+                l_pmic_buffer);
+                io_additional_info.iv_pmic[l_pmic_count].iv_r9c_on_off_config = l_pmic_buffer;
+            }
 
             return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
         });
     }
 }
@@ -734,32 +803,52 @@ void collect_additional_dt_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
                                            (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
         {
             fapi2::buffer<uint8_t> l_dt_buffer[NUM_BYTES_TO_READ];
+            uint8_t l_pmic_dt_array_index = 0;
+            uint8_t l_relative_pmic_id = 0;
+            bool l_index_found = false;
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::OPS_STATE, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_r90_ops_state = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_dt, l_relative_pmic_id));
+            l_index_found = get_pmic_dt_index_number(io_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FIRST_FAULT_STATUS_0, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_r96_first_faults_status_0 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+            if(l_index_found)
+            {
+                mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], DT_REGS::OPS_STATE,
+                l_dt_buffer);
+                io_additional_info.iv_dt[l_dt_count].iv_r90_ops_state = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FIRST_FAULT_STATUS_1, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_r98_first_faults_status_1 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+                mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index],
+                DT_REGS::FIRST_FAULT_STATUS_0, l_dt_buffer);
+                io_additional_info.iv_dt[l_dt_count].iv_r96_first_faults_status_0 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FAULTS_STATUS_0, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_r92_faults_status_0 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+                mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index],
+                DT_REGS::FIRST_FAULT_STATUS_1, l_dt_buffer);
+                io_additional_info.iv_dt[l_dt_count].iv_r98_first_faults_status_1 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FAULTS_STATUS_1, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_r94_faults_status_1 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+                mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], DT_REGS::FAULTS_STATUS_0,
+                l_dt_buffer);
+                io_additional_info.iv_dt[l_dt_count].iv_r92_faults_status_0 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::INFET_POWER_MTP_ADDR, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_ra6_infet_mpt_addr = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+                mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], DT_REGS::FAULTS_STATUS_1,
+                l_dt_buffer);
+                io_additional_info.iv_dt[l_dt_count].iv_r94_faults_status_1 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::NVM_DATA, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_ra8_nvm_data = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+                mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index],
+                DT_REGS::INFET_POWER_MTP_ADDR, l_dt_buffer);
+                io_additional_info.iv_dt[l_dt_count].iv_ra6_infet_mpt_addr = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VCC_VIN_VINP, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_rb4_vcc_vin_vinp = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+                mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], DT_REGS::NVM_DATA,
+                l_dt_buffer);
+                io_additional_info.iv_dt[l_dt_count].iv_ra8_nvm_data = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+
+                mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], DT_REGS::VCC_VIN_VINP,
+                l_dt_buffer);
+                io_additional_info.iv_dt[l_dt_count].iv_rb4_vcc_vin_vinp = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+            }
 
             return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
         });
     }
 }
@@ -955,6 +1044,43 @@ bool mnfg_mode_check_failed_pmics (const mss::pmic::n_mode i_failed_pmics[mss::d
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
+/// @param[in] i_dt_number DT number in the array to reset
+///
+void check_and_reset_breadcrumb_helper(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                                       const uint8_t i_dt_number)
+{
+    mss::pmic::ddr5::run_if_present_dt(io_target_info, i_dt_number, [&io_target_info]
+                                       (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
+    {
+        using DT_REGS  = mss::dt::regs;
+        uint8_t l_pmic_dt_array_index = 0;
+        uint8_t l_relative_pmic_id = 0;
+        bool l_index_found = false;
+
+        FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_dt, l_relative_pmic_id));
+        l_index_found = get_pmic_dt_index_number(io_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
+
+        if(l_index_found)
+        {
+            mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[l_pmic_dt_array_index], DT_REGS::BREADCRUMB,
+            mss::pmic::ddr5::bread_crumb::ALL_GOOD);
+        }
+
+        return fapi2::FAPI2_RC_SUCCESS;
+
+    fapi_try_exit_lambda:
+        return fapi2::current_err;
+    });
+    // Resetting the struct bread crumb variable
+    io_health_check_info.iv_dt[i_dt_number].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+}
+
+///
+/// @brief Resets breadcrumb for PMIC/DT pair if both PMIC and DT states are ALL_GOOD
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
 /// @param[in] i_mnfg_thresholds mnfg attribute flag
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
@@ -963,7 +1089,6 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
         const bool i_mnfg_thresholds)
 {
     using CONSTS = mss::dt::dt_i2c_devices;
-    using DT_REGS  = mss::dt::regs;
     uint8_t l_failed_pmic_number = 0;
     mss::pmic::ddr5::additional_n_mode_telemetry_data l_additional_info;
 
@@ -978,10 +1103,7 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_pmic_state
         && !io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state )
     {
-        mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT0], DT_REGS::BREADCRUMB,
-                                      mss::pmic::ddr5::bread_crumb::ALL_GOOD);
-        // Resetting the struct bread crumb variable
-        io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT0].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        check_and_reset_breadcrumb_helper(io_target_info, io_health_check_info, CONSTS::DT0);
     }
     else
     {
@@ -993,10 +1115,7 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_pmic_state
         && !io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state )
     {
-        mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT1], DT_REGS::BREADCRUMB,
-                                      mss::pmic::ddr5::bread_crumb::ALL_GOOD);
-        // Resetting the struct bread crumb variable
-        io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT1].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        check_and_reset_breadcrumb_helper(io_target_info, io_health_check_info, CONSTS::DT1);
     }
     else
     {
@@ -1008,10 +1127,7 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_pmic_state
         && !io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state )
     {
-        mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT2], DT_REGS::BREADCRUMB,
-                                      mss::pmic::ddr5::bread_crumb::ALL_GOOD);
-        // Resetting the struct bread crumb variable
-        io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT2].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        check_and_reset_breadcrumb_helper(io_target_info, io_health_check_info, CONSTS::DT2);
     }
     else
     {
@@ -1023,10 +1139,7 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_pmic_state
         && !io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt_state )
     {
-        mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT3], DT_REGS::BREADCRUMB,
-                                      mss::pmic::ddr5::bread_crumb::ALL_GOOD);
-        // Resetting the struct bread crumb variable
-        io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT3].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        check_and_reset_breadcrumb_helper(io_target_info, io_health_check_info, CONSTS::DT3);
     }
     else
     {

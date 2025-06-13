@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -381,6 +381,17 @@ bool mnfg_mode_check_failed_pmics (const mss::pmic::n_mode i_failed_pmics[mss::d
                                    mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                                    mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
                                    uint8_t& io_failed_pmic_number);
+
+///
+/// @brief Resets breadcrumb for PMIC/DT pair if both PMIC and DT states are ALL_GOOD
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @param[in] i_dt_number DT number in the array to reset
+///
+void check_and_reset_breadcrumb_helper(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                                       const uint8_t i_dt_number);
 
 ///
 /// @brief Resets breadcrumb for PMIC/DT pair if both PMIC and DT states are ALL_GOOD
