@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,9 @@ target_info_redundancy_ddr5::target_info_redundancy_ddr5(const std::vector<fapi2
     iv_number_of_target_infos_present = 0;
     const uint8_t NUM_GENERIC_I2C_DEV = i_adc.size();
     constexpr auto NUM_PRIMARY_PMICS = CONSTS::NUM_PRIMARY_PMICS_DDR5;
+    constexpr auto NUM_MAX_PMICS = CONSTS::NUM_PMICS_4U;
+    constexpr auto NUM_BITS_IN_A_BYTE = 8;
+    constexpr auto MAX_BIT_NUMBER = 7;
 
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmics[0]);
 
@@ -151,6 +154,44 @@ target_info_redundancy_ddr5::target_info_redundancy_ddr5(const std::vector<fapi2
 
     iv_ocmb = l_ocmb;
 
+    // Mark the NOT_PRESENT PMIC/DT pair as being in n_mode
+    // We need to do this so that run_if_present() skips this pair
+    // when PMICs/Dts are looped over
+    if(iv_number_of_target_infos_present != CONSTS::NUM_PMICS_4U)
+    {
+        for(auto l_bit  = 0; l_bit < NUM_BITS_IN_A_BYTE; l_bit ++)
+        {
+            if(!iv_pmic_dt_present.getBit(l_bit))
+            {
+                // We are breaking from here as we are sure we have received at least 3 pairs at this point
+                // and want to mark the other pair as n_mode if needed
+                // Had to do this to convert back from fapi style to PMIC style
+                auto l_count = MAX_BIT_NUMBER - l_bit;
+                // Log the not received pmic/dt target
+                FAPI_ASSERT_NOEXIT((false),
+                                   fapi2::INCOMPLETE_PMIC_DT_DDR5_TARGET_CONFIG(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_OCMB_TARGET(l_ocmb)
+                                   .set_NUM_PMICS(iv_number_of_target_infos_present)
+                                   .set_EXPECTED_MAX_PMICS(NUM_MAX_PMICS)
+                                   .set_PRESENT_PMIC_DT_TARGETS(iv_pmic_dt_present),
+                                   GENTARGTIDFORMAT " pmic_enable given fewer targets than full redundant set. "
+                                   "Given %u PMICs and DTs. Present PMIC/DT targets 0x%02X "
+                                   "DIMM will boot into n_mode",
+                                   GENTARGTID(l_ocmb),
+                                   iv_number_of_target_infos_present,
+                                   iv_pmic_dt_present);
+
+                // Set back to success
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+                FAPI_TRY(mss::attr::set_n_mode_helper(iv_ocmb,
+                                                      (l_count % CONSTS::NUM_PMICS_4U),
+                                                      mss::pmic::n_mode::N_MODE));
+                break;
+            }
+        }
+    }
+
     return;
 
 fapi_try_exit:
@@ -172,6 +213,33 @@ target_info_redundancy_ddr5::target_info_redundancy_ddr5(const fapi2::Target<fap
         mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_ocmb),
         o_rc)
 {}
+
+///
+/// @brief Get index number of the PMIC/DT target from iv_pmic_dt_map array based on the
+///        target's relative position
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_rel_pos rel pos of the target
+/// @param[in,out] io_index_number index of the target in the array
+/// @return bool to indicate if target found in array
+///
+bool get_pmic_dt_index_number(const target_info_redundancy_ddr5& i_target_info,
+                              const uint8_t i_rel_pos, uint8_t& io_index_number)
+{
+    bool l_index_found = false;
+
+    for(uint8_t l_index = 0; l_index < i_target_info.iv_number_of_target_infos_present; l_index++)
+    {
+        if(i_rel_pos == i_target_info.iv_pmic_dt_map[l_index].iv_rel_pos)
+        {
+            io_index_number = l_index;
+            l_index_found = true;
+            break;
+        }
+    }
+
+    return l_index_found;
+}
 
 ///
 /// @brief Helper function to get the minimum vin bulk threshold
@@ -505,13 +573,13 @@ void dt_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic_dt, const uint
 ///
 /// @brief Get the nominal rail voltage of a JEDEC-compliant PMIC via attribute
 ///
-/// @param[in] i_target_info target info struct
+/// @param[in] i_pmic_target pmic target
 /// @param[in] i_pmic_id PMIC being adressed in sorted array
 /// @param[in] i_rail rail to read from
 /// @param[out] o_nominal_voltage voltage calculated
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
 ///
-fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_target_info,
+fapi2::ReturnCode get_nominal_voltage_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
         const uint8_t i_pmic_id,
         const mss::pmic::rail i_rail,
         uint32_t& o_nominal_voltage)
@@ -534,32 +602,30 @@ fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_
     fapi2::buffer<uint8_t> l_voltage_range_reg_contents;
     fapi2::buffer<uint8_t> l_pmic_vid_offset_coarse_reg;
 
-    const auto& l_pmic_target = i_target_info.iv_pmic_dt_map[i_pmic_id].iv_pmic;
-
-    FAPI_TRY(mss::pmic::pmic_is_ti(l_pmic_target, l_pmic_is_ti));
+    FAPI_TRY(mss::pmic::pmic_is_ti(i_pmic_target, l_pmic_is_ti));
 
     // If TI PMIC get the revision and height
     if (l_pmic_is_ti)
     {
-        FAPI_TRY(mss::pmic::i2c::reg_read(l_pmic_target, REGS::R3B_REVISION, l_pmic_rev));
+        FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, l_pmic_rev));
         FAPI_ASSERT(l_pmic_rev >= TPS_CONSTS::TI_REV_23,
                     fapi2::PMIC_NOT_DDR5_REVISION().
                     set_PMIC_REVISION(l_pmic_rev).
-                    set_PMIC_TARGET(l_pmic_target),
-                    GENTARGTIDFORMAT " PMIC is not DDR5 revision %d exiting get_nominal_voltage_ddr5", GENTARGTID(l_pmic_target),
+                    set_PMIC_TARGET(i_pmic_target),
+                    GENTARGTIDFORMAT " PMIC is not DDR5 revision %d exiting get_nominal_voltage_ddr5", GENTARGTID(i_pmic_target),
                     l_pmic_rev);
     }
     else
     {
-        FAPI_INF(GENTARGTIDFORMAT " PMIC is not from TI, exiting get_nominal_voltage_ddr5", GENTARGTID(l_pmic_target));
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " PMIC is not from TI, exiting get_nominal_voltage_ddr5", GENTARGTID(i_pmic_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY(mss::pmic::calculate_voltage_bitmap_from_attr(l_pmic_target, l_id, i_rail, l_voltage_setting));
+    FAPI_TRY(mss::pmic::calculate_voltage_bitmap_from_attr(i_pmic_target, l_id, i_rail, l_voltage_setting));
 
     // Unlock register R78 for reading for TPS53831 (TI revision >= 0x23)
-    FAPI_TRY(mss::pmic::status::unlock_pmic_r70_to_ra3(l_pmic_target));
-    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic_target, TPS_REGS::R78_VID_OFFSET_COARSE,
+    FAPI_TRY(mss::pmic::status::unlock_pmic_r70_to_ra3(i_pmic_target));
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, TPS_REGS::R78_VID_OFFSET_COARSE,
              l_pmic_vid_offset_coarse_reg));
 
     // Identify range for R78
@@ -600,8 +666,8 @@ fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_
     // If R78 is not used to define range then get range from R2B
     if (!l_use_R78_for_range)
     {
-        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic_target, REGS::R2B, l_voltage_range_reg_contents),
-                 "get_nominal_voltage_ddr5: Error reading 0x%02hhX of PMIC " GENTARGTIDFORMAT, REGS::R2B, GENTARGTID(l_pmic_target));
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2B, l_voltage_range_reg_contents),
+                 "get_nominal_voltage_ddr5: Error reading 0x%02hhX of PMIC " GENTARGTIDFORMAT, REGS::R2B, GENTARGTID(i_pmic_target));
 
         // Identify range for R2B
         l_range_selection = l_voltage_range_reg_contents.getBit(mss::pmic::VOLT_RANGE_FLDS[i_rail]);
@@ -627,8 +693,8 @@ fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_
     // Get nominial voltage using: range_min + (step * setting)
     o_nominal_voltage = l_range_min_value + (CONSTS::VOLT_STEP * l_voltage_setting);
 
-    FAPI_INF(GENTARGTIDFORMAT " Rail %u Nominal voltage: %lumV", GENTARGTID(l_pmic_target), i_rail,
-             o_nominal_voltage);
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Rail %u Nominal voltage: %lumV", GENTARGTID(i_pmic_target), i_rail,
+                    o_nominal_voltage);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -654,15 +720,74 @@ uint8_t calculate_ov_threshold_voltage(const uint32_t i_voltage)
 }
 
 ///
-/// @brief Updates OV threshold voltages in respective dt's per voltage domain
-/// @param i_ocmb_target OCMB Target
-/// @param i_volt_domain Voltage domain to ensure we're setting the proper rails
-/// @param i_voltage Voltage being set to PMIC
+/// @brief Updates OV threshold voltages in respective dt's for VDD domain
+/// @param[in] i_dt_target DT Target
+/// @param[in] i_dt_rel_pos relative position of DT target
+/// @param[in] i_voltage Voltage being set to PMIC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note With the i2c changes recently done to not do contiguous writes for DT, we see the DT OV thresholds get programmed by the pmic
+/// bias tool by writing to R5C first and then R5D. Since the OV threshold bits come from both R5C and R5D, when R5C gets programmed
+/// we can end up with a threshold value that causes the VIN_NOT_OK error. If the upper bits (15:8) are programmed first (ie.  R5B or R5D)
+/// followed by the lower bits (7:0) (ie.  R5A or R5C) then that would work since the upper bits are more significant. Hence we need to
+/// write the bytes contiguously when this function gets called from pmic_bias_tool. The reading/writing can be done as single byte in case of
+/// pmic_enable() as the PMICs are not enabled by the time this function gets called. To mitigate this issue, i_write_read_non_contiguous
+/// has been used. By default this parameter has been set to use single byte operations.
+/// This function is only used for pmic_enable().
+///
+fapi2::ReturnCode update_dt_vdd_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt_target,
+        const uint8_t i_dt_rel_pos,
+        const uint32_t i_voltage)
+{
+    using DT_REGS  = mss::dt::regs;
+    using DT_FIELDS  = mss::dt::fields;
+    using DT_POS  = mss::dt::dt_i2c_devices;
+    static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
+    const auto l_threshold_voltage = calculate_ov_threshold_voltage(i_voltage);
+    fapi2::buffer<uint8_t> l_dt_thresh_buffer[NUM_BYTES_TO_WRITE];
+
+    // We do not want to run on DT2 as VDD is not supported by PMIC/DT2 pair
+    if (i_dt_rel_pos == DT_POS::DT2)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // DT0, DT1, DT3 on rail C
+    FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(i_dt_target, DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
+
+    // Insert data to first & second buffer for rail A/C
+    l_dt_thresh_buffer[1].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_FIRST_BYTE, DT_FIELDS::THRESHOLD_AC_FIRST_BYTE_LEN>
+    (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
+    l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE , DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
+    (l_threshold_voltage);
+
+    FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(i_dt_target, DT_REGS::OV_THRESHOLD_CD,
+             l_dt_thresh_buffer, mss::adc::i2c::byte_read::NON_CONTIGUOUS));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Updates OV threshold voltages in respective dt's per voltage domain
+/// @param[in] i_ocmb_target OCMB Target
+/// @param[in] i_volt_domain Voltage domain to ensure we're setting the proper rails
+/// @param[in] i_voltage Voltage being set to PMIC
+/// @param[in] i_write_read_non_contiguous Read/write I2C contiguously or single byte
+///            Set to single byte by default so as not to change the code in pmic_enable()
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note With the i2c changes recently done to not do contiguous writes for DT, we see the DT OV thresholds get programmed by the pmic
+/// bias tool by writing to R5C first and then R5D. Since the OV threshold bits come from both R5C and R5D, when R5C gets programmed
+/// we can end up with a threshold value that causes the VIN_NOT_OK error. If the upper bits (15:8) are programmed first (ie.  R5B or R5D)
+/// followed by the lower bits (7:0) (ie.  R5A or R5C) then that would work since the upper bits are more significant. Hence we need to
+/// write the bytes contiguously when this function gets called from pmic_bias_tool. The reading/writing can be done as single byte in case of
+/// pmic_enable() as the PMICs are not enabled by the time this function gets called. To mitigate this issue, i_write_read_non_contiguous
+/// has been used. By default this parameter has been set to use single byte operations.
+/// This function is only used in lab tools.
 ///
 fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                       const uint8_t i_volt_domain,
-                                      const uint32_t i_voltage)
+                                      const uint32_t i_voltage,
+                                      const bool i_write_read_non_contiguous)
 {
     using DT_REGS  = mss::dt::regs;
     using DT_FIELDS  = mss::dt::fields;
@@ -732,7 +857,8 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT1], DT_REGS::OV_THRESHOLD_CD,
-                     l_dt_thresh_buffer));
+                     l_dt_thresh_buffer, i_write_read_non_contiguous));
+
             // DT 3
             FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT3], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
 

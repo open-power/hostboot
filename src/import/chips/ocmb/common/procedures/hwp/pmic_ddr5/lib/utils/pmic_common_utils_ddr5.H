@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,7 +210,7 @@ const std::vector<std::pair<uint16_t, uint8_t>> periodic_telemetry_data_struct_m
 const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_struct_meta_data =
 {
     //health_check_telemetry_data iv_health_check
-    // uinit8_t => aggregate_state iv_aggregate_state = aggregate_state::N_PLUS_1
+    // uint8_t => aggregate_state iv_aggregate_state = aggregate_state::N_PLUS_1
     // uint8_t iv_revision
     { 2, 1},
     // uint16_t reserved
@@ -504,11 +504,11 @@ fapi2::ReturnCode run_if_present(
                 l_num_pmic_4u,
                 i_pmic_id);
 
-    for (l_count = 0; l_count <= i_target_info.iv_number_of_target_infos_present; l_count++)
+    for (l_count = 0; l_count < i_target_info.iv_number_of_target_infos_present; l_count++)
     {
         if( i_pmic_id == i_target_info.iv_pmic_dt_map[l_count].iv_rel_pos)
         {
-            l_pmic = i_target_info.iv_pmic_dt_map[i_pmic_id].iv_pmic;
+            l_pmic = i_target_info.iv_pmic_dt_map[l_count].iv_pmic;
             l_pmic_found = true;
             break;
         }
@@ -525,8 +525,8 @@ fapi2::ReturnCode run_if_present(
     FAPI_TRY(mss::pmic::disabled(l_pmic, l_disabled));
 
     // PMIC is present but not functional. We are checking this via ATTR_MEM_PMIC_4U_N_MODE attribute
-    // Passing l_count here for PMIC ID as l_count represents the rel_pos of that PMIC
-    FAPI_TRY(mss::attr::get_n_mode_helper(l_ocmb, l_count, l_pmic_dt_not_responding));
+    // Passing i_pmic_id here for PMIC ID as i_pmic_id represents the rel_pos of that PMIC
+    FAPI_TRY(mss::attr::get_n_mode_helper(l_ocmb, i_pmic_id, l_pmic_dt_not_responding));
 
     // PMIC target provided here. Other arguments to be provided via capture list
     if ((!l_disabled) && (!l_pmic_dt_not_responding)
@@ -575,12 +575,12 @@ fapi2::ReturnCode run_if_present_dt(
                 l_num_dt_4u,
                 i_dt_id);
 
-    for (l_count = 0; l_count <= i_target_info.iv_number_of_target_infos_present; l_count++)
+    for (l_count = 0; l_count < i_target_info.iv_number_of_target_infos_present; l_count++)
     {
         if( i_dt_id == i_target_info.iv_pmic_dt_map[l_count].iv_rel_pos)
         {
-            l_dt = i_target_info.iv_pmic_dt_map[i_dt_id].iv_dt;
-            l_pmic = i_target_info.iv_pmic_dt_map[i_dt_id].iv_pmic;
+            l_dt = i_target_info.iv_pmic_dt_map[l_count].iv_dt;
+            l_pmic = i_target_info.iv_pmic_dt_map[l_count].iv_pmic;
             l_dt_found = true;
             break;
         }
@@ -599,8 +599,8 @@ fapi2::ReturnCode run_if_present_dt(
 
     // DT is present but not functional. Since we are treating PMIC and DT as a pair,
     // we are checking this via ATTR_MEM_PMIC_4U_N_MODE attribute
-    // Passing l_count here for DT ID as l_count represents the rel_pos of that DT
-    FAPI_TRY(mss::attr::get_n_mode_helper(l_ocmb, l_count, l_pmic_dt_not_responding));
+    // Passing i_dt_id here for DT ID as i_dt_id represents the rel_pos of that DT
+    FAPI_TRY(mss::attr::get_n_mode_helper(l_ocmb, i_dt_id, l_pmic_dt_not_responding));
 
     // DT target provided here. Other arguments to be provided via capture list
     if ((!l_disabled) && (!l_pmic_dt_not_responding)
@@ -612,6 +612,18 @@ fapi2::ReturnCode run_if_present_dt(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Get index number of the PMIC/DT target from iv_pmic_dt_map array based on the
+///        target's relative position
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_rel_pos rel pos of the target
+/// @param[in,out] io_index_number index of the target in the array
+/// @return bool to indicate if target found in array
+///
+bool get_pmic_dt_index_number(const target_info_redundancy_ddr5& i_target_info,
+                              const uint8_t i_rel_pos, uint8_t& io_index_number);
 
 ///
 /// @brief Helper function to get the minimum vin bulk threshold
@@ -891,13 +903,13 @@ void dt_reg_write_contiguous(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t
 ///
 /// @brief Get the nominal rail voltage of a JEDEC-compliant PMIC via attribute
 ///
-/// @param[in] i_target_info target info struct
+/// @param[in] i_pmic_target pmic target
 /// @param[in] i_pmic_id PMIC being adressed in sorted array
 /// @param[in] i_rail rail to read from
 /// @param[out] o_nominal_voltage voltage calculated
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
 ///
-fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_target_info,
+fapi2::ReturnCode get_nominal_voltage_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
         const uint8_t i_pmic_id,
         const mss::pmic::rail i_rail,
         uint32_t& o_nominal_voltage);
@@ -910,15 +922,43 @@ fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_
 uint8_t calculate_ov_threshold_voltage(const uint32_t i_voltage);
 
 ///
-/// @brief Updates OV threshold voltages in respective dt's per voltage domain
-/// @param i_ocmb_target OCMB Target
-/// @param i_volt_domain Voltage domain to ensure we're setting the proper rails
-/// @param i_voltage Voltage being set to PMIC
+/// @brief Updates OV threshold voltages in respective dt's for VDD domain
+/// @param[in] i_dt_target DT Target
+/// @param[in] i_dt_rel_pos relative position of DT target
+/// @param[in] i_voltage Voltage being set to PMIC
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note With the i2c changes recently done to not do contiguous writes for DT, we see the DT OV thresholds get programmed by the pmic
+/// bias tool by writing to R5C first and then R5D. Since the OV threshold bits come from both R5C and R5D, when R5C gets programmed
+/// we can end up with a threshold value that causes the VIN_NOT_OK error. If the upper bits (15:8) are programmed first (ie.  R5B or R5D)
+/// followed by the lower bits (7:0) (ie.  R5A or R5C) then that would work since the upper bits are more significant. Hence we need to
+/// write the bytes contiguously when this function gets called from pmic_bias_tool. The reading/writing can be done as single byte in case of
+/// pmic_enable() as the PMICs are not enabled by the time this function gets called. To mitigate this issue, i_write_read_non_contiguous
+/// has been used. By default this parameter has been set to use single byte operations.
+///
+fapi2::ReturnCode update_dt_vdd_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt_target,
+        const uint8_t i_dt_rel_pos,
+        const uint32_t i_voltage);
+
+///
+/// @brief Updates OV threshold voltages in respective dt's per voltage domain
+/// @param[in] i_ocmb_target OCMB Target
+/// @param[in] i_volt_domain Voltage domain to ensure we're setting the proper rails
+/// @param[in] i_voltage Voltage being set to PMIC
+/// @param[in] i_write_read_non_contiguous Read/write I2C contiguously or single byte
+///            Set to single byte by default so as not to change the code in pmic_enable()
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note With the i2c changes recently done to not do contiguous writes for DT, we see the DT OV thresholds get programmed by the pmic
+/// bias tool by writing to R5C first and then R5D. Since the OV threshold bits come from both R5C and R5D, when R5C gets programmed
+/// we can end up with a threshold value that causes the VIN_NOT_OK error. If the upper bits (15:8) are programmed first (ie.  R5B or R5D)
+/// followed by the lower bits (7:0) (ie.  R5A or R5C) then that would work since the upper bits are more significant. Hence we need to
+/// write the bytes contiguously when this function gets called from pmic_bias_tool. The reading/writing can be done as single byte in case of
+/// pmic_enable() as the PMICs are not enabled by the time this function gets called. To mitigate this issue, i_write_read_non_contiguous
+/// has been used. By default this parameter has been set to use single byte operations.
 ///
 fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                       const uint8_t i_volt_domain,
-                                      const uint32_t i_voltage);
+                                      const uint32_t i_voltage,
+                                      const bool i_write_read_non_contiguous = mss::adc::i2c::byte_read::NON_CONTIGUOUS);
 } // ddr5
 } // pmic
 } // mss

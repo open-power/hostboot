@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,7 @@
     #define MSSTARGID(T) T.get()
     #include "index.H"
 #else
+    #include <generic/memory/lib/mss_generic_attribute_getters.H>
     #include <generic/memory/lib/utils/pos.H>
     #include <generic/memory/lib/utils/c_str.H>
     #include <generic/memory/lib/utils/index.H>
@@ -61,12 +62,61 @@ namespace pmic
 namespace i2c
 {
 
+
+///
+/// @brief Function to handle retry and error handling for PMIC i2c writes
+///
+/// @tparam T target type
+/// @param[in] i_target OCMB type input target
+/// @param[in] i_command register command/data for the I2C transaction
+/// @param[in] i_addr address value
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<fapi2::TargetType T>
+inline fapi2::ReturnCode putI2C_retry_and_error_handling_loop(const fapi2::Target<T>& i_target,
+        const std::vector<uint8_t>& i_command, const uint64_t i_addr)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    const uint64_t RETRIES = 11;
+
+    for(uint8_t l_retries = 0; l_retries < RETRIES; l_retries++)
+    {
+        l_rc = fapi2::putI2c(i_target, i_command);
+
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            FAPI_TRY(fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS));
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        FAPI_ERR("putI2C returned error for WRITE operation to 0x%02X on " TARGTIDFORMAT, i_addr, MSSTARGID(i_target));
+    }
+
+    return l_rc;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/// @note This file is not be ported to ekb-src as there are system specific changes
+/// in the respective repos.
+
 ///
 /// @brief Add provided opcode if the Target is an ADC
 ///
 /// @param[in] i_target GENERICI2CRESPONDER target
 /// @param[in] i_opcode opcode to add
 /// @param[in,out] io_command command vector
+/// @note This function is different from P code for the below reason:
+///  There were issues with the ADC setup, mss::index gave absolute pos instead of relative pos
+///  so that if statement was only being met on the DIMM in channel 0, and the other 7 DIMMs under a processor
+///  didn't get their ADCs initialized
 ///
 inline void add_adc_opcode(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
                            const mss::adc::i2c::opcode i_opcode,
@@ -113,18 +163,13 @@ inline fapi2::ReturnCode reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE
     // #ifndef needs to be here because P10 SBE doesn't have ATTR_MEM_EFF_DRAM_GEN, and this is ok since P10 SBE only runs ddr4 pmic code
     // This #ifndef will be removed in ekb-src
 #ifndef __PPE__
-    static const uint8_t RETRIES = 11;
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     uint8_t l_dram_gen = 0;
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    // TODO: ZEN-MST:2632 Replace indexed DRAM gen reading with DRAM gen accessor
     // Get the dram generation
-    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
     {
-        uint8_t l_value[2] = {};
-        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_GEN, l_port, l_value) );
-        l_dram_gen = l_value[0];
+        FAPI_TRY(mss::attr::get_dram_gen(l_dimm, l_dram_gen));
         break;
     }
 
@@ -137,34 +182,14 @@ inline fapi2::ReturnCode reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE
 
         for(auto l_count = 0; l_count < i_length; l_count++, l_addr++)
         {
-            l_rc = fapi2::FAPI2_RC_SUCCESS;
             std::vector<uint8_t> l_command;
             l_command.push_back(l_addr);
             l_command.push_back(i_data_buffer[l_count]);
 
             // Retry for 10 times before returning error
-            for(auto l_retries = 0; l_retries < RETRIES; l_retries++)
-            {
-                l_rc = fapi2::putI2c(i_target, l_command);
-
-                if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-                {
-                    // Delay for 1 ms
-                    fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
             // In case we have not found success after 10 retires, return the error
-            if(l_rc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                FAPI_ERR("putI2C returned error for WRITE operation to 0x%02X on " TARGTIDFORMAT,
-                         l_addr, MSSTARGID(i_target));
-                return l_rc;
-            }
+            FAPI_TRY(putI2C_retry_and_error_handling_loop(i_target, l_command, l_addr));
+
         }
     }
     else
@@ -248,43 +273,23 @@ inline fapi2::ReturnCode reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE
         const std::vector<uint8_t>& i_data_buffer,
         const uint8_t i_length)
 {
-    static const uint8_t RETRIES = 11;
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     auto l_addr = i_addr;
 
     for(auto l_count = 0; l_count < i_length; l_count++, l_addr++)
     {
-        l_rc = fapi2::FAPI2_RC_SUCCESS;
         std::vector<uint8_t> l_command;
         l_command.push_back(l_addr);
         l_command.push_back(i_data_buffer[l_count]);
 
         // Retry for 10 times before returning error
-        for(auto l_retries = 0; l_retries < RETRIES; l_retries++)
-        {
-            l_rc = fapi2::putI2c(i_target, l_command);
-
-            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                // Delay for 1 ms
-                fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
-            }
-            else
-            {
-                break;
-            }
-        }
-
         // In case we have not found success after 10 retires, return the error
-        if(l_rc != fapi2::FAPI2_RC_SUCCESS)
-        {
-            FAPI_ERR("putI2C returned error for WRITE operation to 0x%02X on " TARGTIDFORMAT,
-                     l_addr, MSSTARGID(i_target));
-            return l_rc;
-        }
+        FAPI_TRY(putI2C_retry_and_error_handling_loop(i_target, l_command, l_addr));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -373,12 +378,9 @@ inline fapi2::ReturnCode reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_
     // #ifndef needs to be here because P10 SBE doesn't have ATTR_MEM_EFF_DRAM_GEN, and this is ok since P10 SBE only runs ddr4 pmic code
     // This #ifndef will be removed in ekb-src
 #ifndef __PPE__
-    static const uint8_t RETRIES = 11;
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     uint8_t l_dram_gen = 0;
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    // TODO: ZEN-MST:2632 Replace indexed DRAM gen reading with DRAM gen accessor
     // Get the dram generation
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
     {
@@ -402,37 +404,15 @@ inline fapi2::ReturnCode reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             l_command.push_back(l_addr);
 
             // Retry for 10 times for putI2C before returning error
-            for(auto l_retries = 0; l_retries < RETRIES; l_retries++)
-            {
-                l_rc = fapi2::putI2c(i_target, l_command);
+            FAPI_TRY(putI2C_retry_and_error_handling_loop(i_target, l_command, l_addr));
 
-                if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-                {
-                    // Delay for 1 ms
-                    fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
-                }
-                else
-                {
-                    l_rc = fapi2::FAPI2_RC_SUCCESS;
-                    break;
-                }
-            }
+            l_command.clear();
 
-            if (l_rc == fapi2::FAPI2_RC_SUCCESS)
-            {
-                l_command.clear();
+            // Read 1 byte at a time
+            FAPI_TRY(fapi2::getI2c(i_target, mss::pmic::i2c::sizes::DATA_LENGTH, l_command, l_data),
+                     "i2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), l_addr);
+            io_data.push_back(l_data[0]);
 
-                // Read 1 byte at a time
-                FAPI_TRY(fapi2::getI2c(i_target, mss::pmic::i2c::sizes::DATA_LENGTH, l_command, l_data),
-                         "i2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), l_addr);
-                io_data.push_back(l_data[0]);
-            }
-            else
-            {
-                FAPI_ERR("putI2C returned error for WRITE operation to 0x%02X on " TARGTIDFORMAT,
-                         l_addr, MSSTARGID(i_target));
-                return l_rc;
-            }
         }
     }
     else
@@ -501,8 +481,6 @@ inline fapi2::ReturnCode reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_
         std::vector<uint8_t>& io_data,
         const uint8_t i_length)
 {
-    static const uint8_t RETRIES = 11;
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     auto l_addr = i_addr;
 
     for(auto l_count = 0; l_count < i_length; l_count++, l_addr++)
@@ -512,37 +490,15 @@ inline fapi2::ReturnCode reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_
         l_command.push_back(l_addr);
 
         // Retry for 10 times for putI2C before returning error
-        for(auto l_retries = 0; l_retries < RETRIES; l_retries++)
-        {
-            l_rc = fapi2::putI2c(i_target, l_command);
+        FAPI_TRY(putI2C_retry_and_error_handling_loop(i_target, l_command, l_addr));
 
-            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                // Delay for 1 ms
-                fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
-            }
-            else
-            {
-                l_rc = fapi2::FAPI2_RC_SUCCESS;
-                break;
-            }
-        }
+        l_command.clear();
 
-        if (l_rc == fapi2::FAPI2_RC_SUCCESS)
-        {
-            l_command.clear();
+        // Read 1 byte at a time
+        FAPI_TRY(fapi2::getI2c(i_target, mss::pmic::i2c::sizes::DATA_LENGTH, l_command, l_data),
+                 "i2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), l_addr);
+        io_data.push_back(l_data[0]);
 
-            // Read 1 byte at a time
-            FAPI_TRY(fapi2::getI2c(i_target, mss::pmic::i2c::sizes::DATA_LENGTH, l_command, l_data),
-                     "I2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), l_addr);
-            io_data.push_back(l_data[0]);
-        }
-        else
-        {
-            FAPI_ERR("putI2C returned error for WRITE operation to 0x%02X on " TARGTIDFORMAT,
-                     l_addr, MSSTARGID(i_target));
-            return l_rc;
-        }
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -709,21 +665,38 @@ fapi_try_exit:
 /// @param[in] i_target the PMIC/I2C/DT device target
 /// @param[in] i_addr starting register address to write to
 /// @param[in] i_data_buffer buffer of data to be writen to register addresses
+/// @param[in] i_write_single_or_contiguous Perform I2C Write operation contiguously or single byte.
+///            Set to single byte by default so as not to change the code in pmic_enabl()
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template <fapi2::TargetType T, size_t N>
 inline fapi2::ReturnCode reg_write_contiguous(const fapi2::Target<T>& i_target,
         const uint8_t i_addr,
-        const fapi2::buffer<uint8_t> (&i_data_buffer)[N])
+        const fapi2::buffer<uint8_t> (&i_data_buffer)[N],
+        const bool i_write_single_or_contiguous = mss::adc::i2c::byte_read::NON_CONTIGUOUS)
 {
     std::vector<uint8_t> l_data;
+
+    // PPE workaround as it does not support insert
+    if(i_write_single_or_contiguous == mss::adc::i2c::byte_read::CONTIGUOUS)
+    {
+        l_data.push_back(i_addr);
+    }
 
     for(uint32_t l_count = 0; l_count < N; l_count++)
     {
         l_data.push_back(uint8_t(i_data_buffer[l_count]));
     }
 
-    FAPI_TRY(mss::pmic::i2c::reg_write_helper(i_target, i_addr, l_data, N));
+    if(i_write_single_or_contiguous == mss::adc::i2c::byte_read::NON_CONTIGUOUS)
+    {
+        FAPI_TRY(mss::pmic::i2c::reg_write_helper(i_target, i_addr, l_data, N));
+    }
+    else
+    {
+        // Use fapi2 putI2c interface to execute command
+        FAPI_TRY(fapi2::putI2c(i_target, l_data));
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 

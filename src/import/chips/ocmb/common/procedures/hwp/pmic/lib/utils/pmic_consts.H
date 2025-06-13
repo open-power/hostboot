@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -722,6 +722,16 @@ enum opcode
     WRITE_CONTIGUOUS = 0x28,
     READ_CONTIGUOUS  = 0x30,
 };
+
+///
+/// @brief Data byte sent/received strategy
+///
+enum byte_read
+{
+    NON_CONTIGUOUS = 0,
+    CONTIGUOUS     = 1,
+};
+
 }; // ns i2c
 
 } // ns adc
