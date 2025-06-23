@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -639,6 +639,18 @@ void* host_discover_targets( void *io_pArgs )
 
     TARGETING::TargetHandleList l_procChips;
     TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
+
+    // Reset IS_IOSCM to allow th next loop to set it correctly
+    for(const auto & l_proc : l_procChips)
+    {
+      if(l_proc->getAttr<TARGETING::ATTR_IS_IOSCM>())
+      {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+          INFO_MRK"host_discover_targets: HUID 0x%.8x had ATTR_IS_IOSCM to true, resetting",
+          get_huid(l_proc));
+        l_proc->setAttr<TARGETING::ATTR_IS_IOSCM>(false);
+      }
+    }
 
     for(const auto & l_proc : l_procChips)
     {
