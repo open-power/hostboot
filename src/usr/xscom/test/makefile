@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -31,8 +31,6 @@ SCOM_PATH += ${ROOTPATH}/src/usr/xscom
 VPATH += ${SCOM_PATH}
 
 EXTRAINCDIR += ${SCOM_PATH}
-
-OBJS += xscom.o
 
 TESTS = *.H
 
