@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,7 @@ namespace Util
         UTIL_HLL_PARSE_TOC       = 0x24,      // HLLMgr::parseHLL
         UTIL_HLL_LOADLIDS        = 0x25,      // HLLMgr::loadLids
         UTIL_HLL_VERIFY_POWERVM  = 0x26,      // HLLMgr::verifyPowerVM
+        UTIL_TCE_CLEAR_MEM_RANGE = 0x27,      // clearMemoryRange TCE helper function
     };
 
     enum ReasonCode
