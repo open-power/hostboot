@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/hberrltypes.H>
 #include <util/utiltce.H>
 #include <util/align.H>
 #include <sys/mmio.h>
@@ -70,6 +71,127 @@ namespace TCE
 /************************************************************************/
 // TCE Table Address must be 4MB Aligned
 #define TCE_TABLE_ADDRESS_ALIGNMENT (4*MEGABYTE)
+
+
+/************************************************************************/
+// Helper Enums and Functions
+/************************************************************************/
+
+/*
+ * @brief Used to denote the possible ranges sent as input to clearMemoryRange
+ */
+enum rangeType_t {
+    RANGE_INVALID       = 0x00,
+    RANGE_TOC_ADDR      = 0x01,
+    RANGE_TOC_TMP_ADDR  = 0x02,
+    RANGE_HDAT_TMP_ADDR = 0x03,
+};
+
+/*
+ * @brief Helper function to clear a physical memory range.
+ *        It takes in a physical address and size to define the memory range.
+ *        It memory maps the range to a virtual address, zeroes out the memory,
+ *        and then unmaps the memory range.
+ *
+ * @param[in] i_rangeType Denotes the name of memory range, as recognized in vmmconst.h
+ *                        NOTE: only used for debug purposes.
+ *
+ * @param[in] i_physAddr  Physical address of the start of the memory range
+ *
+ * @param[in] i_size      Size of the memory range
+ *
+ * @return errlHndl_t     Return error log if unsuccessful
+ */
+errlHndl_t clearMemoryRange(const rangeType_t i_rangeType,
+                            const uint64_t    i_physAddr,
+                            const size_t      i_size)
+{
+    errlHndl_t errl = nullptr;
+
+    uint64_t l_virtAddr = 0;
+
+    TRACFCOMP(g_trac_tce,"clearMemoryRange(): range=%d, addr=0x%.16llX, size=0x%X",
+              i_rangeType, i_physAddr, i_size);
+
+    do{
+
+    // (1) Reserve a block of physical memory and get a pointer to
+    //     virtual memory to manipulate it
+    l_virtAddr = reinterpret_cast<uint64_t>(mm_block_map(
+                     reinterpret_cast<void*>(i_physAddr),
+                     i_size));
+
+    // Check that a valid virtual memory address was returned
+    if (reinterpret_cast<void*>(l_virtAddr) == nullptr)
+    {
+        // Invalid Virtual Address was returned
+        TRACFCOMP(g_trac_tce,ERR_MRK"clearMemoryRange: mm_block_map returned nullptr: "
+                  "range=%d, addr=0x%.16llX, size=0x%X",
+                  i_rangeType, i_physAddr, i_size);
+
+        /*@
+         * @errortype
+         * @moduleid         Util::UTIL_TCE_CLEAR_MEM_RANGE
+         * @reasoncode       Util::UTIL_ERC_BAD_PTR
+         * @userdata1        Physical starting address of the memory range
+         * @userdata2[0:31]  Size of the memory range
+         * @userdata2[32:63] Type of the memory range
+         * @devdesc          A memory range could not be block-mapped
+         * @custdesc         A problem occurred during the IPL of the system
+         */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       Util::UTIL_TCE_CLEAR_MEM_RANGE,
+                                       Util::UTIL_ERC_BAD_PTR,
+                                       i_physAddr,
+                                       SrcUserData(errl_util::bits{0, 31},  i_size,
+                                                   errl_util::bits{32, 63}, i_rangeType),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+        errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
+        break;
+    }
+
+    // (2) Clear the memory range
+    memset(reinterpret_cast<void*>(l_virtAddr), 0, i_size);
+
+    // make sure that the memset completes
+    sync();
+
+    // (3) Unmap the memory now that it's cleared
+    int64_t rc = mm_block_unmap(reinterpret_cast<void*>(l_virtAddr));
+
+    if ( rc )
+    {
+        // Got a bad rc from mm_block_unmap
+        TRACFCOMP(g_trac_tce, "clearMemoryRange: mm_block_unmap failed: "
+                  "rc = 0x%.16llX, l_virtAddr=0x%.16llX i_physAddr=0x%X, rangeType=%d",
+                  rc, l_virtAddr, i_physAddr, i_rangeType);
+
+        /*@
+         * @errortype
+         * @moduleid     Util::UTIL_TCE_CLEAR_MEM_RANGE
+         * @reasoncode   Util::UTIL_TCE_BLOCK_UNMAP_FAIL
+         * @userdata1    Starting virtual address of pages to be removed
+         * @userdata2    Return Code from mm_block_unmap
+         * @devdesc      mm_block_unmap failed for a memory range
+         * @custdesc     A problem occurred during the IPL of the system
+         */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       Util::UTIL_TCE_CLEAR_MEM_RANGE,
+                                       Util::UTIL_TCE_BLOCK_UNMAP_FAIL,
+                                       l_virtAddr,
+                                       rc,
+                                       true /*Add HB SW Callout*/);
+
+        errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
+        break;
+    }
+
+    } while(0);
+
+   return errl;
+};
+
 
 
 /************************************************************************/
@@ -132,6 +254,7 @@ errlHndl_t utilSetupPayloadTces(void)
     size_t   size=0x0;
     uint32_t token=0x0;
     uint8_t  nodeId = TARGETING::UTIL::getCurrentNodePhysId();
+    rangeType_t range = RANGE_INVALID;
 
     do{
 
@@ -140,10 +263,40 @@ errlHndl_t utilSetupPayloadTces(void)
     // memory if neccessary
     const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
 
-    // Allocate TCEs for PAYLOAD to Temporary Space
+    // Before allocating TCEs for PAYLOAD clear these 2 temporary spaces:
+    // (1) Clear the TOC_ADDR section, which is where HLL gets loaded for
+    //     systems in V3 mode.
+    //     Do this here even though HLL will get loaded later and
+    //     not when the FSP loads the PHYP LIDs to TOC_TMP_ADDR.
+    //     NOTE: Clearing this now ensures that the HLL will be loaded on all
+    //     normal IPLs and MPIPLs later in the IPL.
+    range = RANGE_TOC_ADDR;
+    addr = hostboot_base_address + TOC_ADDR;
+    size = MTOC_SIZE;
+    errl = clearMemoryRange (range, addr, size);
+    if (errl)
+    {
+        TRACFCOMP(g_trac_tce,ERR_MRK"utilSetupPayloadTces(): CLEAR TOC_ADDR FAILED: "
+                  "range=%d, addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X",
+                  range, addr, hostboot_base_address, size);
+        break;
+    }
+
+    // (2) Clear the TOC_TMP_ADDR section, which is where FSP puts the PHYP lids
+    range = RANGE_TOC_TMP_ADDR;
     addr = hostboot_base_address + TOC_TMP_ADDR;
     size = TOC_TMP_SIZE;
-    TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X", addr, hostboot_base_address, size);
+    errl = clearMemoryRange (range, addr, size);
+    if (errl)
+    {
+        TRACFCOMP(g_trac_tce,ERR_MRK"utilSetupPayloadTces(): CLEAR TOC_TMP_ADDR FAILED: "
+                  "range=%d, addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X",
+                  range, addr, hostboot_base_address, size);
+        break;
+    }
+
+    // Allocate TCEs for PAYLOAD to Temporary Space (aka TOC_TMP_ADDR)
+    TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): PAYLOAD (TOC_TMP_ADDR): addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X", addr, hostboot_base_address, size);
 
     errl = utilAllocateTces(addr, size, token);
     if (errl)
@@ -184,8 +337,21 @@ errlHndl_t utilSetupPayloadTces(void)
 
     // Allocate TCEs for HDAT
     // -- Address must be HRMOR-specific
+    range = RANGE_HDAT_TMP_ADDR;
     addr = hostboot_base_address + HDAT_TMP_ADDR;
     size = HDAT_TMP_SIZE;
+
+    // Clear memory range before setting it up for TCEs
+    errl = clearMemoryRange (range, addr, size);
+    if (errl)
+    {
+        TRACFCOMP(g_trac_tce,ERR_MRK"utilSetupPayloadTces(): CLEAR HDAT_TMP_ADDR FAILED: "
+                  "range=%d, addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X",
+                  range, addr, hostboot_base_address, size);
+        break;
+    }
+
+    TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): HDAT (HDAT_TMP_ADDR): addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X", addr, hostboot_base_address, size);
 
     errl = utilAllocateTces(addr, size, token);
     if (errl)
@@ -208,6 +374,12 @@ errlHndl_t utilSetupPayloadTces(void)
     } while(0);
 
     TRACFCOMP(g_trac_tce,EXIT_MRK"utilSetupPayloadTces(): errl_rc=0x%X", ERRL_GETRC_SAFE(errl));
+
+    if (errl)
+    {
+        // Make sure traces are in the error log
+        errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
+    }
 
     return errl;
 }
