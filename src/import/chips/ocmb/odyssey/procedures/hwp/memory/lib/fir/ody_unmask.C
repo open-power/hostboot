@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/fir/ody_fir_traits.H>
 #include <lib/fir/ody_unmask.H>
+#include <lib/workarounds/ody_fir_workarounds.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
@@ -126,6 +127,7 @@ template<>
 fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target )
 {
+    constexpr bool UNMASK_SRQ_ONE_HOT = true;
     const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
     // Create registers and check success for MCBISTFIR and SRQFIR
@@ -153,7 +155,6 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::T
         l_srq_reg.recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN02>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN07>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN09>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN10>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN11>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN12>()
         .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN24>()
@@ -168,7 +169,6 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::T
         l_srq_reg.checkstop<scomt::ody::ODC_SRQ_LFIR_IN27>()
         .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN32>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN36>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN37>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN38>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN39>()
         .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN41>()
@@ -178,6 +178,9 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::T
     }
 
     FAPI_TRY(l_srq_reg.write(), "Failed to write SRQ FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+    // Workaround: Need to clear and unmask SRQ_ONE_HOT FIR here in case it came on during scominit
+    FAPI_TRY(mss::ody::fir::workarounds::clear_and_unmask_srq_one_hot(i_target, UNMASK_SRQ_ONE_HOT));
 
     // Workaround: unmask ODP FIR PhyStickyUnlockErr here to avoid it coming on during training
     FAPI_TRY(unmask_phy_sticky_unlock_err(i_target));

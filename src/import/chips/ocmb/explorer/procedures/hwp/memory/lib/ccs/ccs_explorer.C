@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -339,6 +339,8 @@ fapi_try_exit:
 ///
 /// @brief Configures the chip to properly execute CCS instructions - EXPLORER specialization
 /// @param[in] i_target The MCBIST containing the CCS engine
+/// @param[in] i_concurrent unused for Explorer specialization
+/// @param[out] o_srq_lfir_unmasked unused for Explorer specialization
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @param[out] o_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -346,9 +348,13 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode setup_to_execute<mss::mc_type::EXPLORER>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const bool i_concurrent,
+    bool& o_srq_lfir_unmasked,
     fapi2::buffer<uint64_t>& o_periodics_reg,
     fapi2::buffer<uint64_t>& o_power_cntl_reg)
 {
+    o_srq_lfir_unmasked = false;
+
     // Disables low power mode
     fapi2::buffer<uint64_t> l_data;
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBARPC0Q, l_data));
@@ -365,15 +371,19 @@ fapi_try_exit:
 ///
 /// @brief Cleans up from a CCS execution - multiple ports - EXPLORER specialization
 /// @param[in] i_target The MCBIST containing the CCS engine
+/// @param[in] i_concurrent unused for Explorer specialization
+/// @param[in] i_srq_lfir_unmasked unused for Explorer specialization
 /// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @param[in] i_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode cleanup_from_execute<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target,
-        const fapi2::buffer<uint64_t> i_periodics_reg,
-        const fapi2::buffer<uint64_t> i_power_cntl_reg)
+fapi2::ReturnCode cleanup_from_execute<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const bool i_concurrent,
+    const bool i_srq_lfir_unmasked,
+    const fapi2::buffer<uint64_t> i_periodics_reg,
+    const fapi2::buffer<uint64_t> i_power_cntl_reg)
 {
     // Re-enable low power mode
     fapi2::buffer<uint64_t> l_data;
