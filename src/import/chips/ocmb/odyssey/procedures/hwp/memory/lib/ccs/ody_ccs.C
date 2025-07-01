@@ -53,6 +53,7 @@
 #include <lib/fir/ody_fir_traits.H>
 #include <lib/fir/ody_unmask.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
+#include <lib/workarounds/ody_fir_workarounds.H>
 
 // Generates linkage
 // CSN Quad encoded settings - Not supported for Odyssey as we only have two ranks so we cannot have a quad encoded CS
@@ -474,6 +475,8 @@ fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::compute_parity(const fap
 ///
 /// @brief Configures the chip to properly execute CCS instructions - ODYSSEY specialization
 /// @param[in] i_target The MCBIST containing the CCS engine
+/// @param[in] i_concurrent set to TRUE if running concurrent CCS, FALSE otherwise
+/// @param[out] o_srq_lfir_unmasked will be set to TRUE if SRQ_LFIR[10, 37] is unmasked
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @param[out] o_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -481,6 +484,8 @@ fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::compute_parity(const fap
 template<>
 fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const bool i_concurrent,
+    bool& o_srq_lfir_unmasked,
     fapi2::buffer<uint64_t>& o_periodics_reg,
     fapi2::buffer<uint64_t>& o_power_cntl_reg)
 {
@@ -501,12 +506,16 @@ fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
     // Get the DDR Power control register data and store it away
     FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBARPC0Q, o_power_cntl_reg));
 
-    // Clear Domain Reduction Enable bit
-    l_pwr_cntl_reg_data = o_power_cntl_reg;
-    l_pwr_cntl_reg_data.clearBit<scomt::ody::ODC_SRQ_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+    if (!i_concurrent)
+    {
+        // Mask the SRQ one hot FIR for standalone CCS
+        FAPI_TRY(mss::ody::fir::workarounds::mask_srq_one_hot(i_target, o_srq_lfir_unmasked));
 
-    // Write the register
-    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBARPC0Q, l_pwr_cntl_reg_data));
+        // and clear Domain Reduction Enable bit
+        l_pwr_cntl_reg_data = o_power_cntl_reg;
+        l_pwr_cntl_reg_data.clearBit<scomt::ody::ODC_SRQ_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+        FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBARPC0Q, l_pwr_cntl_reg_data));
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -516,18 +525,30 @@ fapi_try_exit:
 ///
 /// @brief Cleans up from a CCS execution - multiple ports - ODYSSEY specialization
 /// @param[in] i_target The MCBIST containing the CCS engine
+/// @param[in] i_concurrent set to TRUE if running concurrent CCS, FALSE otherwise
+/// @param[in] i_srq_lfir_unmasked set to TRUE if SRQ_LFIR[10, 37] was initially unmasked
 /// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @param[in] i_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target,
-        const fapi2::buffer<uint64_t> i_periodics_reg,
-        const fapi2::buffer<uint64_t> i_power_cntl_reg)
+fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const bool i_concurrent,
+    const bool i_srq_lfir_unmasked,
+    const fapi2::buffer<uint64_t> i_periodics_reg,
+    const fapi2::buffer<uint64_t> i_power_cntl_reg)
 {
     FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB9Q, i_periodics_reg));
-    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBARPC0Q, i_power_cntl_reg));
+
+    if (!i_concurrent)
+    {
+        // Restore Domain Reduction Enable bit for standalone CCS
+        FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBARPC0Q, i_power_cntl_reg));
+
+        // and clear and unmask the SRQ one hot FIR
+        FAPI_TRY(mss::ody::fir::workarounds::clear_and_unmask_srq_one_hot(i_target, i_srq_lfir_unmasked));
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:

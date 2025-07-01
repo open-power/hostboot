@@ -128,6 +128,12 @@ enum channel_select : size_t
 };
 
 ///
+/// @brief consts for selecting standalone or concurrent CCS
+///
+constexpr bool STANDALONE_CCS = false;
+constexpr bool CONCURRENT_CCS = true;
+
+///
 /// @brief A class representing a series of CCS instructions, and the
 /// CCS engine parameters associated with running the instructions
 /// @tparam MC The memory controller type of the traits
@@ -354,33 +360,37 @@ fapi_try_exit:
 
 ///
 /// @brief Configures the chip to properly execute CCS instructions
-/// @tparam MC the MC type on which to operate
-/// @tparam T  the MC chip type for this CCS engine - derived from i_target
 /// @param[in] i_target The MCBIST containing the CCS engine
+/// @param[in] i_concurrent set to TRUE if running concurrent CCS, FALSE otherwise
+/// @param[out] o_srq_lfir_unmasked will be set to TRUE if workaround bits in SRQ_LFIR are unmasked
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @param[out] o_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
-/// @note Code location for pre CCS execute workarounds
 ///
 template< mss::mc_type MC, fapi2::TargetType T>
-fapi2::ReturnCode setup_to_execute(const fapi2::Target<T>& i_target,
-                                   fapi2::buffer<uint64_t>& o_periodics_reg,
-                                   fapi2::buffer<uint64_t>& o_power_cntl_reg);
+fapi2::ReturnCode setup_to_execute(
+    const fapi2::Target<T>& i_target,
+    const bool i_concurrent,
+    bool& o_srq_lfir_unmasked,
+    fapi2::buffer<uint64_t>& o_periodics_reg,
+    fapi2::buffer<uint64_t>& o_power_cntl_reg);
 
 ///
-/// @brief Cleans up the chip from executing CCS instructions
-/// @tparam MC the MC type on which to operate
-/// @tparam T  the MC chip type for this CCS engine - derived from i_target
+/// @brief Cleans up from a CCS execution
 /// @param[in] i_target The MCBIST containing the CCS engine
+/// @param[in] i_concurrent set to TRUE if running concurrent CCS, FALSE otherwise
+/// @param[in] i_srq_lfir_unmasked set to TRUE if workaround bits in SRQ_LFIR were initially unmasked
 /// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @param[in] i_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
-/// @note Code location for post CCS execute workarounds
 ///
 template< mss::mc_type MC, fapi2::TargetType T>
-fapi2::ReturnCode cleanup_from_execute(const fapi2::Target<T>& i_target,
-                                       const fapi2::buffer<uint64_t> i_periodics_reg,
-                                       const fapi2::buffer<uint64_t> i_power_cntl_reg);
+fapi2::ReturnCode cleanup_from_execute(
+    const fapi2::Target<T>& i_target,
+    const bool i_concurrent,
+    const bool i_srq_lfir_unmasked,
+    const fapi2::buffer<uint64_t> i_periodics_reg,
+    const fapi2::buffer<uint64_t> i_power_cntl_reg);
 
 ///
 /// @brief Start or stop the CCS engine
@@ -589,7 +599,8 @@ fapi_try_exit:
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in, out] io_program the vector of instructions
-/// @param[in] i_ports the vector of ports
+/// @param[in] i_concurrent set to TRUE if running concurrent CCS, FALSE otherwise
+/// @param[out] o_srq_lfir_unmasked will be set to TRUE if workaround bits in SRQ_LFIR are unmasked
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @param[out] o_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -597,6 +608,8 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_target,
         ccs::program<MC>& io_program,
+        const bool i_concurrent,
+        bool& o_srq_lfir_unmasked,
         fapi2::buffer<uint64_t>& o_periodics_reg,
         fapi2::buffer<uint64_t>& o_power_cntl_reg)
 {
@@ -605,7 +618,11 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
 
 
     // Pre CCS execution configuration
-    FAPI_TRY(setup_to_execute<MC>(i_target, o_periodics_reg, o_power_cntl_reg));
+    FAPI_TRY(setup_to_execute<MC>(i_target,
+                                  i_concurrent,
+                                  o_srq_lfir_unmasked,
+                                  o_periodics_reg,
+                                  o_power_cntl_reg));
 
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( start_stop<MC>(i_target, mss::states::STOP),
@@ -779,7 +796,13 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     // Run prelude to execution
     fapi2::buffer<uint64_t> l_periodics_reg;
     fapi2::buffer<uint64_t> l_power_cntl_reg;
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, l_periodics_reg, l_power_cntl_reg),
+    bool l_srq_lfir_unmasked = false;
+    FAPI_TRY( prelude_to_execution<MC>(i_target,
+                                       io_program,
+                                       STANDALONE_CCS,
+                                       l_srq_lfir_unmasked,
+                                       l_periodics_reg,
+                                       l_power_cntl_reg),
               "Error setting up ccs engine before execution on " TARGTIDFORMAT, TARGTID );
 
     // Execute via standalone CCS
@@ -805,7 +828,11 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<MC>(i_target, l_periodics_reg, l_power_cntl_reg)));
+    FAPI_TRY((cleanup_from_execute<MC>(i_target,
+                                       STANDALONE_CCS,
+                                       l_srq_lfir_unmasked,
+                                       l_periodics_reg,
+                                       l_power_cntl_reg)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();
@@ -844,7 +871,13 @@ static inline fapi2::ReturnCode execute_parallel_ports( const fapi2::Target<T>& 
     // Run prelude to execution
     fapi2::buffer<uint64_t> l_periodics_reg;
     fapi2::buffer<uint64_t> l_power_cntl_reg;
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, l_periodics_reg, l_power_cntl_reg),
+    bool l_srq_lfir_unmasked = false;
+    FAPI_TRY( prelude_to_execution<MC>(i_target,
+                                       io_program,
+                                       STANDALONE_CCS,
+                                       l_srq_lfir_unmasked,
+                                       l_periodics_reg,
+                                       l_power_cntl_reg),
               "Error setting up ccs engine before execution on " TARGTIDFORMAT, TARGTID );
 
     // Execute via standalone CCS
@@ -862,7 +895,11 @@ static inline fapi2::ReturnCode execute_parallel_ports( const fapi2::Target<T>& 
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<MC>(i_target, l_periodics_reg, l_power_cntl_reg)));
+    FAPI_TRY((cleanup_from_execute<MC>(i_target,
+                                       STANDALONE_CCS,
+                                       l_srq_lfir_unmasked,
+                                       l_periodics_reg,
+                                       l_power_cntl_reg)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();
@@ -1053,6 +1090,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     auto l_inst_iter = io_program.iv_instructions.begin();
     fapi2::buffer<uint64_t> l_periodics_reg;
     fapi2::buffer<uint64_t> l_power_cntl_reg;
+    bool l_srq_lfir_unmasked = false;
 
     // Check that we have less than the maximum CCS instructions
     FAPI_ASSERT(l_inst_count <= CCS_INSTRUCTION_DEPTH,
@@ -1065,7 +1103,12 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
 
 
     // Run prelude to execution
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, l_periodics_reg, l_power_cntl_reg),
+    FAPI_TRY( prelude_to_execution<MC>(i_target,
+                                       io_program,
+                                       CONCURRENT_CCS,
+                                       l_srq_lfir_unmasked,
+                                       l_periodics_reg,
+                                       l_power_cntl_reg),
               "Error setting up ccs engine before execution on " TARGTIDFORMAT,
               TARGTID);
 
@@ -1093,7 +1136,11 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<MC>(i_target, l_periodics_reg, l_power_cntl_reg)));
+    FAPI_TRY((cleanup_from_execute<MC>(i_target,
+                                       CONCURRENT_CCS,
+                                       l_srq_lfir_unmasked,
+                                       l_periodics_reg,
+                                       l_power_cntl_reg)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();

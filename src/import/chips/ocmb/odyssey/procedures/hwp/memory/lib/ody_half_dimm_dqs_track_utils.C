@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -386,7 +386,9 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
     constexpr uint8_t UNUSED_LOGGING_INFO = 0;
     constexpr bool TEMP_TRIGGER = false;
     constexpr uint8_t MISSED_QUIESCE_THRESHOLD = 10;
+    constexpr bool CONCURRENT_CCS = true;
     bool l_has_quiesced = false;
+    bool l_srq_lfir_unmasked = true;
     // Consts for readability
     constexpr bool RECORD_OFFSETS = false;
     constexpr bool COMPUTE_DELTAS = true;
@@ -485,7 +487,10 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
             // Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] to avoid unnecessary attentions
             FAPI_TRY(mss::memdiags::mask_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
 
-            FAPI_TRY(mss::ccs::setup_to_execute<mss::mc_type::ODYSSEY>(l_ocmb, l_periodics_reg,
+            FAPI_TRY(mss::ccs::setup_to_execute<mss::mc_type::ODYSSEY>(l_ocmb,
+                     CONCURRENT_CCS,
+                     l_srq_lfir_unmasked,
+                     l_periodics_reg,
                      l_power_cntl_reg));
 
             // Run CCS via MCBIST for Concurrent CCS
@@ -495,7 +500,10 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
 
         // Cleans up and sets up the next run
         {
-            FAPI_TRY(( mss::ccs::cleanup_from_execute<mss::mc_type::ODYSSEY>(l_ocmb, l_periodics_reg,
+            FAPI_TRY(( mss::ccs::cleanup_from_execute<mss::mc_type::ODYSSEY>(l_ocmb,
+                       CONCURRENT_CCS,
+                       l_srq_lfir_unmasked,
+                       l_periodics_reg,
                        l_power_cntl_reg)));
 
             // Clear MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and restore the mask

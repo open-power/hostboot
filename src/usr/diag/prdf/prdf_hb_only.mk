@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2024
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -272,6 +272,7 @@ prd_obj_no_sim += ody_dqs_track_utils.o
 prd_obj_no_sim += ody_thermal_init_utils.o
 prd_obj_no_sim += ody_dqs_track_host_utils.o
 prd_obj_no_sim += ody_tsns_dqs_period.o
+prd_obj_no_sim += ody_fir_workarounds.o
 
 # Needed for the ody_ecs procedure
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
