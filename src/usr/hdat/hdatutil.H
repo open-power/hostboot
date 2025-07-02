@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,33 @@ const uint16_t HDAT_VERSION1 = 1;
 const uint16_t HDAT_VERSION2 = 2;
 const uint16_t HDAT_VERSION3 = 3;
 
+// misc helper values
+#define VALUE_0  0
+#define VALUE_1  1
+#define VALUE_2  2
+#define VALUE_3  3
+#define VALUE_4  4
+#define VALUE_5  5
+#define VALUE_6  6
+#define VALUE_7  7
+#define VALUE_8  8
+
+#define MASK_BYTE_BIT_6       0x40
+#define MASK_BYTE_BIT_7       0x80
+#define MASK_BYTE_BITS_01     0x03
+#define MASK_BYTE_BITS_345    0x38
+#define MASK_BYTE_BITS_012    0x07
+#define MASK_BYTE_BITS_567    0xE0
+#define MASK_BYTE_BITS_0123   0x0F
+#define MASK_BYTE_BITS_01234  0x1F
+
+#define SHIFT_BITS_0  0
+#define SHIFT_BITS_3  3
+#define SHIFT_BITS_5  5
+
+#define PRIMARY_BUS_WIDTH_32_BITS   32
+#define PRIMARY_BUS_WIDTH_UNUSED    0
+
 // JEDEC format specific constants
 #define SVPD_JEDEC_RESERVED                 0x08
 #define SVPD_SPD_BYTE_TWO                   2
@@ -80,9 +107,11 @@ const uint16_t HDAT_VERSION3 = 3;
 #define SVPD_DDR4_DEVICE_TYPE               0x0C
 #define SVPD_DDR5_DEVICE_TYPE               0x12
 #define SVPD_JEDEC_BYTE_4                   4
-#define SVPD_JEDEC_BYTE_6                   7
+#define SVPD_JEDEC_BYTE_6                   6
 #define SVPD_JEDEC_BYTE_12                  12
 #define SVPD_JEDEC_BYTE_13                  13
+#define SVPD_JEDEC_BYTE_234                 234
+#define SVPD_JEDEC_BYTE_235                 235
 #define SVPD_JEDEC_SDRAM_CAP_MASK           0x0F
 #define SVPD_JEDEC_SDRAM_WID_MULTIPLIER     4
 #define SVPD_JEDEC_SDRAM_WID_MASK           0x07
@@ -98,6 +127,11 @@ const uint16_t HDAT_VERSION3 = 3;
 #define SVPD_JEDEC_SINGLE_LOAD_STACK        0x02
 #define SVPD_JEDEC_SIGNAL_LOADING_MASK      0x03
 #define SVPD_JEDEC_DIE_COUNT_RIGHT_SHIFT    4
+#define SVPD_JEDEC_DENSITY_DIE_UNDEFINED    0
+#define SVPD_JEDEC_DENSITY_DIE_24GB         24
+#define SVPD_JEDEC_DENSITY_DIE_32GB         32
+#define SVPD_JEDEC_DENSITY_DIE_48GB         48
+#define SVPD_JEDEC_DENSITY_DIE_64GB         64
 
 // Bytes 416~445 OEM Supplemental Information
 
