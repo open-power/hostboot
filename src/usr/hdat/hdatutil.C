@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <string.h>
 #include <util/utilcommonattr.H>
 #include <util/random.H>
+#include <math.h>
 
 #include <targeting/targplatutil.H>
 
@@ -1487,6 +1488,9 @@ errlHndl_t hdatFetchRawSpdData(TARGETING::Target * i_target,
 
 // Forward declarations for the various IPZ VPD generation functions. Their documentation comes after
 // generateIpzFormattedKeyword.
+uint8_t svpd_jedec_getDDR5DensityPerDie(uint8_t l_ByteValue);
+bool checkValidValue(uint8_t l_ByteValue, uint8_t shift,
+                     uint8_t minValue, uint8_t maxValue);
 uint32_t  hdatCreateSzKeyword(const char *i_jedec_vpd_ptr);
 void copyPoundKeywordIntoIpzVpdData(std::vector<uint8_t> & io_ipzVpdData,
         const VPD::VPD_ASCII_KEYWORD_NAME & i_keywordName,
@@ -1886,6 +1890,76 @@ ERROR_EXIT:
 }
 
 /**
+ * @brief  Returns DDR5 die density given SPD byte value
+ *
+ * @param[in] l_ByteValue SPD byte value for die density
+ *
+ * @return DDR5 Die density
+ *
+ */
+uint8_t svpd_jedec_getDDR5DensityPerDie(uint8_t l_ByteValue)
+{
+    uint8_t l_densityPerDie = SVPD_JEDEC_DENSITY_DIE_UNDEFINED;
+    if (l_ByteValue < VALUE_5)
+    {
+        l_densityPerDie = l_ByteValue * VALUE_4;
+    }
+    else
+    {
+        switch (l_ByteValue)
+        {
+            case 5:
+                l_densityPerDie = SVPD_JEDEC_DENSITY_DIE_24GB;
+                break;
+
+            case 6:
+                l_densityPerDie = SVPD_JEDEC_DENSITY_DIE_32GB;
+                break;
+
+            case 7:
+                l_densityPerDie = SVPD_JEDEC_DENSITY_DIE_48GB;
+                break;
+
+            case 8:
+                l_densityPerDie = SVPD_JEDEC_DENSITY_DIE_64GB;
+                break;
+
+            default:
+                l_densityPerDie = SVPD_JEDEC_DENSITY_DIE_UNDEFINED;
+                break;
+        }
+    }
+    return l_densityPerDie;
+}
+
+/**
+ * @brief  Check if value is within bounds after shift (inclusive)
+ *
+ * @param[in] l_ByteValue Value of byte to check
+ * @param[in] shift       bit shift of byte
+ * @param[in] minValue    min value of byte
+ * @param[in] maxValue    max value of byte
+ *
+ * @return Whether shifted value is within bounds
+ *
+ */
+bool checkValidValue(uint8_t l_ByteValue, uint8_t shift,
+                     uint8_t minValue, uint8_t maxValue)
+{
+    l_ByteValue = l_ByteValue >> shift;
+    if ((l_ByteValue > maxValue) || (l_ByteValue < minValue))
+    {
+        HDAT_ERR("%s: Non valid Value encountered value min %d max %d",
+                __FUNCTION__, minValue, maxValue);
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+/**
  * @brief  Create the SZ keyword for the specific DIMM/OCMB
  *
  * @param[in] i_jedec_vpd_ptr: Raw SPD keyword data
@@ -1901,14 +1975,115 @@ uint32_t  hdatCreateSzKeyword(const char *i_jedec_vpd_ptr)
     uint32_t  l_logical_ranks_per_dimm = 1;
     uint32_t  l_tmp = 0;
     uint8_t   l_dieCount = 1;
-
-    constexpr uint8_t PRIMARY_BUS_WIDTH_BYTE_IN_SPD = SVPD_JEDEC_BYTE_13;
-    constexpr uint8_t SDRAM_CAPACITY_BYTE_IN_SPD = SVPD_JEDEC_BYTE_4;
-    constexpr uint8_t SDRAM_DEVICE_WIDTH_BYTE_IN_SPD = SVPD_JEDEC_BYTE_12;
-    constexpr uint8_t PACKAGE_RANKS_PER_DIMM_BYTE_IN_SPD = SVPD_JEDEC_BYTE_12;
+    uint8_t   l_busWidthPerChannel = 0;
+    uint8_t   l_byteValue = 0;
+    uint32_t  l_diePerPackage = 1;
+    uint8_t   l_densityPerDie = 0;
+    uint8_t   l_dramWidth = 0;
+    uint32_t  o_sz = 0;
 
     do
     {
+    if (i_jedec_vpd_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR5_DEVICE_TYPE)
+    {
+        if(!checkValidValue(i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BITS_01,
+                            SHIFT_BITS_0, VALUE_1, VALUE_3) ||
+           !checkValidValue(i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BITS_345,
+                            SHIFT_BITS_3, VALUE_1, VALUE_3))
+        {
+            HDAT_ERR("%s: Capacity calculation failed for channels per DIMM. DDIMM Byte 235 value is %d",
+                       __FUNCTION__, i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235]);
+            l_tmp = SVPD_JEDEC_BYTE_235;
+            break;
+        }
+
+        uint8_t l_channelsPerPhy =
+            (((i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BITS_01) ? VALUE_1 : VALUE_0) +
+            ((i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BITS_345) ? VALUE_1 : VALUE_0));
+
+        uint8_t l_channelsPerDdimm =
+            (((i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BIT_6)  >>
+             VALUE_6) + ((i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] &
+             MASK_BYTE_BIT_7) >> VALUE_7)) * l_channelsPerPhy;
+
+        if (!checkValidValue(i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BITS_012,
+                             SHIFT_BITS_0, VALUE_1, VALUE_3))
+        {
+            HDAT_ERR("%s: Capacity calculation failed for bus width per channel. DDIMM Byte 235 value is %d",
+                       __FUNCTION__, i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235]);
+            l_tmp = SVPD_JEDEC_BYTE_235;
+            break;
+        }
+
+        l_busWidthPerChannel =
+            (i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BITS_012) ?
+                     PRIMARY_BUS_WIDTH_32_BITS : PRIMARY_BUS_WIDTH_UNUSED;
+
+        if (!checkValidValue(i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_4] & MASK_BYTE_BITS_567,
+                            SHIFT_BITS_5, VALUE_0, VALUE_5))
+        {
+            HDAT_ERR("%s: Capacity calculation failed for die per package. DDIMM Byte 4 value is %d",
+                       __FUNCTION__,i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_4]);
+            l_tmp = SVPD_JEDEC_BYTE_4;
+            break;
+        }
+
+        l_byteValue = (i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_4] & MASK_BYTE_BITS_567) >> VALUE_5;
+        if(l_byteValue < VALUE_2)
+        {
+            l_diePerPackage = l_byteValue + VALUE_1;
+        }
+        else
+        {
+            l_diePerPackage = pow(VALUE_2, l_byteValue - VALUE_1);
+        }
+
+        if (!checkValidValue(i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_4] & MASK_BYTE_BITS_01234,
+                             SHIFT_BITS_0,  VALUE_1, VALUE_8))
+        {
+            HDAT_ERR("%s: Capacity calculation failed for SDRAM Density per Die. DDIMM Byte 4 value is %d",
+                       __FUNCTION__,i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_4]);
+            l_tmp = SVPD_JEDEC_BYTE_4;
+            break;
+        }
+
+        l_densityPerDie = svpd_jedec_getDDR5DensityPerDie(
+                               i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_4] & MASK_BYTE_BITS_01234);
+
+        uint8_t l_ranksPerChannel = 0;
+        if (((i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BIT_7) >> VALUE_7))
+        {
+            l_ranksPerChannel = ((i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_234] &
+                                 MASK_BYTE_BITS_345) >> VALUE_3) + VALUE_1;
+        }
+        else if (((i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_235] & MASK_BYTE_BIT_6) >> VALUE_6))
+        {
+            l_ranksPerChannel = (i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_234] &
+                                MASK_BYTE_BITS_012) + VALUE_1;
+        }
+
+        if (!checkValidValue(i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6] & MASK_BYTE_BITS_567,
+                             SHIFT_BITS_5, VALUE_0, VALUE_3))
+        {
+            HDAT_ERR("%s: Capacity calculation failed for dram width DDIMM Byte 6 value is %d",
+                     __FUNCTION__, i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6]);
+            l_tmp = SVPD_JEDEC_BYTE_6;
+            break;
+        }
+
+        l_dramWidth = VALUE_4 * (VALUE_1 << (
+                (i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6] & MASK_BYTE_BITS_567) >> VALUE_5));
+
+        o_sz = ((l_channelsPerDdimm * l_busWidthPerChannel * l_diePerPackage *
+                  l_densityPerDie * l_ranksPerChannel) / (8 * l_dramWidth)) * 1024;
+    }
+    else if (i_jedec_vpd_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR4_DEVICE_TYPE)
+    {
+        constexpr uint8_t PRIMARY_BUS_WIDTH_BYTE_IN_SPD = SVPD_JEDEC_BYTE_13;
+        constexpr uint8_t SDRAM_CAPACITY_BYTE_IN_SPD = SVPD_JEDEC_BYTE_4;
+        constexpr uint8_t SDRAM_DEVICE_WIDTH_BYTE_IN_SPD = SVPD_JEDEC_BYTE_12;
+        constexpr uint8_t PACKAGE_RANKS_PER_DIMM_BYTE_IN_SPD = SVPD_JEDEC_BYTE_12;
+
         /* Calculate SDRAM capacity */
         l_tmp = i_jedec_vpd_ptr[SDRAM_CAPACITY_BYTE_IN_SPD] & SVPD_JEDEC_SDRAM_CAP_MASK;
 
@@ -1972,12 +2147,22 @@ uint32_t  hdatCreateSzKeyword(const char *i_jedec_vpd_ptr)
         }
         l_logical_ranks_per_dimm = (l_tmp + 1) * l_dieCount;
 
-        l_tmp = (l_sdram_cap/SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER)
+        o_sz = (l_sdram_cap/SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER)
               * (l_pri_bus_wid/l_sdram_wid)
               * l_logical_ranks_per_dimm;
-    }while(0);
+    }
+    l_tmp = 0;
 
-    return l_tmp;
+    } while(0);
+
+    if (l_tmp)
+    {
+        HDAT_ERR("%s : Unable to calculate SZ kw for DDIMMs "
+                 "One of the parameters has reserved value in the VPD "
+                 "byte %d has the wrong value.", __FUNCTION__, l_tmp);
+    }
+
+    return o_sz;
 }
 
 /* @brief Generates the IPZ formatted DR and SZ keywords. The DR keyword relies on info contained in the SZ keyword so
