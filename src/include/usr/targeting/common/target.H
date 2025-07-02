@@ -348,7 +348,7 @@ class Target
          *  @retval false Attribute not updated
          */
         template<const ATTRIBUTE_ID A>
-        bool trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue);
+        bool trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue) const;
 
         /**
          *  @brief Tries to set the target's specified not synced attribute value
@@ -373,7 +373,7 @@ class Target
          */
         template<const ATTRIBUTE_ID A>
         bool trySetAttrNotSynced(
-            typename AttributeTraits<A>::Type const& i_attrValue);
+            typename AttributeTraits<A>::Type const& i_attrValue) const;
 
         /**
          *
@@ -401,7 +401,7 @@ class Target
 #if __cplusplus >= 201103L
         template<const ATTRIBUTE_ID A>
         bool trySetAttr(
-            typename AttributeTraits<A>::TypeStdArr const& i_attrValue);
+            typename AttributeTraits<A>::TypeStdArr const& i_attrValue) const;
 #endif
 
         /**
@@ -465,7 +465,7 @@ class Target
          *      routine asserts
          */
         template<const ATTRIBUTE_ID A>
-        void setAttr(typename AttributeTraits<A>::Type const& i_attrValue);
+        void setAttr(typename AttributeTraits<A>::Type const& i_attrValue) const;
 
         /**
          *  @brief For targets whose attribute value type is an array, set value
@@ -482,7 +482,7 @@ class Target
 #if __cplusplus >= 201103L
         template<const ATTRIBUTE_ID A>
         void setAttrFromStdArr(typename AttributeTraits<A>::TypeStdArr const&
-            i_attrValue);
+            i_attrValue) const;
 #endif
 
         /**
@@ -1052,7 +1052,7 @@ bool Target::tryGetAttr(
 #endif
 
 template<const ATTRIBUTE_ID A>
-bool Target::trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue)
+bool Target::trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue) const
 {
     if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
@@ -1065,7 +1065,7 @@ bool Target::trySetAttr(typename AttributeTraits<A>::Type const& i_attrValue)
 
 template<const ATTRIBUTE_ID A>
 bool Target::trySetAttrNotSynced(
-    typename AttributeTraits<A>::Type const& i_attrValue)
+    typename AttributeTraits<A>::Type const& i_attrValue) const
 {
     if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
@@ -1076,7 +1076,7 @@ bool Target::trySetAttrNotSynced(
 #if __cplusplus >= 201103L
 template<const ATTRIBUTE_ID A>
 bool Target::trySetAttr(typename AttributeTraits<A>::TypeStdArr
-    const& i_attrValue)
+    const& i_attrValue) const
 {
     if(AttributeTraits<A>::writeable == AttributeTraits<A>::writeable) { }
     if(AttributeTraits<A>::notHbMutex == AttributeTraits<A>::notHbMutex) { }
@@ -1122,7 +1122,7 @@ typename AttributeTraits<A>::Type Target::getAttr(AttrRP* i_attrRP,
 }
 
 template<const ATTRIBUTE_ID A>
-void Target::setAttr(typename AttributeTraits<A>::Type const& i_attrValue)
+void Target::setAttr(typename AttributeTraits<A>::Type const& i_attrValue) const
 {
     bool l_wrote = trySetAttr<A>(i_attrValue);
     if (unlikely(!l_wrote))
@@ -1135,7 +1135,7 @@ void Target::setAttr(typename AttributeTraits<A>::Type const& i_attrValue)
 #if __cplusplus >= 201103L
 template<const ATTRIBUTE_ID A>
 void Target::setAttrFromStdArr(typename AttributeTraits<A>::TypeStdArr const&
-    i_attrValue)
+    i_attrValue) const
 {
     bool l_wrote = trySetAttr<A>(i_attrValue);
     if (unlikely(!l_wrote))
