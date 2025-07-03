@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,6 +101,9 @@ struct poll_parameters
     // The count of polls to make
     uint64_t iv_poll_count;
 
+    // Multiplier for delay between polling attempts (iv_delay)
+    uint64_t iv_delay_multiplier;
+
     ///
     /// @brief checks if two poll_parameters are equal
     /// @param[in] i_rhs poll_parameters to compare
@@ -114,6 +117,7 @@ struct poll_parameters
         l_equal &= iv_delay == i_rhs.iv_delay;
         l_equal &= iv_sim_delay == i_rhs.iv_sim_delay;
         l_equal &= iv_poll_count == i_rhs.iv_poll_count;
+        l_equal &= iv_delay_multiplier == i_rhs.iv_delay_multiplier;
 
         //returns the result
         return l_equal;
@@ -123,12 +127,14 @@ struct poll_parameters
                      const uint64_t i_initial_sim_delay = 200,
                      const uint64_t i_delay = DELAY_10NS,
                      const uint64_t i_sim_delay = 200,
-                     const uint64_t i_poll_count = DEFAULT_POLL_LIMIT):
+                     const uint64_t i_poll_count = DEFAULT_POLL_LIMIT,
+                     const uint64_t i_delay_multiplier = 1 ):
         iv_initial_delay(i_initial_delay),
         iv_initial_sim_delay(i_initial_sim_delay),
         iv_delay(i_delay),
         iv_sim_delay(i_sim_delay),
-        iv_poll_count(i_poll_count)
+        iv_poll_count(i_poll_count),
+        iv_delay_multiplier(i_delay_multiplier)
     {}
 };
 
@@ -163,9 +169,9 @@ inline bool poll(const fapi2::Target<T>& i_target,
     fapi2::buffer<uint64_t> l_reg;
 
 #ifndef __PPE__
-    FAPI_DBG("%s polling 0x%llx: initial delay %luns(%lusc) poll %luns(%lusc) %lu iters",
+    FAPI_DBG("%s polling 0x%llx: initial delay %luns(%lusc) poll %luns(%lusc) multiplier %lu, %lu iters",
              mss::c_str(i_target), i_addr, i_params.iv_initial_delay, i_params.iv_initial_sim_delay,
-             i_params.iv_delay, i_params.iv_sim_delay, i_params.iv_poll_count);
+             i_params.iv_delay, i_params.iv_sim_delay, i_params.iv_delay_multiplier, i_params.iv_poll_count);
 #endif
 
     // We know to wait this long before polling
@@ -197,7 +203,10 @@ inline bool poll(const fapi2::Target<T>& i_target,
             return true;
         }
 
-        FAPI_TRY( fapi2::delay(i_params.iv_delay, i_params.iv_sim_delay) );
+        for (uint64_t l_multiplier = 0; l_multiplier < i_params.iv_delay_multiplier; l_multiplier++)
+        {
+            FAPI_TRY( fapi2::delay(i_params.iv_delay, i_params.iv_sim_delay) );
+        }
     }
 
     // If we're here, we ran out of poll iterations
@@ -248,7 +257,10 @@ inline bool poll(const fapi2::Target<T>& i_target,
             return true;
         }
 
-        FAPI_TRY( fapi2::delay(i_params.iv_delay, i_params.iv_sim_delay) );
+        for (uint64_t l_multiplier = 0; l_multiplier < i_params.iv_delay_multiplier; l_multiplier++)
+        {
+            FAPI_TRY( fapi2::delay(i_params.iv_delay, i_params.iv_sim_delay) );
+        }
     }
 
     // If we're here, we ran out of poll iterations
