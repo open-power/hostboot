@@ -1661,6 +1661,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
+    // NOTE: Any registers updated in this procedure also need to be updated in reg_reconfigure_ti_workaround()
+
     FAPI_INF_NO_SBE("Enabling PMICs on " GENTARGTIDFORMAT " with 4U/redundancy mode", GENTARGTID(i_ocmb_target));
 
     fapi2::buffer<uint8_t> l_reg_contents;
