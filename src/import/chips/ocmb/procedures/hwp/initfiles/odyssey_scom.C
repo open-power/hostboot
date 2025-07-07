@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,9 +171,6 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         fapi2::ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME_Type l_TGT2_ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME, TGT2,
                                l_TGT2_ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME));
-        fapi2::ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_Type l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED, TGT2,
-                               l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED));
         fapi2::ATTR_MSS_MRW_ENTER_STR_TIME_Type l_TGT2_ATTR_MSS_MRW_ENTER_STR_TIME;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_ENTER_STR_TIME, TGT2, l_TGT2_ATTR_MSS_MRW_ENTER_STR_TIME));
         uint64_t l_def_RDIMM_TYPE = ((l_TGT1_ATTR_MEM_EFF_DIMM_TYPE[literal_0] == literal_1)
@@ -962,40 +959,6 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                 l_scom_buffer.insert<23, 10, 54, uint64_t>(l_TGT2_ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME );
             }
 
-            if (((((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
-                   && (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP))
-                  && (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR))
-                 && (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED !=
-                     ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
-            {
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0 );
-            }
-            else if (((((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
-                        || (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP))
-                       || (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR))
-                      || (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED ==
-                          ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
-            {
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
-            }
-
-            if (((((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
-                   && (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP))
-                  && (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR))
-                 && (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED !=
-                     ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
-            {
-                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_0 );
-            }
-            else if (((((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
-                        || (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP))
-                       || (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR))
-                      || (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED ==
-                          ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
-            {
-                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_1 );
-            }
-
             if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
             {
                 l_scom_buffer.insert<16, 5, 59, uint64_t>(literal_6 );
@@ -1043,31 +1006,6 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             l_scom_buffer.insert<46, 11, 53, uint64_t>(l_def_REFRESH_INTERVAL );
             l_scom_buffer.insert<62, 1, 63, uint64_t>(literal_1 );
             l_scom_buffer.insert<2, 10, 54, uint64_t>(l_TGT2_ATTR_MSS_MRW_ENTER_STR_TIME );
-
-            if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
-                 && (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
-            {
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0 );
-            }
-            else if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
-                      || (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
-            {
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
-            }
-
-            if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)
-                 && (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED !=
-                     ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
-            {
-                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_0 );
-            }
-            else if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)
-                      || (l_TGT2_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED ==
-                          ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
-            {
-                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_1 );
-            }
-
             l_scom_buffer.insert<57, 4, 60, uint64_t>(literal_0 );
             l_scom_buffer.insert<38, 8, 56, uint64_t>(literal_0 );
 

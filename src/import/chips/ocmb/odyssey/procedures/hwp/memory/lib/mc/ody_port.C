@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -246,6 +246,49 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Enable power management - Odyssey helper for unit testing
+/// @param[in] i_target the target
+/// @param[in] i_pwr_cntrl value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED
+/// @param[in] i_idle_pwr_cntrl value of ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode enable_power_management_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_pwr_cntrl,
+        const uint8_t i_idle_pwr_cntrl)
+{
+    using TT = portTraits<mss::mc_type::ODYSSEY>;
+
+    fapi2::buffer<uint64_t> l_rpc0;
+    fapi2::buffer<uint64_t> l_str0;
+    const bool l_str_enable = (i_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR) ||
+                              (i_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP);
+    const bool l_lp_ctrl_data_enable = (i_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR) ||
+                                       (i_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP) ||
+                                       (i_idle_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR) ||
+                                       (i_idle_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP);
+    const bool l_dis_clk_in_str = (i_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP) ||
+                                  (i_idle_pwr_cntrl == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP);
+
+    FAPI_TRY(fapi2::getScom(i_target, TT::MBARPC0Q_REG, l_rpc0));
+    FAPI_TRY(fapi2::getScom(i_target, TT::STR0Q_REG, l_str0));
+
+    l_rpc0.writeBit<TT::CFG_LP_CTRL_ENABLE>(l_lp_ctrl_data_enable)
+    .writeBit<TT::CFG_LP_DATA_ENABLE>(l_lp_ctrl_data_enable);
+    l_str0.writeBit<TT::CFG_DIS_CLK_IN_STR>(l_dis_clk_in_str);
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::MBARPC0Q_REG, l_rpc0));
+    FAPI_TRY(fapi2::putScom(i_target, TT::STR0Q_REG, l_str0));
+
+    // Write the STR_ENABLE bit last to avoid multiple state transitions with DIS_CLK_IN_STR
+    l_str0.writeBit<TT::CFG_STR_ENABLE>(l_str_enable);
+    FAPI_TRY(fapi2::putScom(i_target, TT::STR0Q_REG, l_str0));
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // ody
 
 ///
@@ -257,8 +300,18 @@ template< >
 fapi2::ReturnCode enable_power_management<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target )
 {
-    // This function is a no-op; all settings are configured in odyssey_scom
-    return fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_pwr_cntrl = 0;
+    uint8_t l_idle_pwr_cntrl = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_pwr_cntrl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_idle_pwr_cntrl));
+
+    FAPI_TRY(mss::ody::enable_power_management_helper(i_target, l_pwr_cntrl, l_idle_pwr_cntrl));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

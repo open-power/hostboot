@@ -71,11 +71,6 @@ extern "C"
         // Disable TCE correction in MFG mode
         FAPI_TRY(mss::setup_tce_correction<mss::mc_type::ODYSSEY>(i_target));
 
-        // Enable Power management based off of mrw_power_control_requested
-        FAPI_TRY( mss::enable_power_management<mss::mc_type::ODYSSEY>(i_target),
-                  TARGTIDFORMAT " Failed to enable power management",
-                  TARGTID );
-
         // NOTE: we don't use an "init complete" indicator in Odyssey.
         // This was assigned to an unused (and unnamed) bit on Explorer PMU8Q.
         // FAPI_TRY( mss::change_iml_complete<mss::mc_type::ODYSSEY>(i_target, mss::HIGH),  TARGTIDFORMAT " Failed to set_ipm_complete",
@@ -122,6 +117,15 @@ extern "C"
         FAPI_TRY( mss::unmask::after_draminit_mc<mss::mc_type::ODYSSEY>(i_target),
                   TARGTIDFORMAT " Failed unmask::after_draminit_mc",
                   TARGTID);
+
+        // Add a 25ms delay before setting the power management settings to avoid one-hot state errors
+        // This ensures we're not still in STR. Delay time is based on refresh interval by Odyssey design team
+        FAPI_TRY(fapi2::delay(25 * mss::DELAY_1MS, 200));
+
+        // Enable Power management based off of mrw_power_control_requested
+        FAPI_TRY( mss::enable_power_management<mss::mc_type::ODYSSEY>(i_target),
+                  TARGTIDFORMAT " Failed to enable power management",
+                  TARGTID );
 
         FAPI_INF_NO_SBE( TARGTIDFORMAT " End ody_draminit MC", TARGTID );
         return fapi2::FAPI2_RC_SUCCESS;
