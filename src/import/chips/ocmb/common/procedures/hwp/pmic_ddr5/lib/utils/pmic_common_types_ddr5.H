@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,6 +120,7 @@ enum aggregate_state : uint8_t
 enum pmic_state : uint8_t
 {
     PMIC_DECONFIGURED       = 0b10000000,
+    PMIC_RESET              = 0b00100000,
     PMIC_VIN_OK_Z           = 0b00010000,
     PMIC_NOT_PRESENT        = 0b00001000,
     PMIC_I2C_FAIL           = 0b00000100,
@@ -200,7 +201,7 @@ struct __attribute__((__packed__)) pmic_health_check_telemetry
     uint16_t iv_swd_current_mA = 0;
 
     uint8_t iv_r73_status_5    = 0;
-    uint8_t reserved = 0;
+    uint8_t iv_r30 = 0;
     uint16_t reserved1 = 0;
 };
 
@@ -215,6 +216,7 @@ struct __attribute__((__packed__)) pmic_health_check_telemetry
 ///           dt_additional_n_mode_telemetry_data as reading R96 and R98 after R92 and
 ///           R94 was causing R96 and R98 regs to get cleared causing potential loss of
 ///           data.
+///     0x54: Added R30 to pmic_health_check_telemetry for TI Reset issue
 ///
 struct __attribute__((__packed__)) health_check_telemetry_data
 {
@@ -222,7 +224,7 @@ struct __attribute__((__packed__)) health_check_telemetry_data
 
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision = 0x53;
+    uint8_t iv_revision = 0x54;
     uint16_t reserved   = 0;
 
     dt_health_check_telemetry iv_dt[CONSTS::NUM_DTS_4U];

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -203,10 +203,10 @@ inline void set_pmic_states(mss::pmic::ddr5::target_info_redundancy_ddr5& io_tar
 {
     for (auto l_index = 0; l_index < io_target_info.iv_number_of_target_infos_present; l_index++)
     {
-        // Update breadcrumb if PMIC state is VIN_OK_Z or CURRENT_IMBALANCE or both
+        // Update breadcrumb if PMIC state is VIN_OK_Z or CURRENT_IMBALANCE or PMIC_RESET or all three
         if (((io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_VIN_OK_Z) != 0) ||
-            ((io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE) !=
-             0))
+            ((io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE) != 0) ||
+            ((io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_RESET) != 0))
         {
             mss::pmic::ddr5::run_if_present_dt(io_target_info, l_index,
                                                [&io_target_info, l_index, &io_health_check_info]
@@ -452,6 +452,23 @@ void check_gi2c_fail_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_targ
 void set_gi2c_fail_count(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                          mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
                          uint8_t& io_number_bytes_to_send);
+
+///
+/// @brief Workaround TI issue with improper reg values after reset
+///
+/// @param[in] i_ocmb_target ocmb target
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @note Should only be run on TI vendors
+///
+void reg_reconfigure_ti_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                   mss::pmic::ddr5::target_info_pmic_dt_pair& io_target_info);
+
+///
+/// @brief Starts VR Enable
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+///
+void start_vr_enable( mss::pmic::ddr5::target_info_pmic_dt_pair& io_target_info);
 
 ///
 /// @brief Runs the actual health check for 4U parts
