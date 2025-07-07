@@ -38,6 +38,7 @@
 #include <lib/utils/pmic_common_utils_ddr5.H>
 #include <lib/utils/pmic_health_check_utils_ddr5.H>
 #include <lib/utils/pmic_periodic_telemetry_utils_ddr5.H>
+#include <lib/utils/pmic_enable_utils_ddr5.H>
 #include <lib/i2c/i2c_pmic.H>
 #include <lib/utils/pmic_consts.H>
 #include <pmic_regs.H>
@@ -99,10 +100,16 @@ void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_targ
     using DT_REGS  = mss::dt::regs;
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
     fapi2::buffer<uint8_t> l_dt_data_to_write[NUM_BYTES_TO_WRITE];
     fapi2::buffer<uint8_t> l_pmic_buffer;
     fapi2::buffer<uint8_t> l_data_recovery_count;
+    uint16_t l_vendor_id = 0;
+    uint8_t l_pmic_id = io_pmic_dt_target_info.iv_rel_pos;
+
+    const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(io_pmic_dt_target_info.iv_pmic);
+
     // Disable efuse
     mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::EN_REGISTER, 0x00);
 
@@ -142,10 +149,35 @@ void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_targ
     // Clear global status reg
     mss::pmic::ddr5::pmic_reg_write(io_pmic_dt_target_info, REGS::R14, 0x01);
 
-    // Start VR Enable (1 --> Bit 7)
-    mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_pmic_dt_target_info, REGS::R32, l_pmic_buffer);
-    l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
-    mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_pmic_dt_target_info, REGS::R32, l_pmic_buffer);
+    // check vendor
+#ifdef __PPE__
+    const static uint16_t MFG_ID[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_MFG_ID
+    };
+    // Get vendor ID
+    l_vendor_id = MFG_ID[l_pmic_id];
+#else
+    mss::attr::get_mfg_id[l_pmic_id](l_ocmb, l_vendor_id);
+#endif
+
+    mss::pmic::ddr5::pmic_reg_read(io_pmic_dt_target_info, REGS::R30, l_pmic_buffer);
+
+    // if vendor is TI and the ADC is disabled then run the TI workaround
+    // Note: we check if the ADC is disabled to avoid running the reconfig process when the PMIC hasn't been reset
+    if (l_vendor_id == mss::pmic::vendor::TI && l_pmic_buffer.getBit<FIELDS::R30_ADC_ENABLE>() == CONSTS::DISABLE)
+    {
+        // Workaround TI leakage issue with improper reg values after reset
+        reg_reconfigure_ti_workaround(l_ocmb, io_pmic_dt_target_info);
+    }
+    else
+    {
+        // start VR enable
+        start_vr_enable(io_pmic_dt_target_info);
+    }
 
     fapi2::delay(60 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 }
@@ -524,8 +556,9 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
                                         (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
             using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+            using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
             using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
-            using FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+            using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
             fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ];
             uint8_t l_pmic_dt_array_index = 0;
             uint8_t l_relative_pmic_id = 0;
@@ -570,12 +603,22 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
                 l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
             }
 
-            if (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].getBit<FIELDS::R73_VIN_OK_Z>())
+            if (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].getBit<TPS_FIELDS::R73_VIN_OK_Z>())
             {
                 io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_VIN_OK_Z;
             }
 
             io_health_check_info.iv_pmic[l_pmic_count].iv_r73_status_5 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].reverse();
+
+            mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+
+            if (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].getBit<FIELDS::R30_ADC_ENABLE>() == CONSTS::DISABLE &&
+            !(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
+            {
+                io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_RESET;
+            }
+
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r30 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0];
 
             return fapi2::FAPI2_RC_SUCCESS;
 
@@ -1342,6 +1385,100 @@ void set_gi2c_fail_count(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target
         }
     }
 #endif
+}
+
+///
+/// @brief Workaround TI issue with improper reg values after reset
+///
+/// @param[in] i_ocmb_target ocmb target
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @note Should only be run on TI vendors
+///
+void reg_reconfigure_ti_workaround(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                   mss::pmic::ddr5::target_info_pmic_dt_pair& io_target_info)
+{
+    /*
+    Some TI PMICs have an internal leakage issue that results in the PMIC shutting down,
+    voltage registers (among others) getting reset to their default value and status registers
+    clearing. As a result, there are no status bits to tell us something is wrong in the log.
+
+    This function serves to reconfigure those registers following the order and method they
+    are set in the pmic_enable procedure. The values they are configured to come from
+    this procedure as well.
+    */
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+    using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+
+    const auto l_rel_pos = mss::pmic::id(io_target_info.iv_rel_pos);
+    fapi2::buffer<uint8_t> l_reg_buffer;
+
+    // R2F, R30, R15, R16, and R1A sourced from initialize_pmic
+    // Disable write protection
+    mss::pmic::ddr5::pmic_reg_write(io_target_info, REGS::R2F, 0x06);
+
+    // Write to reg lock reg
+    mss::pmic::status::unlock_pmic_r70_to_ra3(io_target_info.iv_pmic);
+
+    // Enable internal ADC and default to temp readings
+    mss::pmic::ddr5::pmic_reg_write(io_target_info, REGS::R30, 0xD0);
+
+    // Write to Mask status 0 & 1 regs
+    mss::pmic::ddr5::pmic_reg_write(io_target_info, REGS::R15, 0x3C);
+    mss::pmic::ddr5::pmic_reg_write(io_target_info, REGS::R16, 0x60);
+
+    // Set VIN_BULK PG threshold
+    mss::pmic::ddr5::pmic_reg_write(io_target_info, REGS::R1A, 0x60);
+
+    // We need to re-run and update anything that is updated from SPD
+    mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(io_target_info.iv_pmic, i_ocmb, l_rel_pos);
+
+    // Regs R82, R85. R88. R8B sourced from prepost_config PRE_CONFIG
+    static const fapi2::buffer<uint8_t> l_regs_to_be_written_soft_stop[] =
+    {
+        REGS::R82,
+        REGS::R85,
+        REGS::R88,
+        REGS::R8B
+    };
+
+    // soft-stop
+    for (const auto& l_reg_addr : l_regs_to_be_written_soft_stop)
+    {
+        mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info, l_reg_addr, l_reg_buffer);
+        l_reg_buffer.writeBit<FIELDS::COMP_CONFIG>(CONSTS::ENABLE);
+        mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info, l_reg_addr, l_reg_buffer);
+    }
+
+    // Start VR Enable
+    start_vr_enable(io_target_info);
+
+    // Set R9C(2:0) to 0b100, the post config state from the pmic_enable procedure
+    mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_buffer);
+    l_reg_buffer.clearBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_0>();
+    l_reg_buffer.clearBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_1>();
+    l_reg_buffer.setBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_2>();
+    mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_buffer);
+}
+
+///
+/// @brief Starts VR Enable
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+///
+void start_vr_enable( mss::pmic::ddr5::target_info_pmic_dt_pair& io_target_info)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    fapi2::buffer<uint8_t> l_reg_buffer;
+
+    // Start VR Enable (1 --> Bit 7)
+    mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info, REGS::R32, l_reg_buffer);
+    l_reg_buffer.setBit<FIELDS::R32_VR_ENABLE>();
+    mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info, REGS::R32, l_reg_buffer);
 }
 
 ///
