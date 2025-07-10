@@ -3539,7 +3539,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
-            void * pSearchBfr = pCustomizedBfr;
             uint32_t searchSize = sbeImgSize; // Actual image size
             vaddr_metadata_vector_t tempMetaDataVector;
 
@@ -3547,7 +3546,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
             // Remove specific section data from the image, before the
             // CRC is calculated.
-            err = maskUnmaskMetaData(pSearchBfr,
+            err = maskUnmaskMetaData(pCustomizedBfr,
                                      searchSize,
                                      true,
                                      tempMetaDataVector);
@@ -3561,6 +3560,15 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                           ERRL_GETEID_SAFE(err));
                 break;
             }
+
+            // Before calculating the Data CRC, clear any non-zero data between
+            // the XIP sections of the customized image
+#ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+            // NOTE: Skip this function if CXXTEST hooks are enabled because it will
+            // throw off testSbeMaskUnmask() which tests the maskUnmaskMetaData()
+            // function below. This will still always run on full system simics and HW.
+            clearDataBtwnXipSections(pCustomizedBfr);
+#endif
 
             // Calculate Data CRC
             io_sbeState.customizedImage_size = sbeImgSize;
@@ -6678,7 +6686,7 @@ errlHndl_t preReIplCheck(std::vector<sbeTargetState_t>& io_sbeStates_v)
                 else
                 {
                     TRACUCOMP( g_trac_sbe, "masterVersionCompare: Successful "
-                               "Version check", i, mP);
+                               "Version check");
                 }
 
 
@@ -7879,5 +7887,171 @@ errlHndl_t querySbeSeepromVersions()
     return l_errl;
 }
 
+
+
+/////////////////////////////////////////////////////////////////////
+
+void clearDataBtwnXipSections( void * pSbeImgVddr )
+{
+    // Local struct and vector to keep track of xip sections
+    // The struct is needed because P9XipSection doesn't have an id field
+    struct xip_section_struct_t
+    {
+        size_t id;
+        P9XipSection section;
+    };
+    std::vector<xip_section_struct_t> xip_sections;
+
+    // Common variable used for any math related to the starting address of the SBE Image in memory
+    uint64_t sbe_image_start_addr = reinterpret_cast<uint64_t>(pSbeImgVddr);
+
+    /***********************************************************/
+    /* Add all xip sections with a non-zero size to the vector */
+    /***********************************************************/
+    for (auto i=0; i<P9_XIP_SECTIONS_SBE; i++)
+    {
+        //Get the section name for debug
+        auto mysectionId = i;
+        const char* mysection_str = P9_XIP_SECTION_NAME(g_sectionNamesSbe, i);
+
+        //Populate the xip section struct
+        P9XipSection myxipSection = {0};
+        int xip_rc = p9_xip_get_section(pSbeImgVddr, mysectionId, &myxipSection );
+        if ((xip_rc == 0) && (myxipSection.iv_size != 0))
+        {
+
+// Put TRACUCOMP defined check around all of this code to avoid "unused variable"
+// and other similar compile fails if TRACUCOMP isn't set
+#if (TRACUCOMP != nullptr)
+            uint64_t this_sectionaddr = sbe_image_start_addr + myxipSection.iv_offset;
+            uint64_t next_sectionaddr = sbe_image_start_addr
+                                        + myxipSection.iv_offset
+                                        + myxipSection.iv_size;
+            TRACUCOMP(g_trac_sbe, "clearDataBtwnXipSections: %s section "
+                      "starts at 0x%llX. size=0x%X, iv_offset=0x%X, iv_alignment=x0x%X, "
+                      "next section could start at 0x%llX",
+                      mysection_str, this_sectionaddr,
+                      myxipSection.iv_size, myxipSection.iv_offset, myxipSection.iv_alignment,
+                      next_sectionaddr);
+#endif
+            // Save this section to the vector
+            xip_section_struct_t l_struct = {0};
+            l_struct.id = i;
+            l_struct.section = myxipSection;
+            xip_sections.push_back(l_struct);
+
+        }
+        else if(myxipSection.iv_size == 0)
+        {
+            TRACUCOMP(g_trac_sbe, "clearDataBtwnXipSections: %s section has no size",
+                      mysection_str);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_sbe, "clearDataBtwnXipSections %s section not found correctly",
+                      mysection_str);
+        }
+    }
+
+
+    /*************************************/
+    /* Sort sections by starting address */
+    /*************************************/
+    std::sort(xip_sections.begin(),
+              xip_sections.end(),
+              [] (xip_section_struct_t a, xip_section_struct_t b)
+              {
+                  return a.section.iv_offset < b.section.iv_offset;
+              });
+
+    // For trace/debug only. Put TRACUCOMP defined check around all of it
+    // to avoid "unused variable" and other similar compile fails if TRACUCOMP isn't set
+#if (TRACUCOMP != nullptr)
+    for (auto xip_section_struct : xip_sections)
+    {
+        const char* mysection_str = P9_XIP_SECTION_NAME(g_sectionNamesSbe, xip_section_struct.id);
+        uint64_t this_sectionaddr = sbe_image_start_addr + xip_section_struct.section.iv_offset;
+        TRACUCOMP(g_trac_sbe, "clearDataBtwnXipSections: Sorted: "
+                  "sectionaddr=0x%llX. Section %s:  size=0x%X, iv_offset=0x%X, iv_alignment=0x%X",
+                  this_sectionaddr, mysection_str, xip_section_struct.section.iv_size,
+                  xip_section_struct.section.iv_offset, xip_section_struct.section.iv_alignment);
+    }
+#endif
+
+
+    /*************************************************************/
+    /* Look for and clear any non-zero data between xip sections */
+    /*************************************************************/
+
+    // This variable will hold the data of the previous section
+    xip_section_struct_t previousXipSection = {0};
+
+    for (auto this_xip_section : xip_sections)
+    {
+        const char* this_section_str = P9_XIP_SECTION_NAME(g_sectionNamesSbe, this_xip_section.id);
+        uint64_t this_sectionaddr = sbe_image_start_addr + this_xip_section.section.iv_offset;
+
+        // Get data from previous section
+        const char* previous_section_str = P9_XIP_SECTION_NAME(g_sectionNamesSbe,
+                                                               previousXipSection.id);
+        uint64_t end_addr_of_previous_section = sbe_image_start_addr
+                                                + previousXipSection.section.iv_offset
+                                                + previousXipSection.section.iv_size;
+        TRACUCOMP(g_trac_sbe, "clearDataBtwnXipSections: Previous section %s ends at 0x%llX, "
+                  "This section %s starts at 0x%llX",
+                  previous_section_str, end_addr_of_previous_section,
+                  this_section_str, this_sectionaddr);
+
+        // Look for any gap between the sections.
+        // NOTE: The first time through end_addr_of_previous_section will be sbe_image_start_addr
+        // (calculated above), so no checks can be made
+        if ((end_addr_of_previous_section > sbe_image_start_addr) &&
+            (this_sectionaddr > end_addr_of_previous_section))
+        {
+            // Gap found
+            size_t gap_size = this_sectionaddr - end_addr_of_previous_section;
+
+            TRACUCOMP(g_trac_sbe, "clearDataBtwnXipSections: GAP detected between "
+                      "section %s ending at 0x%llX and section %s starting at 0x%llX. "
+                      "Gap Size = %d",
+                      previous_section_str, end_addr_of_previous_section,
+                      this_section_str, this_sectionaddr, gap_size);
+
+            // Walk byte by byte and look for non-zero data
+            uint8_t data_byte = 0;
+            for (size_t btwn_bytes = gap_size;
+                 btwn_bytes > 0;
+                 --btwn_bytes)
+            {
+                uint64_t local_addr = this_sectionaddr - btwn_bytes;
+                memcpy(&data_byte,
+                       reinterpret_cast<void*>(local_addr),
+                       sizeof(data_byte));
+
+                TRACUCOMP(g_trac_sbe, "clearDataBtwnXipSections: "
+                          "data_byte=0x%.2X at local_addr=0x%llX between sections %s and %s",
+                          data_byte, local_addr, previous_section_str, this_section_str);
+
+                // check for non-zero
+                if (data_byte != 0)
+                {
+                    TRACFCOMP(g_trac_sbe, "clearDataBtwnXipSections: Clearing non-zero "
+                              "data_byte=0x%.2X at local_addr=0x%llX between sections %s and %s",
+                              data_byte, local_addr, previous_section_str, this_section_str);
+                    memset(reinterpret_cast<void*>(local_addr), 0, sizeof(data_byte));
+                }
+            }
+        }
+
+        // Setup section for next comparison
+        static_assert(sizeof(previousXipSection) == sizeof(this_xip_section),
+                      "xip section structs have different sizes");
+        memcpy(&previousXipSection,
+               &this_xip_section,
+               sizeof(this_xip_section));
+    }
+
+    return;
+}
 
 } //end SBE Namespace
