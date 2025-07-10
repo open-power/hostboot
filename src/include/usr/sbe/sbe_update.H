@@ -733,5 +733,16 @@ class UpdateProcessorSbes : public UpdateWorkItem
     errlHndl_t updateKeyTransitionState(
         TARGETING::KEY_TRANSITION_STATE i_keyTransitionState);
 
+    /*
+     * @brief This function looks for and clears any non-zero data
+     *        between the XIP Sections of the SBE Image
+     *
+     * @param[in]  pSbeImgVddr - Pointer to the start of the SBE Image in memory
+     *
+     * @return void
+     */
+    void clearDataBtwnXipSections( void * pSbeImgVddr );
+
+
 } //end namespace SBE
 #endif
