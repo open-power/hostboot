@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1736,6 +1736,7 @@ fapi2::ReturnCode check_fields(
             }
         }
 
+        l_reg_contents.reverse();
         status_reg_save_helper(l_reg_bit_pair.first, l_reg_contents, io_values);
 
         l_reg_contents.flush<0>();
