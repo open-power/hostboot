@@ -115,6 +115,7 @@ enum DDS_TRIP_INTP_CTRL
 #define RUNTIME_RAIL_VCS    1
 #define RUNTIME_RAIL_IDD    0
 #define RUNTIME_RAIL_ICS    1
+#define RUNTIME_RAIL_VDN    3
 #define RUNTIME_RAIL_STR { "VDD", "VCS"}
 
 
