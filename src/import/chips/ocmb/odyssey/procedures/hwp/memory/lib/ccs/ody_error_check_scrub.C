@@ -154,7 +154,7 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
     }
 
     // Starting loop index of the instruction that other instructions need to loop back to
-    uint8_t l_loop_mpc_start_index = 0;
+    uint8_t l_loop_nop_start_index = 0;
 
     uint64_t l_dram_freq = 0;
     uint8_t l_dram_density = 0;
@@ -254,25 +254,28 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
     // 3. REFab1(trfc_idle/2)       |    (nested loop=10, goto offset=-1)   else
     //      |   |    10X            |
     //      v   ---------------------
-    // 4. MPC_ECS0(tEcsc/2)<------| <-----| <-----| <-----| <-----| (nested loop=0, goto offset=1)
-    //      |                     |       |       |       |       |
+    // 4. NOP(236-88) <-------------------| <-----| <-----| <-----| (nested loop=0, goto offset=1)
+    //      |                       128X  |  128X |  128X | 2X or | Adding the idle to give enough time for mrank1 to refresh
+    //      v                             |       |       | 4X    | when it loops back
+    // 5. MPC_ECS0(tEcsc/2) <-----|       |       |       |       | (nested loop=0, goto offset=1)
+    //      |                 32X |       |       |       |       |
     //      v                     |       |       |       |       |
-    // 5. MPC_ECS1(tEcsc/2)       |       |       |       |       | (nested loop=32, goto offset=-1)
-    //      |        |     32X    |  128X |  128X |  128X | 2X or |
-    //      v        --------------       |       |       | 4X    |
-    // 6. REFab0(trfc_idle/2)             |       |       |       | (nested loop=0, goto offset=1)
+    // 6. MPC_ECS1(tEcsc/2)       |       |       |       |       | (nested loop=32, goto offset=-1)
+    //      |        |            |       |       |       |       |
+    //      v        --------------       |       |       |       |
+    // 7. REFab0(tEcsc/2)                 |       |       |       | (nested loop=0, goto offset=1)
     //      |                             |       |       |       |
     //      v                             |       |       |       |
-    // 7. REFab1(trfc_idle/2)--------------       |       |       | (nested loop=128, goto offset=-3)
+    // 8. REFab1(trfc_idle/2)--------------       |       |       | (nested loop=128, goto offset=-4)
     //      |                                     |       |       |
     //      v                                     |       |       |
-    // 8. NOP(0)-----------------------------------       |       | (nested loop=128, goto offset=-4)
+    // 8. NOP(0)-----------------------------------       |       | (nested loop=128, goto offset=-5)
     //      |                                             |       |
     //      v                                             |       |
-    // 9. NOP(0)-------------------------------------------       | (nested loop=128, goto offset=-5)
+    // 9. NOP(0)-------------------------------------------       | (nested loop=128, goto offset=-6)
     //      |                                                     |
     //      v                                                     |
-    // 10.NOP(0)--------------------------------------------------- (nested loop=2 or 4, goto offset=-6)
+    // 10.NOP(0)--------------------------------------------------- (nested loop=2 or 4, goto offset=-7)
     //      |
     //      v
     // 11.NOP(32)
@@ -284,22 +287,25 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
     // 1. REFab(0)<------|
     //      |   |    10X |
     //      v    ---------
-    // 2. MPC_ECS(tEcsc)<------| <-----| <-----| <-----| <-----|
-    //      |        |     32X |  128X |  128X |  128X | 2X or |
-    //      v        -----------       |       |       | 4X    |
-    // 3. REFab(0)----------------------       |       |       |
+    // 2. NOP(236-88)<-----------------|<------|<------|<------|
+    //      |                     128X |  128X |  128X | 2X or |
+    //      v                          |       |       | 4X    |
+    // 3. MPC_ECS(tEcsc)<------|       |       |       |       |
+    //      |        |     32X |       |       |       |       |
+    //      v        -----------       |       |       |       |
+    // 4. REFab(tEcsc)-----------------|       |       |
     //      |                                  |       |       |
     //      v                                  |       |       |
-    // 4. NOP(0)--------------------------------       |       |
+    // 5. NOP(0)--------------------------------       |       |
     //      |                                          |       |
     //      v                                          |       |
-    // 5. NOP(0)----------------------------------------       |
+    // 6. NOP(0)----------------------------------------       |
     //      |                                                  |
     //      v                                                  |
-    // 6. NOP(0)------------------------------------------------
+    // 7. NOP(0)------------------------------------------------
     //      |
     //      v
-    // 7. NOP(32)
+    // 8. NOP(32)
 
     // Notes:
     // * loop 2-->1 runs 32 ECS commands between refreshes, with tECSc between them
@@ -385,8 +391,8 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
         setup_goto_offset(l_loop_count, l_refab_instr0_loop_index, io_program.iv_instructions);
     }
 
-    // Get the starting loop index for mpc so that all instructions can loop back to.
-    l_loop_mpc_start_index = io_program.iv_instructions.size();
+    // Get the starting loop index for nop so that all instructions can loop back to this instruction except MPC.
+    l_loop_nop_start_index = io_program.iv_instructions.size();
 
     // Jedec table-154: ECS Operation Timing Parameter is:
     // max(176nck, 110ns)/2. We need to divide it by 2 for the idles in the CCS instr
@@ -394,10 +400,58 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
     FAPI_TRY(mss::divide_and_round(l_tecsc_nck, uint64_t(2), l_func_code, l_tecsc_idles));
     FAPI_TRY(mss::divide_and_round(l_tecsc_idles, uint64_t(l_vec_ranks.size()), l_func_code, l_tecsc_idles_per_rank));
 
+
+    // When we loop from refresh instruction to mpc instruction we
+    // are missing (118-44 idles) for mrank1.
+    // Hence we are failing mrank1 when running ranks in parallel
+    // So we added a NOP with the missing idles.
+    // The idles for this nop is same for single and multi-rank
+    // ======================================================================|
+    // |     Before the fix              |       After the fix               |
+    // ----------------------------------------------------------------------|
+    // | Single     |     Multi          | Single         |  Multi           |
+    // =============|=====================================|==================|
+    // | MPC(tecsc) | MPC(tecsc/#ranks)  | MPC(tecsc)     | MPC(tecsc/#ranks)|
+    // |------------|--------------------|----------------|------------------|
+    // |  -         |      -             | NOP(trfc-tecsc)| NOP(trfc-tecsc)  |
+    // |------------|--------------------|----------------|------------------|
+    // | REF(trfc)  | REF(trfc/#ranks)   | REF(tecsc)     | REF(tecsc/#ranks)|
+    // |============|====================|================|------------------|
+
+    // NOP instruction
+    // Set the CCS instruction for NOP
+    {
+        //======================================================
+        // Case        | Multiple ranks        |  Single rank  |
+        //-------------|-----------------------|---------------|
+        // Ranks       |   r0   |    r1        |      r0       |
+        //======================================================
+        // idles       |      236-88           |    236-88     |
+        //======================================================
+        // goto_offset |        1              |       1       |
+        //======================================================
+        // loop_count  |        0              |       0       |
+        //======================================================
+        const uint16_t l_nop_idle = l_trfc_idle - l_tecsc_idles;
+
+        // Give that extra idle that it needs so that when it loops back mrank1 will have time to refresh
+        auto l_nop_instr = mss::ccs::ddr5::des_command<mss::mc_type::ODYSSEY>(l_nop_idle);
+
+        // GOTO the next instruction
+        // Instruction class variable l_nop_instr.iv_goto_next_instr_offset
+        // Offset is 1
+        // defaults to 1 that takes it to the next instruction
+
+        // Push the nop command
+        io_program.iv_instructions.push_back(l_nop_instr);
+    }
+
     // MPC_ECS instruction
     // Set CCS instruction for MPC
     {
+        uint8_t l_loop_mpc_start_index = 0;
         const uint8_t l_loop_count = 32;
+        l_loop_mpc_start_index = io_program.iv_instructions.size();
 
         for(const auto& l_rank : l_vec_ranks)
         {
@@ -421,6 +475,7 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
             io_program.iv_instructions.push_back(l_mpc_instr);
         }
 
+
         // Update the loop count and goto fields on the instruction for the
         // last mrank (the last instruction we added to io_program)
         // so it loops back to the first MPC
@@ -440,15 +495,14 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
             //-------------|-----------------------|---------------|
             // Ranks       |  r0    |    r1        |      r0       |
             //======================================================
-            // idles       | l_trfc_idle/#ofranks  | l_trfc_idle   |
+            // idles       | l_tecsc_idles/#ofranks| l_tecsc_idle  |
             //======================================================
-            // goto_offset |     1  |    -3        |        -1     |
+            // goto_offset |     1  |    -4        |        -1     |
             //======================================================
             // loop_count  |     0  |    128       |      128      |
             //======================================================
             // Create the REFab instruction for the selected srank
-            auto l_refab_instr = mss::ccs::ddr5::refresh_command<mss::mc_type::ODYSSEY>(l_rank, i_srank, l_trfc_idle_per_rank);
-
+            auto l_refab_instr = mss::ccs::ddr5::refresh_command<mss::mc_type::ODYSSEY>(l_rank, i_srank, l_tecsc_idles_per_rank);
 
             // Push the refresh command
             io_program.iv_instructions.push_back(l_refab_instr);
@@ -456,8 +510,8 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
 
         // Update the loop count and goto fields on the instruction for the
         // last mrank (the last instruction we added to io_program)
-        // so it loops back to the first MPC
-        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
+        // so it loops back to the NOP
+        setup_goto_offset(l_loop_count, l_loop_nop_start_index, io_program.iv_instructions);
     }
 
     // NOP instruction
@@ -470,7 +524,7 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
         //======================================================
         // idles       |         0             |       0       |
         //======================================================
-        // goto_offset |        -4             |      -2       |
+        // goto_offset |        -5             |      -2       |
         //======================================================
         // loop_count  |        128            |      128      |
         //======================================================
@@ -480,8 +534,8 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
         // Push the nop command
         io_program.iv_instructions.push_back(l_nop_instr1);
 
-        // Loops back to the first MPC in the program
-        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
+        // Loops back to the NOP in the program
+        setup_goto_offset(l_loop_count, l_loop_nop_start_index, io_program.iv_instructions);
     }
 
     // NOP instruction
@@ -494,7 +548,7 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
         //======================================================
         // idles       |         0             |       0       |
         //======================================================
-        // goto_offset |        -5             |      -3       |
+        // goto_offset |        -6             |      -3       |
         //======================================================
         // loop_count  |        128            |      128      |
         //======================================================
@@ -504,8 +558,8 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
         // Push the nop command
         io_program.iv_instructions.push_back(l_nop_instr2);
 
-        // Loops back to the first MPC in the program
-        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
+        // Loops back to the NOP in the program
+        setup_goto_offset(l_loop_count, l_loop_nop_start_index, io_program.iv_instructions);
     }
 
     // NOP instruction
@@ -518,7 +572,7 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
         //======================================================
         // idles       |         0             |       0       |
         //======================================================
-        // goto_offset |        -6             |      -4       |
+        // goto_offset |        -7             |      -4       |
         //======================================================
         // loop_count  |        2 or 4         |   2 or 4      |
         //======================================================
@@ -534,8 +588,8 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const std::vector<mss::ran
         // Push the nop command
         io_program.iv_instructions.push_back(l_nop_instr3);
 
-        // Loops back to the first MPC in the program
-        setup_goto_offset(l_loop_count, l_loop_mpc_start_index, io_program.iv_instructions);
+        // Loops back to the NOP in the program
+        setup_goto_offset(l_loop_count, l_loop_nop_start_index, io_program.iv_instructions);
     }
 
     // Exit the CCS loop
@@ -907,15 +961,15 @@ fapi_try_exit:
 
 
 ///
-/// @brief Run the workaround for all DRAMS which runs ecs and does not record the results
+/// @brief Run the workaround for HYNIX DRAMS which runs ecs and does not record the results
 /// @param[in] i_vec_rank_infos vector of rank infos for all ports on a single rank
 /// @param[in] i_srank the srank that currently being executed
 /// @param[in] i_pattern data pattern to test
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode run_ecs_workaround(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_infos,
-                                     const uint8_t i_srank,
-                                     const uint64_t i_pattern)
+fapi2::ReturnCode run_hynix_workaround(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_infos,
+                                       const uint8_t i_srank,
+                                       const uint64_t i_pattern)
 {
 
     if (i_vec_rank_infos.empty())
@@ -924,16 +978,21 @@ fapi2::ReturnCode run_ecs_workaround(const std::vector<mss::rank::info<mss::mc_t
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    uint16_t l_dram_mfg_id = 0;
     fapi2::buffer<uint64_t> l_ecc_reg_data;
     fapi2::buffer<uint64_t> l_periodic_calib_data;
     const auto& l_port = i_vec_rank_infos[0].get_port_target();
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
 
-    // Workaround for all DRAMs, run an extra pattern
+    // Get the dram mfg id
+    FAPI_TRY( mss::attr::get_dram_mfg_id(i_vec_rank_infos[0].get_dimm_target(), l_dram_mfg_id));
+
+    // Workaround for Hynx fails, run an extra pattern
     // to get a clean MR20 for the later patterns
-    if(i_pattern == mss::mcbist::PATTERN_0)
+    if(l_dram_mfg_id == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MFG_ID_HYNIX &&
+       i_pattern == mss::mcbist::PATTERN_0)
     {
-        FAPI_INF_NO_SBE("Starting workaround for dimms running on port:  "
+        FAPI_INF_NO_SBE("Starting workaround for Hynix drams running on port:  "
                         GENTARGTIDFORMAT
                         ", mrank: %u, srank: %u for pattern: %u",
                         GENTARGTID(l_port),
@@ -953,7 +1012,7 @@ fapi2::ReturnCode run_ecs_workaround(const std::vector<mss::rank::info<mss::mc_t
         // Enable periodic calibration and ecc mode
         FAPI_TRY(enable_periodic_cal_ecc_modes(l_ocmb, l_ecc_reg_data, l_periodic_calib_data));
 
-        FAPI_INF_NO_SBE("Ending workaround for Hynix dimms running on port:  "
+        FAPI_INF_NO_SBE("Ending workaround for Hynix drams running on port:  "
                         GENTARGTIDFORMAT
                         ", mrank: %u, srank: %u for pattern: %u",
                         GENTARGTID(l_ocmb),
@@ -1015,9 +1074,9 @@ fapi2::ReturnCode run_ecs_helper(const std::vector<mss::rank::info<mss::mc_type:
     // Run this for each SRANK for the rank info that the user selected
     for(uint8_t l_srank = 0; l_srank < l_num_sranks; l_srank++)
     {
-        // Workaround for all DIMMs
+        // Workaround for Hynix drams
         // should take full set of ranks i_vec_ranks
-        FAPI_TRY(run_ecs_workaround(i_vec_ranks, l_srank, i_pattern));
+        FAPI_TRY(run_hynix_workaround(i_vec_ranks, l_srank, i_pattern));
 
         // Do mem init for each srank
         FAPI_TRY(memory_init_via_memdiags(i_vec_ranks[0], l_srank, i_pattern, l_ecc_reg_data));
