@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2024
+# Contributors Listed Below - COPYRIGHT 2012,2025
 # [+] International Business Machines Corp.
 # [+] YADRO
 #
@@ -1186,7 +1186,26 @@ sub validateTargetInstances{
 
     foreach my $targetInstance (@{$attributes->{targetInstance}})
     {
+        # Make sure the basic structure is correct
         validateSubElements("targetInstance",1,$targetInstance,\%elements);
+
+        # Ensure every target is of a known type
+        #  (catches typos and data/code mismatches)
+        my $foundtype = 0;
+        foreach my $targetType (@{$attributes->{targetType}})
+        {
+            #print "Checking $targetInstance->{id} against type $targetType->{id}\n";
+            if( $targetInstance->{type} eq $targetType->{id} )
+            {
+                #print "Found $targetInstance->{id} has type of $targetType->{id}\n";
+                $foundtype = 1;
+                last; 
+            }
+        }
+        if( $foundtype == 0 )
+        {
+            die "ERROR!!!! " . $targetInstance->{id} . "has type of " . $targetInstance->{type} . "\n";
+        }
     }
 }
 
