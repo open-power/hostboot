@@ -236,6 +236,7 @@ if ($nonSyncAttribFile ne "")
     foreach my $attr (@{$nsa->{attribute}})
     {
         my $attrName = $attr->{id};
+
         if (!defined($attr->{fspaccess_nosync}))
         {
             push(@fspAccesCheck, $attrName);
@@ -334,7 +335,6 @@ if( !($cfgSrcOutputDir =~ "none") )
     writeMutexFileAttrs($attributes,$mutexFile);
     writeMutexFileFooter($mutexFile);
     close $mutexFile;
-
 
     open(TRAIT_FILE,">$cfgSrcOutputDir"."attributetraits.H")
       or croak ("Trait file: \"$cfgSrcOutputDir"
@@ -1407,6 +1407,7 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
     my $macroSection = "";
     my $attrSection = "";
     my $typeSection = "";
+    my %fspAccesCheckSet = map { $_ => 1 } @fspAccesCheck;
 
     foreach my $attribute (@{$attributes->{attribute}})
     {
@@ -1424,7 +1425,7 @@ sub writeFapi2PlatAttrMacrosHeaderFileContent {
 
             if ($cfgFapiAttributesXmlFile eq "")
             {
-                if ($attribute->{id} ~~ @fspAccesCheck)
+                if (exists $fspAccesCheckSet{$attribute->{id}})
                 {
                     next;
                 }
@@ -3002,6 +3003,8 @@ sub writeTraitFileTraits {
 
     my %attrValHash;
 
+    my %fspAccesCheckSet = map { $_ => 1 } @fspAccesCheck;
+
     foreach my $attribute (@{$attributes->{attribute}})
     {
         # Build boolean traits
@@ -3038,7 +3041,7 @@ sub writeTraitFileTraits {
             $traits .= " notFspMutex,";
         }
 
-        if (!($attribute->{id} ~~ @fspAccesCheck))
+        if (!exists $fspAccesCheckSet{$attribute->{id}})
         {
             $traits .= " fspAccessible,";
         }
@@ -4149,6 +4152,7 @@ VERBATIM
 ################################################################################
 
 sub writeAttrMetadataMapCFile{
+
     my($attributes,$outFile) = @_;
     my %finalAttrhash = ();
 
@@ -4160,6 +4164,8 @@ sub writeAttrMetadataMapCFile{
 
     my $mapAttrMetadataPairs = "\n    static const Pair_t l_pair[] = {\n";
     my $hbOnlyMapAttrMetadataPairs = '';
+
+    my %nonSyncAttrSet = map { $_ => 1 } @nonSyncAttributes;
 
     foreach my $key ( keys %finalAttrhash)
     {
@@ -4219,7 +4225,7 @@ sub writeAttrMetadataMapCFile{
                   "attribute [$key]");
         }
 
-        if ($finalAttrhash{$key}->{id} ~~ @nonSyncAttributes)
+        if (exists $nonSyncAttrSet{$finalAttrhash{$key}->{id}})
         {
             $mapAttrMetadataPairs .= " true) ),\n";
         }
@@ -8405,9 +8411,10 @@ sub generateXMLforSM {
 
 print SM_TARGET_FILE "
 <attributes>";
+    my %nonSyncAttrSet = map { $_ => 1 } @nonSyncAttributes;
     for (my $i = 0; $i < $Count; $i++)
     {
-        if ($attrDataforSM[$i][ATTRNAME] ~~ @nonSyncAttributes)
+        if (exists $nonSyncAttrSet{$attrDataforSM[$i][ATTRNAME]})
         {
             next;
         }
