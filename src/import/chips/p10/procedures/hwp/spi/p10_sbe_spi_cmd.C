@@ -366,13 +366,18 @@ static fapi2::ReturnCode
 spi_wait_for_idle(SpiControlHandle& i_handle)
 {
     fapi2::buffer<uint64_t> data64 = 0;
+    fapi2::buffer<uint64_t> seq_op_data64 = 0;
 
     uint64_t timeout = SPI_TIMEOUT_MAX_WAIT_COUNT;
+    uint32_t seq_index = 0;
+    uint64_t seq_op_code = 0x00ULL;
 
     while(timeout)
     {
         FAPI_TRY(getScom( i_handle.target_chip,
                           i_handle.base_addr + SPIM_STATUSREG, data64));
+        FAPI_TRY(getScom( i_handle.target_chip,
+                          i_handle.base_addr + SPIM_SEQREG, seq_op_data64));
 
         //checking for multiplexing error
 #ifndef BOOTLOADER
@@ -388,7 +393,19 @@ spi_wait_for_idle(SpiControlHandle& i_handle)
                      RC_SBE_SPI_INVALID_PORT_MULTIPLEX_SET);
 #endif
 
-        if(data64.getBit<15>())  //seq fsm Idle
+        // @sakorrap: Break busy loop either when FSM reached idle or hit 0x50 op-code (spare)
+        // Reason: Observation on write to SEEPROM is that last data byte is getting corrupted
+        // As there is only one SPI Controller Clock Cycle (PLL/4) b/w SCK fall and CS_B rise
+        // At SPI Controller frequencies >= 650MHz (2600/4), last data byte is not written correctly to SEEPROM
+        // FW workaround: Don't do CS_B rising with the sequencer but rather bring SPI controller to wait state
+        // after transmitting the last bits by introducing a spare opcode 0x50 just before CS de-assert opcode 0x10.
+        // Then do an SPI controller soft reset which brings CS_B back to 1.
+        // Metis reference: https://github.ibm.com/zMeChip/zMeCCB/issues/117
+        // P11 Slack Channel/Thread: https://ibm-chip-design.slack.com/archives/C0959N5K6EQ/p1752333679405699
+        seq_index = 8 * data64.getBits<28, 4>();
+        seq_op_code = (seq_op_data64 & 0xFF00000000000000ULL >> seq_index) >> (56 - seq_index);
+
+        if(data64.getBit<15>() || (seq_op_code == 0x50ULL))  //seq fsm Idle
         {
             break;
         }
@@ -1532,6 +1549,25 @@ spi_write_post_seq(SpiControlHandle& i_handle)
         goto fapi_try_exit;
     }
 
+    // @sakorrap: Reset SPI Controller
+    // Reason: Observation on write to SEEPROM is that last data byte is getting corrupted
+    // As there is only one SPI Controller Clock Cycle (PLL/4) b/w SCK fall and CS_B rise
+    // At SPI Controller frequencies >= 650MHz (2600/4), last data byte is not written correctly to SEEPROM
+    // FW workaround: Don't do CS_B rising with the sequencer but rather bring SPI controller to wait state
+    // after transmitting the last bits by introducing a spare opcode 0x50 just before CS de-assert opcode 0x10.
+    // Then do an SPI controller soft reset which brings CS_B back to 1.
+    // Metis reference: https://github.ibm.com/zMeChip/zMeCCB/issues/117
+    // P11 Slack Channel/Thread: https://ibm-chip-design.slack.com/archives/C0959N5K6EQ/p1752333679405699
+
+    rc = spi_master_reset(i_handle);
+
+    if (rc)
+    {
+        FAPI_ERR("Multiplexing Error in spi_master_reset ");
+        fapi2::current_err = rc;
+        goto fapi_try_exit;
+    }
+
     rc = spi_wait_for_write_complete(i_handle);
 
     if (rc)
@@ -1572,7 +1608,18 @@ spi_write_secure(SpiControlHandle& i_handle, uint32_t address, uint8_t* i_data, 
             SEQ |= static_cast<uint64_t>(0x38) << (40 - (i * 8));
         }
 
-        SEQ |= static_cast<uint64_t>(0x10) << (40 - ((l_number_tdr) * 8));
+        // @sakorrap: Introduce a spare opcode 0x50 after shifting all bits out before opcode for de-assert CS
+        // Reason: Observation on write to SEEPROM is that last data byte is getting corrupted
+        // As there is only one SPI Controller Clock Cycle (PLL/4) b/w SCK fall and CS_B rise
+        // At SPI Controller frequencies >= 650MHz (2600/4), last data byte is not written correctly to SEEPROM
+        // FW workaround: Don't do CS_B rising with the sequencer but rather bring SPI controller to wait state
+        // after transmitting the last bits by introducing a spare opcode 0x50 just before CS de-assert opcode 0x10.
+        // Then do an SPI controller soft reset which brings CS_B back to 1.
+        // Metis reference: https://github.ibm.com/zMeChip/zMeCCB/issues/117
+        // P11 Slack Channel/Thread: https://ibm-chip-design.slack.com/archives/C0959N5K6EQ/p1752333679405699
+
+        SEQ |= static_cast<uint64_t>(0x50) << (40 - ((l_number_tdr) * 8));
+        SEQ |= static_cast<uint64_t>(0x10) << (40 - ((l_number_tdr + 1) * 8));
 
         rc = spi_write_prep_seq(i_handle, address, SEQ);
 
