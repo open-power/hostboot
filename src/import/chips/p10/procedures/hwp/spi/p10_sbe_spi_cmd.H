@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@
 #define TPM_SECURE_DATA_LEN 8
 
 //Byte-length of data to do secure write or read for SEEPROMs
-#define SEEPROM_SECURE_DATA_LEN 40
+#define SEEPROM_SECURE_DATA_LEN 32
 
 //Each page in the seeprom is 256 bytes in size
 #define SEEPROM_PAGE_SIZE 256
