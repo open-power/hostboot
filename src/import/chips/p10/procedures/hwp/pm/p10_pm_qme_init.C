@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -952,10 +952,8 @@ fapi2::ReturnCode invokeQmeQuiesceMode(
     fapi2::buffer<uint64_t>  l_qmeFlagRegValue;
     uint32_t l_quiesceModeTimeout = QME_QUIESCE_TIMEOUT_MS;
 
-#ifdef __HOSTBOOT_MODULE
     fapi2::ATTR_IS_MPIPL_Type l_mpipl;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>      FAPI_SYSTEM;
-#endif
 
     auto l_eq_mc_and  = i_target.getMulticast<fapi2::TARGET_TYPE_EQ, fapi2::MULTICAST_AND >(fapi2::MCGROUP_GOOD_EQ);
 
@@ -980,8 +978,6 @@ fapi2::ReturnCode invokeQmeQuiesceMode(
     FAPI_DBG( "After loop l_qmeFlagRegValue: 0x%016llX QME Flag Register 0x%016llX",
               l_quiesceModeTimeout, l_qmeFlagRegValue );
 
-#ifdef __HOSTBOOT_MODULE
-
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_mpipl ) );
 
     if( l_mpipl && !l_quiesceModeTimeout )
@@ -990,7 +986,6 @@ fapi2::ReturnCode invokeQmeQuiesceMode(
         goto fapi_try_exit;
     }
 
-#endif
 
     FAPI_ASSERT( l_quiesceModeTimeout,
                  fapi2::QME_FAILED_TO_ENTER_QUIESCE_MODE()
