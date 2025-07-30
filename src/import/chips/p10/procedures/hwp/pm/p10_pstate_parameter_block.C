@@ -1348,27 +1348,19 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Compute dds slopes
         compute_dds_slopes(io_globalppb);
 
-
         float pstatef = 0;
-        if (iv_attrs.attr_extended_freq_mode &&
-            iv_extended_freq_enable)
+        if ( ((iv_attrs.attr_extended_freq_mode |= ENUM_ATTR_EXTENDED_FREQ_MODE_OLD_FREQ) &&
+                   iv_extended_freq_enable) ||
+                   ((iv_pdv_model_data & PDV_MODEL_DATA_PNEXT) == PDV_MODEL_DATA_PNEXT))
         {
-            if ( (iv_attrs.attr_extended_freq_mode == ENUM_ATTR_EXTENDED_FREQ_MODE_OLD_FREQ) &&
-                   !iv_extended_freq_enable)
-            {
-                pstatef = (float)(iv_attrs.attr_max_oper_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
-            }
-            else
-            {
                 pstatef = (float)(EXTENDED_MAX_FREQUENCY_MHZ * 1000) /(float)(iv_frequency_step_khz);
-            }
-             io_globalppb->base.dpll_pstate0_value = revle32((uint32_t)internal_round(pstatef));
-         }
-         else
-         {
-            pstatef = (float)(iv_attrs.attr_max_oper_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
-            io_globalppb->base.dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
-         }
+        }
+        else
+        {
+                pstatef = (float)(iv_attrs.attr_max_oper_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
+        }
+
+        io_globalppb->base.dpll_pstate0_value = revle32((uint32_t)internal_round(pstatef));
 
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
@@ -2847,7 +2839,9 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         bool wof_state = is_wof_enabled();
 
 
-        FAPI_TRY(wof_apply_overrides(iv_procChip, p_poundV_data,wof_state));
+        // We don't want  to break from this function, even though
+        // wof is disabled, need to continue to read poundV
+        wof_apply_overrides(iv_procChip, p_poundV_data,wof_state);
         FAPI_INF("< Applying WOF Overrides");
 
         // Update the class variables
@@ -4997,7 +4991,8 @@ fapi2::ReturnCode PlatPmPPB::set_reference_freq(fapi2::ATTR_WOF_TABLE_DATA_Type*
         iv_extended_freq_enable = (p_wfth->sys_flags & 0x04) ? true : false;
     }
 
-    if (iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable)
+    if ((iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable) ||
+       ((iv_pdv_model_data & PDV_MODEL_DATA_PNEXT) == PDV_MODEL_DATA_PNEXT))
     {
         iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
@@ -7153,7 +7148,8 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
         FAPI_TRY(p10_pm_set_system_freq(sys_target,wof_state), "p10_pm_set_system_freq failed.");
     }
 
-    if (iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable)
+    if ((iv_attrs.attr_extended_freq_mode && iv_extended_freq_enable) ||
+        ((iv_pdv_model_data & PDV_MODEL_DATA_PNEXT) == PDV_MODEL_DATA_PNEXT))
     {
         l_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;

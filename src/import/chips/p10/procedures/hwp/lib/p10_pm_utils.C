@@ -1141,7 +1141,7 @@ fapi2::ReturnCode wof_validate_header(
                     FAPI_INF("  ATTR_WOF_TABLE_OVERRIDE_RC = 0x%04X (%04d)", rc_ovrd, rc_ovrd);
                 }
 
-                if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_WARN)
+                if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_INFO)
                 {
                     FAPI_ASSERT_NOEXIT(false,
                                        fapi2::PSTATE_PB_WOF_OVERRIDE_INVALID()
@@ -1161,28 +1161,52 @@ fapi2::ReturnCode wof_validate_header(
                                        "WOF Tables Override validation failed.  One of more fields mismatch.");
                     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                 }
-
-                if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_FAIL)
+                else
                 {
-                    FAPI_ASSERT(false,
-                                fapi2::PSTATE_PB_WOF_OVERRIDE_INVALID()
-                                .set_CHIP_TARGET(i_proc_target)
-                                .set_CHIP_PS(revle16(p_wfth->sort_power_save_freq_mhz))
-                                .set_SYS_PS(ps_ovrd)
-                                .set_CHIP_WB(revle16(p_wfth->sort_power_freq_mhz))
-                                .set_SYS_WB(wb_ovrd)
-                                .set_CHIP_UT(revle16(p_wfth->sort_ultraturbo_freq_mhz))
-                                .set_SYS_UT(ut_ovrd)
-                                .set_CHIP_FF(revle16(p_wfth->sort_fixed_freq_mhz))
-                                .set_SYS_FF(ff_ovrd)
-                                .set_CHIP_SP(revle16(p_wfth->socket_power_w))
-                                .set_SYS_SP(sp_ovrd)
-                                .set_CHIP_RC(revle16(p_wfth->rdp_current_a))
-                                .set_SYS_RC(rc_ovrd),
-                                "WOF Tables Override validation failed.  One of more fields mismatch.");
-                }
 
-                l_wof_enabled = fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
+                    if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_WARN)
+                    {
+                        FAPI_ASSERT_NOEXIT(false,
+                                           fapi2::PSTATE_PB_WOF_OVERRIDE_INVALID()
+                                           .set_CHIP_TARGET(i_proc_target)
+                                           .set_CHIP_PS(revle16(p_wfth->sort_power_save_freq_mhz))
+                                           .set_SYS_PS(ps_ovrd)
+                                           .set_CHIP_WB(revle16(p_wfth->sort_power_freq_mhz))
+                                           .set_SYS_WB(wb_ovrd)
+                                           .set_CHIP_UT(revle16(p_wfth->sort_ultraturbo_freq_mhz))
+                                           .set_SYS_UT(ut_ovrd)
+                                           .set_CHIP_FF(revle16(p_wfth->sort_fixed_freq_mhz))
+                                           .set_SYS_FF(ff_ovrd)
+                                           .set_CHIP_SP(revle16(p_wfth->socket_power_w))
+                                           .set_SYS_SP(sp_ovrd)
+                                           .set_CHIP_RC(revle16(p_wfth->rdp_current_a))
+                                           .set_SYS_RC(rc_ovrd),
+                                           "WOF Tables Override validation failed.  One of more fields mismatch.");
+                        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    }
+
+                    if (l_wof_mode == fapi2::ENUM_ATTR_SYSTEM_WOF_VALIDATION_MODE_FAIL)
+                    {
+                        FAPI_ASSERT(false,
+                                    fapi2::PSTATE_PB_WOF_OVERRIDE_INVALID()
+                                    .set_CHIP_TARGET(i_proc_target)
+                                    .set_CHIP_PS(revle16(p_wfth->sort_power_save_freq_mhz))
+                                    .set_SYS_PS(ps_ovrd)
+                                    .set_CHIP_WB(revle16(p_wfth->sort_power_freq_mhz))
+                                    .set_SYS_WB(wb_ovrd)
+                                    .set_CHIP_UT(revle16(p_wfth->sort_ultraturbo_freq_mhz))
+                                    .set_SYS_UT(ut_ovrd)
+                                    .set_CHIP_FF(revle16(p_wfth->sort_fixed_freq_mhz))
+                                    .set_SYS_FF(ff_ovrd)
+                                    .set_CHIP_SP(revle16(p_wfth->socket_power_w))
+                                    .set_SYS_SP(sp_ovrd)
+                                    .set_CHIP_RC(revle16(p_wfth->rdp_current_a))
+                                    .set_SYS_RC(rc_ovrd),
+                                    "WOF Tables Override validation failed.  One of more fields mismatch.");
+                    }
+
+                    l_wof_enabled = fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
+                }
             }
         }
     }
