@@ -41,7 +41,8 @@ function usage ()
     echo "       -x|--xml-only    Copy system xmls into repo and won't perform any setup actions on the repo. Cannot use with -n"
     echo "       -n|--no-xml      Checkout supplied PACKAGE_NAME and perform setup actions but don't copy system xmls to repo. Cannot use with -x"
     echo "       -s|--system-type Copies the system xml of the targeted system and replaces simics_P10.system.xml with it."
-    echo "                            e = Everest, 2u = Rainer 2U, 4u = Rainier 4U, b = Bonnell, br = Blueridge, f = Fuji"
+    echo "                            e = Everest, 2u = Rainer 2U, 4u = Rainier 4U, b = Bonnell, "
+    echo "                            br = Blueridge, f = Fuji, ba = Balcones"
     echo "       -b|--branch-name The branch name for the new branch created by this script. Default is PACKAGE_NAME"
     echo ""
     echo "Examples:"
@@ -378,6 +379,8 @@ function main ()
                     sys_type="Blueridge"
                 elif [ "${sys_type}" = "f" ]; then
                     sys_type="Fuji"
+                elif [ "${sys_type}" = "ba" ]; then
+                    sys_type="Balcones"
                 else
                     echo "ERROR: Invalid system target."
                     usage
