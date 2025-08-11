@@ -505,7 +505,7 @@ struct __attribute__ ((__packed__)) pmic_periodic_2u_telemetry_data
     uint16_t iv_r31_sample_temp = 0;
 
     uint8_t iv_r73_status_5     = 0;
-    uint8_t reserved            = 0;
+    uint8_t iv_r89              = 0;
     uint16_t reserved1          = 0;
 };
 
@@ -522,12 +522,13 @@ struct __attribute__ ((__packed__)) pmic_periodic_2u_telemetry_data
 ///     0x24: Added DQS drift tracking data
 ///     0x25: Added DTS data
 ///     0x26: Added DRAM mnfg id
+///     0x27: Added compensation register
 ///
 struct __attribute__ ((__packed__)) periodic_2U_telemetry_data
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision             = 0x26;
+    uint8_t iv_revision             = 0x27;
     uint8_t iv_aggregate_pmic_state = 0;
     uint16_t reserved               = 0;
 
