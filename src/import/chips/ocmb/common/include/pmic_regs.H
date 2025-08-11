@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,6 +180,7 @@ struct pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R82                                 = 0x82;
     static constexpr uint8_t R85                                 = 0x85;
     static constexpr uint8_t R88                                 = 0x88;
+    static constexpr uint8_t R89                                 = 0x89;
     static constexpr uint8_t R8B                                 = 0x8B;
 };
 

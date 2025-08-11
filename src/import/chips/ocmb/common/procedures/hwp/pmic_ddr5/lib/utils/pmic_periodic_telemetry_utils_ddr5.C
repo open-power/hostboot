@@ -931,6 +931,10 @@ fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGE
         io_info.iv_pmic[l_relative_pmic_id].iv_r31_sample_temp = static_cast<uint16_t>(l_data_buffer[DATA_POS::DATA_0]()) *
                 ADC_TEMP_STEP;
 
+        // Compensation
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read(l_pmic, REGS::R89, l_data_buffer[DATA_POS::DATA_0]));
+        io_info.iv_pmic[l_relative_pmic_id].iv_r89 = l_data_buffer[DATA_POS::DATA_0]();
+
         // GLOBAL_CLEAR_STATUS
         FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(l_pmic, REGS::R14, 0x01));
 
