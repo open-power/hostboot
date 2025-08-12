@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 /// @file ody_ccs_read_processing.H
 /// @brief  Process ccs read data for ddr5
 ///
-// *HWP HWP Owner: Adithi Ganapathi <adithi.t.ganapathi@ibm.com>
+// *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
