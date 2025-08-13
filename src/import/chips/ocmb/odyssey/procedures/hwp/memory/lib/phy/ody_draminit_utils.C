@@ -1476,6 +1476,7 @@ fapi2::ReturnCode read_mr_from_block(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
                                      const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
                                      const uint8_t (&i_data_array)[mss::ody::MAX_RANK_PER_PHY][mss::ody::MAX_NIBBLES_PER_PORT])
 {
+    // TODO:JIRA:MSWT-414 Update read of MR attributes for x8
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     uint8_t l_dram_width = 0;
     MR l_mr(i_target, l_rc);
