@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -383,10 +383,7 @@ class reg2
         {
             fapi2::buffer<uint64_t> l_clear;
             l_clear.setBit<B>();
-            FAPI_TRY( mss::putScom(iv_target, RT::FIR_CLEAR, l_clear) );
-
-        fapi_try_exit:
-            return fapi2::current_err;
+            return mss::putScom(iv_target, RT::FIR_CLEAR, l_clear);
         }
 
         ///
