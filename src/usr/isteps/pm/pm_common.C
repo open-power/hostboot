@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1399,6 +1399,12 @@ namespace HBPM
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
                 l_errl->collectTrace("ISTEPS_TRACE",256);
+#ifdef CONFIG_HTMGT
+                // Change severity to info since HTMGT will create
+                // a non-informational log after all retries exhausted
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                l_errl->collectTrace(HTMGT_COMP_NAME,1024);
+#endif
 
                 break;
             }

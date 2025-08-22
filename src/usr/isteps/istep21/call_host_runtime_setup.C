@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -343,6 +343,12 @@ void* call_host_runtime_setup (void *io_pArgs)
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "loadAndStartPMAll failed");
 
+#ifdef CONFIG_HTMGT
+                // Change severity to info since HTMGT will create
+                // a non-informational log after all retries exhausted
+                l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                l_err->collectTrace(HTMGT_COMP_NAME,1024);
+#endif
                 // Commit the error and continue with the istep
                 errlCommit(l_err, ISTEP_COMP_ID);
                 pmStartSuccess = false;
