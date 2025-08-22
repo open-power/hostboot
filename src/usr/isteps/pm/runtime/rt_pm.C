@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -540,6 +540,12 @@ namespace RTPM
                               l_failedProc);
                 if(l_errl)
                 {
+#ifdef CONFIG_HTMGT
+                    // Change severity to info since HTMGT will create
+                    // a non-informational log after all retries exhausted
+                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_errl->collectTrace(HTMGT_COMP_NAME,1024);
+#endif
                     pm_complex_error(l_errl, l_rc);
                     l_start_completed = false;
                 }
