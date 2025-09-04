@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -390,15 +390,42 @@ namespace TRACE
         }
         #endif
 
-        #ifdef CONFIG_CONSOLE_OUTPUT_TRACE
+        // Copy the current time.
+        trace_entry_stamp_t l_time;
+        _createTimeStamp(&l_time);
+
+        do
         {
-        // Output binary data.
-        // Format is:
-        // ~[0x0000] 01234567 01234567 01234567 01234567    *012345689abcdef*
-            static size_t BINARY_FORMAT_LENGTH = 69;
+            // make sure either traceLite or CONFIG_CONSOLE_OUTPUT_TRACE is enabled
+            #ifndef CONFIG_CONSOLE_OUTPUT_TRACE
+            if (!iv_traceLite)
+            {
+                break;
+            }
+            #endif
+
+            // Output binary data.
+            // Format is:
+            // ~[0x0000] 12345678 90ABCDEF ABABABAB ABABABAB     *.4Vx............*
+            // ~[0x0010] 74657374 ABABABAB ABABABAB CC           *test.........   *
+            static const size_t BINARY_FORMAT_LENGTH = 69;
 
             size_t pos = 0;
-            char* output = strdup(i_fmt);
+
+            char* output;
+            if (iv_traceLite)
+            {
+                // allocate enough space for trace_lite and hash
+                char tracelite_hashstring[32];
+                sprintf(tracelite_hashstring,"trace_lite %.8X ", i_hash);
+                output = strdup(tracelite_hashstring);
+            }
+            else
+            {
+                // Dont print trace_lite string if its disabled
+                output = strdup(i_fmt);
+            }
+
             size_t output_size = strlen(output)+1;
             while(pos < i_size)
             {
@@ -461,27 +488,35 @@ namespace TRACE
                 pos += 16;
             }
 
+            #ifdef CONFIG_CONSOLE_OUTPUT_TRACE
             // Output full binary dump.
             #ifdef CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME
             if ( !strcmp(i_td->iv_compName,
                          CONFIG_CONSOLE_OUTPUT_TRACE_COMP_NAME) )
             #endif
             {CONSOLE::displayf(CONSOLE::VUART1, i_td->iv_compName,"%s",output);}
+            #endif
+
+            if (iv_traceLite)
+            {
+            #ifdef CONFIG_NO_FAPI_IN_TRACE_LITE_OUTPUT
+                if (strcmp( i_td->iv_compName, "FAPI" ))
+            #endif
+                {
+                    char tmpstr[sizeof(i_td->iv_compName)+sizeof(l_time.tid)+1];
+                    sprintf(tmpstr, "%d %s", l_time.tid, i_td->iv_compName);
+                    CONSOLE::displayf(CONSOLE::VUART2, tmpstr, "%s", output);
+                }
+            }
 
             free(output);
-
-        }
-        #endif
+        } while(0);
 
 
         do
         {
             // Get the right buffer for this component.
             Buffer* l_buffer = iv_buffers[i_td->iv_bufferType];
-
-            // Copy the current time.
-            trace_entry_stamp_t l_time;
-            _createTimeStamp(&l_time);
 
             // Claim an entry from the buffer.
             uint32_t l_realSize = ALIGN_4(sizeof(trace_bin_entry_t) + i_size);
