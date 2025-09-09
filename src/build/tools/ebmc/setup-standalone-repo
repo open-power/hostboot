@@ -108,6 +108,12 @@ function pull_pnor_xml ()
     echo "Getting the OP-BUILD PNOR defaultPnorLayout_64.xml to replace the STANDALONE $file to properly build patches for BMC"
     cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/build/openpower-pnor-${generation}*/${generation}Layouts/defaultPnorLayout_64.xml $PROJECT_ROOT/src/build/buildpnor/$file
     rc=$?
+    # If it fails, try a possible second location
+    if [ ${rc} -ne 0 ]; then
+        echo "Trying a second location for the OP-BUILD PNOR defaultPnorLayout_64.xml to replace the STANDALONE $file to properly build patches for BMC"
+        cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build_savedOutput/p11ebmc/ship/openpower-pnor-${generation}*/${generation}Layouts/defaultPnorLayout_64.xml $PROJECT_ROOT/src/build/buildpnor/$file
+        rc=$?
+    fi
     if [ ${rc} -ne 0 ]; then
         return ${rc}
     fi
