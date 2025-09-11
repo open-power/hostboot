@@ -394,6 +394,22 @@
   </attribute>
 
   <attribute>
+    <id>FULL_IPL_FW_VERSION</id>
+    <description>
+      Provides the full system firmware version level with which last full CEC IPL was performed.
+    </description>
+    <simpleType>
+      <string>
+        <sizeInclNull>64</sizeInclNull>
+      </string>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>
       Firmware release version (e.g. "NH1010_009"), stored by error
       logs in the EH section. This value comes from MI Keyword as
@@ -936,6 +952,23 @@
     <readable/>
     <writeable/>
     <hbOnly/>
+  </attribute>
+
+  <attribute>
+    <id>IPL_FW_VERSION</id>
+    <description>
+      Provides the full system firmware version level with which the last CEC IPL of any type
+      was performed (cold, warm, mpipl).
+    </description>
+    <simpleType>
+      <string>
+        <sizeInclNull>64</sizeInclNull>
+      </string>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
   </attribute>
 
   <enumerationType>

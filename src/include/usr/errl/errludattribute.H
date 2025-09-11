@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,9 +75,6 @@ class ErrlUserDetailsAttribute : public ErrlUserDetails {
     // Disabled
     ErrlUserDetailsAttribute(const ErrlUserDetailsAttribute &);
     ErrlUserDetailsAttribute & operator=(const ErrlUserDetailsAttribute &);
-
-    // internal function
-    void dumpAll();
 
     const TARGETING::Target * iv_pTarget;
     uint32_t iv_dataSize;

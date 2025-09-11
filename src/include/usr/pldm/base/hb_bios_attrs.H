@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 
 /** @file  hb_bios_attrs.H
  *  @brief This file contains the declarations of the functions that
- *         are used to get the current value of the PLDM BIOS attributes from
+ *         are used to get/set the current value of the PLDM BIOS attributes from
  *         the BMC. These interfaces should translate the PLDM attribute value
  *         into a type suitable for hostboot's use as an output parameter.
  *
@@ -49,6 +49,7 @@
  *       vectors the underlying code skips the lookups entirely. Otherwise, the code is forced to do the lookup.
  **/
 
+#include <errl/errlentry.H>
 #include <openbmc/pldm/libpldm/include/libpldm/bios_table.h>
 #include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/file_io.h>
 #include <pnor/pnor_const.H>
@@ -548,6 +549,32 @@ namespace PLDM
     errlHndl_t getDisablePredictiveMemGuard(std::vector<uint8_t>& io_string_table,
                             std::vector<uint8_t>& io_attr_table,
                             uint8_t& o_disable_guards);
+
+    /**
+     * @brief Set PLDM BIOS hb_full_ipl_fw_version attr to new value
+     *
+     * @param[in,out] io_string_table     See brief at the top of this file.
+     * @param[in,out] io_attr_table       See brief at the top of this file.
+     * @param[in]     i_attr_value        Attribute FW version
+     *
+     * @return Error if any, otherwise nullptr.
+     */
+    errlHndl_t setFullIplFwVersion(std::vector<uint8_t>& io_string_table,
+                                   std::vector<uint8_t>& io_attr_table,
+                                   const TARGETING::ATTR_FW_RELEASE_VERSION_type& i_fw_version);
+
+    /**
+     * @brief Set PLDM BIOS hb_ipl_fw_version attr to new value
+     *
+     * @param[in,out] io_string_table     See brief at the top of this file.
+     * @param[in,out] io_attr_table       See brief at the top of this file.
+     * @param[in]     i_attr_value        Attribute FW version
+     *
+     * @return Error if any, otherwise nullptr.
+     */
+    errlHndl_t setIplFwVersion(std::vector<uint8_t>& io_string_table,
+                               std::vector<uint8_t>& io_attr_table,
+                               const TARGETING::ATTR_FW_RELEASE_VERSION_type& i_fw_version);
 }
 
 #endif

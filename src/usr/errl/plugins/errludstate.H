@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,8 @@
 #ifndef LOGPARSER
 #include <targeting/common/target.H>
 #endif
+#include <array>
+
 namespace ERRORLOG
 {
 
@@ -72,7 +74,53 @@ public:
     {
         const uint8_t* const l_data = static_cast<uint8_t*>(i_pBuffer);
 
-        if (i_version == 2)
+        if (i_version == 3)
+        {
+            //***** Memory Layout *****
+            // 1 bytes  : Major Istep
+            // 1 bytes  : Minor Istep
+            // 1 bytes  : IPL type
+            // 64 bytes : FW Release Version
+            const size_t TOTAL_SIZE = 67;
+
+            if( i_buflen >= TOTAL_SIZE )
+            {
+                i_parser.PrintNumber("Current Major Istep", "%d", l_data[0]);
+                i_parser.PrintNumber("Current Minor Istep", "%d", l_data[1]);
+
+                constexpr uint8_t IPL_TYPE_UNAVAILABLE = 0xFF;
+                if (l_data[2] == IPL_TYPE_UNAVAILABLE)
+                {
+                    i_parser.PrintString("MPIPL mode?", "Unknown");
+                }
+                else
+                {
+                    i_parser.PrintNumber("MPIPL mode?", "%d", l_data[2]);
+                }
+
+                constexpr size_t FW_RELEASE_VERSION_SIZE = 64;
+                std::array<char, FW_RELEASE_VERSION_SIZE> l_fw_release_version;
+                memcpy(l_fw_release_version.data(), l_data + 3, FW_RELEASE_VERSION_SIZE);
+
+                i_parser.PrintString("FW Release Version",l_fw_release_version.data());
+
+                if( i_buflen > TOTAL_SIZE )
+                {
+                    // Print out extra data as hex so that an old parser will
+                    //  still display new data that gets logged in the code
+                    i_parser.PrintHexDump( (l_data+TOTAL_SIZE), i_buflen-TOTAL_SIZE );
+                }
+            }
+            else
+            {
+                // Just print out whatever we have if it is less than
+                //  the data size we are aware of
+                i_parser.PrintNumber("State Buffer length", "0x%X", i_buflen);
+                i_parser.PrintNumber("Expected length", "0x%X", TOTAL_SIZE);
+                i_parser.PrintHexDump(i_pBuffer, i_buflen);
+            }
+        }
+        else if (i_version == 2)
         {
             //***** Memory Layout *****
             // 1 bytes  : Major Istep
@@ -146,11 +194,10 @@ public:
         }
     }
 
-private:
-    // Disabled
-    ErrlUserDetailsParserSysState(const ErrlUserDetailsParserSysState &);
-    ErrlUserDetailsParserSysState & operator=(
-        const ErrlUserDetailsParserSysState &);
+// Disabled
+ErrlUserDetailsParserSysState(const ErrlUserDetailsParserSysState &) = delete;
+ErrlUserDetailsParserSysState & operator=(const ErrlUserDetailsParserSysState &) = delete;
+
 };
 
 }

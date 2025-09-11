@@ -1199,7 +1199,7 @@ sub validateTargetInstances{
             {
                 #print "Found $targetInstance->{id} has type of $targetType->{id}\n";
                 $foundtype = 1;
-                last; 
+                last;
             }
         }
         if( $foundtype == 0 )
@@ -3456,35 +3456,6 @@ sub writeAttrErrlCFile {
     print $outFile "}\n";
     print $outFile "\n";
 
-    # build internal function that dumps all attributes
-    print $outFile "//------------------------------------------------------------------------------\n";
-    print $outFile "void ErrlUserDetailsAttribute::dumpAll()\n";
-    print $outFile "{\n";
-    print $outFile "    // write out the HUID first and always\n";
-    print $outFile "    addData(ATTR_HUID);\n";
-
-    # loop through every attribute to make the swith/case
-    foreach my $attribute (@{$attributes->{attribute}})
-    {
-        # skip the HUID that we already added
-        if( $attribute->{id} =~ /HUID/ ) {
-            next;
-        }
-        # things we'll skip:
-        if(!(exists $attribute->{readable}) ||  # write-only attributes
-           !(exists $attribute->{writeable}) || # read-only attributes
-           (exists $attribute->{simpleType} && (
-           (exists $attribute->{simpleType}->{hbmutex}) ||
-           (exists $attribute->{simpleType}->{hbrecursivemutex}) ||
-           (exists $attribute->{simpleType}->{fspmutex}))) # mutex attributes
-          ) {
-            next;
-        }
-        print $outFile "    addData(ATTR_",$attribute->{id},");\n";
-    }
-    print $outFile "}\n";
-
-    print $outFile "\n";
 
     print $outFile "} // namespace\n\n";
 } # sub writeAttrErrlCFile

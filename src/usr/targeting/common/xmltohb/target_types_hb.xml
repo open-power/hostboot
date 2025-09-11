@@ -375,6 +375,20 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>sys</id>
+    <attribute>
+      <id>FULL_IPL_FW_VERSION</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>sys</id>
+    <attribute>
+      <id>IPL_FW_VERSION</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>sys-sys-power10</id>
     <attribute>
       <id>ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE</id>

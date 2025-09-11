@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,7 +196,7 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
 errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
                                  std::vector<uint8_t>& o_attrVal)
 {
-    PLDM_ENTER("getBiosAttrFromHandle");
+    PLDM_ENTER("getBiosAttrFromHandle(handle=0x%08x)", i_bios_attr_handle);
     PLDM_DBG("Making request for Bios Attr 0x%08x from the BMC", i_bios_attr_handle);
 
     variable_field attribute_data { };
@@ -368,7 +368,7 @@ errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
 
     const pldm_set_bios_attribute_current_value_req req_header
     {
-        .transfer_handle = 0, // (0 if transfer op is START_AND_END)
+        .transfer_handle = 0, // (ignored if transfer op is START_AND_END)
         .transfer_flag = PLDM_START_AND_END
     };
 

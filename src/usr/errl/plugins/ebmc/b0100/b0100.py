@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2024
+# Contributors Listed Below - COPYRIGHT 2020,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -547,7 +547,40 @@ class errludP_errl:
         return jsonStr
 
     def ErrlUserDetailsParserSysState(ver, data):
-        if ver == 2:
+        if ver == 3:
+            #***** Memory Layout *****
+            # 1 bytes  : Major Istep
+            # 1 bytes  : Minor Istep
+            # 1 bytes  : IPL type
+            # 64 bytes : FW Release Version
+            TOTAL_SIZE =67
+            IPL_TYPE_UNAVAILABLE = 0xFF
+            d = dict()
+            i = 0
+            if len(data) >= TOTAL_SIZE:
+                d['Current Major Istep']=data[i]
+                i += 1
+
+                d['Current Minor Istep']=data[i]
+                i += 1
+
+                if data[i] == IPL_TYPE_UNAVAILABLE:
+                    d['MPIPL mode?']='Unknown'
+                else:
+                    d['MPIPL mode?']=data[i]
+                i += 1
+
+                fw_release_data = data[i:TOTAL_SIZE].tobytes().decode('utf-8').rstrip('\x00')
+                d['FW Release Version'] = fw_release_data
+                i += 64
+
+                if len(data) > TOTAL_SIZE:
+                    d['Hex Dump']=hexDump(data, i, len(data))
+            else:
+                d['State Buffer Length']= hex(len(data))
+                d['Expected Length']= hex(TOTAL_SIZE)
+                d['Hex Dump']= hexDump(data, i, len(data))
+        elif ver == 2:
             #***** Memory Layout *****
             # 1 bytes  : Major Istep
             # 1 bytes  : Minor Istep

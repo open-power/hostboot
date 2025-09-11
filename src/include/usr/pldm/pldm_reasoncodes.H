@@ -118,6 +118,7 @@ namespace PLDM
         MOD_APPEND_KEYWORDS                          = 0x4D, // append_keywords
         MOD_SEND_GET_NUMERIC_EFFECTER_VALUE_REQUEST  = 0x4E, // sendGetNumericEffecterValueRequest
         MOD_SEND_GET_STATE_SENSOR_STATES_REQUEST     = 0x4F, // sendGetStateSensorStatesRequest
+        MOD_SET_BIOS_ATTR_STRING_VALUE               = 0x50, // setBiosStringAttrValue
     };
 
     enum PLDMReasonCode

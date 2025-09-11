@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@
 // support for string user details sections
 #include <errl/errludstring.H>
 #include <errl/errlmanager.H>
+#include <errl/errludstate.H>
 
 // SectionId eyecatch string lookup
 #include <pnor/pnorif.H>
@@ -79,7 +80,8 @@ const char PLDM_BIOS_HB_PROC_FAVOR_AGGRESSIVE_PREFETCH_STRING[] = "hb_proc_favor
 const char PLDM_BIOS_HB_STORAGE_PREALLOCATION_FOR_DRAWER_ATTACH[] = "hb_storage_preallocation_for_drawer_attach_current";
 const char PLDM_BIOS_HB_CDM_POLICIES[]                     = "hb_cdm_policies";
 const char PLDM_BIOS_HB_DISABLE_PREDICTIVE_MEM_GUARD[]     = "hb_predictive_mem_guard_current";
-
+constexpr char const PLDM_BIOS_HB_FULL_IPL_FW_VERSION[]    = "hb_full_ipl_fw_version";
+constexpr char const PLDM_BIOS_HB_IPL_FW_VERSION[]         = "hb_ipl_fw_version";
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
@@ -216,6 +218,20 @@ struct attr_table_integer_entry_fields {
         uint64_t default_value;
 } __attribute__((packed));
 
+/**
+ * @struct attr_table_string_entry_fields
+ *
+ * Fields of an attribute entry of type string
+ * Copied from libpldm/src/dsp/bios_table.c
+ */
+struct attr_table_string_entry_fields {
+    uint8_t string_type;   // Byte 0    - String encoding type (ASCII, UTF-8, etc.)
+    uint16_t min_length;   // Bytes 1:2 - Minimum length in bytes
+    uint16_t max_length;   // Bytes 3:4 - Maximum length in bytes
+    uint16_t def_length;   // Bytes 5:6 - Default string length in bytes
+    uint8_t def_string[1]; // Variable  - The default string itself
+} __attribute__((packed));
+
 
 /** @brief Given a size_t s, and a string ptr c,
 *          determine if the strlen of the string pointed
@@ -332,7 +348,7 @@ static std::vector<char> decode_string_handle(const std::vector<uint8_t>& i_stri
 *
 * @return Error if any, otherwise nullptr.
 */
-errlHndl_t getCurrentAttrValue(const char *i_attr_string,
+errlHndl_t getCurrentAttrValue(const char* const i_attr_string,
                                pldm_bios_attribute_type & io_attr_type,
                                std::vector<uint8_t>& io_string_table,
                                std::vector<uint8_t>& io_attr_table,
@@ -362,8 +378,8 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
   // Get the string handle by looking up i_attr_string in io_string_table
   const struct pldm_bios_string_table_entry * string_entry =
       pldm_bios_table_string_find_by_string(io_string_table.data(),
-                                            io_string_table.size(),
-                                            i_attr_string);
+                                           io_string_table.size(),
+                                           i_attr_string);
   if(string_entry == nullptr)
   {
       PLDM_ERR("Could not find %s in the string_table provided by the BMC",
@@ -1359,7 +1375,7 @@ errlHndl_t systemStringAttrLookup(std::vector<uint8_t>& io_string_table,
     do{
 
     // Get the attribute info from the attr table
-    pldm_bios_attribute_type expected_type = PLDM_BIOS_STRING;
+    pldm_bios_attribute_type expected_type = pldm_bios_attribute_type::PLDM_BIOS_STRING;
     const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
     std::vector<uint8_t> attr_value;
 
@@ -2825,6 +2841,144 @@ errlHndl_t getCdmPolicies(std::vector<uint8_t>& io_string_table,
              o_cdm_policies, errl ? "Error" : "No Error");
 
     return errl;
+}
+
+errlHndl_t setBiosStringAttrValue(std::vector<uint8_t>& io_string_table,
+                                  std::vector<uint8_t>& io_attr_table,
+                                  const char* const i_attr_string,
+                                  const char* const i_attr_value,
+                                  const size_t i_attr_val_size)
+{
+    errlHndl_t errl = nullptr;
+    do {
+
+    errl = ensureTablesAreSet(io_string_table, io_attr_table);
+    if (errl)
+    {
+        PLDM_ERR("%s: An error occured when attempting to populate the bios tables",
+        __func__);
+        break;
+    }
+
+    const pldm_bios_attr_table_entry * attr_entry_ptr = nullptr;
+    std::vector<uint8_t> attr_value;
+    auto expected_type = pldm_bios_attribute_type::PLDM_BIOS_STRING;
+
+    // get attr_entry_ptr for the passed i_attr_string
+    errl = getCurrentAttrValue(i_attr_string,
+                               expected_type,
+                               io_string_table,
+                               io_attr_table,
+                               attr_entry_ptr,
+                               attr_value);
+    if(errl)
+    {
+        PLDM_ERR("%s: An error occurred while requesting the value of %s from the BMC",
+                __func__,
+                i_attr_string);
+        break;
+    }
+
+    auto entry_fields =
+        reinterpret_cast<const attr_table_string_entry_fields*>(attr_entry_ptr->metadata);
+
+    if(i_attr_val_size > entry_fields->max_length ||
+       i_attr_val_size < entry_fields->min_length)
+    {
+        PLDM_ERR("%s: The value for %s we tried to write, %ld, is out of range."
+                 " The maximum allowed = 0x%ld and the minimum allowed = %ld",
+                __func__,
+                i_attr_string,
+                i_attr_value,
+                entry_fields->max_length,
+                entry_fields->min_length);
+        /*@
+         * @errortype
+         * @severity   ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SET_BIOS_ATTR_STRING_VALUE
+         * @reasoncode RC_OUT_OF_RANGE
+         * @userdata1  Ascii representation of the bios attr to set
+         * @userdata2  Ascii representation  value hb is attempting to set the attr with
+         * @devdesc    Value we are trying to set BIOS attr with is
+         *             out of acceptable range of values.
+         * @custdesc   A software error occurred during system boot.
+         */
+
+        // Type punning to send expected data
+        uint64_t l_attr_str_ascii = 0;
+        memcpy(&l_attr_str_ascii, i_attr_string, sizeof(l_attr_str_ascii));
+
+        uint64_t l_attr_value_ascii = 0;
+        memcpy(&l_attr_value_ascii, i_attr_value, sizeof(l_attr_value_ascii));
+
+        errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                             MOD_SET_BIOS_ATTR_STRING_VALUE,
+                             RC_OUT_OF_RANGE,
+                             l_attr_str_ascii,
+                             l_attr_value_ascii,
+                             ErrlEntry::NO_SW_CALLOUT);
+        ERRORLOG::ErrlUserDetailsSysState().addToLog(errl);
+        addBmcErrorCallouts(errl);
+        addPldmFrData(errl);
+        break;
+    }
+
+    // set the BIOS attr to the new value
+    const auto attr_handle = pldm_bios_table_attr_entry_decode_attribute_handle(attr_entry_ptr);
+
+    //
+    // DSP0247 v1.0.0 - Table 16
+    // Specific BIOS Attribute Value Table Fields for BIOSString and BIOSStringReadOnly Types
+    //
+
+    std::vector<uint8_t> l_attr_data_sent(i_attr_val_size + sizeof(uint16_t), 0);
+
+    // Pack string length field (uint16_t) - needs little-endian conversion
+    const uint16_t string_len_le = htole16(static_cast<uint16_t>(i_attr_val_size));
+    memcpy(l_attr_data_sent.data(), &string_len_le, sizeof(string_len_le));
+
+    // Pack string data - no endianness conversion needed (just raw bytes)
+    const auto attr_len_offset = sizeof(string_len_le);
+    memcpy(l_attr_data_sent.data() + attr_len_offset, i_attr_value, i_attr_val_size);
+
+    errl = setBiosAttrByHandle(attr_handle, expected_type, l_attr_data_sent.data(),
+                               l_attr_data_sent.size());
+
+    if(errl)
+    {
+        PLDM_ERR("%s: An error occurred while sending the new value for %s, of 0x%016x, to the BMC",
+                 __func__, i_attr_string, i_attr_value);
+        break;
+    }
+
+    }
+    while(0);
+
+    return errl;
+
+}
+
+errlHndl_t setFullIplFwVersion(std::vector<uint8_t>& io_string_table,
+                               std::vector<uint8_t>& io_attr_table,
+                               const TARGETING::ATTR_FW_RELEASE_VERSION_type& i_fw_version)
+
+{
+    return setBiosStringAttrValue(io_string_table,
+        io_attr_table,
+        PLDM_BIOS_HB_FULL_IPL_FW_VERSION,
+        i_fw_version,
+        strlen(i_fw_version));
+}
+
+errlHndl_t setIplFwVersion(std::vector<uint8_t>& io_string_table,
+                           std::vector<uint8_t>& io_attr_table,
+                           const TARGETING::ATTR_FW_RELEASE_VERSION_type& i_fw_version)
+{
+    return setBiosStringAttrValue(io_string_table,
+        io_attr_table,
+        PLDM_BIOS_HB_IPL_FW_VERSION,
+        i_fw_version,
+        strlen(i_fw_version));
 }
 
 errlHndl_t getDisablePredictiveMemGuard(std::vector<uint8_t>& io_string_table,

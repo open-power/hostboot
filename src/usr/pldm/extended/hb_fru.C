@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] 867314078@qq.com                                                   */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -38,8 +38,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <util/align.H>
-
+#include <errl/errlmanager.H>
 #include "pldm_fru_to_ipz_mapping.H"
+#include <pldm/base/hb_bios_attrs.H>
+
 // non-pldm userspace headers
 #include <eeprom/eepromif.H>
 #include <eeprom/eeprom_const.H>
@@ -47,7 +49,6 @@
 #include <targeting/common/targetservice.H>
 #include <util/align.H>
 #include <vpd/ipz_vpd_consts.H>
-#include <errl/errlmanager.H>
 
 // pldm userspace /src/ headers
 #include <pldm/extended/hb_fru.H>
@@ -1549,6 +1550,100 @@ void popAndCopy(std::vector<uint8_t>& i_vector,
 
 using location_code_setter_t = errlHndl_t(*)(TARGETING::Target*, const char*);
 
+/**
+ * @brief Set the HB IPL FW version
+ *
+ * @details Sets both the BIOS & HB targeting attributes
+ * @param i_pTarget                 The top-level target
+ * @param i_fw_version              Attribute FW version
+ * @param[in,out] io_string_table   See file brief in hb_bios_attrs.H.
+ * @param[in,out] io_attr_table     See file brief in hb_bios_attrs.H.
+ */
+static void set_hb_ipl_fw_version(TargetHandle_t i_pTarget,
+                                  const ATTR_FW_RELEASE_VERSION_type& i_fw_version,
+                                  std::vector<uint8_t>& io_string_table,
+                                  std::vector<uint8_t>& io_attr_table)
+{
+    static_assert(sizeof(ATTR_FW_RELEASE_VERSION_type) <= sizeof(ATTR_IPL_FW_VERSION_type),
+                  "IPL_FW_VERSION should be large enough to hold FW_RELEASE_VERSION data");
+
+    errlHndl_t l_errl {nullptr};
+
+    // Write the code level into a BIOS attribute during every CEC ipl
+    l_errl = PLDM::setIplFwVersion(io_string_table,
+                                   io_attr_table,
+                                   i_fw_version);
+    if(l_errl)
+    {
+        PLDM_ERR("%s()): An error occurred setting hb_ipl_fw_version to %s",
+            __func__,
+            i_fw_version);
+        l_errl->collectTrace(PLDM_COMP_NAME);
+        errlCommit(l_errl, PLDM_COMP_ID);
+    }
+
+    // Save the code level present during every mpipl to a targeting attribute
+    i_pTarget->setAttr<ATTR_IPL_FW_VERSION>(i_fw_version);
+}
+
+/**
+ * @brief Set the HB full IPL FW version
+ *
+ * @details Sets both the BIOS & HB targeting attributes
+ * @param i_pTarget                 The top-level target
+ * @param i_fw_version              Attribute FW version
+ * @param[in,out] io_string_table   See file brief in hb_bios_attrs.H.
+ * @param[in,out] io_attr_table     See file brief in hb_bios_attrs.H.
+ */
+static void set_hb_full_ipl_fw_version(TargetHandle_t i_pTarget,
+                                       const ATTR_FW_RELEASE_VERSION_type& i_fw_version,
+                                       std::vector<uint8_t>& io_string_table,
+                                       std::vector<uint8_t>& io_attr_table)
+{
+    errlHndl_t l_errl {nullptr};
+
+    // Write the code level into a BIOS attribute during every mpipl
+    l_errl = PLDM::setFullIplFwVersion(io_string_table,
+                                       io_attr_table,
+                                       i_fw_version);
+
+    if(l_errl)
+    {
+        PLDM_ERR("%s()): An error occurred setting hb_ipl_fw_version to %s",
+            __func__,
+            i_fw_version);
+        l_errl->collectTrace(PLDM_COMP_NAME);
+        errlCommit(l_errl, PLDM_COMP_ID);
+    }
+
+    // Save the code level present during every mpipl to a targeting attribute
+    i_pTarget->setAttr<ATTR_FULL_IPL_FW_VERSION>(i_fw_version);
+}
+
+/**
+ * @brief Sets the full system firmware version level based on the IPL type
+ *
+ * @param i_pTarget     The top-level target
+ * @param i_fw_version  Attribute FW version
+ */
+static void saveCECBootCodeLvl(TargetHandle_t i_pTarget,
+                        const ATTR_FW_RELEASE_VERSION_type& i_fw_version)
+{
+    std::vector<uint8_t> l_string_table, l_attr_table;
+
+    if(i_pTarget->getAttr<ATTR_IS_MPIPL_HB>())
+    {
+        // Provides the full system firmware version level with which last CEC MPIPL performed
+        set_hb_ipl_fw_version(i_pTarget, i_fw_version, l_string_table, l_attr_table);
+    }
+    else {
+        // Provides the full system firmware version level with which last full CEC IPL performed
+        // Setting both since MPIPL is a CEC IPL
+        set_hb_ipl_fw_version(i_pTarget, i_fw_version, l_string_table, l_attr_table);
+        set_hb_full_ipl_fw_version(i_pTarget, i_fw_version, l_string_table, l_attr_table);
+    }
+}
+
 // see hb_fru.H for doxygen
 errlHndl_t cacheRemoteFruVpd()
 {
@@ -2070,6 +2165,9 @@ errlHndl_t cacheRemoteFruVpd()
                 memcpy(fw_release_string, l_miKeyword, l_miKeywordSize);
 
                 entity_target->setAttr<ATTR_FW_RELEASE_VERSION>(fw_release_string);
+
+                // Keep track of what code level was used to boot the CEC
+                PLDM::saveCECBootCodeLvl(entity_target, fw_release_string);
             }
 
             if (map_entry.extra_fru_info & HAS_SERIAL_NUMBER)
