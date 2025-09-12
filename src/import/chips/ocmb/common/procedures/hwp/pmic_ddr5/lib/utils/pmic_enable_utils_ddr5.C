@@ -60,63 +60,6 @@ namespace ddr5
 {
 
 ///
-/// @brief Updates VDD domain during dt enable sequence
-/// @param[in] i_target_info target info struct
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-fapi2::ReturnCode inline __attribute__((always_inline)) update_vdd_ov_threshold(const target_info_redundancy_ddr5&
-        i_target_info)
-{
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-    using PMIC_POS  = mss::pmic::id;
-
-    // VDD is support by SWC from PMIC0,1 and 3
-    for (auto l_pmic_id = 0; l_pmic_id < CONSTS::NUM_PMICS_4U; l_pmic_id++)
-    {
-        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_id, [l_pmic_id, i_target_info]
-                          (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
-        {
-            uint32_t l_nominal_voltage = 0;
-            uint8_t l_relative_pmic_id = 0;
-            uint8_t l_pmic_dt_array_index = 0;
-            bool l_index_found = false;
-
-            // Skip PMIC/DT 2 as VDD is not present on it
-            if(l_pmic_id == PMIC_POS::PMIC2)
-            {
-                return fapi2::FAPI2_RC_SUCCESS;
-            }
-
-            // Get nominal ddr5 voltage
-            FAPI_TRY_LAMBDA(mss::pmic::ddr5::get_nominal_voltage_ddr5(
-                i_pmic,
-                l_pmic_id,
-                mss::pmic::rail::SWC,
-                l_nominal_voltage));
-
-            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_pmic, l_relative_pmic_id));
-            l_index_found = get_pmic_dt_index_number(i_target_info, l_relative_pmic_id, l_pmic_dt_array_index);
-
-            if(l_index_found)
-            {
-                FAPI_TRY_LAMBDA(mss::pmic::ddr5::update_dt_vdd_ov_threshold(i_target_info.iv_pmic_dt_map[l_pmic_dt_array_index].iv_dt,
-                l_pmic_id, l_nominal_voltage));
-            }
-
-            return fapi2::FAPI2_RC_SUCCESS;
-
-        fapi_try_exit_lambda:
-            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_pmic_id);
-        }));
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Setup and enable DT
 ///
 /// @param[in] i_target_info target info struct

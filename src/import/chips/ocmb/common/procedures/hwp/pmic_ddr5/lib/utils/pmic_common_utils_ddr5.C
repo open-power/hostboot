@@ -826,6 +826,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
                 l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE, DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
                 (l_threshold_voltage);
+
                 FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dt, DT_REGS::OV_THRESHOLD_AB, l_dt_thresh_buffer,
                          i_write_read_non_contiguous));
             }
@@ -866,7 +867,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             // Insert data to first & second buffer for rail A/C
             l_dt_thresh_buffer[1].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_FIRST_BYTE, DT_FIELDS::THRESHOLD_AC_FIRST_BYTE_LEN>
             (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
-            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE , DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
+            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE, DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT3], DT_REGS::OV_THRESHOLD_CD,
@@ -934,7 +935,6 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
         default:
             FAPI_ERR(GENTARGTIDFORMAT" Invaild volt domain %u", GENTARGTID(i_ocmb_target), i_volt_domain);
             break;
-
     }
 
 fapi_try_exit:
