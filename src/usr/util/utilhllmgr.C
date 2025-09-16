@@ -207,11 +207,12 @@ void GroupInfo::print() const
 // HLLMgr
 ////////////////////////////////////////////////////////////////////////////////
 
-HLLMgr::HLLMgr(const bool i_toc_only)
+HLLMgr::HLLMgr(const bool i_toc_only, const bool i_force_hll_load)
 : iv_HLLSize(MTOC_SIZE), iv_tmpSize(TOC_TMP_SIZE), iv_maxSize(0),
   iv_pHLLVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
   iv_groupInfoCache{}, iv_hasHeader(true), iv_version(0),
-  iv_toc_only(i_toc_only), iv_initMetaData_required(false), iv_initTempSpace_required(false)
+  iv_toc_only(i_toc_only), iv_initMetaData_required(false),
+  iv_initTempSpace_required(false), iv_force_hll_load(i_force_hll_load)
 {
     // Need to make Memory spaces HRMOR-relative
     const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
@@ -220,8 +221,8 @@ HLLMgr::HLLMgr(const bool i_toc_only)
     iv_HLLAddr = hostboot_base_address + TOC_ADDR;
 
     UTIL_FT(ENTER_MRK"HLLMgr::HLLMgr: i_toc_only=%d, "
-                     "iv_HLLAddr=%p, iv_tmpAddr=%p",
-                      i_toc_only, iv_HLLAddr, iv_tmpAddr);
+                     "iv_HLLAddr=%p, iv_tmpAddr=%p, iv_force_hll_load=%d",
+                      i_toc_only, iv_HLLAddr, iv_tmpAddr, iv_force_hll_load);
 
     initHLL();
 }
@@ -230,7 +231,8 @@ HLLMgr::HLLMgr(const void* i_pHLL, const size_t i_size)
 : iv_HLLSize(MTOC_SIZE), iv_tmpSize(TOC_TMP_SIZE), iv_maxSize(0),
   iv_pHLLVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
   iv_groupInfoCache{}, iv_hasHeader(false), iv_version(0),
-  iv_toc_only(false), iv_initMetaData_required(false), iv_initTempSpace_required(false)
+  iv_toc_only(false), iv_initMetaData_required(false),
+  iv_initTempSpace_required(false), iv_force_hll_load(true)
 {
     // Used for test cases where no iv_hasHeader
     // Need to make Memory spaces HRMOR-relative
@@ -240,8 +242,8 @@ HLLMgr::HLLMgr(const void* i_pHLL, const size_t i_size)
     iv_tmpAddr = hostboot_base_address + TOC_TMP_ADDR;
 
     UTIL_FT(ENTER_MRK"HLLMgr::HLLMgr: i_pHLL=%p, i_size=0x%X, "
-                     "iv_HLLAddr=%p, iv_tmpAddr=%p",
-                      i_pHLL, i_size, iv_HLLAddr, iv_tmpAddr);
+                     "iv_HLLAddr=%p, iv_tmpAddr=%p, iv_force_hll_load=%d",
+                      i_pHLL, i_size, iv_HLLAddr, iv_tmpAddr, iv_force_hll_load);
 
     initHLL(i_pHLL, i_size);
 }
@@ -257,8 +259,9 @@ void HLLMgr::initHLL(const void* i_pHLL, const size_t i_HLLSize)
 {
     errlHndl_t l_errl = nullptr;
 
-    UTIL_FT(ENTER_MRK"HLLMgr::initHLL: i_pHLL=%p, i_HLLSize=0x%X",
-            i_pHLL, i_HLLSize);
+    UTIL_FT(ENTER_MRK"HLLMgr::initHLL: i_pHLL=%p, i_HLLSize=0x%X, "
+                     "iv_initMetaData_required=%d",
+                     i_pHLL, i_HLLSize, iv_initMetaData_required);
 
     // Add HLL itself to Cache with group g_HLLGroup
     LidInfo l_hdrLidInfo(Util::HLL_LIDID);
@@ -378,6 +381,10 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
     errlHndl_t l_errl = nullptr;
     assert(i_physAddr != 0, "HLLMgr::initMem: HLLMgr physical address cannot be 0");
 
+    UTIL_FT(ENTER_MRK"HLLMgr::initMem: i_physAddr=0x%llX, i_size=0x%X, io_pVaddr=%p, "
+                     "iv_force_hll_load=%d",
+                     i_physAddr, i_size, io_pVaddr, iv_force_hll_load);
+
     do {
     //Check if we already initialized vm space
     // io_pVaddr is mapped to the iv instance variables by the caller
@@ -412,6 +419,8 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
         // mapping of the TOC space to see if we have already read the HLL LID, even on the second entry to initMem,
         // the instance variable iv_pHLLVaddr will be appropriately mapped to also validate the memory signature
         // of the TOC space.
+        // The exception to this is if iv_force_hll_load has been set to true. If it is,
+        // then always clear out the HLL space.
         auto l_pHLL = reinterpret_cast<const uint8_t*>(iv_pHLLVaddr);
         // When class constructor is called with a real TOC it sets iv_hasHeader
         // to true
@@ -421,7 +430,8 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
             l_pHLL += V3_SIZE;
         }
         auto l_pHdr = reinterpret_cast<const HLLHeader*>(l_pHLL);
-        if (l_pHdr->EyeCatcher != HLL_EYE_CATCHER)
+        if ((l_pHdr->EyeCatcher != HLL_EYE_CATCHER) // HLL is not loaded
+             || (iv_force_hll_load == true))      // definitely clear out HLL
         {
             // We have to use the memory footprint to drive the decision making, not the newly created class instance vars
             // Only the first time when initMetaData is performed will the verifyContainer and tpmExtend functions be run.
@@ -435,6 +445,9 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
                 iv_initTempSpace_required = true;
             }
             memset(io_pVaddr, 0, i_size);
+            // With memory being cleared, this will force HLL to be loaded
+            // so clear class variable if it was previosly set
+            iv_force_hll_load = false;
         }
         else
         {
@@ -455,6 +468,9 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
         errlCommit(l_errl,UTIL_COMP_ID);
         INITSERVICE::doShutdown(l_reasonCode);
     }
+
+    UTIL_FT(EXIT_MRK"HLLMgr::initMem: i_physAddr=0x%llX, i_size=0x%X, io_pVaddr=%p",
+                     i_physAddr, i_size, io_pVaddr);
 }
 
 bool HLLMgr::isValid()
@@ -480,6 +496,8 @@ bool HLLMgr::isValid()
 errlHndl_t HLLMgr::parseHLL()
 {
     errlHndl_t l_err = nullptr;
+
+    UTIL_FT(ENTER_MRK"HLLMgr::parseHLL");
 
     assert(iv_pHLLVaddr != nullptr, "HLLMgr::parseHLL: iv_pHLLVaddr can't be nullptr");
     do {
@@ -659,9 +677,9 @@ errlHndl_t HLLMgr::parseHLL()
     l_HLLPreVerified.totalSize = total_size;
     iv_groupInfoCache.insert(std::make_pair(g_HLLPreVerified, l_HLLPreVerified));
     iv_groupInfoCache.insert(std::make_pair(g_HLLPowerVM, l_HLLPowerVM));
+    printGroupInfoCache();
     UTIL_FT(EXIT_MRK"HLLMgr::parseHLL PreVerified Current Temp Storage Usage=0x%X (%lld) of Max Temp Storage=0x%X (%lld)",
         total_size, total_size, iv_tmpSize, iv_tmpSize);
-    printGroupInfoCache();
     } while (0);
     return l_err;
 }
@@ -1312,6 +1330,10 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
 {
     errlHndl_t l_errl = nullptr;
 
+    UTIL_FT(ENTER_MRK"HLLMgr::loadLids: lidIds.size()=%d",
+                     io_groupInfo.lidIds.size());
+
+
     // Force total size to zero
     o_totalSize = 0;
     // Pointer to mainstore memory temp space
@@ -1486,8 +1508,8 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
         }
         else if (SECUREBOOT::enabled() && (lidInfo.id == Util::HLL_LIDID))
         {
-            // The HLL LID has already been verified in HLLMgr::initMetaData
-            UTIL_FT("HLLMgr::loadLids: HLL has been previously verified");
+            // The HLL LID is verified in HLLMgr::initMetaData by its V3 header
+            UTIL_FT("HLLMgr::loadLids: HLL (aka HLL_LIDID) verified in different path");
         }
 
         // Store current LID load virtual address
@@ -1506,7 +1528,10 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
         o_totalSize += lidInfo.size;
     }
 
-    UTIL_FT(EXIT_MRK"HLLMgr::loadLids Using total=%d of max=%d", o_totalSize, iv_maxSize);
+    UTIL_FT(EXIT_MRK"HLLMgr::loadLids: lidIds.size()=%d. "
+                     "Using total=%d (0x%X) of max=%d (0x%X)",
+                     io_groupInfo.lidIds.size(),
+                     o_totalSize, o_totalSize, iv_maxSize, iv_maxSize);
 
     return l_errl;
 }
