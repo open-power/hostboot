@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,7 +146,10 @@ void* call_host_load_payload (void *io_pArgs)
             }
             else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
             {
-                HLL::HLLMgr l_hll;
+                // Since this is the first time a HLLMgr constructor is called in the IPL
+                // (or MPIPL) we need to ensure that the PHYP HLL gets (re)loaded
+                HLL::HLLMgr l_hll(false, // i_toc_only
+                                  true); // i_force_hll_load
 
                 l_err = l_hll.managePowerVMGroup();
                 if (l_err)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -311,8 +311,16 @@ class HLLMgr
      *            have already been populated.  This allows the TOC to be instantiated
      *            with the class constructor and then leverage the already populated
      *            temp space with the lids later in the IPL.
+     *
+     * @param[in] i_force_hll_load Because the PHYP HLL can sit in the MTOC space
+     *            across HLLMgr() calls and isteps, this variable will be used to
+     *            enforce that the PHYP HLL in the MTOC space gets cleared out
+     *            such that the more recent PHYP HLL can be loaded.  This is
+     *            especially necessary for MPIPLs. This should be set to true
+     *            the absolute first time the HLLMgr constructor is called.
      */
-    HLLMgr(bool i_toc_only = false);
+    HLLMgr(bool i_toc_only = false,
+           bool i_force_hll_load = false);
 
     /**
      * @brief Destructor. Cleans up memory allocated for class
@@ -505,22 +513,31 @@ class HLLMgr
 
     // When creating an instance the following instance
     // variables are used to manage the temporary memory space.
-    // The memory management allows the HLL LID to be read
-    // only once and then subsequent callers can create a
-    // new instance and detect the memory has been initialized.
+    //
     // The HLLMgr instances are used at different IPL steps
     // and some isteps are not even executed on FSP systems,
     // so dynamic memory detection is used to properly setup
     // each new instance created.
+    //
+    // The memory management allows the HLL LID to be read
+    // only once and then subsequent callers can create a
+    // new instance and detect the memory has been initialized.
+    //
     // For some isteps it is necessary to NOT touch the temp space
     // when the class is constructed, so the iv_toc_only means to
     // skip touching the initialization of the temp space where the lids
     // have already been populated.  This allows the TOC to be instantiated
     // with the class constructor and then leverage the already populated
     // temp space with the lids later in the IPL.
+    //
+    // However, in the case of MPIPLs, the original HLL might still be
+    // in memory.  Therefore, use iv_force_hll_load on the first
+    // instance the HLL Mgr constructor gets called to load the PHYP
+    // payload to ensure a new HLL is loaded.
     bool iv_toc_only = false;
     bool iv_initMetaData_required = false;
     bool iv_initTempSpace_required = false;
+    bool iv_force_hll_load = false;
 
     // HLL hash entry size, i.e. SHA512_t or future changes
     uint16_t iv_HashEntrySize = 0;
