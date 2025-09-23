@@ -100,31 +100,35 @@ const char hbblSectionMarker[] = "HBBL ID STRING =";
 const uint32_t xipSectionHdctOffset = 0x4;
 
 // Secure boot header offsets
-const uint32_t xipSectionSbhOffsetV1HWSigABC = 0x020C; // offset=524(d)
-const uint32_t xipSectionSbhOffsetV1FWSigP   = 0x047E; // offset=1150(d)
-const uint32_t xipSectionSbhOffsetV3HWSigA   = 0x102C; // offset=4140(d)
-const uint32_t xipSectionSbhOffsetV3FWSigP   = 0x2DE7; // offset=11751(d)
+const uint32_t xipSectionSbhOffsetV1HWSigABC    = 0x020C; // offset=524(d)
+const uint32_t xipSectionSbhOffsetV1PayloadHash = 0x43D; // offset=1085(d)
+const uint32_t xipSectionSbhOffsetV1FWSigP      = 0x047E; // offset=1150(d)
+const uint32_t xipSectionSbhOffsetV3HWSigA      = 0x102C; // offset=4140(d)
+const uint32_t xipSectionSbhOffsetV3PayloadHash = 0x2D90; // offset=11664(d)
+const uint32_t xipSectionSbhOffsetV3FWSigP      = 0x2DE7; // offset=11751(d)
 
-#define NUMBER_OF_XIP_SECTIONS 13
+#define NUMBER_OF_XIP_SECTIONS 15
 #define SEL_OFFSET 0
 #define SEL_MARKER 1
 
 // Use global var to access respective images mask info and apply to seeprom img
 constexpr xipSectionMask_t g_xipSectionMask[NUMBER_OF_XIP_SECTIONS] =
 {
-    {P9_XIP_SECTION_SBE_HEADER,       SEL_OFFSET,  (uint8_t*)& xipSectionHeaderOffset0,        28}, \
-    {P9_XIP_SECTION_SBE_HEADER,       SEL_OFFSET,  (uint8_t*)& xipSectionHeaderOffset1,        56}, \
-    {P9_XIP_SECTION_SBE_DATA,         SEL_MARKER,  (uint8_t*)& dataSectionMarker[0],            8}, \
-    {P9_XIP_SECTION_SBE_HBBL,         SEL_MARKER,  (uint8_t*)& hbblSectionMarker[0],          128}, \
-    {P9_XIP_SECTION_SBE_HDCT,         SEL_OFFSET,  (uint8_t*)& xipSectionHdctOffset,            8}, \
-    {P9_XIP_SECTION_SBE_SBH_FIRMWARE, SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1HWSigABC, 396}, \
-    {P9_XIP_SECTION_SBE_SBH_FIRMWARE, SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1FWSigP,   132}, \
-    {P9_XIP_SECTION_SBE_SBH_FIRMWARE, SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3HWSigA,   132}, \
-    {P9_XIP_SECTION_SBE_SBH_FIRMWARE, SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3FWSigP,   132}, \
-    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1HWSigABC, 396}, \
-    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1FWSigP,   132}, \
-    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3HWSigA,   132}, \
-    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3FWSigP,   132}
+    {P9_XIP_SECTION_SBE_HEADER,       SEL_OFFSET,  (uint8_t*)& xipSectionHeaderOffset0,          28}, \
+    {P9_XIP_SECTION_SBE_HEADER,       SEL_OFFSET,  (uint8_t*)& xipSectionHeaderOffset1,          56}, \
+    {P9_XIP_SECTION_SBE_DATA,         SEL_MARKER,  (uint8_t*)& dataSectionMarker[0],              8}, \
+    {P9_XIP_SECTION_SBE_HBBL,         SEL_MARKER,  (uint8_t*)& hbblSectionMarker[0],            128}, \
+    {P9_XIP_SECTION_SBE_HDCT,         SEL_OFFSET,  (uint8_t*)& xipSectionHdctOffset,              8}, \
+    {P9_XIP_SECTION_SBE_SBH_FIRMWARE, SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1HWSigABC,   396}, \
+    {P9_XIP_SECTION_SBE_SBH_FIRMWARE, SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1FWSigP,     132}, \
+    {P9_XIP_SECTION_SBE_SBH_FIRMWARE, SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3HWSigA,     132}, \
+    {P9_XIP_SECTION_SBE_SBH_FIRMWARE, SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3FWSigP,     132}, \
+    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1HWSigABC,   396}, \
+    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1PayloadHash, 64}, \
+    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV1FWSigP,     132}, \
+    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3HWSigA,     132}, \
+    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3PayloadHash, 64}, \
+    {P9_XIP_SECTION_SBE_SBH_HBBL,     SEL_OFFSET,  (uint8_t*)& xipSectionSbhOffsetV3FWSigP,    4759}
 };
 
 #endif // _P10_IPL_CUSTOMIZE_MASK_H_
