@@ -45,7 +45,7 @@
 #include <vector>
 #include <p10_infrastruct_help.H>     // XIPC_RING_BUF{1,2,3}_SIZE
 #include <p10_ipl_image.H>            // p9_xip_section_sbe_t
-#include <securerom/sha512.H>         // SHA512_t
+#include <securerom/sha3.H>           // sha3_t
 
 namespace SBE
 {
@@ -324,18 +324,6 @@ class UpdateProcessorSbes : public UpdateWorkItem
                                  mvpdSbKeyword_t& io_sb_keyword);
 
     /**
-     * @brief Read SBE Version from PNOR
-     *
-     * @param[in] i_pnorImgHdrPtr Pointer to Image Header in PNOR
-     *
-     * @param[out] o_version      Pointer to SBE Version struct
-     *
-     * @return errlHndl_t    Error log handle on failure.
-     */
-    errlHndl_t readPNORVersion(void*& i_pnorImgHdrPtr,
-                               sbe_image_version_t& o_version);
-
-    /**
      * @brief Modify (Delete and/or Append) Section of SBE Image
      *
      * @param[ini] i_section             Enum defining which section to modify
@@ -549,10 +537,22 @@ class UpdateProcessorSbes : public UpdateWorkItem
      *       - g_hbbl_data_size
      *       - g_hbbl_v1_v3_headers_ptr
      *
-     * @param[out] List of newly loaded sections
+     * @note This also creates a pnorVersion for the uncustomized SBE image
+     *       in PNOR::SBE_IPL so each update thread can use the same value.
+     *       The pnorVersion is stored in the global variable
+     *       g_sbe_image_pnor_version.
+     *
+     * @param[out] o_loadedSections List of newly loaded sections
+     *
+     * @param[in]  i_boot_proc Boot processor used to pass internally into
+     *                         findSBEInPnor() to work with the PNOR::SBE_IPL
+     *                         section to create the global pnorVersion
+     *                         stored in g_sbe_image_pnor_version
+     *
      * @return error on load failure, else nullptr
      */
-    errlHndl_t preloadPnorSections(std::vector<PNOR::SectionId> & o_loadedSections);
+    errlHndl_t preloadPnorSections(std::vector<PNOR::SectionId> & o_loadedSections,
+                                   TARGETING::Target* i_boot_proc);
 
     /**
      * @brief Unloads pnor sections that were used for SBE update by each thread
@@ -743,6 +743,32 @@ class UpdateProcessorSbes : public UpdateWorkItem
      */
     void clearDataBtwnXipSections( void * pSbeImgVddr );
 
+    /**
+     * @brief Create SBE Version from PNOR
+     *        This function will apply the same mask that the maskUnmaskMetaData()
+     *        function calls to remove build artifacts from the uncustomized SBE image
+     *        found in the PNOR::SBE_IPL section. It will then calculate a sha3 hash
+     *        over the image and return it as a sbe_image_version_t struct (which
+     *        is the same size of a sha3_t at 64 bytes).
+     *
+     * @param[in] i_pnorImgHdrPtr Pointer to uncustomized image header in PNOR
+     *
+     * @param[in] i_size          Size of uncustomized image in PNOR
+     *
+     * @param[out] o_version      Pointer to SBE Version struct
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t createPnorVersion(      void*& i_pnorImgHdrPtr,
+                                 const size_t i_size,
+                                 sbe_image_version_t * o_version);
+
+    static_assert(SBE_IMAGE_VERSION_SIZE == 64,
+                  "SBE_IMAGE_VERSION_SIZE expected to be 64");
+    static_assert(SBE_IMAGE_VERSION_SIZE == sizeof(sha3_t),
+                  "SBE_IMAGE_VERSION_SIZE and sizeof(sha3_t) should both be 64");
+    static_assert(SBE_IMAGE_VERSION_SIZE == sizeof(sbe_image_version_t),
+                  "SBE_IMAGE_VERSION_SIZE and sizeof(sbe_image_version_t) should both be 64");
 
 } //end namespace SBE
 #endif

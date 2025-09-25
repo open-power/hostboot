@@ -543,7 +543,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
         TARGETING::Target* theTarget = NULL;
         void* sbeImgPtr = NULL;
         size_t sbeImgSize = 0;
-        sbe_image_version_t version;
 
         do{
 
@@ -562,10 +561,19 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 break;
             }
             total++;
+
+            // NOTES:
+            // - Testing without optional 4th parameter of
+            //   sbe_image_version_t* o_version as that is covered when
+            //   preloadPnorSections() gets called in the SBEUpdateTest()
+            //   constructor.
+            // - If the 4th parameter was added, createPnorVersion() would be
+            //   called. Since createPnorVersion() also uses the
+            //   VMM_VADDR_SBE_UPDATE space, when it cleans up that space it
+            //   makes the space unusable for testSbeUpdateTarget() below.
             err = findSBEInPnor(theTarget,
                                 sbeImgPtr,
-                                sbeImgSize,
-                                &version);
+                                sbeImgSize);
 
             if(err || (sbeImgPtr == NULL) || (sbeImgSize == 0) )
             {
@@ -581,8 +589,6 @@ class SBEUpdateTest: public CxxTest::TestSuite
                             SBE_COMP_ID );
 
             }
-            TRACDBIN(g_trac_sbe, "testFindSbeInPnor()-Proc PNOR Version", &version, sizeof(version));
-            TRACDBIN(g_trac_sbe, "testFindSbeInPnor()-Proc PNOR Image", sbeImgPtr, 0x80);
 
 
             /****************************************************/
@@ -1421,7 +1427,10 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
         std::vector<PNOR::SectionId> l_loadedPnorSections;
         l_loadedPnorSections.clear(); // start with no loaded sections
-        err = preloadPnorSections(l_loadedPnorSections);
+        // Pass in boot proc
+        Target* boot_proc = nullptr;
+        targetService().masterProcChipTargetHandle(boot_proc);
+        err = preloadPnorSections(l_loadedPnorSections, boot_proc);
         if(err)
         {
             TS_FAIL("SBEUpdateTest() - Constructor: Call to preloadPnorSections() failed");

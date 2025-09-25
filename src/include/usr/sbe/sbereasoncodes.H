@@ -147,3 +147,16 @@ enum UserDetailsTypes
 * @devdesc     Did not find the HBBL ID signature in customized image
 * @custdesc    A problem occurred while customizing image
 */
+
+/*@
+ * @errortype
+ * @moduleid     SBE_READ_PNOR_VERSION
+ * @reasoncode   SBE_VERSION_NOT_FOUND
+ * @userdata1    Not Used
+ * @userdata2    Not Used
+ * @devdesc      Image Version not found in PNOR
+ *               SBE image.
+ * @custdesc     A problem occurred while updating processor
+ *               boot code.
+ */
+

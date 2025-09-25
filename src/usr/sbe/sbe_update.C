@@ -65,6 +65,7 @@
 #include <sbeio/sbeioif.H>
 #include <sbe/sbereasoncodes.H>
 #include <sbe/sbe_update.H>
+#include <sbe/sbe_common.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <sys/time.h>
 #include <pldm/requests/pldm_pdr_requests.H>
@@ -100,6 +101,8 @@
 #include <secureboot/service.H>
 #include <assert.h>
 #include <securerom/sha512.H>
+#include <securerom/ROM.H>
+#include <securerom/contrib/sha3.H>
 #include <p10_ipl_customize_mask.H>
 
 #include <cxxtest/TestInject.H>
@@ -148,8 +151,7 @@ static size_t  g_hbbl_data_size = 0;
 //  - First 1288 bytes of HBBL V1 Header
 //  - Full HBBL V3 Header - 15KB
 constexpr uint32_t HBBL_TRUNCATED_V1_HEADER_SIZE = 1288;
-// @TODO JIRA PFHB-804 use a better constant for this
-constexpr size_t HBBL_V3_HEADER_SIZE = 15 * KILOBYTE;
+constexpr size_t HBBL_V3_HEADER_SIZE = V3_SECURE_HEADER_SIZE;
 constexpr uint32_t SBH_HBBL_SECTION_SIZE = HBBL_TRUNCATED_V1_HEADER_SIZE
                                                    + HBBL_V3_HEADER_SIZE;
 
@@ -157,6 +159,11 @@ constexpr uint32_t SBH_HBBL_SECTION_SIZE = HBBL_TRUNCATED_V1_HEADER_SIZE
 // preloadPnorSections() and it (and again, the memory it points to)
 // is cleaned up in cleanupPreloadedPnorSections()
 static uint8_t * g_hbbl_v1_v3_headers_ptr = nullptr;
+
+// This global variable is initialized in preloadPnorSections()
+// when the pnorVersion is calculated against the masked version of
+// the uncustomized SBE Image found in the PNOR::SBE_IPL section
+static SBE::sbe_image_version_t g_sbe_image_pnor_version = {0};
 
 // -----------------------------------------
 // Global Variables for threaded update
@@ -899,7 +906,7 @@ using namespace CxxTest;
             traceVaddrSbeAssignments(l_thread_procs_map);
 
             // Pre-load any PNOR sections that will be used by each thread
-            err = preloadPnorSections(l_loadedPnorSections);
+            err = preloadPnorSections(l_loadedPnorSections, masterProcChipTargetHandle);
             if (err)
             {
                 TRACFCOMP(g_trac_sbe, "updateProcessorSbeSeeproms: Unable to load all pnor sections");
@@ -1318,7 +1325,7 @@ using namespace CxxTest;
 
                 for(uint32_t i=0; i<MAX_SBE_ENTRIES; i++)
                 {
-                    // For P10, the SBE has a single image for all EC levels so
+                    // For P10 and P11, the SBE has a single image for all EC levels so
                     //   we will just use the first image we find.
                     //if(static_cast<uint32_t>(ec) == sbeToc->entries[i].ec)
                     {
@@ -1397,10 +1404,17 @@ using namespace CxxTest;
 
             if(nullptr != o_version)
             {
-                err = readPNORVersion(hdr_Ptr,
-                                      *o_version);
+                // create pnorVersion from the uncustomized SBE Image after
+                // SBE build data has been masked off
+                err = createPnorVersion(o_imgPtr,
+                                        o_imgSize,
+                                        o_version);
                 if(err)
                 {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Error calling "
+                               "createPnorVersion()"
+                               TRACE_ERR_FMT,
+                               TRACE_ERR_ARGS(err));
                     break;
                 }
             }
@@ -2017,80 +2031,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
     }
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t readPNORVersion(void*& i_pnorImgHdrPtr,
-                               sbe_image_version_t& o_version)
-    {
-        errlHndl_t err = nullptr;
-        TRACDCOMP( g_trac_sbe,
-                   ENTER_MRK"readPNORVersion()" );
-
-        do{
-            //For Non-secure systems, version is prefixed with
-            //'VERSION\0' in ASCII in the 4k header.  The official
-            //protocol is to scan for VERSION, then grab the value
-            //that follows.
-
-            char* tmpPtr = static_cast<char*>(i_pnorImgHdrPtr);
-
-
-            //Last reasonable offset is (Version size +
-            //size of eyecatcher) bytes from end of Page.
-            char* endPtr = tmpPtr +(4*KILOBYTE) -
-              sizeof(sbe_image_version_t&) -
-              sizeof(NONSECURE_VER_EYECATCH);
-
-            // Increment pointer sizeof(uint64_t) because eyecatcher
-            // must be 8-byte aligned
-            for(; tmpPtr<endPtr; tmpPtr+=sizeof(uint64_t))
-            {
-                if(*(reinterpret_cast<uint64_t*>(tmpPtr)) ==
-                   NONSECURE_VER_EYECATCH)
-                {
-                    //increment 8 more bytes and break out
-                    tmpPtr+=sizeof(uint64_t);
-                    break;
-                }
-            }
-
-            if(tmpPtr < endPtr)
-            {
-                memcpy(reinterpret_cast<void*>( &o_version ),
-                       tmpPtr,
-                       sizeof(o_version));
-            }
-            else
-            {
-
-                TRACFCOMP( g_trac_sbe, ERR_MRK"readPNORVersion() - VERSION not found in SBE image in PNOR");
-                /*@
-                 * @errortype
-                 * @moduleid     SBE_READ_PNOR_VERSION
-                 * @reasoncode   SBE_VERSION_NOT_FOUND
-                 * @userdata1    Not Used
-                 * @userdata2    Not Used
-                 * @devdesc      Image Version not found in PNOR
-                 *               SBE image.
-                 * @custdesc     A problem occurred while updating processor
-                 *               boot code.
-                 */
-                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_READ_PNOR_VERSION,
-                                    SBE_VERSION_NOT_FOUND,
-                                    0, 0);
-                err->collectTrace(SBE_COMP_NAME);
-                err->addProcedureCallout( HWAS::EPUB_PRC_SP_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH );
-            }
-
-        }while(0);
-
-        TRACDCOMP( g_trac_sbe,
-                   EXIT_MRK"readPNORVersion()" );
-
-        return err;
-    }
-
-/////////////////////////////////////////////////////////////////////
     errlHndl_t getSbeBootSeeprom(Target* i_target,
                                  sbeSeepromSide_t& o_bootSide,
                                  sbeMeasurementSeepromSide_t& o_mSide)
@@ -2414,7 +2354,8 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
         return  l_errl;
     }
 //////////////////////////////////////////////////////////////////////
-    errlHndl_t preloadPnorSections(std::vector<PNOR::SectionId> & o_loadedSections)
+    errlHndl_t preloadPnorSections(std::vector<PNOR::SectionId> & o_loadedSections,
+                                   Target* i_boot_proc)
     {
         errlHndl_t l_errl = nullptr;
 
@@ -2582,6 +2523,41 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                 HBBL_TRUNCATED_V1_HEADER_SIZE, 64);
                     TRACDBIN( g_trac_sbe, "preloadPnorSections: HBBL Data",
                               g_hbbl_data_ptr, 64);
+                } // end of special action for HBBL
+
+                // Special actions for PNOR::SBE_IPL
+                else if (id == PNOR::SBE_IPL)
+                {
+                    void* sbePnorPtr = nullptr;
+                    size_t sbePnorImageSize = 0;
+                    sbe_image_version_t tmp_pnorVersion;
+
+                    l_errl = findSBEInPnor(i_boot_proc,
+                                           sbePnorPtr,
+                                           sbePnorImageSize,
+                                           &tmp_pnorVersion);
+
+                    if(l_errl)
+                    {
+                        TRACFCOMP( g_trac_sbe, ERR_MRK"preloadPnorSections() - "
+                                   "Error getting SBE Version from PNOR, "
+                                   TRACE_ERR_FMT,
+                                   TRACE_ERR_ARGS(l_errl));
+                        break;
+                    }
+                    else
+                    {
+                        // Successful, so set
+                        memcpy(&g_sbe_image_pnor_version,
+                               &tmp_pnorVersion,
+                               SBE_IMAGE_VERSION_SIZE);
+
+                        TRACFCOMP( g_trac_sbe, "preloadPnorSections() - "
+                                   "sbePnorPtr=%p, sbePnorImageSize=0x%08X (%d), "
+                                   "setting g_sbe_pnor_version to 0x%.8X",
+                                   sbePnorPtr, sbePnorImageSize, sbePnorImageSize,
+                                   sha512_to_u32(g_sbe_image_pnor_version));
+                    }
                 }
             }
         } while (0);
@@ -2834,29 +2810,36 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /*******************************************/
             /*  Get PNOR SBE Version Information       */
             /*******************************************/
+            // Use common global pnorVersion determined when the SBE_IPL
+            // PNOR section was loaded before the individual update threads
+            // were started
+            memcpy ( &io_sbeState.pnorVersion,
+                     &g_sbe_image_pnor_version,
+                     SBE_IMAGE_VERSION_SIZE);
+
             void* sbePnorPtr = nullptr;
             size_t sbePnorImageSize = 0;
-            sbe_image_version_t tmp_pnorVersion;
 
             err = findSBEInPnor(io_sbeState.target,
                                 sbePnorPtr,
-                                sbePnorImageSize,
-                                &tmp_pnorVersion);
+                                sbePnorImageSize);
 
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
                            "Error getting SBE Version from PNOR, "
-                           "RC=0x%X, EID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETEID_SAFE(err));
+                           TRACE_ERR_FMT,
+                           TRACE_ERR_ARGS(err));
                 break;
             }
             else
             {
-                TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
-                           "sbePnorPtr=%p, sbePnorImageSize=0x%08X (%d)",
-                           sbePnorPtr, sbePnorImageSize, sbePnorImageSize);
+                TRACFCOMP( g_trac_sbe, "getSbeInfoState() - HUID=0x%.8X: "
+                           "sbePnorPtr=%p, sbePnorImageSize=0x%08X (%d) "
+                           "io_sbeState.pnorVersion=0x%.8X",
+                           get_huid(io_sbeState.target),
+                           sbePnorPtr, sbePnorImageSize, sbePnorImageSize,
+                           sha512_to_u32(io_sbeState.pnorVersion));
 
                 // Pull build information from XIP header and trace it
                 Util::pullTraceBuildInfo(sbePnorPtr,
@@ -2864,10 +2847,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                          g_trac_sbe);
             }
 
-            // copy tmp_pnorVersion to the main structure
-            memcpy ( &io_sbeState.pnorVersion,
-                     &tmp_pnorVersion,
-                     sizeof(tmp_pnorVersion));
 
             /*******************************************/
             /*  Get PNOR HBBL Information              */
@@ -3575,10 +3554,9 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             io_sbeState.customizedImage_crc =
                             Util::crc32_calc(pCustomizedBfr,
                                              sbeImgSize) ;
-
-            TRACFCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
+            TRACFCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): 0x%.8X "
                        "maxSize=0x%X, actSize=0x%X, crc=0x%X (SV=0x%.2X, Hash=0x%.8X)",
-                       MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
+                       get_huid(io_sbeState.target), MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
                        io_sbeState.customizedImage_crc,
                        sbe_secure_version, sha512_to_u32(sbe_hash));
 
@@ -4688,9 +4666,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                 system_situation |= SITUATION_SIDE_0_DIRTY;
 #endif
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
-                           "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X) isSimics_check=0x%X",
+                           "dirty: pnor=%d (pnorV=0x%.8X/s0=0x%.8X) crc=%d "
+                           "(custom=0x%X/s0=0x%X) isSimics_check=0x%X",
                            get_huid(io_sbeState.target),
-                           pnor_check_dirty, crc_check_dirty,
+                           pnor_check_dirty,
+                           sha512_to_u32(io_sbeState.pnorVersion),
+                           sha512_to_u32(io_sbeState.seeprom_0_ver.image_version),
+                           crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_0_ver.data_crc,
                            isSimics_check);
@@ -4698,10 +4680,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             else
             {
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
-                           "flagged as clean: pnor=%d, crc=%d "
+                           "flagged as clean: pnor=%d (pnorV=0x%.8X/s0=0x%.8X) crc=%d "
                            "(custom=0x%X/s0=0x%X) isSimics_check=0x%X",
                            get_huid(io_sbeState.target),
-                           pnor_check_dirty, crc_check_dirty,
+                           pnor_check_dirty,
+                           sha512_to_u32(io_sbeState.pnorVersion),
+                           sha512_to_u32(io_sbeState.seeprom_0_ver.image_version),
+                           crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_0_ver.data_crc,
                            isSimics_check);
@@ -4751,9 +4736,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                 system_situation |= SITUATION_SIDE_1_DIRTY;
 #endif
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
-                           "dirty: pnor=%d, crc=%d (custom=0x%X/s1=0x%X) isSimics_check 0x%X",
+                           "dirty: pnor=%d (pnorV=0x%.8X/s1=0x%.8X) crc=%d "
+                           "(custom=0x%X/s0=0x%X) isSimics_check=0x%X",
                            get_huid(io_sbeState.target),
-                           pnor_check_dirty, crc_check_dirty,
+                           pnor_check_dirty,
+                           sha512_to_u32(io_sbeState.pnorVersion),
+                           sha512_to_u32(io_sbeState.seeprom_1_ver.image_version),
+                           crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_1_ver.data_crc,
                            isSimics_check);
@@ -4761,10 +4750,13 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             else
             {
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
-                           "flagged as clean: pnor=%d, crc=%d "
+                           "flagged as clean: pnor=%d (pnorV=0x%.8X/s1=0x%.8X) crc=%d "
                            "(custom=0x%X/s1=0x%X) isSimics_check 0x%X",
                            get_huid(io_sbeState.target),
-                           pnor_check_dirty, crc_check_dirty,
+                           pnor_check_dirty,
+                           sha512_to_u32(io_sbeState.pnorVersion),
+                           sha512_to_u32(io_sbeState.seeprom_1_ver.image_version),
+                           crc_check_dirty,
                            io_sbeState.customizedImage_crc,
                            io_sbeState.seeprom_1_ver.data_crc,
                            isSimics_check);
@@ -7548,7 +7540,8 @@ errlHndl_t maskUnmaskMetaData( void*                     i_pSourceBfr,
                         "p9_xip_get_section %s found of size 0x%X (rc=0x%X)",
                         section_str, xipSection.iv_size, xip_rc);
 
-            }else
+            }
+            else
             {
 
                 if (xip_rc == 0)
@@ -7556,6 +7549,7 @@ errlHndl_t maskUnmaskMetaData( void*                     i_pSourceBfr,
                     TRACDCOMP(g_trac_sbe, "maskUnmaskMetaData(): "
                             "p9_xip_get_section %s FOUND but EMPTY (rc=0x%X). Will continue",
                             section_str, xip_rc);
+                    continue;
                 }
                 else
                 {
@@ -7634,7 +7628,8 @@ errlHndl_t maskUnmaskMetaData( void*                     i_pSourceBfr,
 
                 o_maskedDataVector.push_back(tempMaskedData);
 
-            }else
+            }
+            else
             {
                 //Find metadata start using a marker string
                 bool found{false};
@@ -8053,5 +8048,144 @@ void clearDataBtwnXipSections( void * pSbeImgVddr )
 
     return;
 }
+
+
+
+/////////////////////////////////////////////////////////////////////
+    errlHndl_t createPnorVersion(      void*& i_pnorImgHdrPtr,
+                                 const size_t i_size,
+                                 sbe_image_version_t * o_version)
+    {
+        errlHndl_t err = nullptr;
+        TRACFCOMP( g_trac_sbe,
+                   ENTER_MRK"createPnorVersion(): i_pnorImgHdrPtr=%p, i_size=%d",
+                   i_pnorImgHdrPtr, i_size );
+
+        do{
+
+        /*******************************************************************/
+        // Originally there was a version in the PNOR::SBE_IPL image itself.
+        // (See git history for removed readPNORVersion() function)
+        // It was prefixed with 'VERSION\0' in ASCII in the 4Kheader.
+        // Now, this function is passed in the start of the SBE Image (ie
+        // skipped over the VERSION\0's 4K header) and does the following:
+        // - Create vmm space via createSbeImageVmmSpace()
+        // - Copy the uncustomized SBE Image to that vmm space
+        // - Run maskUnmaskMetaData against the image in memory to
+        //   remove any inconsequential build artifacts
+        // - Create a sha3() over the resulting masked image and copy it to
+        //   o_version
+        // - Cleanup meta data vector
+        // - Cleanup vmm space via cleanupSbeImageVmmSpace()
+        /*******************************************************************/
+
+        /*******************************************************************/
+        // - Create vmm space via createSbeImageVmmSpace()
+        /*******************************************************************/
+        // Use the initial virtual memory space of VMM_VADDR_SBE_UPDATE of
+        // size VMM_VADDR_SBE_UPDATE bytes
+        uint64_t sbeSpaceVaddr = VMM_VADDR_SBE_UPDATE;
+        TRACUCOMP(g_trac_sbe, "createPnorVersion: using 0x%llX vddr space",
+                  sbeSpaceVaddr);
+
+        err = createSbeImageVmmSpace(sbeSpaceVaddr);
+        if (err)
+        {
+            TRACFCOMP( g_trac_sbe,
+                       ERR_MRK"createPnorVersion(): "
+                       "createSbeImageVmmSpace(0x%llX) failed."
+                       TRACE_ERR_FMT,
+                       sbeSpaceVaddr,
+                       TRACE_ERR_ARGS(err));
+            break;
+        }
+
+        /*******************************************************************/
+        // - Copy the uncustomized SBE Image to that vmm space
+        /*******************************************************************/
+        memcpy ( reinterpret_cast<void*>(sbeSpaceVaddr),
+                 i_pnorImgHdrPtr,
+                 i_size);
+
+        /*******************************************************************/
+        // - Run maskUnmaskMetaData against the image in memory to
+        //   remove any inconsequential build artifacts
+        /*******************************************************************/
+        vaddr_metadata_vector_t tempMetaDataVector;
+
+        // Remove specific section data from the image, before the
+        // CRC is calculated.
+        err = maskUnmaskMetaData(reinterpret_cast<void*>(sbeSpaceVaddr),
+                                 i_size,
+                                 true, // masks meta data
+                                 tempMetaDataVector);
+        if (err)
+        {
+            TRACFCOMP( g_trac_sbe,
+                       ERR_MRK"createPnorVersion(): "
+                       "maskUnmaskMetaData(addr 0x%llX, size 0x%X) failed."
+                       TRACE_ERR_FMT,
+                       sbeSpaceVaddr, i_size,
+                       TRACE_ERR_ARGS(err));
+            break;
+        }
+
+
+        /*******************************************************************/
+        // - Create a sha3() over the resulting masked image and copy it to
+        //   o_version
+        /*******************************************************************/
+
+        //sha3
+        sha3_t calculated_hash = {0};
+        SECUREBOOT::hashBlob(reinterpret_cast<void*>(sbeSpaceVaddr),
+                             i_size,
+                             calculated_hash,
+                             SB_SIGNING_V3_CONTAINER); // to use sha3() algo
+
+        // both SBE_IMAGE_VERSION_SIZE and the sha3 hash should be 64 bytes
+        static_assert(SBE_IMAGE_VERSION_SIZE == sizeof(sha3_t),
+                      "SBE_IMAGE_VERSION_SIZE and sizeof(SHA512_t should both be 64");
+
+        TRACUCOMP( g_trac_sbe,"createPnorVersion(): calculated_hash = 0x%.8X",
+                   sha512_to_u32(calculated_hash));
+
+        memcpy(o_version,
+               calculated_hash,
+               SBE_IMAGE_VERSION_SIZE);
+
+        /*******************************************************************/
+        // - Cleanup meta data vector
+        /*******************************************************************/
+        for(const auto& metaData : tempMetaDataVector)
+        {
+            //Deallocate temp metadata space
+            delete [] metaData.tempDataBfr;
+        }
+
+
+        /*******************************************************************/
+        // - Cleanup vmm space via cleanupSbeImageVmmSpace()
+        /*******************************************************************/
+        err = cleanupSbeImageVmmSpace(sbeSpaceVaddr);
+        if (err)
+        {
+            TRACFCOMP( g_trac_sbe,
+                       INFO_MRK"createPnorVersion(): "
+                       "cleanupSbeImageVmmSpace(0x%llX) failed."
+                       TRACE_ERR_FMT,
+                       sbeSpaceVaddr,
+                       TRACE_ERR_ARGS(err));
+            break;
+        }
+
+        }while(0);
+
+        TRACFCOMP( g_trac_sbe,
+                   EXIT_MRK"createPnorVersion(): o_version: 0x%.8X )",
+                   *(reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(o_version))));
+
+        return err;
+    }
 
 } //end SBE Namespace
