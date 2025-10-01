@@ -216,6 +216,51 @@ fapi2::ReturnCode run_ecs_helper(const std::vector<mss::rank::info<mss::mc_type:
                                  uint8_t (&o_mr20_arr)[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4],
                                  uint32_t (&o_mr16_19_arr)[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4]);
 
+///
+/// @brief Splits the vector of rank infos into vector of vector of rank infos
+///        depending on the parallel attributes of ranks and ports. Each element
+///        in the output vector represents an "ECS test" with all the ports
+///        and ranks that need to run in parallel
+/// @param[in] i_vec_ranks vector of rank info
+/// @param[in] i_ecs_parallel_ports attr value of ATTR_ECS_PARALLEL_PORT
+/// @param[in] i_ecs_parallel_ranks attr value of ATTR_ECS_PARALLEL_RANK
+/// @param[out] o_vec_tests vector of vector of rank infos
+/// @return none
+///
+void get_vec_of_ecs_tests(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
+                          const uint8_t i_ecs_parallel_ports,
+                          const uint8_t i_ecs_parallel_ranks,
+                          std::vector<std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >>& o_vec_tests);
+
+///
+/// @brief Splits the vector of rank infos into vector of vector of rank infos
+///        when ranks and ports are in serial
+/// @param[in] i_vec_ranks vector of rank info
+/// @param[out] o_vec_tests vector of vector of rank infos
+/// @return none
+///
+void get_vec_of_tests_ranks_ports_serial(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
+        std::vector<std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >>& o_vec_tests);
+
+///
+/// @brief Splits the vector of rank infos into vector of vector of rank infos
+///        when ranks are in parallel
+/// @param[in] i_vec_ranks vector of rank info
+/// @param[out] o_vec_tests vector of vector of rank infos
+/// @return none
+///
+void get_vec_of_tests_ranks_parallel(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
+                                     std::vector<std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >>& o_vec_tests);
+
+///
+/// @brief Splits the vector of rank infos into vector of vector of rank infos
+///        when ports are in parallel
+/// @param[in] i_vec_ranks vector of rank info
+/// @param[out] o_vec_tests vector of vector of rank infos
+/// @return none
+///
+void get_vec_of_tests_ports_parallel(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
+                                     std::vector<std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >>& o_vec_tests);
 
 ///
 /// @brief Run the ecs test

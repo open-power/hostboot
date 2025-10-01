@@ -823,6 +823,38 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ECS_PARALLEL_PORT</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            When enabled, ports are run in parallel for ecs mfg test
+        </description>
+        <enum>
+            ENABLED = 1,
+            DISABLED = 0
+        </enum>
+        <default>ENABLED</default>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <noSBEAccessor/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ECS_PARALLEL_RANK</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            When enabled, ranks are run in parallel for ecs mfg test
+        </description>
+        <enum>
+            ENABLED = 1,
+            DISABLED = 0
+        </enum>
+        <default>ENABLED</default>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <noSBEAccessor/>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_CONFIG_FREQ_LIMIT</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>
