@@ -1163,6 +1163,121 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Splits the vector of rank infos into vector of vector of rank infos
+///        depending on the parallel attributes of ranks and ports
+/// @param[in] i_vec_ranks vector of rank info
+/// @param[in] i_ecs_parallel_ports attr value of ATTR_ECS_PARALLEL_PORT
+/// @param[in] i_ecs_parallel_ranks attr value of ATTR_ECS_PARALLEL_RANK
+/// @param[out] o_vec_tests vector of vector of rank infos
+/// @return none
+///
+void get_vec_of_ecs_tests(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
+                          const uint8_t i_ecs_parallel_ports,
+                          const uint8_t i_ecs_parallel_ranks,
+                          std::vector<std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >>& o_vec_tests)
+{
+    FAPI_INF_NO_SBE("input vector i_vec_ranks size : %d", i_vec_ranks.size());
+    FAPI_INF_NO_SBE("parallel_ports : %d", i_ecs_parallel_ports);
+    FAPI_INF_NO_SBE("parallel_ranks : %d", i_ecs_parallel_ranks);
+
+    // Both are in serial
+    if(i_ecs_parallel_ports == fapi2::ENUM_ATTR_ECS_PARALLEL_PORT_DISABLED
+       && i_ecs_parallel_ranks == fapi2::ENUM_ATTR_ECS_PARALLEL_RANK_DISABLED)
+    {
+        get_vec_of_tests_ranks_ports_serial(i_vec_ranks, o_vec_tests);
+    }
+    // Ranks in parallel
+    else if (i_ecs_parallel_ports == fapi2::ENUM_ATTR_ECS_PARALLEL_PORT_DISABLED
+             && i_ecs_parallel_ranks == fapi2::ENUM_ATTR_ECS_PARALLEL_RANK_ENABLED)
+    {
+        get_vec_of_tests_ranks_parallel(i_vec_ranks, o_vec_tests);
+    }
+    // Ports in parallel
+    else if (i_ecs_parallel_ports == fapi2::ENUM_ATTR_ECS_PARALLEL_PORT_ENABLED
+             && i_ecs_parallel_ranks == fapi2::ENUM_ATTR_ECS_PARALLEL_RANK_DISABLED)
+    {
+        get_vec_of_tests_ports_parallel(i_vec_ranks, o_vec_tests);
+    }
+    // Both in parallel
+    else
+    {
+        o_vec_tests.push_back(i_vec_ranks);
+    }
+}
+
+///
+/// @brief Splits the vector of rank infos into vector of vector of rank infos
+///        when ranks and ports are in serial
+/// @param[in] i_vec_ranks vector of rank info
+/// @param[out] o_vec_tests vector of vector of rank infos
+/// @return none
+///
+void get_vec_of_tests_ranks_ports_serial(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
+        std::vector<std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >>& o_vec_tests)
+{
+    o_vec_tests.clear();
+
+    for (const auto& l_rank_info : i_vec_ranks)
+    {
+        std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_temp_vec_test = {};
+        l_temp_vec_test.push_back(l_rank_info);
+        o_vec_tests.push_back(l_temp_vec_test);
+    }
+}
+
+///
+/// @brief Splits the vector of rank infos into vector of vector of rank infos
+///        when ranks are in parallel
+/// @param[in] i_vec_ranks vector of rank info
+/// @param[out] o_vec_tests vector of vector of rank infos
+/// @return none
+///
+void get_vec_of_tests_ranks_parallel(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
+                                     std::vector<std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >>& o_vec_tests)
+{
+    o_vec_tests.clear();
+
+    // Intitialize the o_vec_tests
+    for (uint8_t l_pos = 0; l_pos < mss::ody::MAX_PORT_PER_OCMB; l_pos++)
+    {
+        o_vec_tests.push_back(std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>());
+    }
+
+    for (const auto& l_rank_info : i_vec_ranks)
+    {
+        const auto& l_port_target = l_rank_info.get_port_target();
+        const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+
+        o_vec_tests[l_rel_pos].push_back(l_rank_info);
+    }
+}
+
+///
+/// @brief Splits the vector of rank infos into vector of vector of rank infos
+///        when ports are in parallel
+/// @param[in] i_vec_ranks vector of rank info
+/// @param[out] o_vec_tests vector of vector of rank infos
+/// @return none
+///
+void get_vec_of_tests_ports_parallel(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
+                                     std::vector<std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >>& o_vec_tests)
+{
+    o_vec_tests.clear();
+
+    // Intitialize the o_vec_tests
+    for (uint8_t l_mrank = 0; l_mrank < mss::ody::HW_MAX_RANK_PER_DIMM; l_mrank++)
+    {
+        o_vec_tests.push_back(std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>());
+    }
+
+    for (const auto& l_rank_info : i_vec_ranks)
+    {
+        const uint8_t l_port_rank = l_rank_info.get_port_rank();
+        o_vec_tests[l_port_rank].push_back(l_rank_info);
+    }
+}
+
+///
 /// @brief Run the ecs test
 /// @param[in] i_vec_rank vector of rank infos
 /// @return FAPI2_RC_SUCCESS iff successful
@@ -1170,7 +1285,11 @@ fapi_try_exit:
 fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks)
 {
     uint8_t l_ecs_threshold = 0;
+    uint8_t l_ecs_parallel_ports = 0;
+    uint8_t l_ecs_parallel_ranks = 0;
+
     bool l_errors_over_threshold = false;
+    std::vector< std::vector<mss::rank::info<mss::mc_type::ODYSSEY> >> l_vec_tests = {};
 
     // Arrays to populate MR20 data per MRANK per SRANK per DRAM
     uint8_t l_mr20_arr_pat0[mss::ody::MAX_PORT_PER_OCMB][mss::ody::HW_MAX_MRANK_PER_PORT][mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4]
@@ -1190,58 +1309,71 @@ fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSE
     uint32_t l_mr16_19_arr_pat1[mss::ody::MAX_PORT_PER_OCMB][mss::ody::HW_MAX_MRANK_PER_PORT][mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4]
         = {};
 
-    // Get the threshold value
+    // Get the threshold value, parallel_port, parallel_rank attribute values
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ECS_ERROR_COUNT_THRESHOLD, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             l_ecs_threshold) );
 
-    // Run ecs with pattern0 memory initialization
-    FAPI_TRY(run_ecs_helper(i_vec_ranks, mss::mcbist::PATTERN_0, l_mr20_arr_pat0, l_mr16_19_arr_pat0));
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ECS_PARALLEL_PORT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ecs_parallel_ports) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ECS_PARALLEL_RANK, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ecs_parallel_ranks) );
 
-    // Run ecs with pattern1 initialization
-    FAPI_TRY(run_ecs_helper(i_vec_ranks, mss::mcbist::PATTERN_1, l_mr20_arr_pat1, l_mr16_19_arr_pat1));
+    // Get the vector of vector of rank infos depending on the attributes
+    get_vec_of_ecs_tests(i_vec_ranks, l_ecs_parallel_ports, l_ecs_parallel_ranks, l_vec_tests);
+    FAPI_INF_NO_SBE("Size of the l_vec_tests: %d", l_vec_tests.size());
 
-    for(const auto& l_rank_info : i_vec_ranks)
+    for(const auto& l_vec_rank_info_test : l_vec_tests)
     {
-        const auto& l_port_target = l_rank_info.get_port_target();
-        const uint8_t l_mrank = l_rank_info.get_port_rank();
-        const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+        // Run ecs with pattern0 memory initialization
+        FAPI_TRY(run_ecs_helper(l_vec_rank_info_test, mss::mcbist::PATTERN_0, l_mr20_arr_pat0, l_mr16_19_arr_pat0));
 
-        // Check for threshold here for MR20 for pattern 0, pattern 1
-        for(uint8_t l_srank_id = 0; l_srank_id < mss::ody::MAX_SRANKS; l_srank_id++)
+        // Run ecs with pattern1 initialization
+        FAPI_TRY(run_ecs_helper(l_vec_rank_info_test, mss::mcbist::PATTERN_1, l_mr20_arr_pat1, l_mr16_19_arr_pat1));
+
+
+        for(const auto& l_rank_info : l_vec_rank_info_test)
         {
-            // Go through all the MR20 values for each DRAM
-            for(uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++ )
+            const auto& l_port_target = l_rank_info.get_port_target();
+            const uint8_t l_mrank = l_rank_info.get_port_rank();
+            const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+
+            // Check for threshold here for MR20 for pattern 0, pattern 1
+            for(uint8_t l_srank_id = 0; l_srank_id < mss::ody::MAX_SRANKS; l_srank_id++)
             {
-                // Check the if we are above the threshold
-                if(l_mr20_arr_pat0[l_rel_pos][l_mrank][l_srank_id][l_dram] > l_ecs_threshold ||
-                   l_mr20_arr_pat1[l_rel_pos][l_mrank][l_srank_id][l_dram] > l_ecs_threshold)
+                // Go through all the MR20 values for each DRAM
+                for(uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++ )
                 {
-                    // Flag an error if we are above the threshold
-                    l_errors_over_threshold = true;
+                    // Check the if we are above the threshold
+                    if(l_mr20_arr_pat0[l_rel_pos][l_mrank][l_srank_id][l_dram] > l_ecs_threshold ||
+                       l_mr20_arr_pat1[l_rel_pos][l_mrank][l_srank_id][l_dram] > l_ecs_threshold)
+                    {
+                        // Flag an error if we are above the threshold
+                        l_errors_over_threshold = true;
+                    }
                 }
             }
+
+            FAPI_ASSERT_NOEXIT(!(l_errors_over_threshold),
+                               fapi2::ODY_ECS_FAIL()
+                               .set_PORT_TARGET(l_port_target)
+                               .set_THRESHOLD(l_ecs_threshold)
+                               .set_MRANK(l_mrank)
+                               .set_MR20_PAT0((void*)l_mr20_arr_pat0)
+                               .set_MR20_PAT0_SIZE(sizeof(l_mr20_arr_pat0))
+                               .set_MR16_TO_19_PAT0((void*)l_mr16_19_arr_pat0)
+                               .set_MR16_TO_19_PAT0_SIZE(sizeof(l_mr16_19_arr_pat0))
+                               .set_MR20_PAT1((void*)l_mr20_arr_pat1)
+                               .set_MR20_PAT1_SIZE(sizeof(l_mr20_arr_pat1))
+                               .set_MR16_TO_19_PAT1((void*)l_mr16_19_arr_pat1)
+                               .set_MR16_TO_19_PAT1_SIZE(sizeof(l_mr16_19_arr_pat1)),
+                               "Error counts MR20 and MR16 to MR19 in port: " GENTARGTIDFORMAT " ecs_threshold: %d",
+                               GENTARGTID(l_port_target), l_ecs_threshold);
+
+            // Reset the current error is needed here
+            // As long the errors saved in the arrays this function can pass a FAPI2_RC_SUCCESS
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
-
-        FAPI_ASSERT_NOEXIT(!(l_errors_over_threshold),
-                           fapi2::ODY_ECS_FAIL()
-                           .set_PORT_TARGET(l_port_target)
-                           .set_THRESHOLD(l_ecs_threshold)
-                           .set_MRANK(l_mrank)
-                           .set_MR20_PAT0((void*)l_mr20_arr_pat0)
-                           .set_MR20_PAT0_SIZE(sizeof(l_mr20_arr_pat0))
-                           .set_MR16_TO_19_PAT0((void*)l_mr16_19_arr_pat0)
-                           .set_MR16_TO_19_PAT0_SIZE(sizeof(l_mr16_19_arr_pat0))
-                           .set_MR20_PAT1((void*)l_mr20_arr_pat1)
-                           .set_MR20_PAT1_SIZE(sizeof(l_mr20_arr_pat1))
-                           .set_MR16_TO_19_PAT1((void*)l_mr16_19_arr_pat1)
-                           .set_MR16_TO_19_PAT1_SIZE(sizeof(l_mr16_19_arr_pat1)),
-                           "Error counts MR20 and MR16 to MR19 in port: " GENTARGTIDFORMAT " ecs_threshold: %d",
-                           GENTARGTID(l_port_target), l_ecs_threshold);
-
-        // Reset the current error is needed here
-        // As long the errors saved in the arrays this function can pass a FAPI2_RC_SUCCESS
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    }
+    }// end of foreach
 
 fapi_try_exit:
     return fapi2::current_err;
