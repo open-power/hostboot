@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,6 +78,9 @@ const uint64_t ISTEP_PAUSE_SET_INFINITE = 0xFF;
  */
 const uint64_t MAX_RCL_TESTS = 5;
 #endif //CONFIG_RECONFIG_LOOP_TESTS_ENABLE
+
+// Used to collect timing statistics for isteps
+extern std::array<iplInfo, MaxISteps> g_ipl_stats;
 
 /******************************************************************************/
 // Typedef/Enumerations
@@ -267,6 +270,76 @@ public:
      */
     errlHndl_t sendAttnMonitorChipIdMsg(
                   const std::vector<TARGETING::ATTR_HUID_type> & i_huid_list );
+
+    /**
+     * @brief  Start the istep timings in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     *
+     * @return  Nothing
+     */
+    void start_istep_timer( uint16_t istep);
+
+    /**
+     * @brief  Stop the istep timings in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     *
+     * @return  Nothing
+     */
+    void stop_istep_timer( uint16_t istep);
+
+    /**
+     * @brief  Start the substep timings in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     *
+     * @return  Nothing
+     */
+    void start_substep_timer( uint16_t istep, uint16_t substep);
+
+    /**
+     * @brief  Stop the substep timings in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     *
+     * @return  Nothing
+     */
+    void stop_substep_timer( uint16_t istep, uint16_t substep);
+
+    /**
+     * @brief  Set substep as a valid substep based on isteplist taskinfo
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     * @param[in]       taskname - taskname to record
+     *
+     * @return  Nothing
+     */
+    void set_substep_valid( uint16_t istep, uint16_t substep, const char* taskname);
+
+    /**
+     * @brief  Start the substep in progress marker in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     *
+     * @return  Nothing
+     */
+    void start_substep_inprogress( uint16_t istep, uint16_t substep);
+
+    /**
+     * @brief  Stop the substep in progress marker in the global data structure
+     *
+     * @param[in]       istep - which istep to process
+     * @param[in]       substep - which substep to process
+     *
+     * @return  Nothing
+     */
+    void stop_substep_inprogress( uint16_t istep, uint16_t substep);
+
 
 protected:
 

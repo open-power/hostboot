@@ -63,7 +63,6 @@
 #ifndef MLCA_INT_H
 #define MLCA_INT_H
 
-//MAB#include <mlca2.h>
 #include <securerom/contrib/v3_mlca/include/mlca2.h>
 #include <stdint.h>
 

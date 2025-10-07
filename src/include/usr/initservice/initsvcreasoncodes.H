@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,6 +147,17 @@ enum InitServiceUserDetailDataSubSection
  * @devdesc         Hostboot code called doShutdown() directly after a SBE Update where the
  *                  security keys were updated
  * @custdesc        Firmware shutdown the system after some security settings were updated
+ */
+
+/*@
+ * @errortype  ERRORLOG::ERRL_SEV_INFORMATIONAL
+ * @moduleid   INITSERVICE::BASE_INITSVC_MOD_ID
+ * @reasoncode INITSERVICE::ISTEP_IPL_STATS
+ * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
+ * @userdata1  unused
+ * @userdata2  unused
+ * @devdesc    Timing information from the boot sequence
+ * @custdesc   Timing information from the boot sequence
  */
 
 };  // namespace    INITSERVICE

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,6 +140,15 @@ void setNewGardRecord ( void );
  */
 void moduleInitFailed(errlOwner i_errl);
 
-}
+/**
+ * @brief Log the IPL stats for this Node
+ * @return none
+ */
+void logStats();
 
-#endif
+} // namespace INITSERVICE
+
+#endif // __INITSERVICE_ISTEPDISPATCHERIF_H
+
+
+
