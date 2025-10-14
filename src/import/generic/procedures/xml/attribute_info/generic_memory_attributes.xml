@@ -624,6 +624,7 @@
     <id>ATTR_OMI_CRC_DEBUG</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
+        DEPRECATED
         Selects the settings for Host and Explorer FIRs
         for CRC and NACK errors.
         Default: MASKED
