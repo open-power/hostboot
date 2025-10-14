@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2025                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2026                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -560,6 +560,7 @@
     <id>ATTR_OMI_CRC_DEBUG</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
+        DEPRECATED ATTR
         Selects the settings for Host and Explorer FIRs
         for CRC and NACK errors.
         Default: MASKED

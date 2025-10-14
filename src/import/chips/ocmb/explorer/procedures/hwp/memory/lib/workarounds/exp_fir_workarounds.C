@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,32 +93,16 @@ void override_omi_crc_firs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i
                             const uint8_t i_omi_crc_debug,
                             mss::fir::reg<EXPLR_DLX_MC_OMI_FIR_REG>& io_exp_mc_omi_fir_reg )
 {
-    // Write MC_OMI_FIR register per attr setting
-    switch(i_omi_crc_debug)
-    {
-        case fapi2::ENUM_ATTR_OMI_CRC_DEBUG_XSTOP:
-            FAPI_DBG("%s Setting MC_OMI_FIR CRC FIRs to checkstop per attribute setting", mss::c_str(i_target));
-            io_exp_mc_omi_fir_reg.checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>()
-            .checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_NACK>();
-            break;
-
-        case fapi2::ENUM_ATTR_OMI_CRC_DEBUG_RECOVERABLE:
-            FAPI_DBG("%s Setting MC_OMI_FIR CRC FIRs to recoverable per attribute setting", mss::c_str(i_target));
-            io_exp_mc_omi_fir_reg.recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>()
-            .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_NACK>();
-            break;
-
-        case fapi2::ENUM_ATTR_OMI_CRC_DEBUG_LOCAL_XSTOP:
-            FAPI_DBG("%s Setting MC_OMI_FIR CRC FIRs to local_checkstop per attribute setting", mss::c_str(i_target));
-            io_exp_mc_omi_fir_reg.local_checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>()
-            .local_checkstop<EXPLR_DLX_MC_OMI_FIR_REG_DL0_NACK>();
-            break;
-
-        default:
-            // By default just leave it
-            FAPI_DBG("%s Leaving MC_OMI_FIR CRC FIRs as masked per attribute setting", mss::c_str(i_target));
-            break;
-    }
+    /*
+        STG: 741775
+            CRC_ERROR FIRs are unmasked always in exp_omi_setup. The action FIRs are not setup for this scenario and still
+            are set based on the ATTR_OMI_CRC_DEBUG which can cause inconsistent setups and xstop a system.
+            We're going to take the recoverable path from the ATTR under all circumstances to reflect the FIR setting in
+            exp_omi_setup.C.
+    */
+    FAPI_DBG("%s Forcing MC_OMI_FIR CRC FIRs to recoverable", mss::c_str(i_target));
+    io_exp_mc_omi_fir_reg.recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>()
+    .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_NACK>();
 }
 
 ///
