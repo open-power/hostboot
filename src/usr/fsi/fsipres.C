@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -220,9 +220,10 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
             // Add FFDC for the target to an error log
             getFsiFFDC( FFDC_PRESENCE_FAIL, l_errl, i_target);
 
-            // Add FSI and VPD trace
-            l_errl->collectTrace("FSI");
-            l_errl->collectTrace("VPD");
+            // Add FSI, VPD, and SPI traces
+            l_errl->collectTrace(FSI_COMP_NAME);
+            l_errl->collectTrace(VPD_COMP_NAME);
+            l_errl->collectTrace(SPI_COMP_NAME);
 
             // Commit this log and move on
             errlCommit( l_errl,
