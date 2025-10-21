@@ -2719,7 +2719,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
 
         errlHndl_t err = nullptr;
         void *sbeHbblImgPtr = nullptr;
-        sb_settings_t sb_settings;
+        sb_settings_t sb_settings = {0};
 
         // Clear build information
         io_sbeState.new_imageBuild.buildDate = 0;
@@ -3007,7 +3007,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error from modifySbeSection() for P9_XIP_SECTION_SBE_SB_SETTINGS: "
+                           "Error from modifySbeSection() for P9_XIP_SECTION_SBE_SBH_HBBL: "
                            TRACE_ERR_FMT,
                            TRACE_ERR_ARGS(err));
                 break;
@@ -6984,8 +6984,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                            const void * i_image_ptr) // defaults to nullptr
 {
     errlHndl_t err = nullptr;
-    sb_settings_t sb_settings;
-
+    sb_settings_t sb_settings = {0};
 
     // Only useChipOp if the sbe is started
     // if i_image_ptr == nullptr, then read from SBE Seeprom;
