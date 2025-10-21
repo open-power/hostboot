@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2024
+# Contributors Listed Below - COPYRIGHT 2020,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -885,7 +885,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[14]
      *  MCHK received while ME=0 - non recoverable
      */
-    (rEQ_CORE_FIR, bit(14)) ? self_th_1_SUE;
+    (rEQ_CORE_FIR, bit(14)) ? level2_M_self_L_th_1_SUE;
 
     /** EQ_CORE_FIR[15]
      *  UE from L2
