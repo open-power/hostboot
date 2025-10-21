@@ -383,10 +383,7 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
         auto l_range_end = l_addrs[l_addr_count].second;
 
         // Add subtest for port0 if range is within start/end boundaries and start address is on port0
-        if (l_port_exists[0] &&
-            (l_port_start_address == 0) &&
-            (uint64_t(l_range_start) >= uint64_t(iv_const.iv_start_address)) &&
-            (uint64_t(l_range_end) <= uint64_t(iv_const.iv_end_address)))
+        if (subtest_in_range(0, l_port_exists, l_port_start_address, iv_const, l_range_start, l_range_end))
         {
             auto l_subtest = iv_subtest;
 
@@ -403,10 +400,7 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
         l_range_end.set_port(1);
 
         // Add subtest for port1 if range is within start/end boundaries and end address is on port1
-        if (l_port_exists[1] &&
-            (l_port_end_address == 1) &&
-            (uint64_t(l_range_start) >= uint64_t(iv_const.iv_start_address)) &&
-            (uint64_t(l_range_end) <= uint64_t(iv_const.iv_end_address)))
+        if (subtest_in_range(1, l_port_exists, l_port_end_address, iv_const, l_range_start, l_range_end))
         {
             auto l_subtest = iv_subtest;
 
@@ -423,6 +417,37 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Checks if a subtest is needed for a given address range
+/// @param[in] i_port_index index of memory port being checked
+/// @param[in] i_port_exists array of boolean that tells if each port exists
+/// @param[in] i_port_start_address port index of starting address
+/// @param[in] i_constraints test constraints containing start and end addresses
+/// @param[in] i_range_start starting address of subtest
+/// @param[in] i_range_end end address of subtest
+/// @return true if a subtest should be created, false otherwise
+///
+bool subtest_in_range(
+    const uint8_t i_port_index,
+    const bool i_port_exists[mss::ody::MAX_PORT_PER_OCMB],
+    const uint64_t i_port_start_address,
+    const mss::mcbist::constraints<mss::mc_type::ODYSSEY>& i_constraints,
+    const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_range_start,
+    const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_range_end)
+{
+    // Check boundary of port index. Returning false here will make it obvious
+    // both in the UT and HWP code that the code is broken
+    if (i_port_index >= mss::ody::MAX_PORT_PER_OCMB)
+    {
+        return false;
+    }
+
+    return (i_port_exists[i_port_index] &&
+            (i_port_start_address == i_port_index) &&
+            (uint64_t(i_constraints.iv_start_address) < uint64_t(i_range_end)) &&
+            (uint64_t(i_constraints.iv_end_address) > uint64_t(i_range_start)));
 }
 
 ///
