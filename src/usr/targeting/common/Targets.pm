@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2024
+# Contributors Listed Below - COPYRIGHT 2015,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -934,7 +934,7 @@ sub getFapiName
            $targetType eq "MEMBUF" || $targetType eq "PMIC" ||
            $targetType eq "OCMB_CHIP" || $targetType eq "GENERIC_I2C_DEVICE" ||
            $targetType eq "MDS_CTLR"  || $targetType eq "POWER_IC" ||
-           $targetType eq "TEMP_SENSOR" || $targetType eq "TPM" || $targetType eq "OCC")
+           $targetType eq "TEMP_SENSOR" || $targetType eq "TPM")
     {
         if ($node eq "" || $chipPos eq "")
         {
