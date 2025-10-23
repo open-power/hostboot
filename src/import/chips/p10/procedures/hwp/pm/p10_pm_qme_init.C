@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -661,19 +661,6 @@ fapi2::ReturnCode init_topo_id_tables(
 
     PREP_QME_SCOM_PBTXTR3(eq);
     FAPI_TRY(PUT_QME_SCOM_PBTXTR3(eq, topo_scoms[3]));
-
-    data = 0;
-    FAPI_TRY( fapi2::getScom( eq, QME_PPEBAR, l_ppeBarRegVal ));
-    l_ppeBarRegVal.extractToRight( data, ( QME_PPEBAR_BASE + TOPO_REGION_START_OFFSET ), TOPO_REGION_BIT_LEN );
-    FAPI_INF( "PPE Bar b15-b19 0x%08x", data );
-
-    FAPI_TRY( fapi2::getScom( eq, ( QME_SCOM_PBTXTR0 + ( data / MAX_TOPO_ENT_PER_SCOM )), l_topoRegVal ));
-
-    FAPI_ASSERT( l_topoRegVal.getBit( ( data % MAX_TOPO_ENT_PER_SCOM )),
-                 fapi2::PPEBAR_TOPOLOGY_INIT_ERROR()
-                 .set_PPE_BAR_REG( l_ppeBarRegVal )
-                 .set_TOPO_SCOM_REG( l_topoRegVal ),
-                 "Topology Register Is Not Initialized Correctly b15-b19 0x%016lx", data );
 
     data = 0;
     FAPI_TRY( fapi2::getScom( eq, QME_BCEBAR0, l_bceBarRegVal ));
