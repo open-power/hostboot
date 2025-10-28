@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,8 +185,26 @@ void attempt_recovery(pmic_info& io_pmic,
 
 fapi_try_exit:
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    io_pmic.iv_state = pmic_state::I2C_FAIL;
+    io_pmic.iv_state |= pmic_state::I2C_FAIL;
     return;
+}
+
+///
+/// @brief Checks if we have all four PMICs
+/// @param[in] i_pmic pmic_info class including target / state info
+/// @return True if all PMICs present
+///
+bool check_all_pmics_present(pmic_info& i_pmic)
+{
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic.iv_pmic);
+    const auto& l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(l_ocmb, fapi2::TARGET_STATE_PRESENT);
+
+    if (l_pmics.size() < mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::NUM_PMICS_4U)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 ///
@@ -207,6 +225,15 @@ void update_breadcrumb(aggregate_state& io_state,
                        pmic_telemetry& io_pmic_tele_data)
 {
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+
+    // Note: We check for the I2C fail before we get here but leaving this as a safeguard in case the error
+    // occurs between then and now. Also need to check if all PMICs are present in case we boot with <4.
+    if (!check_all_pmics_present(io_pmic) || io_pmic.iv_state & pmic_state::I2C_FAIL
+        || io_pmic.iv_state & pmic_state::NOT_PRESENT
+        || io_pmic.iv_state & pmic_state::DECONFIGURED)
+    {
+        return;
+    }
 
     fapi2::buffer<uint8_t> l_reg;
 
@@ -1090,10 +1117,12 @@ fapi_try_exit:
 /// @brief Get bread crumb reg value for individual PMIC
 /// @param[in,out] io_pmic pmic_info class including target / state info
 /// @param[out] o_pmic_data pmic_data struct
+/// @param[out] o_tele_data runtime_n_mode_telem_info struct
 /// @return None
 ///
 void get_bread_crumb_pmic(pmic_info& io_pmic,
-                          pmic_telemetry& o_pmic_data)
+                          pmic_telemetry& o_pmic_data,
+                          runtime_n_mode_telem_info& o_tele_data)
 {
     fapi2::buffer<uint8_t> l_reg_contents;
     static constexpr uint8_t RA3_BREADCRUMB = 0xA3;
@@ -1109,28 +1138,33 @@ void get_bread_crumb_pmic(pmic_info& io_pmic,
     }
 
     o_pmic_data.iv_breadcrumb = l_reg_contents;
+
+    if (io_pmic.iv_state & pmic_state::I2C_FAIL)
+    {
+        o_tele_data.iv_aggregate_error = aggregate_state::GI2C_I2C_FAIL;
+    }
 }
 
 ///
 /// @brief Get bread crumb reg value for all PMIC target
 /// @param[in,out] vector of io_pmic pmic_info class including target / state info
-/// @param[out] o_tele_data telemetry_data struct
+/// @param[out] o_tele_data runtime_n_mode_telem_info struct
 /// @return bread_crumb value
 ///
 bread_crumb get_bread_crumbs(std::vector<pmic_info>& io_pmics,
-                             telemetry_data& o_tele_data)
+                             runtime_n_mode_telem_info& o_tele_data)
 {
     fapi2::buffer<uint8_t> l_reg_contents;
 
-    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC0], o_tele_data.iv_pmic1);
-    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC1], o_tele_data.iv_pmic3);
-    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC2], o_tele_data.iv_pmic2);
-    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC3], o_tele_data.iv_pmic4);
+    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC0], o_tele_data.iv_telemetry_data.iv_pmic1, o_tele_data);
+    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC1], o_tele_data.iv_telemetry_data.iv_pmic3, o_tele_data);
+    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC2], o_tele_data.iv_telemetry_data.iv_pmic2, o_tele_data);
+    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC3], o_tele_data.iv_telemetry_data.iv_pmic4, o_tele_data);
 
-    return static_cast<bread_crumb>(std::max(std::max(o_tele_data.iv_pmic1.iv_breadcrumb,
-                                    o_tele_data.iv_pmic2.iv_breadcrumb),
-                                    std::max(o_tele_data.iv_pmic3.iv_breadcrumb,
-                                            o_tele_data.iv_pmic4.iv_breadcrumb)));
+    return static_cast<bread_crumb>(std::max(std::max(o_tele_data.iv_telemetry_data.iv_pmic1.iv_breadcrumb,
+                                    o_tele_data.iv_telemetry_data.iv_pmic2.iv_breadcrumb),
+                                    std::max(o_tele_data.iv_telemetry_data.iv_pmic3.iv_breadcrumb,
+                                            o_tele_data.iv_telemetry_data.iv_pmic4.iv_breadcrumb)));
 }
 
 ///
@@ -1215,7 +1249,8 @@ fapi2::ReturnCode pmic_n_mode_detect(
     }
 
     // Skip to telemetry collection if already in n-mode
-    if (get_bread_crumbs(PMICS, l_info.iv_telemetry_data) != bread_crumb::STILL_A_FAIL)
+    if (get_bread_crumbs(PMICS, l_info) != bread_crumb::STILL_A_FAIL
+        && l_info.iv_aggregate_error != aggregate_state::GI2C_I2C_FAIL)
     {
         // Start with the GPIOs
         aggregate_state l_output_state_1 = gpio_check(GPIO1, PMICS[mss::pmic::id::PMIC0], PMICS[mss::pmic::id::PMIC1],
@@ -1259,6 +1294,13 @@ fapi2::ReturnCode pmic_n_mode_detect(
         l_info.iv_aggregate_error = l_state;
 
         check_and_reset_breadcrumb(PMICS, l_info.iv_telemetry_data);
+    }
+    else if (l_info.iv_aggregate_error == aggregate_state::GI2C_I2C_FAIL)
+    {
+        l_info.iv_pmic1_errors = PMICS[mss::pmic::id::PMIC0].iv_state;
+        l_info.iv_pmic2_errors = PMICS[mss::pmic::id::PMIC2].iv_state;
+        l_info.iv_pmic3_errors = PMICS[mss::pmic::id::PMIC1].iv_state;
+        l_info.iv_pmic4_errors = PMICS[mss::pmic::id::PMIC3].iv_state;
     }
     else
     {
