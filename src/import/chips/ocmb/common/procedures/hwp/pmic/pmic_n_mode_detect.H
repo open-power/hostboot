@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -387,6 +387,13 @@ void attempt_recovery(pmic_info& io_pmic,
                       const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2);
 
 ///
+/// @brief Checks if we have all four PMICs
+/// @param[in] i_pmic pmic_info class including target / state info
+/// @return True if all PMICs present
+///
+bool check_all_pmics_present(pmic_info& i_pmic);
+
+///
 /// @brief Update breadcrumb register
 /// @param[in,out] aggregate_state Aggregate state
 /// @param[in,out] io_pmic pmic_info class including target / state info
@@ -648,19 +655,21 @@ fapi2::ReturnCode send_struct(runtime_n_mode_telem_info& i_info, fapi2::hwp_data
 /// @brief Get bread crumb reg value for individual PMIC
 /// @param[in,out] io_pmic pmic_info class including target / state info
 /// @param[out] o_pmic_data pmic_data struct
+/// @param[out] o_tele_data runtime_n_mode_telem_info struct
 /// @return None
 ///
 void get_bread_crumb_pmic(pmic_info& io_pmic,
-                          pmic_telemetry& o_pmic_data);
+                          pmic_telemetry& o_pmic_data,
+                          runtime_n_mode_telem_info& o_tele_data);
 
 ///
 /// @brief Get bread crumb reg value for all PMIC target
 /// @param[in,out] vector of io_pmic pmic_info class including target / state info
-/// @param[out] o_tele_data telemetry_data struct
+/// @param[out] o_tele_data runtime_n_mode_telem_info struct
 /// @return bread_crumb value
 ///
 bread_crumb get_bread_crumbs(std::vector<pmic_info>& io_pmics,
-                             telemetry_data& o_tele_data);
+                             runtime_n_mode_telem_info& o_tele_data);
 
 ///
 /// @brief Check and reset bread crumb reg value if PMIC status is clean
