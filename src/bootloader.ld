@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -72,7 +72,11 @@ SECTIONS
         *(.bss)
         *(.bss.*)
 
-    }
+        /* Align the end of this section to a 16-byte boundary */
+        /* The "=0x00" below will set unused bytes to zero */
+        . = ALIGN(16);
+
+    } =0x00
 
     end_load_address = .;
 
