@@ -97,7 +97,7 @@ const char dataSectionMarker[] = "Welcome to SBE - CommitId[0x";
 const char hbblSectionMarker[] = "HBBL ID STRING =";
 
 // HDCT offset
-const uint32_t xipSectionHdctOffset = 0x4;
+const uint32_t xipSectionHdctOffset = 0x0;
 
 // Secure boot header offsets
 const uint32_t xipSectionSbhOffsetV1HWSigABC    = 0x020C; // offset=524(d)
