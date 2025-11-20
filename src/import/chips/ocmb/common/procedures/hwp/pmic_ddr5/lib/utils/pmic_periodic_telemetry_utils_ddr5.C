@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,26 @@ void read_serial_ccin_number(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 #endif
 
     memcpy(io_serial_number, l_serial_number, sizeof(l_serial_number));
+}
+
+///
+/// @brief Helper to conditionally resume DQS drift tracking based on suspended attribute
+/// @param[in] i_target OCMB target
+/// @param[in] i_suspended true if DQS drift tracking is supposed to be suspended
+/// @return true if resume was attempted, false if skipped
+///
+bool resume_dqs_track_if_not_suspended(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_suspended)
+{
+    // Only resume DQS drift track if it's meant to be running
+    if (i_suspended == fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_FALSE)
+    {
+        resume_dqs_track(i_target);
+        return true;
+    }
+
+    return false;
 }
 
 ///
@@ -156,10 +176,7 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
             FAPI_TRY(host_configure_phy_scom_access(l_port_target, mss::states::OFF_N, true));
 
             // Only resume DQS drift track if it's meant to be running
-            if (l_suspended == fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_FALSE)
-            {
-                FAPI_TRY(resume_dqs_track(i_ocmb_target));
-            }
+            resume_dqs_track_if_not_suspended(i_ocmb_target, l_suspended);
         }
 
         // Only need to do this on the first port

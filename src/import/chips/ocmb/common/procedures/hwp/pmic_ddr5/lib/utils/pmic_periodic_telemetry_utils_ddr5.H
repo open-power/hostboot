@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -229,6 +229,16 @@ inline fapi2::ReturnCode resume_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Helper to conditionally resume DQS drift tracking based on suspended attribute
+/// @param[in] i_target OCMB target
+/// @param[in] i_suspended true if DQS drift tracking is supposed to be suspended
+/// @return true if resume was attempted, false if skipped
+///
+bool resume_dqs_track_if_not_suspended(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint8_t i_suspended);
 
 ///
 /// @brief Read and store DQS drift tracking data
