@@ -100,9 +100,15 @@ void override_omi_crc_firs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i
             We're going to take the recoverable path from the ATTR under all circumstances to reflect the FIR setting in
             exp_omi_setup.C.
     */
+    /*
+        STG: 749600
+            NACK FIR was being overwritten to be recoverable under all circumstances, which is not the intended value.
+            This bit needs to be masked under all circumstances. This is the default value coming into this function so
+            bit is no longer manipulated here
+    */
     FAPI_DBG("%s Forcing MC_OMI_FIR CRC FIRs to recoverable", mss::c_str(i_target));
-    io_exp_mc_omi_fir_reg.recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>()
-    .recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_NACK>();
+    io_exp_mc_omi_fir_reg.recoverable_error<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>();
+
 }
 
 ///
