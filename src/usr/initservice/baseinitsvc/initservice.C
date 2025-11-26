@@ -632,8 +632,8 @@ void InitService::init( void *io_ptr )
         }
         else
         {
-            // Set the shutdown status to be the plid to force a TI
-            l_shutdownStatus = l_errl->plid();
+            // Set the shutdown status to be the eid to force a TI
+            l_shutdownStatus = l_errl->eid();
         }
 
         errlCommit( l_errl, INITSVC_COMP_ID );
