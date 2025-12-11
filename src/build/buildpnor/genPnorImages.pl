@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2025
+# Contributors Listed Below - COPYRIGHT 2016,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -882,7 +882,7 @@ sub manipulateImage
                 print "HBBL raw size ($bin_file) (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
                 if ($hbblRawSize > $MAX_HBBL_SIZE)
                 {
-                    die "HBBL raw size is too large";
+                    die "ERROR: HBBL raw size is too large";
                 }
             }
 

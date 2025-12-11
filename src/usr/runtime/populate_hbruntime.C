@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3324,16 +3324,6 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         // version and offset
         for (auto const &funcType : SecRomFuncTypes)
         {
-            // @TODO JIRA PFHB-922 the SHA3 and MLDSA function types are not
-            // currently working, so do not include them in this section
-            if ((funcType == SHA3) || (funcType == MLDSA))
-            {
-                TRACFCOMP(g_trac_runtime, "populate_TpmInfoByNode: "
-                          "Skipping inoperable SecureROM function of type %d",
-                          funcType);
-                continue;
-            }
-
             auto l_hdatHashVerifyInfo =
                 reinterpret_cast<HDAT::hdatHashVerifyFunc_t*>(l_baseAddr +
                                                               l_currOffset);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2024,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2024,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,8 +55,15 @@
 
 /* generated code follows, please do not modify */
 
+/*
+ * Using inline here to not compile in the many functions in this file
+ * that are unused. Also many if not all of them are inlined anyways.
+*/
+#ifdef CRS_STATIC
+#undef CRS_STATIC
+#endif
 #if defined(USE_STATIC_MLCA)
-    #define CRS_STATIC static
+    #define CRS_STATIC static inline
 #else
     #define CRS_STATIC /**/
 #endif

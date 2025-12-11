@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2025
+# Contributors Listed Below - COPYRIGHT 2013,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -37,8 +37,6 @@ OBJS += $(if $(CONFIG_TPMDD),trustedbootMsg.o,)
 OBJS += ${SECUREBOOT_COMMON_OBJS}
 OBJS += targutilbase.o
 
-# @TODO JIRA PFHB-921 remove these temporary flags that are needed for
-# compiling MLCA and ecverify into the hostboot secureboot_base module
 # Flags for ecverify
 CFLAGS += -DBYTE_ORDER=BIG_ENDIAN
 CFLAGS += -DBN_POWER64_MUL
@@ -54,21 +52,17 @@ CFLAGS += -DNO_CRYSTALS_KEX
 CFLAGS += -DNO_DILITHIUM_SIGN
 CFLAGS += -DNO_MLDSA_SIGN
 CFLAGS += -DNO_DILITHIUM_VERIFY
-#CFLAGS += -DUSE_DYNAMIC_ALLOC
+CFLAGS += -DUSE_STATIC_MLCA
+CFLAGS += -DNO_MLCA_RANDOM
 
-# @TODO JIRA PFHB-921 Until securerom's call_rom_SHA3() function works by
-# calling it via the securerom branch table, build in the sha3(), mldsa_verify()
-# and ROM_v3_verify() support by including these OBJs and VPATH
 OBJS += keccak.o
 OBJS += mlca.o
 OBJS += ROM_v3.o
 OBJS += ecverify.o
 
-
 # add this VPATH to find the above files
 VPATH += ${ROOTPATH}/src/securerom/contrib/
 EXTRAINCDIR += $(ROOTPATH)/src/include/securerom/
-
 
 VPATH += $(ROOTPATH)/src/usr/targeting/common
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr

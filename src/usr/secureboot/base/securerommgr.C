@@ -323,9 +323,9 @@ errlHndl_t SecureRomManager::initialize()
         /***************************************************************/
         SecureRomManager::getHwKeyHash();
 
-
-        TRACDCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): SUCCESSFUL:"
-                  " iv_securerom=%p", iv_securerom);
+        uint64_t l_secure_rom_version = g_BlToHbDataManager.getSecureRomInfoVersion();
+        TRACFCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): SUCCESSFUL:"
+                  " iv_securerom=%p secureROM ver=0x%llX", iv_securerom, l_secure_rom_version);
 
 #ifdef HOSTBOOT_DEBUG
         TRACFCOMP(g_trac_secure,">> iv_SecRomFuncTypeOffset Map");
@@ -484,6 +484,9 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
         if (l_signModeToUse == TARGETING::SB_SIGNING_V3_CONTAINER)
         {
 
+            ROM_v3_container_raw* l_v3_container =
+                reinterpret_cast<ROM_v3_container_raw*>(i_container);
+
             // V3 verification path
             if (g_BlToHbDataManager.getSecureRomInfoVersion() >= SECUREROM_INFO_VER3_2)
             {
@@ -498,10 +501,6 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                         "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
                         l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
                         iv_securerom);
-
-                ROM_v3_container_raw* l_v3_container =
-                                    reinterpret_cast<ROM_v3_container_raw*>(
-                                                                    i_container);
 
                 l_rc = call_rom_v3_verify(reinterpret_cast<void*>
                                         (l_rom_verify_startAddr),
@@ -518,10 +517,6 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
             else
             {
                 // V3 verification via direct call
-                ROM_v3_container_raw* l_v3_container =
-                                    reinterpret_cast<ROM_v3_container_raw*>(
-                                                                    i_container);
-
                 l_rc = ROM_v3_verify(l_v3_container, &l_hw_parms);
 
                 TRACFCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "

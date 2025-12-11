@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2024,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2024,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,10 @@
 /* IBM_PROLOG_END_TAG                                                     */
 // SPDX-License-Identifier: Apache-2.0
 
+/*
+ * Functions unused by hostboot are iffed out.
+ */
+
 #if !defined(PQALGS_H__)
 #define PQALGS_H__ 1
 
@@ -67,6 +71,7 @@ extern "C"
 
 #define MLCA_MINIMAL
 
+#if 0
 /*--------------------------------------
  * Generate keypair.
  *
@@ -259,6 +264,8 @@ int
 mlca_wire2key(unsigned char* key, size_t kbytes, unsigned int* type,
               const unsigned char* wire, size_t wbytes,
               const unsigned char* algid, size_t ibytes);
+
+#endif
 
 /*-----  extension notes
  * ---------------------------------------------------- As an alternative to

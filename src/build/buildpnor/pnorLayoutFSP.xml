@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2025                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2026                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -161,7 +161,7 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <!-- @HBBL_SIZE_SYNC -->
+        <!-- @HBBL_SIZE_SYNC@ -->
         <description>Hostboot Bootloader (152KiB)</description>
         <eyeCatch>HBBL</eyeCatch>
         <!-- Logical content of HBBL is -->

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2024,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2024,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,21 @@
 // This file was modified from the ekb version of this file used by
 // the processor SBE code for mldsa_verify/v3 verification
 
+/*
+ * README
+ *
+ * This version of the file has all parts not used by hostboot
+ * compiled out using #if 0 blocks, except for parts already
+ * compiled out using compiler flags (eg NO_MLDSA_SIGN).
+ *
+ * Some changes needed to be made in order for this to work in
+ * the secureROM.
+ * 1. In several spots where const arrays are accessed, we
+ *    have some inline assembly to find the proper location.
+ * 2. Several switch statements are replaced with equivalent
+ *    if statements due to compiler optimizations that break
+ *    them in the secureROM
+ */
 
 /*----------------------------------------------------------------------
  *
@@ -197,7 +212,9 @@ static __INLINE__ void MSBF4_WRITE(void* p, uint64_t v)
  * assume this gets inlined, possibly through bswap() or equivalent
  * recent gcc/clang and some xlc's tend to do so
  */
-
+// Commented out and replaced with regular memset call
+// Because this crashes in secureROM context
+#if 0
 static __INLINE__ void* MEMSET0_STRICT(void* mem, size_t size)
 {
     typedef void* (*memset_t)(void*, int, size_t);
@@ -205,6 +222,7 @@ static __INLINE__ void* MEMSET0_STRICT(void* mem, size_t size)
     memset_func(mem, 0, size);
     return mem;
 }
+#endif
 
 #endif /* !defined(COMMON_BASE_H__) */
 
@@ -236,6 +254,7 @@ typedef enum
     CRS__SPC_PRV2PUB = 1 /* such as PKCS8-to-SPKI or public-to-private */
 } CRS__SpecOID_t;
 
+#if 0
 CRS_STATIC unsigned int is_special_oid(const unsigned char* oid, size_t oidb)
 {
     if (!oid || !oidb)
@@ -255,6 +274,7 @@ CRS_STATIC unsigned int is_special_oid(const unsigned char* oid, size_t oidb)
 
     return 0;
 }
+#endif
 
 #if 1 /*-----  delimiter: reduce  ------------------------------------*/
 #define DIL_D                         14
@@ -679,8 +699,14 @@ CRS_STATIC int16_t kyb__csubq(int16_t a)
 #define DIL_N ((unsigned int)256)
 #define KYB_N ((unsigned int)256)
 
+/*
+ * Added extern "C" to all const arrays in order for us to be
+ * able to find them properly in secureROM context
+*/
+
 /* Roots of unity in order needed by forward ntt */
-CRS_STATIC const uint32_t dil_zetas[DIL_N] =
+extern "C"
+const uint32_t dil_zetas[DIL_N] =
 {
     0,       25847,   5771523, 7861508, 237124,  7602457, 7504169, 466468,
     1826347, 2353451, 8021166, 6288512, 3119733, 5495562, 3111497, 2680103,
@@ -716,7 +742,8 @@ CRS_STATIC const uint32_t dil_zetas[DIL_N] =
     7826001, 3919660, 8332111, 7018208, 3937738, 1400424, 7534263, 1976782
 };
 
-CRS_STATIC const int16_t r3_kyb_zetas[128] =
+#if 0
+const int16_t r3_kyb_zetas[128] =
 {
     -1044, -758,  -359,  -1517, 1493,  1422,  287,   202,  -171,  622,   1577,
     182,   962,   -1202, -1474, 1468,  573,   -1325, 264,  383,   -829,  1458,
@@ -731,9 +758,11 @@ CRS_STATIC const int16_t r3_kyb_zetas[128] =
     -1187, -1659, -1185, -1530, -1278, 794,   -1510, -854, -870,  478,   -108,
     -308,  996,   991,   958,   -1460, 1522,  1628
 };
+#endif
 
 /* Roots of unity in order needed by inverse ntt */
-CRS_STATIC const uint32_t dil_zetas_inv[DIL_N] =
+extern "C"
+const uint32_t dil_zetas_inv[DIL_N] =
 {
     6403635, 846154,  6979993, 4442679, 1362209, 48306,   4460757, 554416,
     3545687, 6767575, 976891,  8196974, 2286327, 420899,  2235985, 2939036,
@@ -769,7 +798,8 @@ CRS_STATIC const uint32_t dil_zetas_inv[DIL_N] =
     7913949, 876248,  777960,  8143293, 518909,  2608894, 8354570
 };
 
-CRS_STATIC const uint8_t mldsa_ds_pure[2] = {0x0, 0x0};
+extern "C"
+const uint8_t mldsa_ds_pure[2] = {0x0, 0x0};
 
 /*************************************************
  * Description: Forward NTT, in-place. No modular reduction is performed after
@@ -785,11 +815,23 @@ CRS_STATIC void          ntt256(uint32_t p[DIL_N])
 
     k = 1;
 
+    const uint32_t* dil_zetas_p;
+
+    // In secureROM context dil_zetas won't correctly point to the data
+    // So we must do this in order to use it
+    #if defined EMULATE_HW || defined __HOSTBOOT_MODULE
+    dil_zetas_p = dil_zetas;
+    #else
+    asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work
+                    "sub  %0,2,%0 \n\t" // because subi does not work
+                    "addi %0,%0,(dil_zetas-0x8000)@l" : "=r" (dil_zetas_p) );
+    #endif
+
     for (len = 128; len > 0; len >>= 1)
     {
         for (start = 0; start < DIL_N; start = j + len)
         {
-            zeta = dil_zetas[k++];
+            zeta = dil_zetas_p[k++];
 
             for (j = start; j < start + len; ++j)
             {
@@ -818,11 +860,23 @@ CRS_STATIC void invntt_tomont256(uint32_t p[DIL_N])
 
     k = 0;
 
+    const uint32_t* dil_zetas_inv_p;
+
+    // In secureROM context dil_zetas_inv won't correctly point to the data
+    // So we must do this in order to use it
+    #if defined EMULATE_HW || defined __HOSTBOOT_MODULE
+    dil_zetas_inv_p = dil_zetas_inv;
+    #else
+    asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work
+                    "sub  %0,2,%0 \n\t" // because subi does not work
+                    "addi %0,%0,(dil_zetas_inv-0x8000)@l" : "=r" (dil_zetas_inv_p) );
+    #endif
+
     for (len = 1; len < DIL_N; len <<= 1)
     {
         for (start = 0; start < DIL_N; start = j + len)
         {
-            zeta = dil_zetas_inv[k++];
+            zeta = dil_zetas_inv_p[k++];
 
             for (j = start; j < start + len; ++j)
             {
@@ -842,8 +896,8 @@ CRS_STATIC void invntt_tomont256(uint32_t p[DIL_N])
 }
 
 /*-----  round3 NTT  -------------------------------------------------------*/
-
-CRS_STATIC const int32_t s_zetas[DIL_N] =
+extern "C"
+const int32_t s_zetas[DIL_N] =
 {
     0,        25847,    -2608894, -518909,  237124,   -777960,  -876248,
     466468,   1826347,  2353451,  -359251,  -2091905, 3119733,  -2884855,
@@ -896,11 +950,24 @@ CRS_STATIC void sntt256(int32_t a[DIL_N])
     unsigned int len, start, j, k = 0;
     int32_t      zeta, t;
 
+    const int32_t* s_zetas_p;
+
+    // In secureROM context s_zetas won't correctly point to the data
+    // So we must do this in order to use it
+    #if defined EMULATE_HW || defined __HOSTBOOT_MODULE
+    s_zetas_p = s_zetas;
+    #else
+    // In securerom we must do this in order for const arrays to work
+    asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work
+                    "sub  %0,2,%0 \n\t" // because subi does not work
+                    "addi %0,%0,(s_zetas-0x8000)@l" : "=r" (s_zetas_p) );
+    #endif
+
     for (len = 128; len > 0; len >>= 1)
     {
         for (start = 0; start < DIL_N; start = j + len)
         {
-            zeta = s_zetas[++k];
+            zeta = s_zetas_p[++k];
 
             for (j = start; j < start + len; ++j)
             {
@@ -932,11 +999,24 @@ CRS_STATIC void invntt_s_tomont256(int32_t a[DIL_N])
 
     k = 256;
 
+    const int32_t* s_zetas_p;
+
+    // In secureROM context s_zetas won't correctly point to the data
+    // So we must do this in order to use it
+    #if defined EMULATE_HW || defined __HOSTBOOT_MODULE
+    s_zetas_p = s_zetas;
+    #else
+    // In securerom we must do this in order for const arrays to work
+    asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work
+                    "sub  %0,2,%0 \n\t" // because subi does not work
+                    "addi %0,%0,(s_zetas-0x8000)@l" : "=r" (s_zetas_p) );
+    #endif
+
     for (len = 1; len < DIL_N; len <<= 1)
     {
         for (start = 0; start < DIL_N; start = j + len)
         {
-            zeta = -s_zetas[--k];
+            zeta = -s_zetas_p[--k];
 
             for (j = start; j < start + len; ++j)
             {
@@ -1345,6 +1425,7 @@ CRS_STATIC size_t dil_r3k2polyw1_bytes(unsigned int k)
  */
 #define DIL__KxPOLYW1_MAX_BYTES ((size_t)1024)
 
+#if 0
 /*--------------------------------------
  * expanded form of POLYETA_PACKEDBYTES, replacing ref.impl. #define
  * returns 0 for unknown param sets (which SNH)
@@ -1368,6 +1449,7 @@ CRS_STATIC size_t dil_r3k2polyeta_bytes(unsigned int k)
             return 0;
     }
 }
+#endif
 
 /*--------------------------------------
  * expanded form of POLYETA_PACKEDBYTES, replacing ref.impl. #define
@@ -1379,20 +1461,19 @@ ATTR_CONST__
 /**/
 CRS_STATIC size_t dil_mldsa_ctilbytes(unsigned int k)
 {
-    switch (k)
+    if (k == 4)
     {
-        case 4:
-            return DIL_MLDSA_44_CTILDEBYTES;
-
-        case 6:
-            return DIL_MLDSA_65_CTILDEBYTES;
-
-        case 8:
-            return DIL_MLDSA_87_CTILDEBYTES;
-
-        default:
-            return 0;
+        return DIL_MLDSA_44_CTILDEBYTES;
     }
+    if (k == 6)
+    {
+        return DIL_MLDSA_65_CTILDEBYTES;
+    }
+    if (k == 8)
+    {
+        return DIL_MLDSA_87_CTILDEBYTES;
+    }
+    return 0;
 }
 
 /*--------------------------------------
@@ -1564,6 +1645,7 @@ CRS_STATIC void shake128_stream_init(Keccak_state* state,
     shake128_finalize(state);
 }
 
+#if 0
 /*------------------------------------*/
 CRS_STATIC void shake256_stream_init(Keccak_state* state,
                                      const uint8_t seed[DIL_CRHBYTES],
@@ -1579,6 +1661,7 @@ CRS_STATIC void shake256_stream_init(Keccak_state* state,
     shake256_absorb(state, t, 2);
     shake256_finalize(state);
 }
+#endif
 
 /*------------------------------------
  * round3 dilithium, different field size
@@ -1999,6 +2082,7 @@ CRS_STATIC void poly_uniform(poly* a, const uint8_t seed[DIL_SEEDBYTES],
     stream128_wipe(&state);
 }
 
+#if 0
 /*************************************************
  * Name:        rej_eta
  *
@@ -2184,6 +2268,7 @@ CRS_STATIC void poly_uniform_gamma1m1(poly* a, const uint8_t seed[DIL_CRHBYTES],
 
     stream256_wipe(&state);
 }
+#endif
 
 /*************************************************
  * Description: Bit-pack polynomial with coefficients in [-ETA,ETA].
@@ -2428,6 +2513,7 @@ CRS_STATIC void polyt0_unpack(poly* r, const uint8_t* a)
     }
 }
 
+#if 0
 /*************************************************
  * Name:        polyz_pack
  *
@@ -2516,6 +2602,7 @@ CRS_STATIC void polyw1_pack(uint8_t* r, const poly* a)
         r[i] = a->coeffs[2 * i + 0] | (a->coeffs[2 * i + 1] << 4);
     }
 }
+#endif
 
 #if 1 /* delimiter: round3 */
 /*************************************************
@@ -3013,7 +3100,7 @@ while (ctr < DIL_N)
                      DIL_STREAM128_BLOCKBYTES, eta);
 }
 
-#endif
+
 
 /*************************************************
  * Description: Bit-pack polynomial with coefficients
@@ -3067,6 +3154,7 @@ CRS_STATIC void spolyz_pack(uint8_t* r, const spoly* a, unsigned int dil_k)
         }
     }
 }
+#endif
 
 /*************************************************
  * Description: Unpack polynomial z with coefficients
@@ -3167,8 +3255,7 @@ CRS_STATIC void spoly_uniform_gamma1(spoly*        a,
 
     spolyz_unpack(a, buf, dil_k);
 
-    MEMSET0_STRICT(buf,
-                   SPOLY_UNIFORM_GAMMA1_NBLOCKS * DIL_STREAM256_BLOCKBYTES);
+    memset(buf, 0, SPOLY_UNIFORM_GAMMA1_NBLOCKS * DIL_STREAM256_BLOCKBYTES);
     stream256_wipe(&state);
 }
 
@@ -3179,22 +3266,22 @@ ATTR_CONST__
 /**/
 CRS_STATIC unsigned int dilr3_k2tau(unsigned int dil_k)
 {
-    switch (dil_k)
+    if (dil_k == 4)
     {
-        case 4:
-            return 39;
-
-        case 6:
-            return 49;
-
-        case 8:
-            return 60;
-
-        default:
-            return 0; /* SNH */
+        return 39;
     }
+    if (dil_k == 6)
+    {
+        return 49;
+    }
+    if (dil_k == 8)
+    {
+        return 60;
+    }
+    return 0;
 }
 
+#if 0
 /*--------------------------------------
  * returns 0 for unknown param.sets, which should not happen
  */
@@ -3273,6 +3360,7 @@ CRS_STATIC void spoly_challenge(spoly* c, const uint8_t seed[DIL_SEEDBYTES],
 
     stream256_wipe(&state);
 }
+#endif
 
 /*************************************************
  * Description: Implementation of H. Samples polynomial with TAU nonzero
@@ -3581,6 +3669,7 @@ CRS_STATIC void spolyt0_unpack(spoly* r, const uint8_t* a)
     }
 }
 
+#if 0
 /*--------------------------------------
  * expect the few calls to be inlined/const-propagated
  */
@@ -3608,6 +3697,7 @@ CRS_STATIC size_t spolyw1_packedbytes(unsigned int dil_k)
             return 0;
     }
 }
+#endif
 
 /*************************************************
  * Description: Bit-pack polynomial w1 with coefficients in [0,15] or [0,43].
@@ -4349,6 +4439,7 @@ typedef struct
     spoly vec[DIL_VECT_MAX - 1];
 } spolyvec_maxm1;
 
+#if 0
 //--------------------------------------
 // 0 if K is not a valid predefined category
 CRS_STATIC unsigned int dil_eta(unsigned int k, unsigned int round)
@@ -4470,8 +4561,10 @@ CRS_STATIC size_t dil_pub_wirebytes(unsigned int k, unsigned int l,
             return 0;
     }
 }
+#endif
 #endif /* !NO_CRYSTALS_SIG */
 
+#if 0
 //--------------------------------------
 // raw bytecount, excluding ASN framing
 CRS_STATIC size_t kyb_pub_wirebytes(unsigned int k)
@@ -4536,63 +4629,70 @@ CRS_STATIC size_t kyb_ctext_wirebytes(unsigned int k)
             return 0;
     }
 }
+#endif
 
 #if !defined(NO_CRYSTALS_SIG)
 //--------------------------------------
 CRS_STATIC unsigned int dil_omega(unsigned int k, unsigned int round)
 {
-    switch ((round << 4) | k)
+    unsigned int value = (round << 4) | k;
+    if (value == 0x25)
     {
-        case 0x25:
-            return DIL_OMEGA5x4;
-
-        case 0x26:
-            return DIL_OMEGA6x5;
-
-        case 0x28:
-            return DIL_OMEGA8x7;
-
-        case 0x34:
-            return DIL_R3_OMEGA4x4;
-
-        case 0x36:
-            return DIL_R3_OMEGA6x5;
-
-        case 0x38:
-            return DIL_R3_OMEGA8x7;
-
-        default:
-            return 0;
+        return DIL_OMEGA5x4;
     }
+    if (value == 0x26)
+    {
+        return DIL_OMEGA6x5;
+    }
+    if (value == 0x28)
+    {
+        return DIL_OMEGA8x7;
+    }
+    if (value == 0x34)
+    {
+        return DIL_R3_OMEGA4x4;
+    }
+    if (value == 0x36)
+    {
+        return DIL_R3_OMEGA6x5;
+    }
+    if (value == 0x38)
+    {
+        return DIL_R3_OMEGA8x7;
+    }
+    return 0;
 }
 
 //--------------------------------------
 //
 CRS_STATIC unsigned int dil_k2beta(unsigned int k, unsigned int round)
 {
-    switch ((round << 4) | k)
+    unsigned int value = (round << 4) | k;
+    if (value == 0x25)
     {
-        case 0x25:
-            return DIL_BETA5x4;
-
-        case 0x26:
-            return DIL_BETA6x5;
-
-        case 0x28:
-            return DIL_BETA8x7;
-
-        case 0x34:
-            return DIL_R3_BETA4x4;
-
-        case 0x36:
-            return DIL_R3_BETA6x5;
-
-        case 0x38:
-            return DIL_R3_BETA8x7;
-
-        default:
-            return 0;
+        return DIL_BETA5x4;
     }
+    if (value == 0x26)
+    {
+        return DIL_BETA6x5;
+    }
+    if (value == 0x28)
+    {
+        return DIL_BETA8x7;
+    }
+    if (value == 0x34)
+    {
+        return DIL_R3_BETA4x4;
+    }
+    if (value == 0x36)
+    {
+        return DIL_R3_BETA6x5;
+    }
+    if (value == 0x38)
+    {
+        return DIL_R3_BETA8x7;
+    }
+    return 0;
 }
 
 //--------------------------------------
@@ -4641,6 +4741,7 @@ CRS_STATIC size_t dil_signature_bytes(unsigned int k, unsigned int l,
     }
 }
 
+#if 0
 /*--------------------------------------
  * raw/ASN-less signature field sizes are unique
  *
@@ -4747,6 +4848,7 @@ CRS_STATIC unsigned int dil__pubbytes2type(size_t pubbytes)
             return 0;
     }
 }
+#endif
 
 CRS_STATIC unsigned int dil__pubbytes2type_mldsa(size_t pubbytes)
 {
@@ -4766,6 +4868,7 @@ CRS_STATIC unsigned int dil__pubbytes2type_mldsa(size_t pubbytes)
     }
 }
 
+#if 0
 /*--------------------------------------
  * OID stubs for Dilithium
  *
@@ -4999,8 +5102,10 @@ CRS_STATIC size_t crs_oid2wire(unsigned char* wire, size_t wbytes,
 
     return wr;
 }
+#endif
 #endif /* !NO_CRYSTALS_SIG */
 
+#if 0
 /*--------------------------------------
  * map known IDs to [strength and] functionality
  * see CRS_AlgFlags_t
@@ -5037,8 +5142,9 @@ CRS_STATIC unsigned int crs_type2category(unsigned int type)
             return 0;
     }
 }
+#endif
 
-#if 1 /*-----  delimiter: ASN.1/BER  ---------------------------------*/
+#if 0 /*-----  delimiter: ASN.1/BER  ---------------------------------*/
 
 /* priv.keys which consists of BIT STRING arrays: */
 #define CRS__ASN_MAX_ELEMS  ((unsigned int)7)
@@ -7225,6 +7331,7 @@ CRS_STATIC unsigned int kyb_type2k(unsigned int type)
 /*--------------------------------------
  * does not check 'type' validity; call only after verification
  */
+#if 0
 CRS_STATIC unsigned int dil_type2eta(unsigned int type)
 {
     switch (type)
@@ -7253,6 +7360,7 @@ CRS_STATIC unsigned int dil_type2eta(unsigned int type)
             return 0;
     }
 }
+#endif
 
 /*--------------------------------------
  * does not check 'type' validity; call only after verification
@@ -7284,6 +7392,7 @@ CRS_STATIC unsigned int dil_type2round(unsigned int type)
     }
 }
 
+#if 0
 CRS_STATIC unsigned int kyb_type2round(unsigned int type)
 {
     switch (type)
@@ -7304,6 +7413,7 @@ CRS_STATIC unsigned int kyb_type2round(unsigned int type)
             return 0;
     }
 }
+#endif
 
 #if !defined(NO_CRYSTALS_CIP) || !defined(NO_CRYSTALS_KEX) /*- Kyber ------*/
 /*--------------------------------------
@@ -7581,6 +7691,7 @@ CRS_STATIC void r3_kpolyvec_decompress(kpolyvec_max* r, unsigned int kyb_k,
 #endif /*-----  /delimiter: Kyber  ------------------------------------*/
 
 #if !defined(NO_CRYSTALS_SIG) /*-----  delimiter: Dilithium  --------------*/
+#if 0
 /*************************************************
  * Bit-pack signature sig = (z, h, c).
  * Arguments:   - uint8_t sig[]: output byte array
@@ -8010,6 +8121,7 @@ CRS_STATIC int r3_wire2sig(unsigned char* chash, /* DIL_SEEDBYTES */
 
     return 0;
 }
+#endif
 
 /*------------------------------------
  * Unpack signature sig = (z, h, c); round3
@@ -8123,6 +8235,7 @@ typedef struct
     Keccak_state  state;
 } DilState;
 
+#if 0
 /*-------------------------------------------------
  * Description: Implementation of H. Samples polynomial with 60 nonzero
  *              coefficients in {-1,1} using the output stream of
@@ -8140,7 +8253,8 @@ CRS_STATIC void dil_challenge(poly* c, const uint8_t mu[DIL_CRHBYTES],
     uint64_t      signs = 0;
     Keccak_state  state;
 
-    MEMMOVE(buf, mu, DIL_CRHBYTES);
+    // MEMMOVE(buf, mu, DIL_CRHBYTES);
+    memmove(buf, mu, DIL_CRHBYTES);
 
     for (i = 0; i < k; ++i)
     {
@@ -8189,6 +8303,7 @@ CRS_STATIC void dil_challenge(poly* c, const uint8_t mu[DIL_CRHBYTES],
 
     shake256_wipe(&state);
 }
+#endif
 
 #if !defined(NO_DILITHIUM_SIGN) /*-----  delimiter: Dilithium sign  --------------*/
 /*************************************************
@@ -10026,7 +10141,7 @@ CRS_STATIC int mldsa_verify_internal(const uint8_t* sig, size_t siglen,
         }
     }
 
-    MEMSET0_STRICT(pMat, sizeof(struct ver_mat));
+    memset(pMat, 0, sizeof(struct ver_mat));
 
 #if defined(USE_DYNAMIC_ALLOC)
     mlca_free ((void*) pMat);
@@ -10035,12 +10150,27 @@ CRS_STATIC int mldsa_verify_internal(const uint8_t* sig, size_t siglen,
     return rc;
 }
 
+// This function is called via securerom
+// Reroutes call to internal function
+asm(".globl .L.mldsa_verify");
 int mldsa_verify(const uint8_t* sig, size_t siglen,
                  const uint8_t* m, size_t mlen,
                  const uint8_t* pk, size_t pkbytes)
 {
+    const uint8_t* mldsa_ds_pure_p;
+
+    // In secureROM context mldsa_ds_pure won't correctly point to the data
+    // So we must do this in order to use it
+    #if defined EMULATE_HW || defined __HOSTBOOT_MODULE
+    mldsa_ds_pure_p = mldsa_ds_pure;
+    #else
+    asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work
+                    "sub  %0,2,%0 \n\t" // because subi does not work
+                    "addi %0,%0,(mldsa_ds_pure-0x8000)@l" : "=r" (mldsa_ds_pure_p) );
+    #endif
+
     return mldsa_verify_internal(sig, siglen, m, mlen, pk, pkbytes,
-                                 mldsa_ds_pure, 2);
+                                 mldsa_ds_pure_p, 2);
 }
 #endif  /*-----  delimiter: NO_MLDSA_VERIFY  --------------*/
 #endif /*-----  /delimiter: sign/verify  ------------------------------*/

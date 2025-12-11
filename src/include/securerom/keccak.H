@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,6 +23,6 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __KECCAK_H
-#define __KECCAH_H
+#define __KECCAK_H
 #include <securerom/contrib/keccak.H>
 #endif

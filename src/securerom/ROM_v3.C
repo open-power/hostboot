@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
 #include <securerom/status_codes.H>
 #include <securerom/mlca.H>
 #include <string.h>
-#include <algorithm>
 
 #define v3_valid_magic_number(header) \
     (GET32((header)->magic_number) == ROM_MAGIC_NUMBER)
@@ -39,9 +38,16 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #endif
 
-static bool pred_notZero(uint8_t x)
+static bool is_zero(uint8_t* data, size_t size)
 {
-    return x != 0;
+    for (size_t i = 0; i < size; i++)
+    {
+        if (data[i] != 0)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 static int v3_valid_ver_alg(ROM_version_raw* ver_alg, uint8_t sig_alg)
@@ -65,21 +71,6 @@ static int v3_valid_ver_alg(ROM_version_raw* ver_alg, uint8_t sig_alg)
     return 1;
 }
 
-static inline ROM_v3_container_raw* cast_container(uint64_t addr)
-{
-    return (ROM_v3_container_raw*) Convert_Mem_Addr(physical_addr(addr));
-}
-
-static inline void ROM_v3_init_cache_area(uint64_t target, uint64_t size)
-{
-    uint64_t i;
-    for (i=0;i<size;i+=CACHE_LINE)
-    {
-        assem_DCBZ(target);
-        target+=CACHE_LINE;
-    }
-}
-
 #ifdef EMULATE_HW
     #define FAILED(_c,_m) { params->log=ERROR_EVENT|CONTEXT|(_c); \
         printf ("FAILED '%s'\n", (_m)); return ROM_FAILED; }
@@ -92,12 +83,10 @@ static inline void ROM_v3_init_cache_area(uint64_t target, uint64_t size)
 #undef  CONTEXT
 #define CONTEXT  ROM_V3_VERIFY
 // NOTE: ROM_verify is called with with hrmor relative addresses from Hostboot
-// @TODO JIRA PFHB-921 reinstate the asm() call so that the securerom
-// branch table can properly find this function
-//asm(".globl .L.ROM_v3_verify");
+asm(".globl .L.ROM_v3_verify");
 ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
                             ROM_hw_params* params,
-                            void* i_data )
+                            void* i_data)
 {
     sha3_t digest;
     ROM_v3_prefix_header_raw* prefix;
@@ -105,6 +94,7 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     ROM_v3_fw_header_raw* fw_header;
     ROM_v3_fw_sig_raw* fw_sig;
     uint64_t size;
+    int mldsa_rc = 0;
 
     // params->log is used to pass in a FW Secure Version to
     // compare against the container's fw_header's fw_secure_version field
@@ -131,7 +121,7 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
         FAILED(HW_KEY_HASH_TEST,"invalid hw keys");
     }
 
-    if (std::any_of(container->reserved, &(container->reserved[ARRAY_SIZE(container->reserved)]), pred_notZero))
+    if (!is_zero(container->reserved, ARRAY_SIZE(container->reserved)))
     {
         FAILED(CONTAINER_RESERVED_TEST, "container reserved field not 0");
     }
@@ -145,8 +135,7 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     }
 
     // test for valid prefix header signatures (all)
-    hw_data = (ROM_v3_prefix_data_raw*) ((uint8_t*) prefix
-                                         + V3_PREFIX_HEADER_SIZE(prefix));
+    hw_data = (ROM_v3_prefix_data_raw*) ((uint8_t*) prefix + V3_PREFIX_HEADER_SIZE(prefix));
     sha3((uint8_t*)prefix, V3_PREFIX_HEADER_SIZE(prefix), &digest);
 
     // Test for HW Signatures:
@@ -159,19 +148,21 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     }
 
     // Then hw_mldsa_public_key_d (hw_pkey_d) and hw_signature_D
-    if(mldsa_verify(hw_data->hw_sig_d,
+    mldsa_rc = mldsa_verify(hw_data->hw_sig_d,
                     MLDSA_SIG_SIZE,
                     digest,
                     SHA3_DIGEST_LENGTH,
                     container->hw_pkey_d,
-                    MLDSA_PUBLIC_KEY_SIZE) == 0)
+                    MLDSA_PUBLIC_KEY_SIZE);
+
+    if(mldsa_rc <= 0)
     {
         FAILED(HW_SIGNATURE_TEST_MLDSA,"invalid hw signature - MLDSA");
     }
 
     // test for machine specific matching ecid
     // All ECID bytes must be 0
-    if (std::any_of(prefix->ecid, &prefix->ecid[ECID_SIZE], pred_notZero))
+    if (!is_zero(prefix->ecid, ECID_SIZE))
     {
         FAILED(PREFIX_ECID_TEST, "invalid ecid bytes");
     }
@@ -181,7 +172,7 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
         FAILED(PREFIX_RESERVED_TEST, "perfix reserved field not 0");
     }
 
-    if (std::any_of(prefix->reserved1, &(prefix->reserved1[ARRAY_SIZE(prefix->reserved1)]), pred_notZero))
+    if (!is_zero(prefix->reserved1, ARRAY_SIZE(prefix->reserved1)))
     {
         FAILED(PREFIX_RESERVED1_TEST, "perfix reserved1 field not 0");
     }
@@ -242,19 +233,21 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
     }
 
     // Then fw_mldsa_public_key_S and fw_signature_S
-    if(mldsa_verify(fw_sig->fw_sig_s,
+    mldsa_rc = mldsa_verify(fw_sig->fw_sig_s,
                     MLDSA_SIG_SIZE,
                     digest,
                     SHA3_DIGEST_LENGTH,
                     hw_data->fw_pkey_s,
-                    MLDSA_PUBLIC_KEY_SIZE) == 0)
+                    MLDSA_PUBLIC_KEY_SIZE);
+
+    if(mldsa_rc <= 0)
     {
         FAILED(FW_SIGNATURE_TEST_MLDSA,"invalid fw signature - MLDSA");
     }
 
     // test for machine specific matching ecid
     // check for all 0; if not 0 fail
-    if (std::any_of(fw_header->ecid, &fw_header->ecid[ECID_SIZE], pred_notZero))
+    if (!is_zero(fw_header->ecid, ECID_SIZE))
     {
         FAILED(HEADER_ECID_TEST, "fw header ecid bytes are not 0");
     }
@@ -264,9 +257,7 @@ ROM_response ROM_v3_verify( ROM_v3_container_raw* container,
         FAILED(HEADER_RESERVED_TEST, "fw header reserved not 0");
     }
 
-    if (std::any_of(fw_header->reserved1,
-                    &(fw_header->reserved1[ARRAY_SIZE(fw_header->reserved1)]),
-                    pred_notZero))
+    if (!is_zero(fw_header->reserved1, ARRAY_SIZE(fw_header->reserved1)))
     {
         FAILED(HEADER_RESERVED1_TEST, "fw header reserved1 not 0");
     }

@@ -493,19 +493,17 @@ namespace Bootloader{
                              + V3_CONTENT_HASH_OFFSET;
 
         // Used in multiple places below: Set startAddr to SHA512_HASH_FUNCTION_OFFSET
-        // call_rom_SHA512() function at an offset of Secure ROM
+        // or SHA3_HASH_FUNCTION_OFFSET for v1 and v3 modes respectively
+        // then use call_rom_SHAx() functions at an offset of Secure ROM
         const uint64_t l_rom_SHA512_startAddr =
             reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
                 + g_blData->blToHbData.branchtableOffset
                 + SHA512_HASH_FUNCTION_OFFSET;
 
-        // For V3: Set startAddr to SHA3_HASH_FUNCTION_OFFSET to call
-        // call_rom_SHA512() function at an offset of Secure ROM
-        // @TODO JIRA PFHB-921 uncomment this when function is fixed
-        // const uint64_t l_rom_SHA3_startAddr =
-        //     reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
-        //         + g_blData->blToHbData.branchtableOffset
-        //         + SHA3_HASH_FUNCTION_OFFSET;
+        const uint64_t l_rom_SHA3_startAddr =
+            reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
+                + g_blData->blToHbData.branchtableOffset
+                + SHA3_HASH_FUNCTION_OFFSET;
 
         // Check if Secure Access Bit is set
         if (!g_blData->blToHbData.secureAccessBit)
@@ -533,15 +531,10 @@ namespace Bootloader{
             }
             else
             {
-                // @TODO JIRA PFHB-921 Until securerom's call_rom_SHA3() function is
-                // working, call the linked sha3() function directly below
-
-                // call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
-                //               l_hbbl_blob_addr,
-                //               l_protectedSize,
-                //               reinterpret_cast<sha3_t*>(l_v3_hash));
-
-                sha3(l_hbb_blob_addr, l_protectedSize, reinterpret_cast<void*>(l_v3_hash));
+                call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
+                              l_hbb_blob_addr,
+                              l_protectedSize,
+                              reinterpret_cast<sha3_t*>(l_v3_hash));
             };
 
         }
@@ -604,23 +597,21 @@ namespace Bootloader{
             else
             {
                 // Set startAddr to ROM_v3_verify() function at an offset of Secure ROM
-                // uint64_t l_rom_v3_verify_startAddr =
-                //     reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
-                //     + g_blData->blToHbData.branchtableOffset
-                //     + ROM_V3_VERIFY_FUNCTION_OFFSET;
+                uint64_t l_rom_v3_verify_startAddr =
+                    reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
+                    + g_blData->blToHbData.branchtableOffset
+                    + ROM_V3_VERIFY_FUNCTION_OFFSET;
 
                 const auto l_v3_container = reinterpret_cast<const ROM_v3_container_raw*>
                                                                     (l_v3_header_addr);
 
-                // @TODO JIRA: PFHB-921: use rom offset call but for now use direct linked function
-                // l_rc = call_rom_v3_verify(reinterpret_cast<void*>
-                //                             (l_rom_v3_verify_startAddr),
-                //                             l_v3_container,
-                //                             &l_hw_parms);
+                void* l_void_blob_addr = const_cast<void*>(reinterpret_cast<const void*>(l_hbb_blob_addr));
 
-                l_rc = ROM_v3_verify(const_cast<ROM_v3_container_raw*>(l_v3_container),
-                            &l_hw_parms,
-                            const_cast<uint8_t*>(l_hbb_blob_addr));
+                l_rc = call_rom_v3_verify(reinterpret_cast<void*>
+                                            (l_rom_v3_verify_startAddr),
+                                            l_v3_container,
+                                            &l_hw_parms,
+                                            l_void_blob_addr);
             }
 
             if (l_rc != 0)
@@ -716,15 +707,10 @@ namespace Bootloader{
                         size_t l_totalHwKeysSize = sizeof(ecc_key_t) // hw_pkey_a
                                                 + sizeof(mldsa_pub_key_t); // hw_pkey_d
 
-                        // @TODO JIRA PFHB-921 Until securerom's call_rom_SHA3() function is
-                        // working, call the linked sha3() function directly below
-
-                        // call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
-                        //               l_hwPubKeyA,
-                        //               l_totalHwKeysSize,
-                        //               reinterpret_cast<sha3_t*>(l_pContainerHash));
-
-                        sha3(l_hwPubKeyA, l_totalHwKeysSize, reinterpret_cast<sha3_t*>(l_pContainerHash));
+                        call_rom_SHA3(reinterpret_cast<void*>(l_rom_SHA3_startAddr),
+                                      l_hwPubKeyA,
+                                      l_totalHwKeysSize,
+                                      reinterpret_cast<sha3_t*>(l_pContainerHash));
 
                         memcpy(&l_container_hash, &l_pContainerHash, sizeof(l_container_hash));
                     }
@@ -788,6 +774,12 @@ namespace Bootloader{
 
                 // Verification of Container failed.
                 BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_FAIL);
+                bl_console::putString("Main verify failed. hw_params.log=0x\r\n");
+                bl_console::displayHex(reinterpret_cast<unsigned char*>
+                                               (&l_hw_parms.log),
+                                           sizeof(l_hw_parms.log));
+                bl_console::putString("\r\n");
+
                 /*@
                  * @errortype
                  * @moduleid     Bootloader::MOD_BOOTLOADER_VERIFY

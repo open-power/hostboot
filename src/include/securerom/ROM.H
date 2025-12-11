@@ -375,6 +375,8 @@ extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
    E.g.
     0000000000000040 <_SHA512_Hash>:
     0000000000000050 <_ROM_verify>:
+    0000000000000058 <_sha3>:
+    0000000000000060 <_ROM_v3_verify>:
 
     Search for branchtableoffset
     0000000000000010 <branchtableoffset>:
@@ -384,6 +386,8 @@ extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
     Subtraction (0x28) results in relative offset from branch table start
     0000000000000018 <_SHA512_Hash>:
     0000000000000028 <_ROM_verify>:
+    0000000000000030 <_sha3>:
+    0000000000000038 <_ROM_v3_verify>:
 
 
    Note: If the SecureRomInfo change size, these will be affected.
@@ -473,7 +477,6 @@ ROM_response call_rom_verify(void*, const ROM_container_raw*, ROM_hw_params*);
  */
 void call_rom_SHA512(void*, const sha2_byte *, size_t, SHA512_t*);
 
-
 /**
  * @brief Call rom V3 verify code against system hash keys
  *
@@ -504,10 +507,12 @@ ROM_response call_rom_v3_verify(void*,
  * @param[in] sha2_byte*       Pointer to effective address of blob to hash
  * @param[in] size_t           Size of blob to hash
  * @param[in/out] SHA512_t*    Pointer to resulting hash value
+ * @param[in] size_t           Size of output hash (defaults to 64 bytes/512 bits)
+ *                             We don't currently support hashes larger than the default.
  *
  * @return N/A
  */
-void call_rom_SHA3(void*, const void *, size_t, sha3_t*);
+void call_rom_SHA3(void*, const void *, size_t, sha3_t*, size_t mdlen = SHA3_DIGEST_LENGTH);
 
 
 #ifdef __cplusplus

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2024,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2024,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,9 @@
     #include <string.h>
 #endif
 
-static const uint64_t keccak_rcs[KECCAK_ROUNDS] =
+// Extern C here so that we can find this in secureROM context
+extern "C"
+const uint64_t keccak_rcs[KECCAK_ROUNDS] =
 {
     0x0000000000000001ULL,
     0x0000000000008082ULL,
@@ -97,6 +99,18 @@ static void keccak_permute(Keccak_state* state)
 {
     uint64_t* A = state->A;
     int i = 0;
+
+    const uint64_t* keccak_rcs_p;
+
+    // In secureROM context keccak_rcs wont correctly point to the data
+    // So we must do this in order to use it
+    #if defined EMULATE_HW || defined __HOSTBOOT_MODULE
+    keccak_rcs_p = keccak_rcs;
+    #else
+    asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work
+                    "sub  %0,2,%0 \n\t" // because subi does not work
+                    "addi %0,%0,(keccak_rcs-0x8000)@l" : "=r" (keccak_rcs_p) );
+    #endif
 
     /**
      *  For i_r from 12+2l-n_r to 12+2l-1, A=Rnd(A,i_r)
@@ -275,7 +289,7 @@ static void keccak_permute(Keccak_state* state)
         A[23] = CZ[4];
 
         /* ι(χ(π(ρ(θ(A)))): Add round constant */
-        A[0] ^= keccak_rcs[i];
+        A[0] ^= keccak_rcs_p[i];
     }
 
 }
@@ -552,9 +566,6 @@ void sha3_256(uint8_t h[32], const uint8_t* in, size_t inlen)
 }
 #endif
 
-// @TODO JIRA PFHB-921 reinstate the asm() call so that the securerom
-// branch table can properly find this function
-//asm(".globl .L.sha3_512");
 void sha3_512(uint8_t h[64], const uint8_t* in, size_t inlen)
 {
     Keccak_state state;
@@ -606,7 +617,6 @@ int sha3_update(sha3_ctx_t* c, const void* data, size_t len)
     return 1;
 }
 
-asm(".globl .L.sha3_final");
 int sha3_final(sha3_t* md, sha3_ctx_t* c)
 {
     sha3_512_final((uint8_t*)md, c);
@@ -616,10 +626,8 @@ int sha3_final(sha3_t* md, sha3_ctx_t* c)
 
 // This is the main sha3() function that hostboot uses, which essentially
 // just calls one other function in this file: sha3_512()
-// @TODO JIRA PFHB-921 reinstate the asm() call so that the securerom
-// branch table can properly find this function
-//asm(".globl .L.sha3");
-void* sha3(const void* in, size_t inlen, void* md, int mdlen)
+asm(".globl .L.sha3");
+void* sha3(const void* in, size_t inlen, void* md, size_t mdlen)
 {
     sha3_t digest;
     sha3_512(digest, (const uint8_t*)in, inlen);

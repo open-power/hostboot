@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2024,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2024,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,11 +99,7 @@ void sha3_256(uint8_t h[32], const uint8_t* in, size_t inlen);
 
 /**
  * SHA3-512 non-incremental call
- *
- * @note This function is being marked with extern "C" so that the securerom
- *       branch table can properly find it.
 */
-extern "C"
 void sha3_512(uint8_t h[64], const uint8_t* in, size_t inlen);
 
 /** Incremental API for SHA3-512 */

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2025                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2026                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -192,7 +192,7 @@ Layout Description
         <readOnly/>
     </section>
     <section>
-        <!-- @HBBL_SIZE_SYNC -->
+        <!-- @HBBL_SIZE_SYNC@ -->
         <description>Hostboot Bootloader (152KiB)</description>
         <eyeCatch>HBBL</eyeCatch>
         <!-- Logical content of HBBL is -->
@@ -204,6 +204,7 @@ Layout Description
         <physicalRegionSize>0x26000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
+        <ecc/>
     </section>
     <section>
         <description>Ref Image Ring Overrides (20K)</description>

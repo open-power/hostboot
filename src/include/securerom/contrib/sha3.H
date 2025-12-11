@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2024,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2024,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,7 +113,8 @@ int sha3_final(sha3_t* md, sha3_ctx_t* c);
  * @param in Message to be hashed
  * @param inlen Length of the message to be hashed
  * @param md Hash of the message
- * @param mdlen Length of the message hash
+ * @param mdlen Length of the message hash. Truncates original output to this size,
+ *              any size larger will be interpreted as the default size.
  *
  * @note This function is being marked with extern "C" so that the securerom
  *       branch table can properly find it.
@@ -121,6 +122,6 @@ int sha3_final(sha3_t* md, sha3_ctx_t* c);
  * @return void* Hash of the message
  */
 extern "C"
-void* sha3(const void* in, size_t inlen, void* md, int mdlen = SHA3_DIGEST_LENGTH);
+void* sha3(const void* in, size_t inlen, void* md, size_t mdlen = SHA3_DIGEST_LENGTH);
 
 #endif

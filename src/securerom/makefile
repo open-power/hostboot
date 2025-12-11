@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2025
+# Contributors Listed Below - COPYRIGHT 2016,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -37,15 +37,18 @@ COMMONFLAGS += -DEC_POWER64_RED
 COMMONFLAGS += -DEC_POWER64_ALG
 COMMONFLAGS += -DSHA512_FIX
 
-# @TODO JIRA PFHB-921 use these flags for compiling MLCA into the securerom
 # Flags for MLCA/mldsa_verify() to reduce size
-#COMMONFLAGS += -DNO_CRYSTALS_CIP
-#COMMONFLAGS += -DNO_CRYSTALS_KEX
-#COMMONFLAGS += -DNO_DILITHIUM_SIGN
-#COMMONFLAGS += -DNO_MLDSA_SIGN
-#COMMONFLAGS += -DNO_DILITHIUM_VERIFY
-#COMMONFLAGS += -DUSE_DYNAMIC_ALLOC
+COMMONFLAGS += -DNO_CRYSTALS_CIP
+COMMONFLAGS += -DNO_CRYSTALS_KEX
+COMMONFLAGS += -DNO_DILITHIUM_SIGN
+COMMONFLAGS += -DNO_MLDSA_SIGN
+COMMONFLAGS += -DNO_DILITHIUM_VERIFY
+COMMONFLAGS += -DUSE_STATIC_MLCA
+COMMONFLAGS += -DNO_MLCA_RANDOM
 
+# Need this option because PHYP doesnt play nice with some
+# indexed address instructions when they call securerom functions
+COMMONFLAGS += -mavoid-indexed-addresses
 
 LDFLAGS += -N
 
@@ -56,15 +59,10 @@ OBJS += sha512.o
 OBJS += ecverify.o
 OBJS += hw_utils.o
 OBJS += rom_entry.o
+OBJS += ROM_v3.o
+OBJS += keccak.o
+OBJS += mlca.o
 OBJS += secureromasm.o
-
-# @TODO JIRA PFHB-921 will move the V3 algorithm support back to securerom.
-# In the meantime these .o files will be built into the bootloader and
-# secureboot_base modules
-#OBJS += ROM_v3.o
-#OBJS += keccak.o
-#OBJS += mlca.o
-
 
 VPATH += contrib
 
