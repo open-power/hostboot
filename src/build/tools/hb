@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2025
+# Contributors Listed Below - COPYRIGHT 2011,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -738,12 +738,6 @@ hb_startsimics()
         whichLab=$(cat /etc/pfd/site)
         if [ $whichLab = "rch" ] ; then
             if $(grep -q $(hostname -s) /afs/rchland/projects/esw/gfwcs/data/auth*); then
-                skipVexec=false;
-            else
-                skipVexec=true;
-            fi
-        elif [ $whichLab = "aus" ] ; then
-            if $(grep -q $(hostname -s) /afs/austin/projects/esw/gfwcs/data/auth*); then
                 skipVexec=false;
             else
                 skipVexec=true;

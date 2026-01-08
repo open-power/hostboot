@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -97,7 +97,7 @@ my  $L2_Flushed =   0;
 
 my $vbuToolsDir = $ENV{'HB_VBUTOOLS'};
 if ( ! defined ( $vbuToolsDir ) || $vbuToolsDir eq "" ) {
-	$vbuToolsDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/dev";
+	$vbuToolsDir = "/gsa/rchgsa/projects/h/hostboot/vbutools/dev";
 }
 
 my $vbuProcsRoot = $ENV{'VBU_PROCS_ROOT'};

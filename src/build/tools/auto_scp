@@ -41,7 +41,7 @@ if {$FILE=="" || $MACHINE=="" || $PASSWORD=="" || $OUTDIR=="" ||  $FILE=="-h" ||
 }
 
 # Kick off the SCP command
-spawn scp -F /gsa/ausgsa/home/h/o/hostboot/fsp.ssh_config $FILE $USER@$MACHINE:$OUTDIR/
+spawn scp -F /gsa/rchgsa/home/h/o/hostboot/fsp.ssh_config $FILE $USER@$MACHINE:$OUTDIR/
 
 # This expect part will automatically enter the password passed in as the 2nd param
 expect {
