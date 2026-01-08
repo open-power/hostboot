@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -33,7 +33,7 @@ use Getopt::Long qw(:config pass_through);
 my %power_platforms = ();
 my %relations = ();
 my $latest_power_platform = "";
-my $fsp_ci_jenkins_rel_file = "/gsa/ausgsa/home/f/s/fspcibld/patches/cipatch_xml";
+my $fsp_ci_jenkins_rel_file = "/gsa/rchgsa/home/f/s/fspcibld/patches/cipatch_xml";
 use constant MASTER => "master";
 my $debug = 0;
 my $help = 0;

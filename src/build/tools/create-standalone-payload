@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022,2023
+# Contributors Listed Below - COPYRIGHT 2022,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -28,8 +28,7 @@ function usage ()
 {
         echo ""
         echo "Description: This script will take two PHYP lids, concatenate them together and truncate the result to fit"
-        echo "             into the standalone PAYLOAD section. The resulting payload.bin should be copied to both:"
-        echo "                 * /gsa/ausgsa/projects/h/hostboot/simbuild/dependencies/hdat"
+        echo "             into the standalone PAYLOAD section. The resulting payload.bin should be copied to:"
         echo "                 * /gsa/rchgsa/projects/h/hostboot_rch/simbuild/dependencies/hdat"
         echo "             See the README in one of those directories for more details."
         echo ""
