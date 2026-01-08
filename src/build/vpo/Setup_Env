@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -71,9 +71,9 @@ test "$AUTOVBU_USER_CMD" = "" && AUTOVBU_USER_CMD=NO_TEST
 
 # Local values used in this script
 
-AUTOVBU_HBRELEASE_BASEDIR=/gsa/ausgsa/projects/h/hostboot/release
+AUTOVBU_HBRELEASE_BASEDIR=/gsa/rchgsa/projects/h/hostboot/release
 AUTOVBU_HBTOOLS_BASEDIR=/afs/apd.pok.ibm.com/u/thi/hbtools
-AUTOVBU_HBVBUTOOLS_BASEDIR=/gsa/ausgsa/projects/h/hostboot/vbutools
+AUTOVBU_HBVBUTOOLS_BASEDIR=/gsa/rchgsa/projects/h/hostboot/vbutools
 
 # Remove any previous test definitions for HostBoot values - force everything to default if not set
 # by Setup_MyEnv function or user specifed argument(s)

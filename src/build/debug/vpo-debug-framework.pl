@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -98,7 +98,7 @@ if (defined ($vbuToolDir))
 {
     unless ($vbuToolDir ne "")
     {
-        $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+        $vbuToolDir = "/gsa/rchgsa/projects/h/hostboot/vbutools/latest";
     }
 }
 

@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2026
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -106,7 +108,7 @@ if (defined ($vbuToolDir))
 {
     unless ($vbuToolDir ne "")
     {
-        $vbuToolDir = "/gsa/ausgsa/projects/h/hostboot/vbutools/latest";
+        $vbuToolDir = "/gsa/rchgsa/projects/h/hostboot/vbutools/latest";
     }
 }
 

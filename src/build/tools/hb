@@ -745,12 +745,6 @@ hb_startsimics()
             else
                 skipVexec=true;
             fi
-        elif [ $whichLab = "aus" ] ; then
-            if $(grep -q $(hostname -s) /afs/austin/projects/esw/gfwcs/data/auth*); then
-                skipVexec=false;
-            else
-                skipVexec=true;
-            fi
         else
             skipVexec=false;
         fi
