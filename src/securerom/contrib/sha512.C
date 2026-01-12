@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -187,8 +187,8 @@ void SHA512_Init(SHA512_CTX* context)
         return;
     }
 
-    uint64_t* sha512_initial_hash_value_p;
-#ifdef EMULATE_HW
+    const uint64_t* sha512_initial_hash_value_p;
+#if defined EMULATE_HW || defined __HOSTBOOT_MODULE
     sha512_initial_hash_value_p = sha512_initial_hash_value;
 #else
     asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work
@@ -208,8 +208,8 @@ static void SHA512_Transform(SHA512_CTX* context, const uint64_t* data)
     uint64_t T1, T2, *W512 = (uint64_t*)context->buffer;
     int j;
 
-    uint64_t* K512_p;
-#ifdef EMULATE_HW
+    const uint64_t* K512_p;
+#if defined EMULATE_HW || defined __HOSTBOOT_MODULE
     K512_p = K512;
 #else
     asm volatile("li   %0,(__toc_start)@l  ### %0 := base+0x8000 \n\t" // because li does not work

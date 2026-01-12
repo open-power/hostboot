@@ -70,8 +70,8 @@ enum CONTAINER_FIELD_SIZE : size_t
  */
 enum ROM_HASH_ALGORITHM : uint8_t
 {
-    HASH_ALG_SHA512 = 0x01,   // V1
-    HASH_ALG_SHA3_512 = 0x02, // V3
+    HASH_ALG_SHA512 = 0x01,
+    HASH_ALG_SHA3_512 = 0x02,
 };
 
 /**
@@ -79,10 +79,17 @@ enum ROM_HASH_ALGORITHM : uint8_t
  */
 enum ROM_SIGNATURE_ALGORITHM : uint8_t
 {
-    SIG_ALG_ECDSA521            = 0x01, // V1
-    SIG_ALG_ECDSA521_DILITHIUM  = 0x02, // V2 - not supported
-    SIG_ALG_ECDSA521_MLDSA      = 0x03, // V3
+    SIG_ALG_ECDSA521                = 0x01, // V1
+    SIG_ALG_ECDSA521_DILITHIUM      = 0x02, // V2 - not supported
+    SIG_ALG_ECDSA521_MLDSA          = 0x03, // V3
+    SIG_ALG_SHA3_512_ECDSA521_MLDSA = 0x03, // V3
+    SIG_ALG_SHA512_ECDSA521_MLDSA   = 0x04, // V3
 };
+// Make sure original value of SIG_ALG_ECDSA521_MLDSA (which assumed sha3_512()
+// use) has the same value as SIG_ALG_SHA3_512_ECDSA521_MLDSA
+static_assert(SIG_ALG_ECDSA521_MLDSA == SIG_ALG_SHA3_512_ECDSA521_MLDSA,
+              "SIG_ALG_ECDSA521_MLDSA and SIG_ALG_SHA3_512_ECDSA521_MLDSA don't match!");
+
 
 typedef struct
 {
@@ -91,7 +98,8 @@ typedef struct
                             //  2: SHA3-512)
   uint8_t      sig_alg;     // (1: SHA-512/ECDSA-521,
                             //  2: SHA3-512,ECDSA 521/Dilithium,
-                            //  3: SHA3-512,ECDSA 521/ML-DSA)
+                            //  3: SHA3-512,ECDSA 521/ML-DSA,
+                            //  4: SHA512,ECDSA 521/ML-DSA)
 }__attribute__((packed)) ROM_version_raw;
 
 /**
@@ -360,11 +368,20 @@ extern "C" ROM_response ROM_verify (ROM_container_raw* container,
  *                                  expected to start V3_SECURE_HEADER_SIZE past
  *                                  the effective address of ROM_v3_container_raw
  *
+ * @param[in] i_hash_algo        Hash algorithm to use internally to verify the
+ *                               different parts of the container.
+ *                               Only HASH_ALG_SHA3_512 and HASH_ALG_SHA512 are
+ *                               supported at this time.
+ *                               Default is HASH_ALG_SHA3_512.
+ *                               Input must match container's hash algorithms,
+ *                               or a fail will be returned.
+ *
  * @return ROM_response ROM_DONE on success ROM_FAILURE otherwise
  */
 extern "C" ROM_response ROM_v3_verify (ROM_v3_container_raw* container,
                                        ROM_hw_params* params,
-                                       void* i_data = nullptr);
+                                       void* i_data = nullptr,
+                                       ROM_HASH_ALGORITHM i_hash_algo = HASH_ALG_SHA3_512);
 
 
 /************************* END OF ORIGINAL ROM CODE ***************************/
@@ -492,13 +509,21 @@ void call_rom_SHA512(void*, const sha2_byte *, size_t, SHA512_t*);
  *                                  If nullptr is entered then the data is
  *                                  expected to start V3_SECURE_HEADER_SIZE past
  *                                  the effective address of ROM_v3_container_raw
+ * @param[in] ROM_HASH_ALGORITHM Hash algorithm to use internally to verify the
+ *                               different parts of the container.
+ *                               Only HASH_ALG_SHA3_512 and HASH_ALG_SHA512 are
+ *                               supported at this time.
+ *                               Default is HASH_ALG_SHA3_512.
+ *                               Input must match container's hash algorithms,
+ *                               or a fail will be returned.
  *
  * @return ROM_response ROM_DONE on success ROM_FAILURE otherwise
  */
 ROM_response call_rom_v3_verify(void*,
                                 const ROM_v3_container_raw*,
                                 ROM_hw_params*,
-                                void*);
+                                void*,
+                                ROM_HASH_ALGORITHM);
 
 /**
  * @brief Call rom SHA3 code
@@ -544,8 +569,10 @@ static_assert(V1_MAX_SECURE_HEADER_SIZE == PAGESIZE,
  *
  */
 constexpr uint16_t ROM_V3_VERSION = 3;
-constexpr uint8_t  ROM_V3_HASH_ALG = 2;
-constexpr uint8_t  ROM_V3_SIG_ALG = 3;
+// Next two values no longer used as V3 container can now
+// support 2 hash algorithmns and 2 signature algorithms
+// constexpr uint8_t  ROM_V3_HASH_ALG = 2;
+// constexpr uint8_t  ROM_V3_SIG_ALG = 3;
 constexpr uint8_t  V3_HW_KEY_COUNT = 2;
 constexpr uint8_t  V3_FW_KEY_COUNT = 2;
 constexpr size_t   V3_SECURE_HEADER_SIZE = 15360;

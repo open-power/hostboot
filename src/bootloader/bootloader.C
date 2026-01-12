@@ -611,7 +611,8 @@ namespace Bootloader{
                                             (l_rom_v3_verify_startAddr),
                                             l_v3_container,
                                             &l_hw_parms,
-                                            l_void_blob_addr);
+                                            l_void_blob_addr,
+                                            HASH_ALG_SHA3_512); // only supported value at this time
             }
 
             if (l_rc != 0)

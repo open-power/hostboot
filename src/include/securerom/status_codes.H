@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,15 @@
 #define CONTAINER_VERSION_TEST 0x0021
 #define PREFIX_VER_ALG_TEST    0x0022
 #define HEADER_VER_ALG_TEST    0x0023
+#define PREFIX_VERSION_TEST    0x0024
+#define FW_HEADER_VERSION_TEST 0x0025
+#define INVALID_HASH_ALGO_INPUT 0x0026
+#define HASH_ALGO_MISTMATCH_FW_PUBLIC_KEYS_1 0x0027
+#define HASH_ALGO_MISTMATCH_FW_PUBLIC_KEYS_2 0x0028
+#define HASH_ALGO_MISTMATCH_FW_SIG_1 0x0029
+#define HASH_ALGO_MISTMATCH_FW_SIG_2 0x002A
+#define HASH_ALGO_MISTMATCH_PAYLOAD_1 0x002B
+#define HASH_ALGO_MISTMATCH_PAYLOAD_2 0x002C
 
 #define STACK_LOW_TEST         0x0030
 #define STACK_VALID_TEST       0x0031

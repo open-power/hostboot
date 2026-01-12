@@ -506,7 +506,8 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                                         (l_rom_verify_startAddr),
                                         l_v3_container,
                                         &l_hw_parms,
-                                        nullptr);
+                                        nullptr, // assume payload right after container
+                                        HASH_ALG_SHA3_512); // assume using sha3_512()
 
                 TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
                         "Back from ROM_v3_verify() via call_rom_v3_verify: l_rc=0x%x, "

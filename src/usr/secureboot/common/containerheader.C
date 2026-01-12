@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -727,7 +727,9 @@ errlHndl_t ContainerHeader::validate()
 
     if (iv_isV3 == false)
     {
-        // V1 Check
+        // V1: Check for basic assumptions of a V1 header, like magic number,
+        //     different versions (rom, hash, signature), fw key count, and
+        //     payload size
         iv_isValid = (iv_hdrBytesRead <= MAX_SECURE_HEADER_SIZE)
             && (iv_headerInfo.hw_hdr.magic_number == ROM_MAGIC_NUMBER)
             && (iv_headerInfo.hw_hdr.version == ROM_VERSION)
@@ -751,13 +753,17 @@ errlHndl_t ContainerHeader::validate()
     }
     else
     {
-        // V3 Check
+        // V3: Check for basic assumptions of a V3 header, like magic number,
+        //     different versions (rom, hash, signature), fw key count, and
+        //     payload size
         iv_isValid = (iv_hdrBytesRead <= V3_SECURE_HEADER_SIZE)
             && (iv_v3_headerInfo.v3_hw_hdr.magic_number == ROM_MAGIC_NUMBER)
             && (iv_v3_headerInfo.v3_hw_hdr.version == ROM_V3_VERSION)
             && (iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.version == ROM_V3_VERSION)
-            && (iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.hash_alg == ROM_V3_HASH_ALG)
-            && (iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.sig_alg == ROM_V3_SIG_ALG)
+            && ((iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.hash_alg == HASH_ALG_SHA512)
+                || (iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.hash_alg == HASH_ALG_SHA3_512))
+            && ((iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.sig_alg == SIG_ALG_SHA3_512_ECDSA521_MLDSA)
+                || (iv_v3_headerInfo.v3_hw_prefix_hdr.ver_alg.sig_alg == SIG_ALG_SHA512_ECDSA521_MLDSA))
             && (iv_v3_headerInfo.v3_hw_prefix_hdr.fw_key_count == V3_FW_KEY_COUNT)
             && (iv_v3_headerInfo.v3_fw_hdr.payload_size_protected != 0);
 
