@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2024
+# Contributors Listed Below - COPYRIGHT 2022,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -116,7 +116,6 @@ function USAGE () {
     errlog "      HBBL        Patch Hostboot Bootloader"
     errlog "      HBRT        Patch Hostboot runtime"
     errlog "      HBD         Patch Hostboot targeting data (only use with appropriate targeting XML changes)"
-    errlog "      --nopldmd   Do not restart PLDMD on the BMC after patching"
     errlog "      --cponly    Copy files to an external dir instead of a BMC"
     errlog "      -h/--help   Display this help text and exit"
     errlog ""
@@ -233,20 +232,16 @@ function PATCH_HBBL () {
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBBL.bin HBBL && ln -sf HBBL.bin $HBBL.lid"
 }
 
-function RESTART_PLDMD () {
-    REMOTE_SUDO "systemctl restart pldmd"
-}
-
 function CHECK_STATE () {
     QUERY_RESULT=$(REMOTE_SUDO "obmcutil state")
     checkstatus "Checking state of BMC"
     if echo $QUERY_RESULT | grep 'HostState.Off'; then
         errlog '***************************************************************************'
-        errlog 'INFO - BMC is HostState.Off, valid state to have pldmd restart be effective'
+        errlog 'INFO - BMC is HostState.Off, valid state to apply patches'
         errlog '***************************************************************************'
     else
         errlog '******************************************************************************************************'
-        errlog 'WARNING !! BMC is not in HostState.Off, you need to be powered off to have pldmd restart be effective.'
+        errlog 'WARNING !! BMC is not in HostState.Off, you need to be powered off to apply patches.'
         errlog '    obmcutil poweroff OR obmcutil chassisoff           '
         errlog 'Make any changes and Press enter when ready to continue'
         errlog '******************************************************************************************************'
@@ -348,7 +343,6 @@ PATCH_HBI=0
 PATCH_HBBL=0
 PATCH_HBRT=0
 PATCH_HBD=0
-RESTART_PLDMD=1
 
 shift 2
 
@@ -368,10 +362,6 @@ for type in $* ; do
 
         HBD)
             PATCH_HBD=1
-            ;;
-
-        --nopldmd)
-            RESTART_PLDMD=0
             ;;
 
         -h|--help)
@@ -465,10 +455,6 @@ else   # Apply the data to the BMC
     # Need slight delay for rsync to complete before rm
     sleep 2
     rm -rf $COPYDIR
-
-    if [[ $RESTART_PLDMD = 1 ]] ; then
-        RESTART_PLDMD
-    fi
 
     CHECK_STATE
 
