@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -693,7 +693,7 @@ int32_t L3CE( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     } while(0);
 
     // Finally, add the FFDC to the SDC.
-    addL3LineDeleteFfdc(i_chip, io_sc, l_bundle->iv_L2LDCount, errorAddr);
+    addL3LineDeleteFfdc(i_chip, io_sc, l_bundle->iv_L3LDCount, errorAddr);
 
     #endif // __HOSTBOOT_RUNTIME
 
