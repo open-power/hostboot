@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2024
+# Contributors Listed Below - COPYRIGHT 2012,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -87,7 +87,7 @@ simics_setup()
     rm -rf ${hbfw_dir}/*
 
     # Copy down fsp-trace
-    cp /opt/mcp/shared/fr_FLD9-DEV-20190308/opt/fsp/usr/bin/fsp-trace ${hbfw_dir}
+    cp /opt/mcp/shared/fr_FLD9-P5-20251023/opt/fsp/usr/bin/fsp-trace ${hbfw_dir}
 
     # Copy down HB's Simics and Debugs files
     cp -rf ${PROJECT_ROOT}/src/build/simics/* ${hbfw_dir}
