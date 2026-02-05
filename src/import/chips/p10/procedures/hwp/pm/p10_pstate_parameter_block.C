@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2838,14 +2838,18 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
 
         bool wof_state = is_wof_enabled();
 
+        //if we have valid cores, then apply wof override
+        if (iv_core_count)
+        {
+            // We don't want  to break from this function, even though
+            // wof is disabled, need to continue to read poundV
+            wof_apply_overrides(iv_procChip, p_poundV_data,wof_state);
+            FAPI_INF("< Applying WOF Overrides");
 
-        // We don't want  to break from this function, even though
-        // wof is disabled, need to continue to read poundV
-        wof_apply_overrides(iv_procChip, p_poundV_data,wof_state);
-        FAPI_INF("< Applying WOF Overrides");
+            // Update the class variables
+            FAPI_TRY(set_wof_override_flags(p_poundV_data));
+        }
 
-        // Update the class variables
-        FAPI_TRY(set_wof_override_flags(p_poundV_data));
 
 #define UINT16_GET(__uint8_ptr)  \
         ((uint16_t)( ( (*((const uint8_t *)(__uint8_ptr)) << 8) | *((const uint8_t *)(__uint8_ptr) + 1) ) ))
