@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2026                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -309,6 +309,20 @@
     phase1 topology table update
   </description>
   <ffdc>CORE_TARGET</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_BUILD_SMP_LINK_TOPOLOGY_ID_LOOKUP_ERR</rc>
+  <description>
+    Unable to find remote group ID/chip ID in SMP data structure
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>LINK_ID</ffdc>
+  <ffdc>REM_ID</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

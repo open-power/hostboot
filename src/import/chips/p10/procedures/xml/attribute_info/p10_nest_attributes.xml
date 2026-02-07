@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2026                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -449,20 +449,6 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
-  <id>ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-    For each fabric X link on this chip, specifies the 5-bit fabric topology ID
-    of the chip at the receiving end of the link. Should be considered valid
-    only if corresponding ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG index is true.
-  </description>
-  <valueType>uint8</valueType>
-  <array>8</array>
-  <writeable/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
   <id>ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -482,20 +468,6 @@
   <description>
     For each fabric A link on this chip, specifies the fabric topology ID chip
     bits of the chip at the receiving end of the link. Should be considered valid
-    only if corresponding ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
-  </description>
-  <valueType>uint8</valueType>
-  <array>8</array>
-  <writeable/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-    For each fabric A link on this chip, specifies the 5-bit fabric topology ID
-    of the chip at the receiving end of the link. Should be considered valid
     only if corresponding ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG index is true.
   </description>
   <valueType>uint8</valueType>

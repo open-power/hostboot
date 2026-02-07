@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -926,6 +926,56 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+///
+/// @brief Add all topology ID table indicies owned by i_rem_target to the
+///        link topology ID table of i_loc_target (value=i_loc_link_id)
+///
+/// @param[in] i_loc_target     Local target (to update ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)
+/// @param[in] i_loc_link_id    Local link ID value (to write into ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)
+/// @param[in] i_rem_target     Remote target (to query ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE)
+///
+/// @return fapi2::ReturnCode   FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_build_smp_add_link_topo_table_entries(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_loc_target,
+    const uint8_t i_loc_link_id,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_rem_target)
+{
+    FAPI_DBG("Start");
+
+    // obtain the system wide table of topology ID index assignments
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_Type l_sys_topology_id_table;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, FAPI_SYSTEM, l_sys_topology_id_table));
+
+    // read link topology ID table for local end, to be updated and written back
+    fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_Type l_loc_link_topology_id_table;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, i_loc_target, l_loc_link_topology_id_table));
+
+    // get the topology ID of the remote chip
+    fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID_Type l_rem_topology_id;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_ID, i_rem_target, l_rem_topology_id));
+
+    // search the system wide table for any indicies associated with remote target
+    for (uint8_t l_index = 0; l_index < P10_FBC_UTILS_MAX_TOPO_ENTRIES; l_index++)
+    {
+        // index owned by remote chip, mark local link topology ID table entry with local link ID value
+        if (l_sys_topology_id_table[l_index] == l_rem_topology_id)
+        {
+            l_loc_link_topology_id_table[l_index] = i_loc_link_id;
+        }
+    }
+
+    // write updates back
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, i_loc_target, l_loc_link_topology_id_table));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 ///
 /// @brief Update link topology ID tables to represent all connections
 ///
@@ -938,105 +988,121 @@ fapi2::ReturnCode p10_build_smp_link_topo_tables(
 {
     FAPI_DBG("Start");
 
-    // build set of all valid group/chip IDs in system
-    fapi2::buffer<uint32_t> l_topo_ids_in_system;
-
     for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
     {
         for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
         {
-            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_target = *(p_iter->second.target);
-            uint8_t l_topo_index = 0;
-
-            // index into topology table is by the 5-bit topology id of processor
-            FAPI_TRY(topo::get_topology_idx(l_target, EFF_TOPOLOGY_ID, l_topo_index),
-                     "Error from topo::get_topology_idx (remote target)");
-
-            FAPI_INF("Adding topology index %d", l_topo_index);
-            l_topo_ids_in_system.setBit(l_topo_index);
-        }
-    }
-
-    for (auto g_iter = i_smp.groups.begin(); g_iter != i_smp.groups.end(); g_iter++)
-    {
-        for (auto p_iter = g_iter->second.chips.begin(); p_iter != g_iter->second.chips.end(); p_iter++)
-        {
+            FAPI_DBG("Processing group: %d chip: %d", g_iter->first, p_iter->first);
             fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_loc_target = *(p_iter->second.target);
-            fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_Type l_topo_id_table;
+            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+            fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_Type l_link_topology_id_table;
             fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_x_cnfg;
             fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_a_cnfg;
-            fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID_Type l_x_topo;
-            fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID_Type l_a_topo;
+            fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID_Type l_x_rem_chip_id;
+            fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID_Type l_a_rem_group_id;
             fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS_Type l_x_addr_dis;
             fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS_Type l_a_addr_dis;
+            fapi2::ATTR_PROC_FABRIC_TOPOLOGY_MODE_Type l_topology_mode;
+            fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE_Type l_broadcast_mode;
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, l_loc_target, l_topo_id_table),
+            // clear link topology ID table for this chip, prior to processing its links
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, l_loc_target, l_link_topology_id_table),
                      "Error form FAPI_ATTR_GET (ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)");
+
+            for (uint8_t l_index = 0; l_index < P10_FBC_UTILS_MAX_TOPO_ENTRIES; l_index++)
+            {
+                l_link_topology_id_table[l_index] = fapi2::ENUM_ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE_INVALID;
+            }
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, l_loc_target, l_link_topology_id_table),
+                     "Error form FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)");
+
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, l_loc_target, l_x_cnfg),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, l_loc_target, l_a_cnfg),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID, l_loc_target, l_x_topo),
-                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID)");
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID, l_loc_target, l_a_topo),
-                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, l_loc_target, l_x_rem_chip_id),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, l_loc_target, l_a_rem_group_id),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ADDR_DIS, l_loc_target, l_x_addr_dis),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ADDR_DIS)");
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ADDR_DIS, l_loc_target, l_a_addr_dis),
                      "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ADDR_DIS)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_TOPOLOGY_MODE, FAPI_SYSTEM, l_topology_mode),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_TOPOLOGY_MODE)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_BROADCAST_MODE, FAPI_SYSTEM, l_broadcast_mode),
+                     "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_BROADCAST_MODE)");
 
+            // process each link
             for (uint8_t l_loc_link_id = 0; l_loc_link_id < P10_FBC_UTILS_MAX_LINKS; l_loc_link_id++)
             {
-                FAPI_DBG("Working on link %d\n", l_loc_link_id);
-
                 bool l_link_en = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
                                  (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) :
                                  (l_a_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE);
                 bool l_addr_en = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
                                  (l_x_addr_dis[l_loc_link_id] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ADDR_DIS_OFF) :
                                  (l_a_addr_dis[l_loc_link_id] == fapi2::ENUM_ATTR_PROC_FABRIC_A_ADDR_DIS_OFF);
+                uint8_t l_rem_id = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
+                                   (l_x_rem_chip_id[l_loc_link_id]) :
+                                   (l_a_rem_group_id[l_loc_link_id]);
+
+                FAPI_DBG("Working on link %d (active: %d, coherent: %d, rem fbc ID: 0x%x",
+                         l_loc_link_id, l_link_en, l_addr_en, l_rem_id);
 
                 if (l_link_en && l_addr_en)
                 {
-                    uint8_t l_topo_index = (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) ?
-                                           (l_x_topo[l_loc_link_id]) :
-                                           (l_a_topo[l_loc_link_id]);
+                    bool l_found = false;
 
-                    if (l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
+                    // X link connecting chips in same group
+                    if ((l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) &&
+                        (l_broadcast_mode != fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP))
                     {
-                        // program the link id used to get from this chip to remote chip for xlinks
-                        FAPI_DBG("Set LINK_TOPOLOGY_ID_TABLE[%d]=%d\n", l_topo_index, l_loc_link_id);
-                        l_topo_id_table[l_topo_index] = l_loc_link_id;
-                    }
-                    else
-                    {
-                        // program all indexes for valid remote groups for alinks
-                        for (uint8_t l_index = 0; l_index < P10_FBC_UTILS_MAX_TOPO_ENTRIES; l_index++)
+                        // add entries associated with X connected chip in this group
+                        for (auto l_chip_id_iter = g_iter->second.chips.begin(); l_chip_id_iter != g_iter->second.chips.end()
+                             && !l_found; l_chip_id_iter++)
                         {
-                            if (l_topo_ids_in_system.getBit(l_index) && ((l_index & 0x1C) == (l_topo_index & 0x1C)))
+                            if (l_chip_id_iter->first == l_rem_id)
                             {
-                                FAPI_DBG("Set LINK_TOPOLOGY_ID_TABLE[%d]=%d\n", l_index, l_loc_link_id);
-                                l_topo_id_table[l_index] = l_loc_link_id;
+                                l_found = true;
+                                FAPI_TRY(p10_build_smp_add_link_topo_table_entries(l_loc_target,
+                                         l_loc_link_id,
+                                         *(l_chip_id_iter->second.target)));
                             }
                         }
                     }
-                }
-                else
-                {
-                    // link is not enabled for fabric command operations, we don't know the remote chip id
-                    // so invalidate any entries in the topology table that references this link
-                    for (uint8_t l_topo_index = 0; l_topo_index < (sizeof(l_topo_id_table) / sizeof(l_topo_id_table[0])); l_topo_index++)
+
+                    // A/X link connecting chips in different groups
+                    if ((l_a_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE) ||
+                        ((l_x_cnfg[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE) &&
+                         (l_broadcast_mode == fapi2::ENUM_ATTR_PROC_FABRIC_BROADCAST_MODE_1HOP_CHIP_IS_GROUP)))
                     {
-                        if(l_topo_id_table[l_topo_index] == l_loc_link_id)
+                        // add entries associated with all chips in X/A connected group
+                        for (auto l_group_id_iter = i_smp.groups.begin(); l_group_id_iter != i_smp.groups.end() && !l_found; l_group_id_iter++)
                         {
-                            l_topo_id_table[l_topo_index] = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE_INVALID;
+                            if (l_group_id_iter->first == l_rem_id)
+                            {
+                                l_found = true;
+
+                                for (auto l_chip_id_iter = l_group_id_iter->second.chips.begin(); l_chip_id_iter != l_group_id_iter->second.chips.end();
+                                     l_chip_id_iter++)
+                                {
+                                    FAPI_TRY(p10_build_smp_add_link_topo_table_entries(l_loc_target,
+                                             l_loc_link_id,
+                                             *(l_chip_id_iter->second.target)));
+                                }
+                            }
                         }
                     }
+
+                    FAPI_ASSERT(l_found,
+                                fapi2::P10_BUILD_SMP_LINK_TOPOLOGY_ID_LOOKUP_ERR()
+                                .set_TARGET(l_loc_target)
+                                .set_LINK_ID(l_loc_link_id)
+                                .set_REM_ID(l_rem_id),
+                                "Unable to find remote group ID/chip ID in SMP data structure");
                 }
             }
-
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE, l_loc_target, l_topo_id_table),
-                     "Error form FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_TOPOLOGY_ID_TABLE)");
         }
     }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -390,7 +390,6 @@ fapi_try_exit:
 /// @param[out] o_loc_link_en     Array of local end link enables
 /// @param[out] o_rem_link_id     Array of remote end link IDs
 /// @param[out] o_rem_fbc_id      Array of remote end fabric chip/node IDs
-/// @param[out] o_rem_topo_id     Array of remote end fabric topology IDs
 /// @param[out] o_bus_width       Array of local end IOHS bus widths
 ///
 /// @return fapi2::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
@@ -401,7 +400,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
     uint8_t o_loc_link_en[],
     uint8_t o_rem_link_id[],
     uint8_t o_rem_fbc_id[],
-    uint8_t o_rem_topo_id[],
     uint8_t o_bus_width[])
 {
     FAPI_DBG("Start");
@@ -434,8 +432,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
         // discern remaining output parameters
         if (l_loc_link_en[l_loc_link_id] != fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
         {
-            uint8_t l_loc_topo_id = 0, l_rem_topo_id = 0;
-
             // across all physical links we should only end up with one contributing
             // to the specification of a logical link connection
             FAPI_ASSERT(o_loc_link_en[l_loc_link_id] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE,
@@ -518,16 +514,8 @@ fapi2::ReturnCode p10_fbc_eff_config_links_query_endp(
                          o_rem_fbc_id[l_loc_link_id]),
                      "Error from p10_fbc_eff_config_links_rem_fbc_id");
 
-            // print out mapped local and remote endpoints for debug
-            FAPI_TRY(topo::get_topology_idx(l_loc_proc_target, EFF_TOPOLOGY_ID, l_loc_topo_id),
-                     "Error from topo::get_topology_idx (local)");
-            FAPI_TRY(topo::get_topology_idx(l_rem_proc_target, EFF_TOPOLOGY_ID, l_rem_topo_id),
-                     "Error from topo::get_topology_idx (remote)");
-            FAPI_DBG("Local topo ID: 0x%x, Remote topo ID: 0x%x, Link ID: %d", l_loc_topo_id, l_rem_topo_id, l_loc_link_id);
-
             // update output / attribute information
             o_loc_link_en[l_loc_link_id] = l_loc_link_en[l_loc_link_id];
-            o_rem_topo_id[l_loc_link_id] = l_rem_topo_id;
             l_link_active = fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE;
             o_bus_width[l_loc_link_id] = l_loc_bus_width[l_loc_link_id];
         }
@@ -574,8 +562,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
     fapi2::ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID_Type l_a_rem_link_id = { 0 };
     fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID_Type l_x_rem_fbc_id  = { 0 };
     fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID_Type l_a_rem_fbc_id  = { 0 };
-    fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID_Type l_x_rem_topo_id  = { 0 };
-    fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID_Type l_a_rem_topo_id  = { 0 };
 
     // bus width on local end
     fapi2::ATTR_PROC_FABRIC_IOHS_BUS_WIDTH_Type l_iohs_bus_width = { 0 };
@@ -602,8 +588,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, i_target, l_x_rem_fbc_id),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID, i_target, l_x_rem_topo_id),
-                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_AGGREGATE, i_target, l_x_aggregate),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_AGGREGATE)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
@@ -614,8 +598,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, i_target, l_a_rem_fbc_id),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID, i_target, l_a_rem_topo_id),
-                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_AGGREGATE, i_target, l_a_aggregate),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_AGGREGATE)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_IOHS_BUS_WIDTH, i_target, l_iohs_bus_width),
@@ -661,7 +643,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
                          l_x_en,
                          l_x_rem_link_id,
                          l_x_rem_fbc_id,
-                         l_x_rem_topo_id,
                          l_iohs_bus_width),
                      "Error from p10_fbc_eff_config_links_query_endp (SMPX)");
         }
@@ -673,7 +654,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
                          l_a_en,
                          l_a_rem_link_id,
                          l_a_rem_fbc_id,
-                         l_a_rem_topo_id,
                          l_iohs_bus_width),
                      "Error from p10_fbc_eff_config_links_query_endp (SMPA)");
         }
@@ -734,8 +714,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID, i_target, l_x_rem_fbc_id),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_ID)");
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID, i_target, l_x_rem_topo_id),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_AGGREGATE, i_target, l_x_aggregate),
              "Error setting FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_AGGREGATE)");
 
@@ -747,8 +725,6 @@ fapi2::ReturnCode p10_fbc_eff_config_links(
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID, i_target, l_a_rem_fbc_id),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_ID)");
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID, i_target, l_a_rem_topo_id),
-             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID)");
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_AGGREGATE, i_target, l_a_aggregate),
              "Error setting FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_AGGREGATE)");
 
