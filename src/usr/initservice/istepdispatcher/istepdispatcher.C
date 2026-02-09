@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2026                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1403,14 +1403,14 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         if (l_errl)
         {
             l_status = SHUTDOWN_STATUS_UT_FAILED;
-            if (err)
+            if (istepErrl)
             {
-                l_errl->plid(err->plid());
+                l_errl->plid(istepErrl->plid());
                 errlCommit(l_errl, INITSVC_COMP_ID);
             }
             else
             {
-                err = l_errl;
+                istepErrl = l_errl;
                 l_errl = nullptr;
             }
         }
