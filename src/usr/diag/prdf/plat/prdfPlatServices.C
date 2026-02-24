@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -776,9 +776,9 @@ uint32_t nvdimmNotifyProtChange( TARGETING::TargetHandle_t i_target,
 void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  )
 {
     #define PRDF_FUNC "[PlatServices::nvdimmAddFfdc] "
-    // Add Page 4 Regs and Vendor Log using external Hostboot interfaces.
+
+    // Add Page 4 Regs using external Hostboot interfaces.
     NVDIMM::nvdimmAddPage4Regs( i_nvdimm, io_errl );
-    NVDIMM::nvdimmAddVendorLog( i_nvdimm, io_errl );
 
     // Add PRD specific registers relevant to runtime NVDIMM analysis.
     const uint16_t regList[] =
@@ -840,6 +840,10 @@ void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  )
     }
 
     regUd.addToLog( io_errl );
+
+    // Add vendor logs using external Hostboot interfaces.
+    // Note: Vendor logs may fill up the errl, so add them after all the regs.
+    NVDIMM::nvdimmAddVendorLog( i_nvdimm, io_errl );
 
     #undef PRDF_FUNC
 }
