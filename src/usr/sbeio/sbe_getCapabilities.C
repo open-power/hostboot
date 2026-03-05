@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -572,7 +572,6 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 
     SbeFifo::fifoGetCapabilitiesRequest  l_fifoRequest{};
     sbeCapabilities_rsp_t               *l_rsp{nullptr};
-    const SbeFifo::fifoStandardResponse *l_fifoResponseEnd{nullptr};
 
     uint16_t l_num_images{};         // max number of images in response buffer
     uint16_t l_num_capabilities{};   // max number of capabilities in response buffer
@@ -625,8 +624,6 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         goto ERROR_EXIT;
     }
 
-    l_fifoResponseEnd = l_rsp->getEndPtr();
-
     // Make the call to perform the FIFO Chip Operation
     l_errl = SbeFifo::getTheInstance().performFifoChipOp(
          i_target,
@@ -639,65 +636,15 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         goto ERROR_EXIT;
     }
 
-    // Sanity check - are HW and HB communications in sync?
-    //  *this does a double-check of the response buffer using l_fifoResponseEnd,
-    //    which ensures our local variable is correctly pointing at the response data
-    if ((SbeFifo::FIFO_STATUS_MAGIC != l_fifoResponseEnd->status.magic)        ||
-        (l_fifoRequest.commandClass != l_fifoResponseEnd->status.commandClass) ||
-        (l_fifoRequest.command      != l_fifoResponseEnd->status.command))
-    {
-        SBE_TRACF("getFifoSbeCapabilities: 0x%08X performFifoChipOp returned unexpected "
-                  "message type; "
-                  "magic code returned:0x%X, "
-                  "expected magic code:0x%X, "
-                  "command class returned:0x%X, "
-                  "expected command class:0x%X, "
-                  "command returned:0x%X, "
-                  "expected command:0x%X",
-                  l_huid,
-                  l_fifoResponseEnd->status.magic,
-                  SbeFifo::FIFO_STATUS_MAGIC,
-                  l_fifoResponseEnd->status.commandClass,
-                  l_fifoRequest.commandClass,
-                  l_fifoResponseEnd->status.command,
-                  l_fifoRequest.command);
-
-        /*@
-         * @errortype
-         * @moduleid          SBEIO_FIFO
-         * @reasoncode        SBEIO_RECEIVED_UNEXPECTED_MSG
-         * @userdata1         Target HUID
-         * @userdata2[0:15]   Requested command class
-         * @userdata2[16:31]  Requested command
-         * @userdata2[32:47]  Returned command class
-         * @userdata2[48:63]  Returned command
-         * @devdesc           Call to FIFO Chip Op returned an
-         *                    unexpected message type.
-         */
-        l_errl = new ErrlEntry(
-            ERRL_SEV_INFORMATIONAL,
-            SBEIO_FIFO,
-            SBEIO_RECEIVED_UNEXPECTED_MSG,
-            l_huid,
-            TWO_UINT32_TO_UINT64(
-              TWO_UINT16_TO_UINT32(l_fifoRequest.commandClass,
-                                   l_fifoRequest.command),
-              TWO_UINT16_TO_UINT32(l_fifoResponseEnd->status.commandClass,
-                                   l_fifoResponseEnd->status.command) ));
-
-        TRACFBIN(g_trac_sbeio,"getFifoSbeCapabilities: l_fifoResponseBuffer",
-                 l_rsp->getBufPtr(),
-                 l_rsp->getBufSize());
-        TRACFBIN(g_trac_sbeio,"getFifoSbeCapabilities: capabilities",
-                 l_rsp->getCapPtr(),
-                 l_rsp->getCapSize());
-        TRACFBIN(g_trac_sbeio,"getFifoSbeCapabilities: l_fifoResponseEnd",
-                 l_rsp->getEndPtr(),
-                 sizeof(SbeFifo::fifoStandardResponse));
-
-        l_errl->collectTrace(SBEIO_COMP_NAME, 256);
-        goto ERROR_EXIT;
-    }
+    TRACDBIN(g_trac_sbeio,"getFifoSbeCapabilities: l_fifoResponseBuffer",
+                l_rsp->getBufPtr(),
+                l_rsp->getBufSize());
+    TRACDBIN(g_trac_sbeio,"getFifoSbeCapabilities: capabilities",
+                l_rsp->getCapPtr(),
+                l_rsp->getCapSize());
+    TRACDBIN(g_trac_sbeio,"getFifoSbeCapabilities: response end",
+                l_rsp->getEndPtr(),
+                sizeof(SbeFifo::fifoStandardResponse));
 
     applySbeCapabilities(i_target, l_rsp);
 

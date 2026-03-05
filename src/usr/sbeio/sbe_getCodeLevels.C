@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,6 @@ errlHndl_t getFifoSbeCodeLevels(TargetHandle_t  i_target,
 {
     SbeFifo::fifoGetCodeLevelsRequest l_fifoRequest;
     getCodeLevelsResponseBuf_t        l_rspBuf;
-    SbeFifo::fifoStandardResponse    *l_fifoResponseEnd = &l_rspBuf.rspEnd;
     errlHndl_t                        l_errl(nullptr);
     uint32_t                          l_huid = get_huid(i_target);
 
@@ -93,64 +92,15 @@ errlHndl_t getFifoSbeCodeLevels(TargetHandle_t  i_target,
         goto ERROR_EXIT;
     }
 
-    // Sanity check - are HW and HB communications in sync?
-    //  *this does a double-check of the response buffer using l_fifoResponseEnd,
-    //    which ensures our local variable is correctly pointing at the response data
-    if ((SbeFifo::FIFO_STATUS_MAGIC != l_fifoResponseEnd->status.magic)        ||
-        (l_fifoRequest.commandClass != l_fifoResponseEnd->status.commandClass) ||
-        (l_fifoRequest.command      != l_fifoResponseEnd->status.command))
-    {
-        SBE_TRACF("getFifoSbeCodeLevels: 0x%08X performFifoChipOp returned unexpected "
-                  "message type; "
-                  "magic code returned:0x%X, "
-                  "expected magic code:0x%X, "
-                  "command class returned:0x%X, "
-                  "expected command class:0x%X, "
-                  "command returned:0x%X, "
-                  "expected command:0x%X",
-                  l_huid,
-                  l_fifoResponseEnd->status.magic,
-                  SbeFifo::FIFO_STATUS_MAGIC,
-                  l_fifoResponseEnd->status.commandClass,
-                  l_fifoRequest.commandClass,
-                  l_fifoResponseEnd->status.command,
-                  l_fifoRequest.command);
-        /*@
-         * @errortype
-         * @moduleid          SBEIO_FIFO
-         * @reasoncode        SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG
-         * @userdata1         Target HUID
-         * @userdata2[0:15]   Requested command class
-         * @userdata2[16:31]  Requested command
-         * @userdata2[32:47]  Returned command class
-         * @userdata2[48:63]  Returned command
-         * @devdesc           Call to FIFO Chip Op returned an
-         *                    unexpected message type.
-         */
-        l_errl = new ErrlEntry(
-            ERRL_SEV_INFORMATIONAL,
-            SBEIO_FIFO,
-            SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG,
-            l_huid,
-            TWO_UINT32_TO_UINT64(
-              TWO_UINT16_TO_UINT32(SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
-                                   l_fifoRequest.command),
-              TWO_UINT16_TO_UINT32(l_fifoResponseEnd->status.commandClass,
-                                   l_fifoResponseEnd->status.command) ));
-
-        TRACFBIN(g_trac_sbeio,"getFifoSbeCodeLevels: getCodeLevelsResponseBuf_t",
-                 &l_rspBuf,
-                 sizeof(l_rspBuf));
-        TRACFBIN(g_trac_sbeio,"getFifoSbeCodeLevels: getCodeLevelsResponse_t",
-                 &l_rspBuf.data,
-                 sizeof(l_rspBuf.data));
-        TRACFBIN(g_trac_sbeio,"getFifoSbeCodeLevels: l_fifoResponseEnd",
-                &l_rspBuf.rspEnd,
-                sizeof(l_rspBuf.rspEnd));
-
-        l_errl->collectTrace(SBEIO_COMP_NAME, 256);
-        goto ERROR_EXIT;
-    }
+    TRACDBIN(g_trac_sbeio,"getFifoSbeCodeLevels: getCodeLevelsResponseBuf_t",
+                &l_rspBuf,
+                sizeof(l_rspBuf));
+    TRACDBIN(g_trac_sbeio,"getFifoSbeCodeLevels: getCodeLevelsResponse_t",
+                &l_rspBuf.data,
+                sizeof(l_rspBuf.data));
+    TRACDBIN(g_trac_sbeio,"getFifoSbeCodeLevels: response end",
+            &l_rspBuf.rspEnd,
+            sizeof(l_rspBuf.rspEnd));
 
     memcpy(&o_response, &l_rspBuf.data, sizeof(o_response));
     i_target->setAttr<ATTR_SBE_NUM_CAPABILITIES>(o_response.num_capabilities);
