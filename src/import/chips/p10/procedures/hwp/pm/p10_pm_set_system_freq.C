@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -379,6 +379,11 @@ fapi2::ReturnCode pm_set_frequency(
             if (!l_tmp_psav_freq)
             {
                 l_tmp_psav_freq = l_psav_freq;
+                //// We need to initialize l_floor_freq_mhz to the PSAV frequency (PS from #V).
+                // If not set, in an IOSCM system the second processor may not have active cores,
+                // causing l_floor_freq to be 0, which can lead to selecting an incorrect
+                // non-VPD PSAV value.
+                l_floor_freq_mhz = l_tmp_psav_freq;
             }
             else
             {
