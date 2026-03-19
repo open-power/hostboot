@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,6 +95,42 @@ class NodeCommExchange
         NodeCommExchange(const NodeCommExchange&) = delete;
         NodeCommExchange& operator=(const NodeCommExchange&) = delete;
 };
+
+/**
+ * @brief Performs a node sync. Also informs other nodes of an error.
+ */
+class NodeCommExchangeSync : public NodeCommExchange
+{
+    protected:
+        // Whether we had an error on this node
+        const bool iv_was_error;
+
+        // Pointer to a vector of node ids which weve received errors from
+        std::vector<uint8_t>* iv_p_error_nodes;
+
+        // Mutex to make sure only one thread is modifying iv_p_rcv_error at once
+        static mutex_t iv_rcv_error_mutex;
+
+    public:
+        // @brief ThreadPool uses this function to do the actual work
+        void operator()();
+
+        // A constructor that takes an IOHS info structure, an istep error structure,
+        // and a pointer to a bool that represents whether this node has received notice of an error
+        NodeCommExchangeSync(const iohs_instances_t& i_iohsInfo,
+                             ISTEP_ERROR::IStepError& i_istepError,
+                             const bool i_was_error, std::vector<uint8_t>* i_p_error_nodes) :
+            NodeCommExchange(i_iohsInfo, i_istepError), iv_was_error(i_was_error),
+            iv_p_error_nodes(i_p_error_nodes)
+        {
+            iv_p_error_nodes->clear();
+        }
+
+        // Delete copy constructor and assignment operator
+        NodeCommExchangeSync(const NodeCommExchangeSync&) = delete;
+        NodeCommExchangeSync& operator=(const NodeCommExchangeSync&) = delete;
+
+}; // class NodeCommExchangeSync
 
 /**
  * @brief Performs the Phase 1 of multinode comm, where nodes exchange an 8-byte

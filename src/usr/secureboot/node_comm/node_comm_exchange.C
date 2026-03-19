@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1500,44 +1500,90 @@ errlHndl_t sendRecvNodeSyncMessage(const bool i_sendMessage,
 }
 
 /**
- * @brief Performs a sync with all other nodes on the system. A sync message is an empty message
+ * @brief Performs a sync with all other nodes on the system. A sync message is a message
  *        whose purpose is to indicate that the node is currently not in the middle of other
- *        multinode transactions. Primary node will send this message to all other nodes, and
- *        secondary nodes will wait for this message from the primary node.
+ *        multinode transactions and to report if this node has experienced an error to the other nodes.
  *
  * @param[in] i_iohsInstances the array of IOHS target information used to communicate with other
  *            nodes.
+ * @param[in] i_notify_error whether this node should notify the other nodes of an error.
+ *
  * @return nullptr on success; non-nullptr on error
  */
-errlHndl_t syncWithAllNodes(const std::vector<iohs_instances_t>& i_iohsInstances)
+errlHndl_t syncWithAllNodes(const std::vector<iohs_instances_t>& i_iohsInstances, const bool i_notify_error)
 {
-    errlHndl_t l_errl = nullptr;
-    const bool SEND_MESSAGE = true;
-    const bool RECEIVE_MESSAGE = false;
+    Util::ThreadPool<NodeCommExchangeSync> l_threadpool;
+    ISTEP_ERROR::IStepError l_istepError;
+    std::vector<uint8_t> error_nodes;
 
-    // Primary node will send the sync message to all secondary nodes
-    if(TARGETING::UTIL::isCurrentMasterNode())
+    for(const auto& l_iohsInstance: i_iohsInstances)
     {
-        // Send a sync message to all secondary nodes
-        for(const auto& l_iohsInstance : i_iohsInstances)
+        l_threadpool.insert(new NodeCommExchangeSync(
+            l_iohsInstance, l_istepError, i_notify_error, &error_nodes));
+    }
+
+    // Get the number of nodes on the machine (each thread will service a
+    // different node)
+    auto l_hbImages = TARGETING::UTIL::assertGetToplevelTarget()->
+                        getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
+    const int l_nodeCnt = __builtin_popcount(l_hbImages);
+    // A thread per each node OTHER than this one (so, total nodes - 1)
+    Util::ThreadPoolManager::setThreadCount(l_nodeCnt - 1);
+
+    // Start all threads
+    l_threadpool.start();
+
+    // Wait for the threads to finish running
+    errlHndl_t l_errl = l_threadpool.shutdown();
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"syncWithAllNodes: Error returned from thread pool"
+                  TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        goto ERROR_EXIT;
+    }
+
+    if (!l_istepError.isNull())
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"syncWithAllNodes: "
+                "An error occured while attempting to sync nodes.");
+
+        l_errl = l_istepError.getErrorHandle();
+        goto ERROR_EXIT;
+    }
+
+    // Check if another node told us there was an error
+    if (!error_nodes.empty())
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"syncWithAllNodes: "
+                "Another node informed this node of an error. "
+                "Breaking out of nodeCommExchange.");
+
+        uint64_t error_node_bitfield = 0;
+        for (uint8_t node_id : error_nodes)
         {
-            l_errl = sendRecvNodeSyncMessage(SEND_MESSAGE, l_iohsInstance);
-            if(l_errl)
-            {
-                break;
-            }
+            error_node_bitfield |= 1 << node_id;
         }
-        TRACFCOMP(g_trac_nc,INFO_MRK"syncWithAllNodes: Primary node completed sync with other nodes");
-    }
-    else
-    {
-        TRACFCOMP(g_trac_nc,INFO_MRK"syncWithAllNodes: Receiving the sync message from primary node");
-        // The array of IOHS targes is sorted by node ID, so the first IOHS target
-        // is connected to the primary node. Look for a message from the links associated with
-        // that target.
-        l_errl = sendRecvNodeSyncMessage(RECEIVE_MESSAGE, i_iohsInstances[0]);
+
+        /*@
+         * @errortype
+         * @reasoncode       RC_NCEX_RECEIVED_ABORT_MSG
+         * @moduleid         MOD_NCT_NODE_SYNC
+         * @userdata1        Bitfield representing which nodes reported errors
+         *                   (LSB is node0, next bit node1, etc)
+         * @userdata2        0
+         * @devdesc          Received notice of error during node exchange from another node
+         * @custdesc         Trusted Boot failure
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            MOD_NCT_NODE_SYNC,
+            RC_NCEX_RECEIVED_ABORT_MSG,
+            error_node_bitfield,
+            0,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
     }
 
+ERROR_EXIT:
     return l_errl;
 }
 
@@ -1547,6 +1593,9 @@ errlHndl_t syncWithAllNodes(const std::vector<iohs_instances_t>& i_iohsInstances
  *        sends its nonce (56-bit random number and 8-bit link info) to every other node.
  *        Each node generates a unique nonce per each other node it needs to communicate with.
  *
+ * If there is an error we always do a sync to make sure other nodes know that there was an issue
+ * before going to error handling.
+ *
  * @param[in] i_iohsInstances the array of IOHS target information used to communicate with other
  *            nodes.
  * @return nullptr on success; non-nullptr on error
@@ -1555,6 +1604,7 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
 {
     Util::ThreadPool<NodeCommExchangeNonces> l_threadpool;
     ISTEP_ERROR::IStepError l_istepError;
+    bool was_error = false;
 
     for(const auto& l_iohsInstance: i_iohsInstances)
     {
@@ -1578,35 +1628,53 @@ errlHndl_t exchangeNoncesMultithreaded(const std::vector<iohs_instances_t>& i_io
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"exchangeNoncesMultithreaded: Error returned from thread pool"
                   TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
-    }
-    else
-    {
-        // Wait 250ms to let the nodes catch up
-        nanosleep(0, 250*NS_PER_MSEC);
-
-        // Sync with all nodes
-        l_errl = syncWithAllNodes(i_iohsInstances);
-        if(l_errl)
-        {
-            TRACFCOMP(g_trac_nc,ERR_MRK"exchangeNoncesMultithreaded: Could not sync the nodes"
-                      TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
-        }
+        was_error = true;
     }
 
-    if(l_errl)
+    if (!l_istepError.isNull())
     {
-        // If TPM is required, propagate the error further
+        TRACFCOMP(g_trac_nc,ERR_MRK"exchangeNoncesMultithreaded: "
+                "An error occured while attempting to exchange nonces.");
+
+        was_error = true;
+    }
+
+    // Wait 250ms to let the nodes catch up
+    nanosleep(0, 250*NS_PER_MSEC);
+
+    // Sync with all nodes, if we had an error tell the other nodes and abort exchange
+    errlHndl_t sync_errl = syncWithAllNodes(i_iohsInstances, was_error);
+    if(sync_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"exchangeNoncesMultithreaded: Error during node sync"
+                    TRACE_ERR_FMT, TRACE_ERR_ARGS(sync_errl));
+    }
+
+    if(l_errl || sync_errl)
+    {
         if(TRUSTEDBOOT::isTpmRequired())
         {
-            captureError(l_errl, l_istepError, SECURE_COMP_ID);
+            // If TPM is required, capture any errors to istep error and propogate to higher level function
+            if (l_errl) captureError(l_errl, l_istepError, SECURE_COMP_ID);
+            if (sync_errl) captureError(sync_errl, l_istepError, SECURE_COMP_ID);
         }
         else
         {
-            // TPM is not required, mark the error as informational and commit
-            TRACFCOMP(g_trac_nc,INFO_MRK"exchangeNoncesMultithreaded: TPM is not required, changing EID 0x%x's severity to Informational and committing the error log.",
-                      l_errl->eid());
-            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            errlCommit(l_errl, SECURE_COMP_ID);
+            // In tpm not required case, guarantee that we propagate at least one error so that the
+            // higher level function is aware of failure, and commit other error as informational if necessary
+            if (l_errl)
+            {
+                if (sync_errl)
+                {
+                    sync_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    errlCommit(sync_errl, SECURE_COMP_ID);
+                }
+                return l_errl;
+            }
+            else
+            {
+                return sync_errl;
+            }
         }
     }
 
@@ -1673,15 +1741,22 @@ errlHndl_t extendAllQuotes(std::vector<quoteInfo_t>& io_quotes)
  *        node. If the current node is a lower node ID, it will request the quote first, and then
  *        send its quote to the peer. Otherwise, the opposite happens.
  *
+ * This function's error handling has two parts: SYNC_POINT and ERROR_HANDLING.
+ * If weve had an error we must first go to SYNC_POINT to inform the other nodes
+ * of the error, then we go to ERROR_HANDLING to actually handle the errls.
+ *
  * @param[in] i_iohsInstances the array of IOHS information of all connected peer nodes.
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_iohsInstances)
 {
     errlHndl_t l_errl = nullptr;
+    errlHndl_t sync_errl = nullptr;
     ISTEP_ERROR::IStepError l_istepError;
+    bool was_error = false;
 
-    do {
+    std::vector<quoteInfo_t> l_quotes;
+
     // First, expand each TPM's log. The TPM's logs are created early in IPL,
     // when we're still running out of the cache, so the sizes of the logs
     // are quite small. We need to expand each log here so that it can fit
@@ -1696,23 +1771,33 @@ errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_io
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: could not expand the TPM log for TPM HUID 0x%x"
                       TRACE_ERR_FMT, TARGETING::get_huid(l_tpm), TRACE_ERR_ARGS(l_errl));
-            break;
+            was_error = true;
+            goto SYNC_POINT;
         }
-    }
-    if(l_errl)
-    {
-        break;
     }
 
     // Pre-generate attestation keys
     l_errl = generateAKCertificate();
     if(l_errl)
     {
-        break;
+        was_error = true;
+        goto SYNC_POINT;
     }
 
+    sync_errl = syncWithAllNodes(i_iohsInstances, was_error);
+    if(sync_errl)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: Could not sync the nodes"
+                    TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        was_error = true;
+        // If we have an error here, either we were just informed of an error,
+        // or there was a commincation error. In both cases all nodes will have
+        // realized there is a problem at this point, go to error handling.
+        goto ERROR_HANDLING;
+    }
+
+    {
     Util::ThreadPool<NodeCommExchangeQuotes> l_threadpool;
-    std::vector<quoteInfo_t> l_quotes;
 
     for(const auto& l_iohsInstance : i_iohsInstances)
     {
@@ -1736,17 +1821,35 @@ errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_io
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: Error returned from thread pool"
                   TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
-        break;
+        was_error = true;
+        goto SYNC_POINT;
+    }
+    }
+
+    if (!l_istepError.isNull())
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: "
+                "An error occured while attempting to exchange quotes.");
+
+        was_error = true;
     }
 
     // Ensure all nodes have completed their exchanges. The primary node will send out
     // a sync message to all nodes.
-    l_errl = syncWithAllNodes(i_iohsInstances);
-    if(l_errl)
+SYNC_POINT:
+    sync_errl = syncWithAllNodes(i_iohsInstances, was_error);
+    if(sync_errl)
     {
-       TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: Could not sync the nodes"
-                 TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
-        break;
+        TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: Could not sync the nodes"
+                    TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
+        was_error = true;
+    }
+
+    // If we previously had an error or were notified of an error
+    // skip straight to error handling
+    if (was_error)
+    {
+        goto ERROR_HANDLING;
     }
 
     // Flush all secure info/certificates from the TPM
@@ -1755,32 +1858,42 @@ errlHndl_t exchangeQuotesMultithreaded(const std::vector<iohs_instances_t>& i_io
     {
         TRACFCOMP(g_trac_nc,ERR_MRK"exchangeQuotesMultithreaded: Could not flush TPM context"
                   TRACE_ERR_FMT, TRACE_ERR_ARGS(l_errl));
-        break;
+        goto ERROR_HANDLING;
     }
 
     // Extend all received quotes to TPM
     l_errl = extendAllQuotes(l_quotes);
     if(l_errl)
     {
-        break;
+        goto ERROR_HANDLING;
     }
 
-    }while(0);
-
-    if(l_errl)
+ERROR_HANDLING:
+    if(l_errl || sync_errl)
     {
-        // If TPM is required, propagate the error further
         if(TRUSTEDBOOT::isTpmRequired())
         {
-            captureError(l_errl, l_istepError, SECURE_COMP_ID);
+            // If TPM is required, capture any errors to istep error and propogate to higher level function
+            if (l_errl) captureError(l_errl, l_istepError, SECURE_COMP_ID);
+            if (sync_errl) captureError(sync_errl, l_istepError, SECURE_COMP_ID);
         }
         else
         {
-            // TPM is not required, mark the error as informational and commit
-            TRACFCOMP(g_trac_nc,INFO_MRK"exchangeQuotesMultithreaded: TPM is not required, changing EID 0x%x's severity to Informational and committing the error log.",
-                      l_errl->eid());
-            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            errlCommit(l_errl, SECURE_COMP_ID);
+            // In tpm not required case, guarantee that we propagate at least one error so that the
+            // higher level function is aware of failure, and commit other error as informational if necessary
+            if (l_errl)
+            {
+                if (sync_errl)
+                {
+                    sync_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    errlCommit(sync_errl, SECURE_COMP_ID);
+                }
+                return l_errl;
+            }
+            else
+            {
+                return sync_errl;
+            }
         }
     }
 

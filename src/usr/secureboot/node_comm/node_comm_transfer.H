@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,7 +94,7 @@ const std::map<node_comm_transfer_types_t, size_t>
                        {NCT_TRANSFER_QUOTE_REQUEST,
                             sizeof(QuoteRequestBlob)},
                        {NCT_NODE_SYNC,
-                            0}};
+                            sizeof(uint64_t)}};
 
 /**
  *  @brief This function sends multiple messages with data from

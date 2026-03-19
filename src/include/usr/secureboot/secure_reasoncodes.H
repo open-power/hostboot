@@ -78,6 +78,7 @@ namespace SECUREBOOT
         MOD_NCT_SEND                        = 0x2E,
         MOD_NCT_RECEIVE                     = 0x2F,
         MOD_NCT_REQUEST_QUOTE               = 0x30,
+        MOD_NCT_NODE_SYNC                   = 0x31,
 
         // Use 0x40-0x4F range for Physical Presence Detection and Key Clear
         // Requests
@@ -143,6 +144,7 @@ namespace SECUREBOOT
         RC_NCT_ACK_MISMATCH                = SECURE_COMP_ID | 0x32,
         RC_NCT_INITIATION_MISMATCH         = SECURE_COMP_ID | 0x33,
         RC_NCEX_NO_FUNCTIONAL_PRIMARY_TPM  = SECURE_COMP_ID | 0x34,
+        RC_NCEX_RECEIVED_ABORT_MSG         = SECURE_COMP_ID | 0x35,
 
         // Use 0x40-0x4F range for Physical Presence Detection and Key Clear
         // Requests

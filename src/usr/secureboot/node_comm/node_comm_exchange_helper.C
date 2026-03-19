@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@ namespace NODECOMM
 
 mutex_t NodeCommExchangeQuotes::iv_quoteMutex = MUTEX_INITIALIZER;
 mutex_t NodeCommExchange::iv_errorMutex = MUTEX_INITIALIZER;
+mutex_t NodeCommExchangeSync::iv_rcv_error_mutex = MUTEX_INITIALIZER;
 
 /**
  * @brief Helper function to capture an error safely
@@ -111,6 +112,196 @@ void getLinkMboxInfo(const iohs_instances_t& i_iohsInstance,
                                 i_iohsInstance.myIohsRelLink,
                                 o_peerLinkId,
                                 o_peerMboxId);
+}
+
+/**
+ * @brief Sends a sync message to the peer node.
+ *
+ * @param[in] i_iohsInstance the IOHS info of the current and peer nodes
+ * @param[in] i_was_error whether there was an error to report to the peer node
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t sendSyncMsg(const iohs_instances_t& i_iohsInstance,
+                        const bool i_was_error)
+{
+    errlHndl_t l_errl = nullptr;
+    uint8_t l_myLinkId = 0;
+    uint8_t l_myMboxId = 0;
+    uint8_t l_expectedPeerLinkId = 0;
+    uint8_t l_expectedPeerMboxId = 0;
+
+    // Get this node and peer's link and mbox info
+    getLinkMboxInfo(i_iohsInstance, l_myLinkId, l_myMboxId,
+                    l_expectedPeerLinkId, l_expectedPeerMboxId);
+
+    TRACFCOMP(g_trac_nc,INFO_MRK"sendSyncMsg: "
+              "my: linkId=%d, mboxId=%d, IohsInstance=%d. "
+              "expected peer: n%d linkId=%d, mboxId=%d, IohsInstance=%d",
+              l_myLinkId, l_myMboxId, i_iohsInstance.myIohsInstance,
+              i_iohsInstance.peerNodeInstance, l_expectedPeerLinkId,
+              l_expectedPeerMboxId, i_iohsInstance.peerIohsInstance);
+
+    // The node comm control and data regs live on PAUC parents of IOHS
+    TARGETING::Target* l_paucParent =
+           TARGETING::getImmediateParentByAffinity(i_iohsInstance.myIohsTarget);
+
+    // Nonzero value in data buffer means there was an error
+    uint64_t data = i_was_error;
+    size_t l_size = sizeof(data);
+
+    // Send the message
+    l_errl = nodeCommTransferSend(l_paucParent,
+                                  l_myLinkId,
+                                  l_myMboxId,
+                                  i_iohsInstance.peerNodeInstance,
+                                  NCT_NODE_SYNC,
+                                  reinterpret_cast<uint8_t*>(&data),
+                                  l_size);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc, ERR_MRK"sendSyncMsg: Could not send message to the peer node %d",
+                  i_iohsInstance.peerNodeInstance);
+    }
+
+    return l_errl;
+}
+
+/**
+ * @brief Receives a sync message from the peer node
+ *
+ * @param[in] i_iohsInstance the IOHS info of the current and peer nodes
+ * @param[out] o_rcvd_error Whether the peer node informed this node of an error
+ * @return nullptr on success; non-nullptr on error
+ */
+errlHndl_t receiveSyncMsg(const iohs_instances_t& i_iohsInstance, bool& o_rcvd_error)
+{
+    errlHndl_t l_errl = nullptr;
+    // Pointer to buffer used for receiving data from nodeCommTransferRecv()
+    uint8_t * l_dataRcvBuffer = nullptr;
+    uint8_t l_myLinkId = 0;
+    uint8_t l_myMboxId = 0;
+    uint8_t l_expectedPeerLinkId = 0;
+    uint8_t l_expectedPeerMboxId = 0;
+
+    // Get this node and peer's link and mbox info
+    getLinkMboxInfo(i_iohsInstance, l_myLinkId, l_myMboxId,
+                    l_expectedPeerLinkId, l_expectedPeerMboxId);
+
+    TRACFCOMP(g_trac_nc,INFO_MRK"receiveSyncMsg: "
+              "my: linkId=%d, mboxId=%d, IohsInstance=%d. "
+              "expected peer: n%d linkId=%d, mboxId=%d, IohsInstance=%d",
+              l_myLinkId, l_myMboxId, i_iohsInstance.myIohsInstance,
+              i_iohsInstance.peerNodeInstance, l_expectedPeerLinkId,
+              l_expectedPeerMboxId, i_iohsInstance.peerIohsInstance);
+
+    // The node comm control and data regs live on PAUC parents of IOHS
+    TARGETING::Target* l_paucParent =
+           TARGETING::getImmediateParentByAffinity(i_iohsInstance.myIohsTarget);
+    size_t l_msgSize;
+
+    l_errl = nodeCommTransferRecv(l_paucParent,
+                                  l_myLinkId,
+                                  l_myMboxId,
+                                  i_iohsInstance.peerNodeInstance,
+                                  NCT_NODE_SYNC,
+                                  l_dataRcvBuffer,
+                                  l_msgSize);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_nc, ERR_MRK"receiveSyncMsg: Could not get sync message from peer node %d",
+                  i_iohsInstance.peerNodeInstance);
+    }
+    else
+    {
+        // If no err is returned, l_dataRcvBuffer should be valid, but do a
+        // sanity check here to be certain
+        assert(l_dataRcvBuffer!=nullptr,"receiveSyncMsg: l_dataRcvBuffer returned as nullptr");
+
+        // Nonzero value in data buffer means there was an error
+        if (*reinterpret_cast<uint64_t*>(l_dataRcvBuffer))
+        {
+            o_rcvd_error = true;
+        }
+
+        free(l_dataRcvBuffer);
+    }
+
+    return l_errl;
+}
+
+/**
+ * @brief Performs a sync message exchange with another node.
+ *
+ * Each node acts as a sender once and a receiver once. This is so each node
+ * gets a change to report if it has had an error to the other node.
+ */
+void NodeCommExchangeSync::operator()()
+{
+    errlHndl_t l_errl = nullptr;
+    bool rcvd_error = false;
+
+    // Node with lower position receive sync message first from the peer node,
+    // while node with higher position does the procedure in reverse.
+    if(iv_iohsInstance.myNodeInstance < iv_iohsInstance.peerNodeInstance)
+    {
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeSync: This node will first receive a sync message from node %d",
+                  iv_iohsInstance.peerNodeInstance);
+        // Receive a sync from the peer node
+        l_errl = receiveSyncMsg(iv_iohsInstance, rcvd_error);
+        if(l_errl)
+        {
+            // Capture and continue communicating
+            handleError(l_errl);
+        }
+
+        // Wait 10ms before sending the sync message to make sure the communication protocol
+        // has a chance to catch up.
+        nanosleep(0, 10*NS_PER_MSEC);
+
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeSync: This node will now send a sync message to node %d",
+                  iv_iohsInstance.peerNodeInstance);
+        // Send a sync message to a peer node
+        l_errl = sendSyncMsg(iv_iohsInstance, iv_was_error);
+        if(l_errl)
+        {
+            // Capture and continue communicating
+            handleError(l_errl);
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeSync: This node will first send a sync message to node %d",
+                  iv_iohsInstance.peerNodeInstance);
+        // Send a sync message to a peer node
+        l_errl = sendSyncMsg(iv_iohsInstance, iv_was_error);
+        if(l_errl)
+        {
+            // Capture and continue communicating
+            handleError(l_errl);
+        }
+
+        // Wait 10ms before sending the message to make sure the communication protocol
+        // has a chance to catch up.
+        nanosleep(0, 10*NS_PER_MSEC);
+
+        // Receive a sync message from the peer node
+        TRACFCOMP(g_trac_nc, INFO_MRK"NodeCommExchangeSync: This node will now receive a sync message from node %d",
+                  iv_iohsInstance.peerNodeInstance);
+        l_errl = receiveSyncMsg(iv_iohsInstance, rcvd_error);
+        if(l_errl)
+        {
+            // Capture and continue communicating
+            handleError(l_errl);
+        }
+    }
+
+    // If we were told there was an error propogate it up
+    if (rcvd_error)
+    {
+        mutex_lock(&iv_rcv_error_mutex);
+        iv_p_error_nodes->push_back(iv_iohsInstance.peerNodeInstance);
+        mutex_unlock(&iv_rcv_error_mutex);
+    }
 }
 
 /**

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,9 +62,9 @@ namespace NODECOMM
 // ----------------------------------------------
 // If the link(s) are up the operation should complete right away
 // so there will only be a short polling window
-#define NODE_COMM_POLL_DELAY_NS ( 10 )  // Sleep for 10ns per poll
+#define NODE_COMM_POLL_INTERVAL_NS ( 10 )  // Sleep for 10ns per poll
 // FSP is expecting a reply in 30 seconds, so leave some buffer
-#define NODE_COMM_POLL_DELAY_TOTAL_NS (25 * NS_PER_SEC) // Total time 25s
+#define NODE_COMM_POLL_TIMEOUT_SECS (25) // Timeout after 25 seconds with no attention
 
 
 /**
@@ -82,23 +82,30 @@ errlHndl_t nodeCommRecvMessage(TARGETING::Target* i_pTarget,
     bool attn_found = false;
     uint8_t actual_linkId = 0;
     uint8_t actual_mboxId = 0;
-
-    const uint64_t interval_ns = NODE_COMM_POLL_DELAY_NS;
-    uint64_t time_polled_ns = 0;
+    uint32_t num_poll_attempts = 0;
 
     TRACUTCOMP(g_trac_nc,ENTER_MRK"nodeCommRecvMessage: i_pTarget=0x%.08X",
               get_huid(i_pTarget));
 
     do
     {
-        do
-        {
+
+    // Poll for NODE_COMM_POLL_TIMEOUT_SECS seconds with
+    // NODE_COMM_POLL_INTERVAL_NS nanoseconds inbetween each poll attempt
+    const bool timeout =
+        hbstd::with_timeout(NODE_COMM_POLL_TIMEOUT_SECS, 0,
+            0, NODE_COMM_POLL_INTERVAL_NS,
+            [&]()
+    {
+        hbstd::timeout_t continue_polling = hbstd::timeout_t::CONTINUE;
 
         // Look for Attention
         err = nodeCommMapAttn(i_pTarget,
                               attn_found,
                               actual_linkId,
                               actual_mboxId);
+        num_poll_attempts++;
+
         if (err)
         {
             TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: Error Back "
@@ -106,73 +113,75 @@ errlHndl_t nodeCommRecvMessage(TARGETING::Target* i_pTarget,
                       TRACE_ERR_FMT,
                       get_huid(i_pTarget),
                       TRACE_ERR_ARGS(err));
-            break;
+
+            continue_polling = hbstd::timeout_t::STOP;
         }
         if (attn_found == true)
         {
             TRACUTCOMP(g_trac_nc,INFO_MRK"nodeCommRecvMessage: "
-              "nodeCommMapAttn attn_found (%d) for Tgt=0x%.08X, link=%d, "
-              "mbox=%d",
-              attn_found, get_huid(i_pTarget), actual_linkId, actual_mboxId);
-            break;
+              "nodeCommMapAttn attn_found (%d) after (%d) poll attempts for "
+              "Tgt=0x%.08X, link=%d, mbox=%d",
+              attn_found, num_poll_attempts,
+              get_huid(i_pTarget), actual_linkId, actual_mboxId);
+
+            continue_polling = hbstd::timeout_t::STOP;
         }
 
-        if (time_polled_ns >= NODE_COMM_POLL_DELAY_TOTAL_NS)
-        {
-            TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: "
-              "timeout: time_polled_ns-0x%.16llX, MAX=0x%.16llX, "
-              "interval=0x%.16llX",
-              time_polled_ns, NODE_COMM_POLL_DELAY_TOTAL_NS, interval_ns);
+        return continue_polling;
+    });
 
-            /*@
-             * @errortype
-             * @reasoncode       RC_NC_WAITING_TIMEOUT
-             * @moduleid         MOD_NC_RECV
-             * @userdata1[0:31]  Target HUID
-             * @userdata1[32:63] Time Polled in ns
-             * @userdata2[0:31]  Defined MAX Poll Time in ns
-             * @userdata2[32:63] Time Interval Between Polls in ns
-             * @devdesc          Timed out waiting to receive message from
-             *                   another node
-             * @custdesc         Trusted Boot failure
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_NC_RECV,
-                                           RC_NC_WAITING_TIMEOUT,
-                                           TWO_UINT32_TO_UINT64(
-                                             get_huid(i_pTarget),
-                                             time_polled_ns),
-                                           TWO_UINT32_TO_UINT64(
-                                             NODE_COMM_POLL_DELAY_TOTAL_NS,
-                                             interval_ns));
+    if (err)
+    {
+        break;
+    }
 
-            // This failure could be caused by the other side of the bus
-            //  having checkstopped.  Log a procedure callout to direct
-            //  service to investigate.
-            err->addProcedureCallout(HWAS::EPUB_PRC_MULTINODE_CHECKSTOP,
-                                     HWAS::SRCI_PRIORITY_HIGH);
+    if (timeout)
+    {
+        TRACFCOMP(g_trac_nc,ERR_MRK"nodeCommRecvMessage: hit timeout waiting for message. "
+          "timeout secs=0x%.16llX, poll interval ns=0x%.16llX, num poll attempts=%d",
+          NODE_COMM_POLL_TIMEOUT_SECS, NODE_COMM_POLL_INTERVAL_NS, num_poll_attempts);
 
-            // Since we know what bus we expected the message on, call it out
-            addNodeCommBusCallout(i_pTarget,
-                                  i_linkId,
-                                  err);
+        /*@
+         * @errortype
+         * @reasoncode       RC_NC_WAITING_TIMEOUT
+         * @moduleid         MOD_NC_RECV
+         * @userdata1[0:31]  Target HUID
+         * @userdata1[32:63] Number of polling attempts
+         * @userdata2[0:31]  Defined MAX Poll Time in seconds
+         * @userdata2[32:63] Time Interval Between Polls in ns
+         * @devdesc          Timed out waiting to receive message from
+         *                   another node
+         * @custdesc         Trusted Boot failure
+         */
+        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                       MOD_NC_RECV,
+                                       RC_NC_WAITING_TIMEOUT,
+                                       TWO_UINT32_TO_UINT64(
+                                         get_huid(i_pTarget),
+                                         num_poll_attempts),
+                                       TWO_UINT32_TO_UINT64(
+                                         NODE_COMM_POLL_TIMEOUT_SECS,
+                                         NODE_COMM_POLL_INTERVAL_NS));
 
-            // Or HB code failed to do the procedure correctly
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_LOW);
+        // This failure could be caused by the other side of the bus
+        //  having checkstopped.  Log a procedure callout to direct
+        //  service to investigate.
+        err->addProcedureCallout(HWAS::EPUB_PRC_MULTINODE_CHECKSTOP,
+                                 HWAS::SRCI_PRIORITY_HIGH);
 
-            // Grab FFDC from the target
-            getNodeCommFFDC(i_pTarget,
-                            err);
+        // Since we know what bus we expected the message on, call it out
+        addNodeCommBusCallout(i_pTarget,
+                              i_linkId,
+                              err);
 
-            break;
-        }
+        // Or HB code failed to do the procedure correctly
+        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                 HWAS::SRCI_PRIORITY_LOW);
 
-        // Sleep before polling again
-        nanosleep( 0, interval_ns );
-        time_polled_ns += interval_ns;
-
-        } while(attn_found == false);
+        // Grab FFDC from the target
+        getNodeCommFFDC(i_pTarget,
+                        err);
+    }
 
     if (err)
     {
