@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2003,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2003,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -470,7 +470,17 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // Check PLL unlock attentions on OSC 0.
     if (!pllUnlockClk0.empty())
     {
-        PRDpriority clockPri = (1 == pllUnlockClk0.size()) ? MRU_MED : MRU_HIGH;
+        // The callout priority is dependent on the number of chips with PLL
+        // unlock attentions.
+        PRDpriority clockPri = MRU_MEDA;
+        PRDpriority procPri = MRU_MEDA;
+        GARD_POLICY procGuard = GARD;
+        if (1 < pllUnlockClk0.size())
+        {
+            clockPri = MRU_HIGH;
+            procPri = MRU_MED;
+            procGuard = NO_GARD;
+        }
 
         #ifdef __HOSTBOOT_MODULE
         // Check threshold.
@@ -486,8 +496,8 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             PRDcallout clockCallout {trgt, PRDcalloutData::TYPE_PROCCLK0};
             io_sc.service_data->SetCallout(clockCallout, clockPri);
 
-            // Callout the processor. Do not guard on any callout.
-            io_sc.service_data->SetCallout(trgt, MRU_MED, NO_GARD);
+            // Callout the processor.
+            io_sc.service_data->SetCallout(trgt, procPri, procGuard);
 
             #ifdef __HOSTBOOT_MODULE
             // Actions if at threshold.
@@ -507,7 +517,17 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // Check PLL unlock attentions on OSC 1.
     if (!pllUnlockClk1.empty())
     {
-        PRDpriority clockPri = (1 == pllUnlockClk1.size()) ? MRU_MED : MRU_HIGH;
+        // The callout priority is dependent on the number of chips with PLL
+        // unlock attentions.
+        PRDpriority clockPri = MRU_MEDA;
+        PRDpriority procPri = MRU_MEDA;
+        GARD_POLICY procGuard = GARD;
+        if (1 < pllUnlockClk1.size())
+        {
+            clockPri = MRU_HIGH;
+            procPri = MRU_MED;
+            procGuard = NO_GARD;
+        }
 
         #ifdef __HOSTBOOT_MODULE
         // Check threshold.
@@ -523,8 +543,8 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             PRDcallout clockCallout {trgt, PRDcalloutData::TYPE_PROCCLK1};
             io_sc.service_data->SetCallout(clockCallout, clockPri);
 
-            // Callout the processor. Do not guard on any callout.
-            io_sc.service_data->SetCallout(trgt, MRU_MED, NO_GARD);
+            // Callout the processor.
+            io_sc.service_data->SetCallout(trgt, procPri, procGuard);
 
             #ifdef __HOSTBOOT_MODULE
             // Actions if at threshold.
