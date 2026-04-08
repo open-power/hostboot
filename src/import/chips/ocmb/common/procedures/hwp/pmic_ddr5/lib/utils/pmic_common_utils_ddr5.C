@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -259,21 +259,27 @@ uint16_t get_minimum_vin_bulk_threshold_helper(
     {
         case CONSTS::VIN_BULK_9_5V:
             l_mapped_vin_bulk = 9500;
+            break;
 
         case CONSTS::VIN_BULK_8_5V:
             l_mapped_vin_bulk = 8500;
+            break;
 
         case CONSTS::VIN_BULK_7_5V:
             l_mapped_vin_bulk = 7500;
+            break;
 
         case CONSTS::VIN_BULK_6_5V:
             l_mapped_vin_bulk = 6500;
+            break;
 
         case CONSTS::VIN_BULK_5_5V:
             l_mapped_vin_bulk = 5500;
+            break;
 
         case CONSTS::VIN_BULK_4_25V:
             l_mapped_vin_bulk = 4250;
+            break;
     }
 
     return l_mapped_vin_bulk;
@@ -621,8 +627,6 @@ fapi2::ReturnCode get_nominal_voltage_ddr5(const fapi2::Target<fapi2::TARGET_TYP
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY(mss::pmic::calculate_voltage_bitmap_from_attr(i_pmic_target, l_id, i_rail, l_voltage_setting));
-
     // Unlock register R78 for reading for TPS53831 (TI revision >= 0x23)
     FAPI_TRY(mss::pmic::status::unlock_pmic_r70_to_ra3(i_pmic_target));
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, TPS_REGS::R78_VID_OFFSET_COARSE,
@@ -656,6 +660,8 @@ fapi2::ReturnCode get_nominal_voltage_ddr5(const fapi2::Target<fapi2::TARGET_TYP
                      i_rail);
             break;
     }
+
+    FAPI_TRY(mss::pmic::calculate_voltage_bitmap_from_attr(i_pmic_target, l_id, i_rail, l_voltage_setting));
 
     // Get range minimum voltage for rail using R78
     l_r78_range_min_value_mv = mss::pmic::VOLT_RANGE_VID_OFFSET_COARSE_MINS[i_rail][l_range_selection];
