@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,11 +237,10 @@ struct is_host_p10_putsram<true>
         } while (0); \
         if(l_errl) \
         { \
-            FAPI_INF("subroutine_executor: SBE HWP invoking returns error. " \
-            "Commit error"); \
-            /*Commit the error as unrecoverable */ \
+            FAPI_INF("subroutine_executor: SBE HWP invoking returns error."); \
+            /* Add error to RC so it propagates up to the caller*/ \
             l_errl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE); \
-            errlCommit(l_errl, SBEIO_COMP_ID); \
+            addErrlPtrToReturnCode(RC, l_errl); \
         } \
         else \
         { \
