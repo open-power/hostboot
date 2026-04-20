@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -236,6 +236,7 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libpm.so),
         DEP_LIB(libruntime.so),
         DEP_LIB(libthread_activate.so),
+        DEP_LIB(libsecureboot_ext.so),
 // Once all the HWP calls are implemented and istep 14
 // is fully operational add this back in, if needed, else delete.
 //        DEP_LIB(libnestmemutils.so),

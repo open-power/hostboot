@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,8 @@ namespace SECUREBOOT
         MOD_VERIFY_ODY_SECURITY_SETTINGS        = 0x19,
         MOD_VERIFY_ODY_MEASUREMENT_REGS         = 0x1A,
         MOD_ODY_SECUREBOOT_VERIF                = 0x1B,
+        MOD_HASH_DRBG_INSTANTIATE               = 0x1C,
+        MOD_HASH_DRBG_GENERATE                  = 0x1D,
 
         // Use 0x20-0x3F range for Node Communications
         MOD_NCDD_CHECK_FOR_ERRORS           = 0x20,
@@ -158,6 +160,16 @@ namespace SECUREBOOT
         RC_PHYS_PRES_REIPL                  = SECURE_COMP_ID | 0x45,
         RC_CLEARING_KEY_CLEAR_SENSOR_FAILED = SECURE_COMP_ID | 0x46, // deprecated
         RC_KEY_CLEAR_REQUEST_MFG            = SECURE_COMP_ID | 0x47,
+
+        // Use 0x70-0x7F range for Hash_DRBG reason codes
+        RC_HASH_DRBG_ENTROPY_TOO_SHORT          = SECURE_COMP_ID | 0x70,
+        RC_HASH_DRBG_ENTROPY_TOO_LONG           = SECURE_COMP_ID | 0x71,
+        RC_HASH_DRBG_PERSONALIZATION_TOO_LONG   = SECURE_COMP_ID | 0x72,
+        RC_HASH_DRBG_SECURITY_STRENGTH          = SECURE_COMP_ID | 0x73,
+        RC_HASH_DRBG_NOT_INSTANTIATED           = SECURE_COMP_ID | 0x74,
+        RC_HASH_DRBG_REQUEST_TOO_LARGE          = SECURE_COMP_ID | 0x75,
+        RC_HASH_DRBG_RESEED_REQUIRED            = SECURE_COMP_ID | 0x76,
+        RC_HASH_DRBG_ALREADY_INSTANTIATED       = SECURE_COMP_ID | 0x77,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

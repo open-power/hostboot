@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,10 +49,14 @@
 #include <isteps/istep_reasoncodes.H>
 #include <initservice/isteps_trace.H>
 #include <secureboot/service.H>
+#include <secureboot/hash_drbg.H>
+#include <secureboot/hash_drbg_test_data.H>
 #include <arch/ppc.H>
 #include <memory>
 #include <algorithm>
 #include <scom/scomif.H>
+#include <stdio.h>
+#include <secureboot/secure_buffer.H>
 
 // HWP
 #include <p10_ncu_enable_darn.H>
@@ -279,6 +283,189 @@ static errlHndl_t initialize_boot_core_ncu(Target* const i_node,
     return errl;
 }
 
+/* @brief Create and instantiate a Hash_DRBG for memory encryption key generation
+ *
+ * This function generates entropy using hardware_random64 and creates a DRBG
+ * instance with a personalization string based on the processor's ECID.
+ * The entropy is collected with the assumption of 0.5 bits of entropy per bit
+ * of output, so we collect double the required amount.
+ *
+ * @param[in] i_core     The core to use for DARN instructions
+ * @param[in] i_nx       The NX unit connected to i_core
+ * @param[in] i_proc     The processor target for ECID attribute
+ * @param[out] o_drbg    The instantiated DRBG instance
+ * @return errlHndl_t    Error if any, nullptr otherwise
+ */
+static errlHndl_t create_drbg_for_memory_encryption(const Target* const i_core,
+                                                     const Target* const i_nx,
+                                                     const Target* const i_proc,
+                                                     SECUREBOOT::Hash_DRBG& o_drbg)
+{
+    errlHndl_t errl = nullptr;
+
+    // For 256-bit security strength:
+    // Needs 256 bits of entropy plus another 128 bits for the nonce which totals 384 bits of entropy.
+    // Due to DARN giving use .5 bits of entropy per bit of raw data, we need double the
+    // entropy in raw data output for a total of 768 bits of raw data output from DARN.
+    // 768 bits / 64 bits per DARN instruction = 12 DARN calls
+    constexpr size_t ENTROPY_UINT64_COUNT = 12;
+    uint64_t entropy_buffer[ENTROPY_UINT64_COUNT] = {0};
+
+    // Generate entropy using DARN (hardware RNG)
+    for (size_t i = 0; i < ENTROPY_UINT64_COUNT; ++i)
+    {
+        errl = hardware_random64(i_core, i_nx, entropy_buffer[i]);
+        if (errl)
+        {
+            // Zero out any collected entropy before returning
+            CLEAN_BUFFER_STACK(entropy_buffer, sizeof(entropy_buffer));
+            return errl;
+        }
+    }
+
+    // Create personalization string from ECID
+    // ATTR_ECID is a uint64_t array of size 2 (128 bits total)
+    const auto ecid = i_proc->getAttrAsStdArr<ATTR_ECID>();
+
+    // Format personalization string as "hostboot-<ECID[0]>-<ECID[1]>"
+    char personalization[64] = {};
+    snprintf(personalization, sizeof(personalization),
+             "hostboot-%016llx-%016llx",
+             static_cast<unsigned long long>(ecid[0]),
+             static_cast<unsigned long long>(ecid[1]));
+
+    // Instantiate the DRBG
+    errl = o_drbg.instantiate(reinterpret_cast<const uint8_t*>(entropy_buffer),
+                              sizeof(entropy_buffer),
+                              reinterpret_cast<const uint8_t*>(personalization),
+                              strlen(personalization));
+
+    // Zero out the entropy buffer
+    CLEAN_BUFFER_STACK(entropy_buffer, sizeof(entropy_buffer));
+
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"create_drbg_for_memory_encryption: DRBG instantiation failed");
+    }
+
+    return errl;
+}
+
+/**
+ * @brief Run a known-answer health test on the Hash_DRBG implementation
+ *
+ * This function performs a cryptographic health check on the Hash_DRBG
+ * (Deterministic Random Bit Generator) implementation before it is used
+ * for generating memory encryption keys. The test uses known test vectors
+ * from NIST SP 800-90A to verify that the DRBG produces the expected output.
+ *
+ * The health test:
+ * 1. Instantiates a DRBG with known test entropy and personalization string
+ * 2. Generates random output from the DRBG
+ * 3. Compares the output against the expected known-answer test vector
+ * 4. Uninstantiates the DRBG and cleans up
+ *
+ * This test ensures that the DRBG implementation is functioning correctly
+ * before it is used to generate cryptographic keys for memory encryption.
+ * A failure in this test indicates a serious problem with the DRBG
+ * implementation or the underlying cryptographic primitives.
+ *
+ * @return errlHndl_t  Error log handle if the test fails, nullptr on success
+ *
+ * @note This function should be called before the DRBG's first use in the
+ *       IPL sequence to ensure the implementation is working correctly.
+ * @note Uses TEST2 test vectors from hash_drbg_test_data.H since it uses personalization
+ */
+static errlHndl_t run_drbg_health_test()
+{
+    errlHndl_t errl = nullptr;
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            "run_drbg_health_test: Running DRBG health test");
+
+    SECUREBOOT::Hash_DRBG test_drbg;
+    uint8_t test_output[SECUREBOOT::DRBG_TEST_REQUESTED_BYTES] = {};
+
+    errl = test_drbg.instantiate(SECUREBOOT::TEST2_ENTROPY,
+                                    sizeof(SECUREBOOT::TEST2_ENTROPY),
+                                    SECUREBOOT::TEST2_PERSONALIZATION,
+                                    sizeof(SECUREBOOT::TEST2_PERSONALIZATION));
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"run_drbg_health_test: DRBG test instantiation failed");
+        goto ERROR_EXIT;
+    }
+
+    errl = test_drbg.generate(test_output, sizeof(test_output));
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"run_drbg_health_test: DRBG test first generation failed");
+        test_drbg.uninstantiate();
+        goto ERROR_EXIT;
+    }
+
+    if (memcmp(test_output, SECUREBOOT::TEST2_EXPECTED_OUTPUT_1, sizeof(test_output)) != 0)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"run_drbg_health_test: DRBG test output mismatch on first generate");
+        /*@
+         * @errortype
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_ENABLE_MEMORY_ENCRYPTION
+         * @reasoncode       RC_HASH_DRBG_TEST_FIRST_GEN_FAILED
+         * @devdesc          DRBG health test failed on first generate
+         * @custdesc         Security failure prevents memory encryption
+         */
+        errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            MOD_ENABLE_MEMORY_ENCRYPTION,
+            RC_HASH_DRBG_TEST_FIRST_GEN_FAILED);
+        errl->addProcedureCallout(EPUB_PRC_HB_CODE, SRCI_PRIORITY_HIGH);
+        test_drbg.uninstantiate();
+        goto ERROR_EXIT;
+    }
+
+    errl = test_drbg.generate(test_output, sizeof(test_output));
+    if (errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"run_drbg_health_test: DRBG test second generation failed");
+        test_drbg.uninstantiate();
+        goto ERROR_EXIT;
+    }
+
+    if (memcmp(test_output, SECUREBOOT::TEST2_EXPECTED_OUTPUT_2, sizeof(test_output)) != 0)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"run_drbg_health_test: DRBG test output mismatch on second generate");
+        /*@
+         * @errortype
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_ENABLE_MEMORY_ENCRYPTION
+         * @reasoncode       RC_HASH_DRBG_TEST_SECOND_GEN_FAILED
+         * @devdesc          DRBG health test failed on second generate
+         * @custdesc         Security failure prevents memory encryption
+         */
+        errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            MOD_ENABLE_MEMORY_ENCRYPTION,
+            RC_HASH_DRBG_TEST_SECOND_GEN_FAILED);
+        errl->addProcedureCallout(EPUB_PRC_HB_CODE, SRCI_PRIORITY_HIGH);
+        test_drbg.uninstantiate();
+        goto ERROR_EXIT;
+    }
+
+    test_drbg.uninstantiate();
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "run_drbg_health_test: DRBG health test passed");
+ERROR_EXIT:
+    return errl;
+}
+
 static errlHndl_t enable_memory_encryption()
 {
     // List of pairs of encrypt and decrypt registers, which need to contain the
@@ -295,7 +482,9 @@ static errlHndl_t enable_memory_encryption()
 
     // AES-XTS requires both keys, whereas CTR mode only requires one, but we
     // set up both in either case to support both.
-    static const crypto_scom_pair_t key_scoms[] =
+    // Each pair is a pair of HALF of an encrypt and decrypt key since each register only fits half of a key
+    // In total there are 3 separate full keys, key 1, key 2, and the nonce
+    static const crypto_scom_pair_t half_key_regs[] =
     {
         { CRYPTO_ENCRYPT_CRYPTOKEY1A, CRYPTO_DECRYPT_CRYPTOKEY1A },
         { CRYPTO_ENCRYPT_CRYPTOKEY1B, CRYPTO_DECRYPT_CRYPTOKEY1B },
@@ -304,6 +493,7 @@ static errlHndl_t enable_memory_encryption()
         { CRYPTO_ENCRYPT_CRYPTONONCEA, CRYPTO_DECRYPT_CRYPTONONCEA },
         { CRYPTO_ENCRYPT_CRYPTONONCEB, CRYPTO_DECRYPT_CRYPTONONCEB, NONCE_B_MASK }
     };
+    const size_t num_half_keys = sizeof(half_key_regs) / sizeof(half_key_regs[0]);
 
     errlHndl_t errl = nullptr;
 
@@ -329,16 +519,10 @@ static errlHndl_t enable_memory_encryption()
                               return enable && t->getAttr<ATTR_PROC_MEMORY_ENCRYPTION_ENABLED>();
                           });
 
-    do
     {
 
     if (enable_encryption)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Memory encryption: Initializing keys for a total of %lu MCCs on node 0x%08x",
-                  encrypt_mccs.size(),
-                  get_huid(node));
-
         // Collect a list of MCCs from each PROC on this node if encryption
         // is enabled.
         getChildAffinityTargetsByState(encrypt_mccs,
@@ -346,13 +530,18 @@ static errlHndl_t enable_memory_encryption()
                                        CLASS_NA,
                                        TYPE_MCC,
                                        UTIL_FILTER_FUNCTIONAL);
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "Memory encryption: Initializing keys for a total of %lu MCCs on node 0x%08x",
+                  encrypt_mccs.size(),
+                  get_huid(node));
     }
     else
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Memory encryption: Encryption disabled on node 0x%08x, not initializing keys",
                   get_huid(node));
-        break;
+        goto ERROR_EXIT;
     }
 
     // Set up the boot core for DARN and migrate this task there so that the
@@ -362,7 +551,7 @@ static errlHndl_t enable_memory_encryption()
 
     if (errl)
     {
-        break;
+        goto ERROR_EXIT;
     }
 
     task_affinity_pin();
@@ -377,50 +566,86 @@ static errlHndl_t enable_memory_encryption()
     // Unblock SCOM value tracing when this scope ends
     const auto unblock_scom_trace = hbstd::scope_exit([] { SCOM::setBlockScomValueTrace(false); });
 
+    // Per NIST standard, run DRBG known-answer test before its first use in the IPL sequence
+    errl = run_drbg_health_test();
+    if (errl)
+    {
+        goto ERROR_EXIT;
+    }
+
+    // Create and instantiate DRBG for key generation
+    // Use the first processor for ECID
+    SECUREBOOT::Hash_DRBG drbg;
+    errl = create_drbg_for_memory_encryption(activecore, activenx, procs[0], drbg);
+
+    if (errl)
+    {
+        goto ERROR_EXIT;
+    }
+
+    // Ensure DRBG is uninstantiated when this scope ends
+    const auto uninstantiate_drbg = hbstd::scope_exit([&drbg] { drbg.uninstantiate(); });
+
     // Iterate each MCC in this node and generate a random key for each key SCOM
     // register.
 
     for (const auto mcc : encrypt_mccs)
     {
-        for (const auto scom_pair : key_scoms)
+        // Loop over number of full keys because we generate one full key at a time
+        // and then split it into two 64 bit half keys to fit in registers
+        for (size_t key_reg_i = 0; key_reg_i < (num_half_keys / 2); key_reg_i++)
         {
-            uint64_t key = 0;
-            errl = hardware_random64(activecore, activenx, key);
+            // Generate 128 bits (16 bytes) at a time from DRBG
+            // Use two uint64_t values to hold the 128 bits
+            uint64_t key_bytes[2] = {0, 0};
+            errl = drbg.generate(reinterpret_cast<uint8_t*>(key_bytes), sizeof(key_bytes));
 
             if (errl)
             {
-                break;
+                CLEAN_BUFFER_STACK(key_bytes, sizeof(key_bytes));
+                goto ERROR_EXIT;
             }
 
-            // Mask key and write to encryption and decryption registers
-            key &= scom_pair.mask;
-
-            uint64_t buffer = key;
-            uint64_t buffersize = sizeof(buffer);
-            errl = deviceWrite(mcc, &buffer, buffersize, DEVICE_SCOM_ADDRESS(scom_pair.encrypt_key_reg));
-
-            if (errl)
+            // For each half of key_bytes, write the value to the appropriate registers
+            for (size_t key_half = 0; key_half < 2; key_half++)
             {
-                break;
+                auto half_key_scom_pair = half_key_regs[key_reg_i*2 + key_half];
+                uint64_t half_key = key_bytes[key_half] & half_key_scom_pair.mask;
+
+                uint64_t buffer = half_key;
+                uint64_t buffersize = sizeof(buffer);
+                errl = deviceWrite(mcc, &buffer, buffersize, DEVICE_SCOM_ADDRESS(half_key_scom_pair.encrypt_key_reg));
+
+                if (errl)
+                {
+                    CLEAN_BUFFER_STACK(&buffer, sizeof(buffer));
+                    CLEAN_BUFFER_STACK(&half_key, sizeof(half_key));
+                    CLEAN_BUFFER_STACK(key_bytes, sizeof(key_bytes));
+                    goto ERROR_EXIT;
+                }
+
+                errl = deviceWrite(mcc, &buffer, buffersize, DEVICE_SCOM_ADDRESS(half_key_scom_pair.decrypt_key_reg));
+
+                if (errl)
+                {
+                    CLEAN_BUFFER_STACK(&buffer, sizeof(buffer));
+                    CLEAN_BUFFER_STACK(&half_key, sizeof(half_key));
+                    CLEAN_BUFFER_STACK(key_bytes, sizeof(key_bytes));
+                    goto ERROR_EXIT;
+                }
+
+                // Clean sensitive data after use
+                CLEAN_BUFFER_STACK(&buffer, sizeof(buffer));
+                CLEAN_BUFFER_STACK(&half_key, sizeof(half_key));
             }
 
-            buffer = key;
-            buffersize = sizeof(buffer);
-            errl = deviceWrite(mcc, &buffer, buffersize, DEVICE_SCOM_ADDRESS(scom_pair.decrypt_key_reg));
-
-            if (errl)
-            {
-                break;
-            }
-        }
-
-        if (errl)
-        {
-            break;
+            // Clean key_bytes after processing both halves
+            CLEAN_BUFFER_STACK(key_bytes, sizeof(key_bytes));
         }
     }
+    }
 
-    } while (false);
+ERROR_EXIT:
 
     { // Create an informational error log to report whether we enabled memory encryption
         /*@
