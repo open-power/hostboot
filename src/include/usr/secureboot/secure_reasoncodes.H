@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,8 @@ namespace SECUREBOOT
         MOD_VERIFY_ODY_SECURITY_SETTINGS        = 0x19,
         MOD_VERIFY_ODY_MEASUREMENT_REGS         = 0x1A,
         MOD_ODY_SECUREBOOT_VERIF                = 0x1B,
+        MOD_HASH_DRBG_INSTANTIATE               = 0x1C,
+        MOD_HASH_DRBG_GENERATE                  = 0x1D,
 
         // Use 0x20-0x3F range for Node Communications
         MOD_NCDD_CHECK_FOR_ERRORS           = 0x20,
@@ -168,6 +170,16 @@ namespace SECUREBOOT
         RC_BAD_V3_FW_HDR_RESERVED          = SECURE_COMP_ID | 0x55,
         RC_BAD_V3_FW_HDR_RESERVED1         = SECURE_COMP_ID | 0x56,
         RC_BAD_MIX_OF_V1_AND_V3            = SECURE_COMP_ID | 0x57,
+
+        // Use 0x70-0x7F range for Hash_DRBG reason codes
+        RC_HASH_DRBG_ENTROPY_TOO_SHORT          = SECURE_COMP_ID | 0x70,
+        RC_HASH_DRBG_ENTROPY_TOO_LONG           = SECURE_COMP_ID | 0x71,
+        RC_HASH_DRBG_PERSONALIZATION_TOO_LONG   = SECURE_COMP_ID | 0x72,
+        RC_HASH_DRBG_SECURITY_STRENGTH          = SECURE_COMP_ID | 0x73,
+        RC_HASH_DRBG_NOT_INSTANTIATED           = SECURE_COMP_ID | 0x74,
+        RC_HASH_DRBG_REQUEST_TOO_LARGE          = SECURE_COMP_ID | 0x75,
+        RC_HASH_DRBG_RESEED_REQUIRED            = SECURE_COMP_ID | 0x76,
+        RC_HASH_DRBG_ALREADY_INSTANTIATED       = SECURE_COMP_ID | 0x77,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -33,6 +33,7 @@ OBJS += $(if $(CONFIG_PHYS_PRES_PWR_BUTTON), phys_presence.o)
 OBJS += $(if $(CONFIG_KEY_CLEAR), key_clear.o)
 OBJS += $(if $(CONFIG_SECUREBOOT), p10_update_security_ctrl.o)
 OBJS += $(if $(CONFIG_SECUREBOOT), ody_secureboot.o)
+OBJS += $(if $(CONFIG_SECUREBOOT), hash_drbg.o)
 
 VPATH += $(PERV_HWP_PATH)
 
