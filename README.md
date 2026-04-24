@@ -1,3 +1,5 @@
+** NOTE : This branch is deprecated.  Use one of the named release branches for up to date code **
+
 # Hostboot
 Hostboot firmware initializes all processor, bus, and memory within IBM POWER
  based systems. Furthermore, it is responsible for loading the hostboot image
