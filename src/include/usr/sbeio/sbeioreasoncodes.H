@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -259,6 +259,32 @@ enum UserDetailsTypes
  * @userdata2    Number of FFDC packages
  * @devdesc      Unexpected number of FFDC packages in buffer
  * @custdesc     Extra FFDC gathered, marked information event
+ */
+
+/*@
+ * @errortype
+ * @moduleid          SBEIO_FIFO
+ * @reasoncode        SBEIO_RECEIVED_UNEXPECTED_MSG
+ * @userdata1         Target HUID
+ * @userdata2[0:15]   Requested command class
+ * @userdata2[16:31]  Requested command
+ * @userdata2[32:47]  Returned command class
+ * @userdata2[48:63]  Returned command
+ * @devdesc           Call to FIFO Chip Op returned an
+ *                    unexpected message type.
+ */
+
+/*@
+ * @errortype
+ * @moduleid          SBEIO_FIFO
+ * @reasoncode        SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG
+ * @userdata1         Target HUID
+ * @userdata2[0:15]   Requested command class
+ * @userdata2[16:31]  Requested command
+ * @userdata2[32:47]  Returned command class
+ * @userdata2[48:63]  Returned command
+ * @devdesc           Call to FIFO Chip Op returned an
+ *                    unexpected message type.
  */
 
 #endif

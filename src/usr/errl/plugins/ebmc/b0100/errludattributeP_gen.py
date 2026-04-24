@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2025
+# Contributors Listed Below - COPYRIGHT 2025,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -6126,6 +6126,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x6d2847c:
+            #simpleType:uint
+            label = "ECS_PARALLEL_PORT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x6d3696b:
             #simpleType:uint
             label = "CHIP_ID"
@@ -6621,13 +6627,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
-        elif attrEnum == 0x76d2e17:
-            #simpleType:uint
-            label = "PROC_FABRIC_A_ATTACHED_TOPOLOGY_ID"
-            traceEntry.append("[8]:")
-            for x in range(8):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
         elif attrEnum == 0x76d448e:
             #simpleType:uint
             label = "IO_OMI_PRE1"
@@ -7167,6 +7166,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(2):
                 traceEntry.append(hexConcat(data, i, i+2)[0])
                 i += 2
+        elif attrEnum == 0x81af48e:
+            #simpleType:uint
+            label = "ECS_PARALLEL_RANK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0x81d308e:
             #simpleType:uint
             label = "RCW44_CHB_D0"
@@ -7789,6 +7794,8 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x8da3c56:
+            pass
         elif attrEnum == 0x8dc56b6:
             #simpleType:uint
             label = "ODY_RX2D_DFE_MISC"
@@ -13711,6 +13718,8 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xe93c3a5:
+            pass
         elif attrEnum == 0xe94e26a:
             #simpleType:uint
             label = "ODY_SENSOR_POLLING_PERIOD_MS_INIT"
@@ -14138,13 +14147,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
             #simpleType:uint
             label = "PMIC_READ_TIMEOUT_SEC"
             for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0xf033211:
-            #simpleType:uint
-            label = "PROC_FABRIC_X_ATTACHED_TOPOLOGY_ID"
-            traceEntry.append("[8]:")
-            for x in range(8):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
         elif attrEnum == 0xf036277:

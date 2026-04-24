@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2025
+# Contributors Listed Below - COPYRIGHT 2025,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -34,7 +34,7 @@
 # openbmc project's meta-openpower/recipes-phosphor/logging/hostboot-pel-parsers_git.bb
 # file to reference the Hostboot commit with the change.
 
-# Last generated: Fri May 23 21:52:20 2025 GMT
+# Last generated: Fri Apr 24 14:27:41 2026 GMT
 
 import json
 from udparsers.helpers.errludP_Helpers import intConcat
@@ -751,6 +751,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "The DD level from HB and MVPD is not same" ],
             0x40dcb4: [ "RC_SPI_TPM_REQUEST_TOO_SHORT",
                         "The TPM indicated it was still expecting data after the request got sent" ],
+            0x40e01c: [ "RC_INCOMPLETE_PMIC_DT_DDR5_TARGET_CONFIG",
+                        "Pmic_enable given fewer targets than full redundant set. This indicates system presence detection failed on a PMIC or DT component. This is a non fatal error used to differentiate from pmic_enable fails." ],
             0x40e643: [ "RC_MSS_EXP_RSP_ARG_FAILED",
                         "The response_argument field of the host_fw_response_struct returned a FAILURE" ],
             0x411a07: [ "RC_MSS_RANK_OUT_OF_RANGE",
@@ -1297,6 +1299,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "Conflict in SPD fields: HYBRID_MEDIA_TYPE (byte 3, bits 1:3) cannot be MDS if HYBRID (byte 3, bit 0) is not set." ],
             0x7449c5: [ "RC_MSS_INVALID_SPD_RANK",
                         "Invalid rank passed into attribute engine. May be due to problem in SPD. Note: calls out the rank from the PHY perspective." ],
+            0x7493d3: [ "RC_P10_BUILD_SMP_LINK_TOPOLOGY_ID_LOOKUP_ERR",
+                        "Unable to find remote group ID/chip ID in SMP data structure" ],
             0x74a0cd: [ "RC_PM_OCB1_PUT_DATA_ERROR",
                         "Indicates that a fail occured writing the OCB data register as part of a channel PUT operation. Such a fail can occur due to channel setup or use issues (i.e.overflow) or secondary failures to a SCOM access (eg address issue going to the OCC SRAM)." ],
             0x74e171: [ "RC_TEST_CALLOUT_TEMPSENSOR_TARGET1",

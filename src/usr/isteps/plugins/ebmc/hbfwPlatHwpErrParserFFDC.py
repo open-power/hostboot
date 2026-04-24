@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2025
+# Contributors Listed Below - COPYRIGHT 2025,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -34,7 +34,7 @@
 # openbmc project's meta-openpower/recipes-phosphor/logging/hostboot-pel-parsers_git.bb
 # file to reference the Hostboot commit with the change.
 
-# Last generated: Fri May 23 21:52:20 2025 GMT
+# Last generated: Fri Apr 24 14:27:41 2026 GMT
 
 import json
 from udparsers.helpers.errludP_Helpers import memConcat, hexDump, intConcat
@@ -491,6 +491,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x03c66ea9:
         d["HwpReturnCode"]="RC_PROC_DOES_NOT_SUPPORT_DS_A"
         d["FFDC"]="DS_TEMPLATES_0147"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x03cd186e:
+        d["HwpReturnCode"]="RC_P10_BUILD_SMP_LINK_TOPOLOGY_ID_LOOKUP_ERR"
+        d["FFDC"]="LINK_ID"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x03cd90d9:
@@ -2120,11 +2125,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x12ab4faa:
         d["HwpReturnCode"]="RC_MSS_EXP_DRAMINIT_UNSUPPORTED_3DS_HEIGHT"
         d["FFDC"]="PORT"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x12b9e7cd:
-        d["HwpReturnCode"]="RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG"
-        d["FFDC"]="NUM_DT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x12c0279a:
@@ -15268,6 +15268,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="FREQUENCY_A"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x83d69fe9:
+        d["HwpReturnCode"]="RC_INCOMPLETE_PMIC_DT_DDR5_TARGET_CONFIG"
+        d["FFDC"]="PRESENT_PMIC_DT_TARGETS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x83e9906a:
         d["HwpReturnCode"]="RC_ODY_IO_LOAD_PPE_IMG_ERROR"
         d["FFDC"]="IMAGE_SIZE"
@@ -19151,6 +19156,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CHIP_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa85824ba:
+        d["HwpReturnCode"]="RC_INCOMPLETE_PMIC_DT_DDR5_TARGET_CONFIG"
+        d["FFDC"]="OCMB_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xa85ae1fe:
         d["HwpReturnCode"]="RC_P10_TOD_MOVE_TOD_TO_TB_INIT_TIMEOUT"
         d["FFDC"]="COUNT"
@@ -20205,6 +20215,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xad8116a5:
+        d["HwpReturnCode"]="RC_P10_BUILD_SMP_LINK_TOPOLOGY_ID_LOOKUP_ERR"
+        d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xad8789a2:
         d["HwpReturnCode"]="RC_CPLT_NOT_ALIGNED_ERR"
         d["FFDC"]="LOOP_COUNT"
@@ -20539,6 +20554,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xaf837662:
         d["HwpReturnCode"]="RC_MSS_EXP_BOOT_CONFIG_LANE_INV_FAIL"
         d["FFDC"]="BOOT_MODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xaf8d300d:
+        d["HwpReturnCode"]="RC_P10_BUILD_SMP_LINK_TOPOLOGY_ID_LOOKUP_ERR"
+        d["FFDC"]="REM_ID"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xafa83052:
@@ -29364,6 +29384,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="SMF_CONFIG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf891de9e:
+        d["HwpReturnCode"]="RC_INCOMPLETE_PMIC_DT_DDR5_TARGET_CONFIG"
+        d["FFDC"]="NUM_PMICS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf8bb28d7:
         d["HwpReturnCode"]="RC_XIPC_MVPD_OVLY_RING_HEADER_MISMATCH"
         d["FFDC"]="OVLY_TYPE"
@@ -29745,6 +29770,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PROC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfb5c213a:
+        d["HwpReturnCode"]="RC_INCOMPLETE_PMIC_DT_DDR5_TARGET_CONFIG"
+        d["FFDC"]="EXPECTED_MAX_PMICS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfb8fe646:
         d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
         d["FFDC"]="PMIC1_R04"
@@ -29803,11 +29833,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xfc258108:
         d["HwpReturnCode"]="RC_ODY_DRAMINIT_REPAIRS_EXCEEDED"
         d["FFDC"]="DISABLES_BYTE4"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xfc285100:
-        d["HwpReturnCode"]="RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG"
-        d["FFDC"]="EXPECTED_MIN_DT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfc3332d6:
