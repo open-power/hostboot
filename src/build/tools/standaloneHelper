@@ -132,7 +132,7 @@ generate_sbe_odyssey_images()
     if [[ "${HB_FAST_PRIME}" ]] && [[ -z $HB_FORCE_REBUILD_ODY ]]
     then
         export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_DIR | awk '{print $1}' | sed 's/^-//')
-        export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main-p11/$SBE_SUBREPO_TOP_COMMIT/
+        export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/${PRIME_BRANCH}/$SBE_SUBREPO_TOP_COMMIT/
         # Check if the cached images exist; rebuild the SBE submodule if they don't
         if [ -d ${ODYSSEY_SBE_IMAGES} ]; then
             echo "\n***Using default pre-built SBE Odyssey images\n"
@@ -214,7 +214,7 @@ generate_sbe_image()
     export PPE_SUBREPO_TOP_COMMIT=$(git submodule status ${PPE_DIR} | awk '{print $1}' | sed 's/^-//')
     if [[ "${HB_FAST_PRIME}" ]] && [[ -z $HB_FORCE_REBUILD_SBE ]]
     then
-        PPE_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ppe/main-p11/${PPE_SUBREPO_TOP_COMMIT}"
+        PPE_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ppe/${PRIME_BRANCH}/${PPE_SUBREPO_TOP_COMMIT}"
         if [ -d ${PPE_CACHE_DIR} ]; then
             echo "\n***Using default pre-built SBE images from ${PPE_CACHE_DIR}\n"
             return 0
@@ -279,7 +279,7 @@ generate_hcode_image()
     if [[ "${HB_FAST_PRIME}" ]] && [[ -z $HB_FORCE_REBUILD_EKB ]]
     then
         export EKB_SUBREPO_TOP_COMMIT=$(git submodule status $EKB_DIR | awk '{print $1}' | sed 's/^-//')
-        EKB_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ekb/main-p11/${EKB_SUBREPO_TOP_COMMIT}"
+        EKB_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ekb/${PRIME_BRANCH}/${EKB_SUBREPO_TOP_COMMIT}"
         if [ -d ${EKB_CACHE_DIR} ]; then
             echo "\n***Using default pre-built HCODE images\n"
             cp ${EKB_CACHE_DIR}/p10.hw_image.bin \
