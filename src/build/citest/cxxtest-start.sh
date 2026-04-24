@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2024
+# Contributors Listed Below - COPYRIGHT 2011,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -43,11 +43,12 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     export HBBLPATH=${STANDALONE}/pnor/hbbl.bin
     export HBICORE_EXTENDED_PATH=${STANDALONE}/staging/hbicore_extended.bin
     export STARTUPSIMICS=${STANDALONE_SIMICS}/hbfw/startup.simics
+    export PRIME_BRANCH=release-fw1120
 
     export PATH=${STANDALONE_SIMICS}:${PATH}
 
     PPE_SUBREPO_TOP_COMMIT=$(git submodule status src/build/tools/extern/ppe | awk '{print $1}' | sed 's/^-//')
-    PPE_CACHE_DIR=${HOSTBOOT_ENVIRONMENT}/prime/ppe/main-p11/${PPE_SUBREPO_TOP_COMMIT}
+    PPE_CACHE_DIR=${HOSTBOOT_ENVIRONMENT}/prime/ppe/${PRIME_BRANCH}/${PPE_SUBREPO_TOP_COMMIT}
     if [[ "$HB_FAST_PRIME" ]] && [[ -d ${PPE_CACHE_DIR} ]]; then
         # Pick up pre-built SBE images
         SBE_STANDALONE_IMG=${PPE_CACHE_DIR}/sbe_seeprom_p10.bin.ecc
@@ -70,7 +71,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     then
         # Pick up pre-built images
         export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_DIR | awk '{print $1}' | sed 's/^-//')
-        export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main-p11/$SBE_SUBREPO_TOP_COMMIT/
+        export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/${PRIME_BRANCH}/$SBE_SUBREPO_TOP_COMMIT/
         # Check if the cached images exist; rebuild the SBE submodule if they don't
         if [ -d ${ODYSSEY_SBE_IMAGES} ]; then
             echo "\n***Using default pre-built SBE Odyssey images from ${ODYSSEY_SBE_IMAGES}\n"
@@ -87,7 +88,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         if [ ! -d ${ODY_SBE_DEBUG_DIR} ]; then
             ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
             if [ ! -d ${ODY_SBE_DEBUG_DIR} ]; then
-                ODY_SBE_DEBUG_DIR=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main-p11/latest/odyssey_debug_files_tools/
+                ODY_SBE_DEBUG_DIR=${HOSTBOOT_ENVIRONMENT}/prime/sbe/${PRIME_BRANCH}/latest/odyssey_debug_files_tools/
             fi
         fi
     fi
