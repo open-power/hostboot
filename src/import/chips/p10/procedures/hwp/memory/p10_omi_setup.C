@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,7 +124,7 @@ fapi2::ReturnCode p10_omi_setup_get_mfg_mode(bool& o_mfg_mode)
     uint32_t l_mfg_flags[4] = {};
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags));
 
-    o_mfg_mode = (l_mfg_flags[l_index] & l_flag_pos) ? true : false;
+    o_mfg_mode = (l_mfg_flags[l_index] & (0x80000000 >> l_flag_pos)) ? true : false;
 
 fapi_try_exit:
     return fapi2::current_err;
