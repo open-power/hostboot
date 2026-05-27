@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -748,15 +748,35 @@ namespace HTMGT
                     {
                         //get parent proc chip.
                         TARGETING::Target* l_proc_target = NULL;
+                        HBPM::loadPmMode l_hb_mode = HBPM::PM_RELOAD;
+
+                        TARGETING::TargetHandleList l_procChips;
+                        TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
+                        for( const auto & proc : l_procChips )
+                        {
+                            // Processor has not been loaded yet, need to use PM_LOAD
+                            if (proc->getAttr<TARGETING::ATTR_HOMER_HCODE_LOADED>() == 0)
+                            {
+                                TMGT_INF("_resetOccs: Proc HUID 0x%X not loaded yet",
+                                         get_huid(proc));
+                                l_hb_mode = HBPM::PM_LOAD;
+                                break;
+                            }
+                        }
 
                         //Reload OCC on this processor chip.
                         TMGT_INF("_resetOccs: Calling loadAndStartPMAll");
-                        err = HBPM::loadAndStartPMAll(HBPM::PM_RELOAD,
+                        err = HBPM::loadAndStartPMAll(l_hb_mode,
                                                       l_proc_target);
                         if(err)
                         {
                             TMGT_ERR("_resetOCCs: loadAndStartPMAll failed. ");
                             err->collectTrace(HTMGT_COMP_NAME);
+
+                            // Update safe mode reason if not already set
+                            const uint32_t l_huid = TARGETING::get_huid(l_proc_target);
+                            _updateSafeModeReason(err->reasonCode(), l_huid);
+
                             processOccStartStatus(false, l_proc_target);
                         }
                         else

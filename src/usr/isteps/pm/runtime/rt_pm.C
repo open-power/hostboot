@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,7 @@ namespace RTPM
 
     /**
      *  @brief Load OCC/HCODE images into mainstore
+     *         (called by PHYP for initial load on FSP)
      *  @param[in]  i_chip              Processor Chip ID
      *  @param[in]  i_homer_addr        Homer physical address
      *  @param[in]  i_occ_common_addr   OCC common area physical address
@@ -520,7 +521,7 @@ namespace RTPM
         int l_rc = 0;
         errlHndl_t l_errl = nullptr;
         Target* l_failedProc = nullptr;
-        bool l_attemptedLoadAndStart = false;
+        bool l_start_completed = false;
 
         Target* l_sys = UTIL::assertGetToplevelTarget();
         auto pm_type = l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>();
@@ -531,9 +532,8 @@ namespace RTPM
             if ((pm_type == PM_COMPLEX_LOAD_TYPE_LOAD) ||
                 (pm_type == PM_COMPLEX_LOAD_TYPE_RELOAD))
             {
-
-                bool l_start_completed = true;
-                l_attemptedLoadAndStart = true;
+                // Assume start completes (will clear on errors)
+                l_start_completed = true;
                 l_errl = HBPM::loadAndStartPMAll(
                               (pm_type == PM_COMPLEX_LOAD_TYPE_LOAD)
                                 ? HBPM::PM_LOAD : HBPM::PM_RELOAD,
@@ -601,7 +601,7 @@ namespace RTPM
                       ERR_MRK"load_and_start_pm_complex: error occurred; rc: %d", l_rc);
         }
 
-        if (l_attemptedLoadAndStart == true)
+        if (l_start_completed == true)
         {
             // Only ever try to load or reload once, so always change to "Do Not Load" here
             pm_type = PM_COMPLEX_LOAD_TYPE_DO_NOT_LOAD;
