@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,6 +96,7 @@ namespace ISTEP
         MOD_MSS_ATTR_CLEANUP                              = 0x42,
         MOD_HOST_SET_IPL_PARMS                            = 0x43,
         MOD_HOST_IPL_COMPLETE                             = 0x44,
+        MOD_LOAD_AND_START_PM_ALL                         = 0x45,
 
         // For CCU Testing
         MOD_MPIPL_CCU_ATTR_UPDATE_ERROR                   = 0xFE,
@@ -209,6 +210,9 @@ namespace ISTEP
         RC_TIMEBASE_CORE_FREQ_MISMATCH           = ISTEP_COMP_ID | 0x72,
         RC_ALL_AVAILABLE_SPARES_DEPLOYED         = ISTEP_COMP_ID | 0x73,
         RC_PRIMARY_PROC_SIGNING_MODE_MISMATCH    = ISTEP_COMP_ID | 0x74,
+        RC_HASH_DRBG_TEST_FIRST_GEN_FAILED       = ISTEP_COMP_ID | 0x75,
+        RC_HASH_DRBG_TEST_SECOND_GEN_FAILED      = ISTEP_COMP_ID | 0x76,
+        RC_PM_RELOAD_MISMATCH                    = ISTEP_COMP_ID | 0x77,
 
         // For CCU testing
         RC_GET_ATTR_FAILURE                      = ISTEP_COMP_ID | 0xFE,
