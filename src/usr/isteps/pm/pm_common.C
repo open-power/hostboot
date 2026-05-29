@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1161,6 +1161,56 @@ namespace HBPM
                 break;
             }
 
+            if (i_mode == PM_LOAD)
+            {
+                // Force HCODE_NOT_LOADED for all procs before initiating load
+                for (auto & l_procChip: l_procChips)
+                {
+                    l_procChip->setAttr<ATTR_HOMER_HCODE_LOADED>(HBPM::HCODE_NOT_LOADED);
+                }
+            }
+            else if (i_mode == PM_RELOAD)
+            {
+                // Create error if RELOAD called when any functional proc is not loaded
+                for (auto & l_procChip: l_procChips)
+                {
+                    if (l_procChip->getAttr<TARGETING::ATTR_HOMER_HCODE_LOADED>() ==
+                        HBPM::HCODE_NOT_LOADED)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                  ERR_MRK"loadAndStartPMAll: "
+                                  "RELOAD called when proc not loaded yet");
+                        o_failTarget = l_procChip;
+                        /*@
+                         * @errortype
+                         * @reasoncode  ISTEP::RC_PM_RELOAD_MISMATCH
+                         * @severity    ERRORLOG::ERRL_SEV_PREDICTIVE
+                         * @moduleid    ISTEP::MOD_LOAD_AND_START_PM_ALL
+                         * @userdata1   processor HUID
+                         * @devdesc     RELOAD requested when proc did not complete LOAD
+                         * @custdesc    A problem occurred during the IPL
+                         *              of the system.
+                         */
+                        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                         ISTEP::MOD_LOAD_AND_START_PM_ALL,
+                                                         ISTEP::RC_PM_RELOAD_MISMATCH,
+                                                         get_huid(l_procChip),
+                                                         0, true);
+                        l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                        l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                        l_errl->collectTrace("ISTEPS_TRACE",256);
+#ifdef CONFIG_HTMGT
+                        l_errl->collectTrace(HTMGT_COMP_NAME,1024);
+#endif
+                        break;
+                    }
+                }
+                if( l_errl )
+                {
+                    break;
+                }
+            }
+
             for (auto & l_procChip: l_procChips)
             {
                 ScopedHomerMapper l_homerMapper(l_procChip);
@@ -1399,6 +1449,12 @@ namespace HBPM
                 l_errl->collectTrace(FAPI_TRACE_NAME,256);
                 l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
                 l_errl->collectTrace("ISTEPS_TRACE",256);
+#ifdef CONFIG_HTMGT
+                // Change severity to info since HTMGT will create
+                // a non-informational log after all retries exhausted
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                l_errl->collectTrace(HTMGT_COMP_NAME,1024);
+#endif
 
                 break;
             }

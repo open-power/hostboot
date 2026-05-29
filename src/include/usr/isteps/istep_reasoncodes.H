@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,6 +94,7 @@ namespace ISTEP
         MOD_BIOS_ATTR_SETTERS                             = 0x40,
         MOD_FINISH_PDR_EXCHANGE                           = 0x41,
         MOD_MSS_ATTR_CLEANUP                              = 0x42,
+        MOD_LOAD_AND_START_PM_ALL                         = 0x43,
     };
 
     /**
@@ -201,6 +202,10 @@ namespace ISTEP
         RC_BOOT_CORE_REPLACEMENT                 = ISTEP_COMP_ID | 0x6F,
         RC_REQUESTED_FREQ_OUTSIDE_BOUNDARY       = ISTEP_COMP_ID | 0x70,
         RC_OCMB_MIXING_RULES_ERROR               = ISTEP_COMP_ID | 0x71,
+        //gap
+        RC_HASH_DRBG_TEST_FIRST_GEN_FAILED       = ISTEP_COMP_ID | 0x75,
+        RC_HASH_DRBG_TEST_SECOND_GEN_FAILED      = ISTEP_COMP_ID | 0x76,
+        RC_PM_RELOAD_MISMATCH                    = ISTEP_COMP_ID | 0x77,
     };
 
 };

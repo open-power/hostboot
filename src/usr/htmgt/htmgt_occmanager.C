@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -654,6 +654,8 @@ namespace HTMGT
                 if((i_reason == HTMGT::OCC_RESET_REASON_CODE_UPDATE) ||
                         (i_reason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE))
                 {
+                    TMGT_INF("_resetOCCs: reset due to Code Update (reason=0x%02X)",
+                             i_reason);
                     i_skipCountIncrement = true;
                 }
 
@@ -744,18 +746,37 @@ namespace HTMGT
                     // Don't restart OCC's on CODE UPDATE
                     if(i_reason != HTMGT::OCC_RESET_REASON_CODE_UPDATE )
                     {
-
                         //get parent proc chip.
                         TARGETING::Target* l_proc_target = NULL;
+                        HBPM::loadPmMode l_hb_mode = HBPM::PM_RELOAD;
+
+                        TARGETING::TargetHandleList l_procChips;
+                        TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
+                        for( const auto & proc : l_procChips )
+                        {
+                            // Processor has not been loaded yet, need to use PM_LOAD
+                            if (proc->getAttr<TARGETING::ATTR_HOMER_HCODE_LOADED>() == 0)
+                            {
+                                TMGT_INF("_resetOccs: Proc HUID 0x%X not loaded yet",
+                                         get_huid(proc));
+                                l_hb_mode = HBPM::PM_LOAD;
+                                break;
+                            }
+                        }
 
                         //Reload OCC on this processor chip.
                         TMGT_INF("_resetOccs: Calling loadAndStartPMAll");
-                        err = HBPM::loadAndStartPMAll(HBPM::PM_RELOAD,
+                        err = HBPM::loadAndStartPMAll(l_hb_mode,
                                                       l_proc_target);
                         if(err)
                         {
                             TMGT_ERR("_resetOCCs: loadAndStartPMAll failed. ");
                             err->collectTrace(HTMGT_COMP_NAME);
+
+                            // Update safe mode reason if not already set
+                            const uint32_t l_huid = TARGETING::get_huid(l_proc_target);
+                            _updateSafeModeReason(err->reasonCode(), l_huid);
+
                             processOccStartStatus(false, l_proc_target);
                         }
                         else
@@ -778,8 +799,16 @@ namespace HTMGT
                 else if (!err) // Reset Threshold reached and no other err
                 {
                     // Create threshold error
-                    TMGT_ERR("_resetOCCs: Retry Threshold reached. "
-                             "Leaving OCCs in reset state");
+                    if (i_reason == HTMGT::OCC_RESET_REASON_CODE_UPDATE)
+                    {
+                        TMGT_ERR("_resetOCCs: Retry Threshold reached during code update. "
+                                 "Leaving OCCs in reset state");
+                    }
+                    else
+                    {
+                        TMGT_ERR("_resetOCCs: Retry Threshold reached. "
+                                 "Leaving OCCs in reset state");
+                    }
                     /*@
                      * @errortype
                      * @moduleid HTMGT_MOD_OCC_RESET

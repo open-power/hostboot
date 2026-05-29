@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -520,7 +520,7 @@ namespace RTPM
         int l_rc = 0;
         errlHndl_t l_errl = nullptr;
         Target* l_failedProc = nullptr;
-        bool l_attemptedLoadAndStart = false;
+        bool l_start_completed = false;
 
         Target* l_sys = UTIL::assertGetToplevelTarget();
         auto pm_type = l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>();
@@ -531,15 +531,20 @@ namespace RTPM
             if ((pm_type == PM_COMPLEX_LOAD_TYPE_LOAD) ||
                 (pm_type == PM_COMPLEX_LOAD_TYPE_RELOAD))
             {
-
-                bool l_start_completed = true;
-                l_attemptedLoadAndStart = true;
+                // Assume start completes (will clear on errors)
+                l_start_completed = true;
                 l_errl = HBPM::loadAndStartPMAll(
                               (pm_type == PM_COMPLEX_LOAD_TYPE_LOAD)
                                 ? HBPM::PM_LOAD : HBPM::PM_RELOAD,
                               l_failedProc);
                 if(l_errl)
                 {
+#ifdef CONFIG_HTMGT
+                    // Change severity to info since HTMGT will create
+                    // a non-informational log after all retries exhausted
+                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_errl->collectTrace(HTMGT_COMP_NAME,1024);
+#endif
                     pm_complex_error(l_errl, l_rc);
                     l_start_completed = false;
                 }
@@ -595,7 +600,7 @@ namespace RTPM
                       ERR_MRK"load_and_start_pm_complex: error occurred; rc: %d", l_rc);
         }
 
-        if (l_attemptedLoadAndStart == true)
+        if (l_start_completed == true)
         {
             // Only ever try to load or reload once, so always change to "Do Not Load" here
             pm_type = PM_COMPLEX_LOAD_TYPE_DO_NOT_LOAD;
