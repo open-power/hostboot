@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,10 +74,59 @@ class WorkItem_pmic_enable: public ISTEP::HwpWorkItem
 
     virtual errlHndl_t run_hwp( void )
     {
-        errlHndl_t l_err = nullptr;
+        errlHndl_t l_errl = nullptr;
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-        FAPI_INVOKE_HWP(l_err, pmic_enable, l_fapi_target);
-        return l_err;
+
+        FAPI_INVOKE_HWP(l_errl, pmic_enable, l_fapi_target);
+
+        // Check for callouts and add default if needed
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      "WorkItem_pmic_enable: pmic_enable returned error for OCMB 0x%08X",
+                      TARGETING::get_huid(iv_pTarget));
+
+            const auto search_results = l_errl->queryCallouts(iv_pTarget);
+            using compare_enum = ERRORLOG::ErrlEntry::callout_search_criteria;
+
+            // Check if we found any callouts for this OCMB
+            if((search_results & compare_enum::TARGET_MATCH) == compare_enum::TARGET_MATCH)
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "WorkItem_pmic_enable: Found existing callout for OCMB 0x%08X",
+                          TARGETING::get_huid(iv_pTarget));
+
+                // If we found a callout for this OCMB w/o a DECONFIG,
+                // edit the callout to include a deconfig
+                if((search_results & compare_enum::DECONFIG_FOUND) != compare_enum::DECONFIG_FOUND)
+                {
+                    TRACFCOMP(g_trac_isteps_trace,
+                              "WorkItem_pmic_enable: Adding DECONFIG to existing callout for OCMB 0x%08X",
+                              TARGETING::get_huid(iv_pTarget));
+                    l_errl->setDeconfigState(iv_pTarget, HWAS::DECONFIG);
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_isteps_trace,
+                              "WorkItem_pmic_enable: Callout already has DECONFIG for OCMB 0x%08X",
+                              TARGETING::get_huid(iv_pTarget));
+                }
+            }
+            else
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "WorkItem_pmic_enable: No callout found, adding default HW callout with DECONFIG/NO_GARD for OCMB 0x%08X",
+                          TARGETING::get_huid(iv_pTarget));
+
+                // No callout found for this OCMB, add one with DECONFIG/NO_GARD
+                l_errl->addHwCallout(iv_pTarget,
+                                HWAS::SRCI_PRIORITY_LOW,
+                                HWAS::DECONFIG,
+                                HWAS::GARD_NULL);
+            }
+        }
+
+        return l_errl;
     }
 };
 
