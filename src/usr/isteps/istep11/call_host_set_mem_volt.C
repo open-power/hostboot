@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,122 @@ class WorkItem_pmic_enable: public ISTEP::HwpWorkItem
     {
         errlHndl_t l_err = nullptr;
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+        
+        // ============================================================
+        // FORCE TEST CASE 1: Simulate error with NO callout
+        // ============================================================
+        #if 0  // Enable this block to test "no callout" scenario
+        TRACFCOMP(g_trac_isteps_trace, "HEYV TEST: Forcing error with NO callout");
+
+        l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        ISTEP::MOD_VOLTAGE_CONFIG,
+                        ISTEP::RC_FAILURE,
+                        TARGETING::get_huid(iv_pTarget),
+                        0);
+        #endif
+        
+        // ============================================================
+        // FORCE TEST CASE 2: Simulate error with callout but NO deconfig
+        // ============================================================
+        #if 0  // Enable this block to test "callout exists without deconfig" scenario
+        TRACFCOMP(g_trac_isteps_trace, "HEYV TEST: Forcing error with callout but NO deconfig");
+
+        l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        ISTEP::MOD_VOLTAGE_CONFIG,
+                        ISTEP::RC_FAILURE,
+                        TARGETING::get_huid(iv_pTarget),
+                        1);
+        // Add a callout WITHOUT deconfig/gard
+        l_err->addHwCallout(iv_pTarget,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::NO_DECONFIG,
+                           HWAS::GARD_NULL);
+        #endif
+        
+        // ============================================================
+        // FORCE TEST CASE 3: Simulate error with callout AND deconfig
+        // ============================================================
+        #if 1  // Enable this block to test "callout with deconfig already set" scenario
+        TRACFCOMP(g_trac_isteps_trace, "HEYV TEST: Forcing error with callout AND deconfig");
+  
+        l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        ISTEP::MOD_VOLTAGE_CONFIG,
+                        ISTEP::RC_FAILURE,
+                        TARGETING::get_huid(iv_pTarget),
+                        2);
+        // Add a callout WITH deconfig
+        l_err->addHwCallout(iv_pTarget,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           HWAS::DECONFIG,
+                           HWAS::GARD_NULL);
+        #endif
+        
+        // ============================================================
+        // Normal HWP call (comment out when testing)
+        // ============================================================
+        #if 0  // Set to 0 when testing above scenarios
         FAPI_INVOKE_HWP(l_err, pmic_enable, l_fapi_target);
+        #endif
+        
+        // ============================================================
+        // Check for callouts and add default if needed
+        // ============================================================
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      "HEYV pmic_enable returned error for OCMB 0x%08X",
+                      TARGETING::get_huid(iv_pTarget));
+            
+            const auto search_results = l_err->queryCallouts(iv_pTarget);
+            using compare_enum = ERRORLOG::ErrlEntry::callout_search_criteria;
+            
+            TRACFCOMP(g_trac_isteps_trace,
+                      "HEYV queryCallouts returned: 0x%02X (TARGET_MATCH=%d, DECONFIG=%d, GARD=%d)",
+                      search_results,
+                      (search_results & compare_enum::TARGET_MATCH) ? 1 : 0,
+                      (search_results & compare_enum::DECONFIG_FOUND) ? 1 : 0,
+                      (search_results & compare_enum::GARD_FOUND) ? 1 : 0);
+            
+            // Check if we found any callouts for this OCMB
+            if((search_results & compare_enum::TARGET_MATCH) == compare_enum::TARGET_MATCH)
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "HEYV Found existing callout for OCMB 0x%08X",
+                          TARGETING::get_huid(iv_pTarget));
+                
+                // If we found a callout for this OCMB w/o a DECONFIG,
+                // edit the callout to include a deconfig
+                if((search_results & compare_enum::DECONFIG_FOUND) != compare_enum::DECONFIG_FOUND)
+                {
+                    TRACFCOMP(g_trac_isteps_trace,
+                              "HEYV Adding DECONFIG to existing callout for OCMB 0x%08X",
+                              TARGETING::get_huid(iv_pTarget));
+                    l_err->setDeconfigState(iv_pTarget, HWAS::DECONFIG);
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_isteps_trace,
+                              "HEYV Callout already has DECONFIG for OCMB 0x%08X",
+                              TARGETING::get_huid(iv_pTarget));
+                }
+            }
+            else
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          "HEYV No callout found, adding default HW callout with DECONFIG/NO_GARD for OCMB 0x%08X",
+                          TARGETING::get_huid(iv_pTarget));
+                
+                // No callout found for this OCMB, add one with DECONFIG/NO_GARD
+                l_err->addHwCallout(iv_pTarget,
+                                HWAS::SRCI_PRIORITY_LOW,
+                                HWAS::DECONFIG,
+                                HWAS::GARD_NULL);
+            }
+        }
+    
         return l_err;
     }
 };
