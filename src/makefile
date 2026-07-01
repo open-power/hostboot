@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2025
+# Contributors Listed Below - COPYRIGHT 2010,2026
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -451,7 +451,7 @@ hbirt_test_LDFLAGS = ${RELOCATABLE_IMAGE_LDFLAGS}
 hbirt_test_LDFILE = kernel.ld
 
 IMAGE_PASS_POST += buildpnor
-IMAGE_PASS_POST += imgsizecheck
+IMAGE_PASS_POST += imgsizecheck ipcdataareacheck
 
 IMAGE_PASS_POST += $(IMGDIR)/hbotStringFile
 CLEAN_TARGETS += $(IMGDIR)/hbotStringFile
@@ -464,7 +464,7 @@ buildpnor: ${IMAGES}
 $(IMGDIR)/hbotStringFile : $(IMAGES)
 	$(ROOTPATH)/src/build/trace/tracehash_hb.pl -c -d $(ROOTPATH)/obj -s $@
 
-.PHONY: imgsizecheck
+.PHONY: imgsizecheck ipcdataareacheck
 
 # MAX_BASE_SIZE is for hbicore.bin, aka HBB (Hostboot Base image)
 # - HBB size is 1MB in pnor layout
@@ -495,3 +495,21 @@ ifndef HOSTBOOT_PROFILE
 endif
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbicore.bin; echo $(MAX_BASE_SIZE)) | sort -n | tail -n1), $(MAX_BASE_SIZE)),true, @echo ERROR: ${IMGDIR}/hbicore.bin too large.  Max allowed size is $(MAX_BASE_SIZE); false)
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbibl.bin; echo $(MAX_BTLDR_SIZE)) | sort -n | tail -n1), $(MAX_BTLDR_SIZE)),true, @echo ERROR: ${IMGDIR}/hbibl.bin too large.  Max allowed size is $(MAX_BTLDR_SIZE); false)
+
+#make sure ipc_data_area has the expected address in hbicore.syms to prevent
+#a problem where the value has changed and a concurrent update
+#is followed by a mainstore dump. The mpipl logic relies on values
+#that were computed during the initial IPL which will be incorrect.
+#PROCESS: grep for ipc_data_area in hbicore.syms, strip off the first two
+#characters, then isolate the address field and compare it with 00030300.
+
+EXPECTED_IPC_DATA_AREA_ADDR = 00030300
+
+ipcdataareacheck: ${IMGDIR}/hbicore.syms
+	$(if $(findstring \
+	    $(shell grep 'ipc_data_area$$' ${IMGDIR}/hbicore.syms | \
+	        colrm 1 2 | colrm 9), \
+	    $(EXPECTED_IPC_DATA_AREA_ADDR)), \
+	    true, \
+	    @echo ERROR: ipc_data_area in ${IMGDIR}/hbicore.syms is not at \
+	        $(EXPECTED_IPC_DATA_AREA_ADDR); false)
