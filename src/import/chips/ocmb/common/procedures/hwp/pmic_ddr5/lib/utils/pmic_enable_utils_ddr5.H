@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -393,6 +393,14 @@ fapi2::ReturnCode inline __attribute__((always_inline)) assert_n_mode_states_ddr
 fapi2::ReturnCode process_n_mode_results(
     const target_info_redundancy_ddr5& i_target_info,
     const pmic_enable_return_code_data& i_rc_data);
+
+///
+/// @brief Validate vendor ID and PMIC revision
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+fapi2::ReturnCode validate_vendor_id_revision(const target_info_redundancy_ddr5& i_target_info);
 
 ///
 /// @brief Set the up DTs, ADCs, PMICs for a redundancy configuration / 4U

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1594,6 +1594,68 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Validate vendor ID and PMIC revision
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
+///
+fapi2::ReturnCode validate_vendor_id_revision(const target_info_redundancy_ddr5& i_target_info)
+{
+    bool l_loop_done = false;
+
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
+    {
+        // If the pmic is not overridden to disabled, run the status checking
+        // Have to wrap this in run_if_present since we are accessing I2C regs and if any targets have issues
+        // the i2c error does not get cleared and causes system boot issues
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [&i_target_info,
+                          l_pmic_count, &l_loop_done]
+                          (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+        {
+            // 1a, Validate pmic vendor id
+            FAPI_TRY_LAMBDA((mss::pmic::check::matching_vendors(i_target_info.iv_ocmb, i_pmic)));
+
+            // 1b, Validate and return revision number
+            FAPI_TRY_LAMBDA(validate_pmic_revisions(i_target_info.iv_ocmb, i_pmic));
+
+            l_loop_done = true;
+
+            // No issues found, exit out of the lambda and for loop
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            // If there are vendor or rev mismatch issues, exit out of the lambda with the error intact
+            if((fapi2::current_err == static_cast<uint32_t>(fapi2::RC_PMIC_MISMATCHING_REVISIONS_DDR5)) ||
+            (fapi2::current_err == static_cast<uint32_t>(fapi2::RC_PMIC_MISMATCHING_VENDOR_IDS)))
+            {
+                l_loop_done = true;
+                return fapi2::current_err;
+            }
+
+            // I2C issues found, mark that PMIC/DT pair attr as n-mode and move to the next pair
+            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_pmic_count);
+        }));
+
+        if(l_loop_done)
+        {
+            // Vendor or rev mismatch found, exit HWP with error
+            if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+            {
+                goto fapi_try_exit;
+            }
+
+            // No issues found, break out of the for loop
+            break;
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Set the up DTs, ADCs, PMICs for a redundancy configuration / 4U
 ///
 /// @param[in] i_ocmb_target OCMB target
@@ -1630,11 +1692,7 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(mss::pmic::ddr5::setup_dt(l_target_info));
 
     // Validate the vendor_id and revision
-    // 1a, Validate pmic vendor id
-    FAPI_TRY((mss::pmic::check::matching_vendors(i_ocmb_target, l_target_info.iv_pmic_dt_map[0].iv_pmic)));
-
-    // 1b, Validate and return revision number
-    FAPI_TRY(validate_pmic_revisions(i_ocmb_target, l_target_info.iv_pmic_dt_map[0].iv_pmic));
+    FAPI_TRY(mss::pmic::ddr5::validate_vendor_id_revision(l_target_info));
 
     // Second, initialize PMIC
     FAPI_TRY(mss::pmic::ddr5::initialize_pmic(i_ocmb_target, l_target_info));
