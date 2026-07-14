@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,8 @@
 #include <runtime/hbrt_utilities.H>        // HBRT_TRACE_NAME
 #include <util/misc.H>                     // isSimicsRunning()
 #include <targeting/odyutil.H>             // isOdysseyChip
+#include <hwas/common/deconfigGard.H>
+#include <secureboot/service.H>
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -503,67 +505,79 @@ void occActiveNotification( void * i_data )
  **/
 void attrSyncRequest( void * i_data)
 {
-    HbrtAttrSyncData_t * l_hbrtAttrData =
-                                reinterpret_cast<HbrtAttrSyncData_t*>(i_data);
-    TRACFCOMP(g_trac_runtime, ENTER_MRK"attrSyncRequest: Target HUID 0x%0X "
-            "for AttrID: 0x%0X with AttrSize: %lld", l_hbrtAttrData->huid,
-            l_hbrtAttrData->attrID, l_hbrtAttrData->sizeOfAttrData);
+    do {
+        if (not SECUREBOOT::allowAttrOverrides())
+        {
+            // Do not allow a service processor to sync attributes if we do not allow attribute overrides.
+            // This feature is only for testing and in secure mode the service processor is an untrusted source.
+            // We do not want to allow them to arbitrarily change our attributes.
+            TRACFCOMP(g_trac_runtime, INFO_MRK"attrSyncRequest: Attribute overrides are disabled, ignoring request.");
+            break;
+        }
 
-    TRACFBIN(g_trac_runtime, "Attribute data: ",
-            &(l_hbrtAttrData->attrDataStart),
-            l_hbrtAttrData->sizeOfAttrData);
+        HbrtAttrSyncData_t * l_hbrtAttrData =
+            reinterpret_cast<HbrtAttrSyncData_t*>(i_data);
+        TRACFCOMP(g_trac_runtime, ENTER_MRK"attrSyncRequest: Target HUID 0x%0X "
+                "for AttrID: 0x%0X with AttrSize: %lld", l_hbrtAttrData->huid,
+                l_hbrtAttrData->attrID, l_hbrtAttrData->sizeOfAttrData);
 
-    // extract the target from the given HUID
-    TargetHandle_t l_target = Target::getTargetFromHuid(l_hbrtAttrData->huid);
+        TRACFBIN(g_trac_runtime, "Attribute data: ",
+                &(l_hbrtAttrData->attrDataStart),
+                l_hbrtAttrData->sizeOfAttrData);
 
-    // Assumes the attribute is writeable
-    bool attr_updated = l_target->unsafeTrySetAttr(
-                                               l_hbrtAttrData->attrID,
-                                               l_hbrtAttrData->sizeOfAttrData,
-               reinterpret_cast<const void*>(&(l_hbrtAttrData->attrDataStart)));
+        // extract the target from the given HUID
+        TargetHandle_t l_target = Target::getTargetFromHuid(l_hbrtAttrData->huid);
 
-    if (!attr_updated)
-    {
-        TRACFCOMP(g_trac_runtime,ERR_MRK"attrSyncRequest: "
+        // Assumes the attribute is writeable
+        bool attr_updated = l_target->unsafeTrySetAttr(
+                l_hbrtAttrData->attrID,
+                l_hbrtAttrData->sizeOfAttrData,
+                reinterpret_cast<const void*>(&(l_hbrtAttrData->attrDataStart)));
+
+        if (!attr_updated)
+        {
+            TRACFCOMP(g_trac_runtime,ERR_MRK"attrSyncRequest: "
                     "Unable to update attribute");
 
-        // Copy the first couple bytes of new attribute data (up to 4 bytes)
-        uint32_t l_attrData = 0;
-        uint32_t l_attrSize = l_hbrtAttrData->sizeOfAttrData;
-        if (l_attrSize > sizeof(l_attrData))
-        {
-            l_attrSize = sizeof(l_attrData);
+            // Copy the first couple bytes of new attribute data (up to 4 bytes)
+            uint32_t l_attrData = 0;
+            uint32_t l_attrSize = l_hbrtAttrData->sizeOfAttrData;
+            if (l_attrSize > sizeof(l_attrData))
+            {
+                l_attrSize = sizeof(l_attrData);
+            }
+            memcpy(&l_attrData, &(l_hbrtAttrData->attrDataStart), l_attrSize);
+
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_PREDICTIVE
+             * @moduleid     MOD_RT_ATTR_SYNC_REQUEST
+             * @reasoncode   RC_ATTR_UPDATE_FAILED
+             * @userdata1[0:31]  Target HUID
+             * @userdata1[32:63] Attribute ID
+             * @userdata2[0:31]  Data Size
+             * @userdata2[32:63] Up to 4 bytes of attribute data
+             * @devdesc      Attribute failed to update on HBRT side
+             * @custdesc     An internal firmware error occurred
+             */
+            errlHndl_t l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                    MOD_RT_ATTR_SYNC_REQUEST,
+                    RC_ATTR_UPDATE_FAILED,
+                    TWO_UINT32_TO_UINT64(
+                        l_hbrtAttrData->huid,
+                        l_hbrtAttrData->attrID),
+                    TWO_UINT32_TO_UINT64(
+                        l_hbrtAttrData->sizeOfAttrData,
+                        l_attrData),
+                    ErrlEntry::ADD_SW_CALLOUT);
+
+            l_err->collectTrace(RUNTIME_COMP_NAME, 256);
+
+            //Commit the error
+            errlCommit(l_err, RUNTIME_COMP_ID);
         }
-        memcpy(&l_attrData, &(l_hbrtAttrData->attrDataStart), l_attrSize);
 
-        /*@
-        * @errortype
-        * @severity     ERRL_SEV_PREDICTIVE
-        * @moduleid     MOD_RT_ATTR_SYNC_REQUEST
-        * @reasoncode   RC_ATTR_UPDATE_FAILED
-        * @userdata1[0:31]  Target HUID
-        * @userdata1[32:63] Attribute ID
-        * @userdata2[0:31]  Data Size
-        * @userdata2[32:63] Up to 4 bytes of attribute data
-        * @devdesc      Attribute failed to update on HBRT side
-        * @custdesc     An internal firmware error occurred
-        */
-       errlHndl_t l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                                        MOD_RT_ATTR_SYNC_REQUEST,
-                                        RC_ATTR_UPDATE_FAILED,
-                                        TWO_UINT32_TO_UINT64(
-                                            l_hbrtAttrData->huid,
-                                            l_hbrtAttrData->attrID),
-                                        TWO_UINT32_TO_UINT64(
-                                            l_hbrtAttrData->sizeOfAttrData,
-                                            l_attrData),
-                                        ErrlEntry::ADD_SW_CALLOUT);
-
-       l_err->collectTrace(RUNTIME_COMP_NAME, 256);
-
-       //Commit the error
-       errlCommit(l_err, RUNTIME_COMP_ID);
-    }
+    } while(0);
 
     TRACFCOMP(g_trac_runtime, EXIT_MRK"attrSyncRequest");
 }
