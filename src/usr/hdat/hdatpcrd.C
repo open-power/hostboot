@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -377,7 +377,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             // Fabric Node Id needs to get set according to the DCM number that
             // contains the processor chip
             hdatGetLocationCode(l_pProcTarget, HDAT_SLCA_FRU_TYPE_PROC,
-                l_cur_location_code);
+                l_cur_location_code, sizeof(l_cur_location_code));
 
             // Value of index is based on the proc numbers, so here depending
             // on the index, the first value is set and consecutive dcm values
