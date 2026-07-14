@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -409,13 +409,15 @@ void hdatPopulateMTMAndSerialNumber()
  * @param i_pFruTarget    - input parameter - fru target
  *        i_frutype - input parameter - fru type
  *        o_locCode - output parameter - Constructed location code
+ *        i_bufferSize - input parameter - size of output buffer
  *
  * @return None
  */
 
 void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
                          HDAT_FRUType_t i_frutype,
-                         char *o_locCode)
+                         char *o_locCode,
+                         size_t i_bufferSize)
 {
     HDAT_ENTER();
     TARGETING::ATTR_PHYS_PATH_type l_physPath;
@@ -439,7 +441,7 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
         {
             HDAT_DBG("fetched SYS_LOCATION_CODE %s for fru type %d",
                       l_sysLocationCode, i_frutype);
-            sprintf(l_locCode, "%s",l_sysLocationCode);
+            snprintf(l_locCode, sizeof(l_locCode), "%s",l_sysLocationCode);
         }
     }
     else
@@ -454,7 +456,7 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
         if(i_frutype == HDAT_SLCA_FRU_TYPE_EV)
         {
             HDAT_DBG("fru type EV 0x%x only CHASSIS_LOCATION_CODE",i_frutype);
-            sprintf(l_locCode, "%s",l_chassisLocationCode);
+            snprintf(l_locCode, sizeof(l_locCode), "%s",l_chassisLocationCode);
         }
 
         else
@@ -467,7 +469,7 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
                                                              l_absLocationCode);
                 HDAT_DBG("l_chassisLocationCode=%s, l_absLocationCode=%s",
                             l_chassisLocationCode,l_absLocationCode);
-                sprintf(l_locCode, "%s-%s",
+                snprintf(l_locCode, sizeof(l_locCode), "%s-%s",
                        l_chassisLocationCode,l_absLocationCode);
             }
          }
@@ -495,7 +497,7 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
                  l_cutString = strchr(l_cutString+1, '/');
              }
 
-             sprintf(l_locCode, "ufcs-%s",(l_suffix+1));
+             snprintf(l_locCode, sizeof(l_locCode), "ufcs-%s",(l_suffix+1));
          }
          else
          {
@@ -505,14 +507,20 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
      }
 
      uint8_t l_index = 0;
-     while(l_index < strlen(l_locCode))
+     uint8_t output_index = 0;
+     while(l_index < strlen(l_locCode) &&
+           output_index < (i_bufferSize-1))
      {
          if(l_locCode[l_index] != ' ')
          {
-             *o_locCode++ = l_locCode[l_index];
+             o_locCode[output_index] = l_locCode[l_index];
+             output_index++;
          }
          l_index++;
      }
+     // Make sure output is null terminated
+     o_locCode[output_index] = '\0';
+
      HDAT_EXIT();
 }
 

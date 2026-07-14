@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -231,7 +231,7 @@ uint16_t hdatAddSLCAEntry( TARGETING::Target *i_Target,
                                          l_hdatslcaentry.max_location_code_len);
 
     hdatGetLocationCode(i_Target,i_frutype,
-                                                 l_hdatslcaentry.location_code);
+                        l_hdatslcaentry.location_code, sizeof(l_hdatslcaentry.location_code));
     uint32_t l_length = strlen(l_hdatslcaentry.location_code);
     l_hdatslcaentry.location_code[l_length]='\0';
     l_hdatslcaentry.actual_location_code_len = l_length + 1;
@@ -323,7 +323,7 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
 
 
     l_slcaBPIndex = l_slcaEntryIndex;
-    hdatGetLocationCode(i_Target, HDAT_SLCA_FRU_TYPE_BP, l_nodeLocCode);
+    hdatGetLocationCode(i_Target, HDAT_SLCA_FRU_TYPE_BP, l_nodeLocCode, sizeof(l_nodeLocCode));
 
     TARGETING::PredicateHwas l_predHwas;
     l_predHwas.present(true);

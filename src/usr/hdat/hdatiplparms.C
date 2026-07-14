@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] 867314078@qq.com                                                   */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -538,7 +538,7 @@ static errlHndl_t hdatGetPortInfo(HDAT::hdatHDIFDataArray_t &o_portArrayHdr,
         char l_locCode[64]={0};
 
         hdatGetLocationCode(l_serialportTarget,
-                                         HDAT_SLCA_FRU_TYPE_CS,l_locCode);
+                                         HDAT_SLCA_FRU_TYPE_CS, l_locCode, sizeof(l_locCode));
         HDAT_DBG(" Serial Port Loc Code :%s", l_locCode);
 
         strncpy((char *)(o_ports[l_loopCnt].hdatLocCode),
