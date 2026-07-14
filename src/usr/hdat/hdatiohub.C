@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1518,7 +1518,7 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 
             // Get the current proc location code
             hdatGetLocationCode(l_pProcTarget, HDAT_SLCA_FRU_TYPE_PROC,
-                l_cur_location_code);
+                l_cur_location_code, sizeof(l_cur_location_code));
 
             uint32_t l_procOrdId =
                      l_pProcTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();

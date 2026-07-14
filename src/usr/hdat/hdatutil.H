@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -495,12 +495,14 @@ void hdatPopulateMTMAndSerialNumber();
  * @param i_pFruTarget    - input parameter - fru target
  *        i_frutype - fru type
  *        o_locCode - output location code
+ *        i_bufferSize - size of provides location code buffer
  *
  * @return None
  */
 void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
                                              HDAT_FRUType_t i_frutype,
-                                             char *o_locCode);
+                                             char *o_locCode,
+                                             size_t i_bufferSize);
 
 /**
  * @brief  Get the ascii keyword for a TARGET
