@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2026                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1162,6 +1162,19 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
 
     if(msg->type == MSG_REQUEST_DMA_BUFFERS)
     {
+        // A DMA-buffer request inbound from the FSP never carries an
+        // extra_data payload (only data[0] = requested size). If the FSP
+        // supplied one, drop it before handing this message to send_msg().
+        if(msg->extra_data != NULL)
+        {
+            TRACFCOMP(g_trac_mbox,
+                      INFO_MRK
+                      "MailboxSp::handle_hbmbox_msg - FSP DMA request with "
+                      "unexpected extra_data %p, dropped",
+                      msg->extra_data);
+            msg->extra_data = NULL;
+        }
+
         // DMA req. will be resolved by send_msg
         send_msg(&i_mbox_msg);   // response message
     }
