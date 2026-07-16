@@ -28,13 +28,14 @@
  * @brief mailbox service provider definition
  */
 
-#include "mailboxsp.H"
 #include "mboxdd.H"
+#include "mailboxsp.H"
 #include "ipcSp.H"
 #include <sys/task.h>
 #include <initservice/taskargs.H>
 #include <initservice/initserviceif.H>
 #include <sys/vfs.h>
+#include <kernel/vmmmgr.H>
 #include <devicefw/userif.H>
 #include <mbox/mbox_reasoncodes.H>
 #include <mbox/mboxUdParser.H>
@@ -945,7 +946,51 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
     // Handle moving data from DMA buffer
     if(iv_dmaBuffer.isDmaAddress(msg->extra_data))
     {
+        // Validate msg_sz from data[1] to ensure it doesn't exceed MBOX_DMA_PAGESIZE
         uint64_t msg_sz = msg->data[1];
+        if(msg_sz > VmmManager::MBOX_DMA_PAGESIZE)
+        {
+            TRACFCOMP(g_trac_mbox,
+                      ERR_MRK"MailboxSp::recv_msg - extra_data size 0x%llx"
+                      " exceeds MBOX_DMA_PAGESIZE 0x%llx; truncating data to that size.",
+                      msg_sz,
+                      static_cast<uint64_t>(VmmManager::MBOX_DMA_PAGESIZE));
+
+            /*@ errorlog tag
+             * @errortype       ERRL_SEV_INFORMATIONAL 
+             * @moduleid        MBOX::MOD_MBOXSRV_RCV
+             * @reasoncode      MBOX::RC_MSG_EXTRA_DATA_TOO_LARGE
+             * @userdata1       msg->data[1] (requested extra_data size in bytes)
+             * @userdata2[00:31] msg_queue_id from the incoming mbox message
+             * @userdata2[32:63] msg_type from the incoming mbox message
+             * @devdesc         Incoming mailbox message claims an extra_data
+             *                  size that exceeds the maximum allowed DMA buffer
+             *                  size.
+             * @custdesc        An internal firmware error occurred
+             */
+            err = new ERRORLOG::ErrlEntry
+                (
+                 ERRORLOG::ERRL_SEV_INFORMATIONAL ,
+                 MBOX::MOD_MBOXSRV_RCV,
+                 MBOX::RC_MSG_EXTRA_DATA_TOO_LARGE,
+                 msg_sz,                          // requested extra_data size
+                 TWO_UINT32_TO_UINT64(
+                     i_mbox_msg.msg_queue_id,     // msg queue id
+                     msg->type),                  // msg type
+                 true //Add HB Software Callout
+                );
+
+            err->addFFDC(MBOX_COMP_ID,
+                         msg,
+                         sizeof(msg_t),
+                         1,//version
+                         MBOX_UDT_MSG_DATA);//subsect
+            err->collectTrace(MBOXMSG_TRACE_NAME);
+            errlCommit(err,MBOX_COMP_ID);
+
+            msg_sz = VmmManager::MBOX_DMA_PAGESIZE;
+        }
+
         void * buf = malloc(msg_sz);
         memcpy(buf,msg->extra_data,msg_sz);
 
