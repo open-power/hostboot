@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,6 +117,36 @@ namespace MBOX
         FIRST_HB_KERNEL_MSG     = 0x80000000,
         LAST_KERNEL_MSG         = 0xFFFFFFFF
     };
+
+    /**
+     * Maximum number of bytes of extra-data that a single mailbox message
+     * may carry in either direction.
+     *
+     * Derivation:
+     *   The DMA buffer pool is 64 pages x 1 KB each = 64 KB total
+     *   (vmmmgr.H: MBOX_DMA_PAGES=64, MBOX_DMA_PAGESIZE=1 KB).
+     *   MailboxSp::handleAllocate() caps each allocation at MAX_ALLOCATION
+     *   (= 64 KB) so no single message can go past the overall DMA buffer pool.
+     *   Each on-wire message is a fixed 40-byte mbox_msg_t header followed
+     *   by the extra-data payload, so the maximum extra-data size is:
+     *       64 KB - sizeof(mbox_msg_t) = 65536 - 40 = 65496 bytes
+     *
+     * Inbound enforcement:
+     *   msg->data[1] is written by the caller. Ensure that the size of the
+     *   msg->data[1] plus the size of the 40-byte mbox_msg_t header is not 
+     *   greater than MBOX_DMA_PAGESIZE. See recv_msg (mailboxsp.C) for 
+     *   the inbound enforcement site.
+     *
+     * Outbound enforcement:
+     *   MailboxSp::handleAllocate() uses MAX_ALLOCATION (= 64 KB) to refuse
+     *   outbound allocations that would exceed the DMA pool budget.
+     *
+     * Note: defined as a macro rather than a typed constant so this header
+     * remains self-contained with no #include dependencies (it is shared
+     * between Hostboot and FSP).
+     */
+    #define MBOX_MSG_SIZE (40u)                           /* sizeof(mbox_msg_t) */
+    #define MBOX_MAX_EXTRA_DATA  ((64u * 1024u) - MBOX_MSG_SIZE) /* 65496 bytes */
 
     /**
      * MBOX to MBOX service message types.

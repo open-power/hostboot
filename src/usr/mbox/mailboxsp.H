@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,6 +154,8 @@ namespace MBOX
                     memset(&msg_payload,'\0',sizeof(msg_t));
                 }
             };
+            static_assert(sizeof(mbox_msg_t) == MBOX_MSG_SIZE, 
+                                    "mbox_msg_t size is out of sync with its define");
 
             // Private functions
 
@@ -338,7 +340,9 @@ namespace MBOX
             enum
             {
                 MAX_RETRY_COUNT = 3,
-                MAX_ALLOCATION = 64 * KILOBYTE,
+                // Keep in sync with MBOX_MAX_EXTRA_DATA in mbox_queues.H
+                // which exposes this limit to code outside this class.
+                MAX_ALLOCATION  = MBOX_MAX_EXTRA_DATA,
             };
 
             /**

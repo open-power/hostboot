@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2026                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -24,6 +26,7 @@
 #define _MBOXUDPARSER
 
 #include <errl/errluserdetails.H>
+#include <limits.h>
 #include <mbox/mbox_reasoncodes.H>
 #include <util/align.H>
 
@@ -46,6 +49,12 @@ namespace MBOX
             if(i_extra_data == NULL)
             {
                 i_data_byte_size = 0;
+            }
+
+            // Clamp the extra-data length to a maximum of 1KB before allocating space.
+            if(i_data_byte_size > KILOBYTE)
+            {
+                i_data_byte_size = KILOBYTE;
             }
 
             size_t msg_size = ALIGN_8(i_msg_byte_size);
