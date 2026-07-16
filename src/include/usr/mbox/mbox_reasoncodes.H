@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,7 @@ namespace MBOX
         RC_IPC_INVALID_NODE          = MBOX_COMP_ID | 0x11,
         RC_MSG_SEND_ERROR            = MBOX_COMP_ID | 0x12,
         RC_IPC_INVALID_DATA          = MBOX_COMP_ID | 0x13,
+        RC_MSG_EXTRA_DATA_TOO_LARGE  = MBOX_COMP_ID | 0x14,
     };
 
 
