@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,11 +30,14 @@
 typedef uint16_t beint16_t;
 typedef beint16_t be16;
 
+// Header structure at the start of each NVRAM section
 struct chrp_nvram_hdr {
-    uint8_t     sig;
-    uint8_t     cksum;
-    be16        len;
-    char        name[12];
+    uint8_t     sig;      // signature of the section
+    uint8_t     cksum;    // checksum across this struct/header
+    be16        len;      // (len * 0x10) is the size of the section
+                          // NOTE: len must at least be 2 to account for
+                          //       the size of the header itself
+    char        name[12]; // section name
 };
 
 extern "C"
