@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2026                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2299,9 +2299,45 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
                         l_recordOffset, l_recordLength, l_eccOffset,
                         l_eccLength,    l_recordName,   l_targetHuid );
 
-            // Retrieve the record data.
-            uint8_t l_recordData[l_recordLength] = {0};  // Create record data buffer
-            l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData,
+            // Validate record length
+            if (l_recordLength == 0)
+            {
+                TRACFCOMP(g_trac_vpd, ERR_MRK
+                          "IpVpdFacade::updateRecordEccData(): "
+                          "Zero-length record detected for target 0x%08X. "
+                          "Possible tampered SEEPROM.",
+                          l_targetHuid);
+
+                /*@
+                 * @errortype
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       VPD::VPD_IPVPD_UPDATE_RECORD_ECC
+                 * @reasoncode     VPD::VPD_INVALID_RECORD_LENGTH
+                 * @userdata1      Record length from SEEPROM (zero)
+                 * @userdata2      Target HUID
+                 * @devdesc        VPD record length is zero - undefined behavior
+                 * @custdesc       A hardware component contains invalid data
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    VPD::VPD_IPVPD_UPDATE_RECORD_ECC,
+                    VPD::VPD_INVALID_RECORD_LENGTH,
+                    l_recordLength,
+                    l_targetHuid,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                l_err->addHwCallout(i_target,
+                                    HWAS::SRCI_PRIORITY_HIGH,
+                                    HWAS::NO_DECONFIG,
+                                    HWAS::GARD_NULL);
+                break;
+            }
+
+            // Allocate record data buffer on heap with untrusted EEPROM data
+            std::vector<uint8_t> l_recordData(l_recordLength);
+
+            // Retrieve the record data
+            l_err = fetchDataFromEeprom(l_recordOffset, l_recordData.size(), l_recordData.data(),
                                         i_target,       i_args.eepromSource);
 
             if ( unlikely(nullptr != l_err) )
@@ -2316,18 +2352,56 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
                         "fetchDataFromEeprom succeeded in retrieving record data %s on "
                         "target 0x%.8X", l_recordName, l_targetHuid );
 
+            // Validate ECC length
+            if (l_eccLength == 0)
+            {
+                TRACFCOMP(g_trac_vpd, ERR_MRK
+                          "IpVpdFacade::updateRecordEccData(): "
+                          "Zero-length ECC detected for target 0x%08X. "
+                          "Possible tampered SEEPROM.",
+                          l_targetHuid);
+
+                /*@
+                 * @errortype
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       VPD::VPD_IPVPD_UPDATE_RECORD_ECC
+                 * @reasoncode     VPD::VPD_INVALID_ECC_LENGTH
+                 * @userdata1      ECC length from SEEPROM (zero)
+                 * @userdata2      Target HUID
+                 * @devdesc        VPD ECC length is zero - undefined behavior
+                 * @custdesc       A hardware component contains invalid data
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    VPD::VPD_IPVPD_UPDATE_RECORD_ECC,
+                    VPD::VPD_INVALID_ECC_LENGTH,
+                    l_eccLength,
+                    l_targetHuid,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                l_err->addHwCallout(i_target,
+                                    HWAS::SRCI_PRIORITY_HIGH,
+                                    HWAS::NO_DECONFIG,
+                                    HWAS::GARD_NULL);
+                break;
+            }
+
+            // Allocate ECC data buffer on heap
+            // Avoid stack overflow with untrusted EEPROM data
+            std::vector<uint8_t> l_eccData(l_eccLength);
+
             // Create the ECC data using the record's data
-            uint8_t l_eccData[l_eccLength] = {0};  // Create record data buffer
-            auto l_returnCode = vpdeccCreateEcc(l_recordData, l_recordLength,
-                                                l_eccData,   &l_eccLength);
+            auto l_returnCode = vpdeccCreateEcc(l_recordData.data(), l_recordData.size(),
+                                                l_eccData.data(),     &l_eccLength);
 
             // If the return code from the call to vpdeccCreateEcc is not VPD_ECC_OK, then an error occurred
             if ( unlikely(VPD_ECC_OK != l_returnCode) )
             {
                 // Check the return code of the call to "vpdeccCreateEcc()" and create the
                 // appropriate error log if necessary.
-                l_err = checkCreateEccDataReturnCode(l_returnCode, i_target, i_args, l_recordName,
-                                        l_recordOffset, l_recordLength, l_eccOffset, l_eccLength);
+                l_err = checkCreateEccDataReturnCode(l_returnCode, i_target, i_args,
+                                        l_recordName, l_recordOffset, l_recordData.size(),
+                                        l_eccOffset, l_eccLength);
                 if (l_err)
                 {
                     break;
@@ -2337,7 +2411,7 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
             // Write the ECC data to the ECC data's offset
             l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
                                         i_target,
-                                        l_eccData,
+                                        l_eccData.data(),
                                         l_eccLength,
                                         DEVICE_EEPROM_ADDRESS(
                                           EEPROM::VPD_AUTO,
@@ -2359,7 +2433,7 @@ IpVpdFacade::updateRecordEccData ( const TARGETING::TargetHandle_t  i_target,
             msgdata.offset = l_eccOffset;
 
             l_err = VPD::sendMboxWriteMsg( l_eccLength,
-                                           l_eccData,
+                                           l_eccData.data(),
                                            i_target,
                                            iv_vpdMsgType,
                                            msgdata );
@@ -2765,9 +2839,45 @@ IpVpdFacade::validateVtocRecordEccData(
                     VPD_TABLE_OF_CONTENTS_RECORD_NAME, l_recordName,
                     l_recordLength, l_recordOffset, l_eccLength, l_eccOffset);
 
-        // Retrieve the record data.
-        uint8_t l_recordData[l_recordLength] = {0};  // Create record data buffer
-        l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData,
+        // Validate record length
+        if (l_recordLength == 0)
+        {
+            TRACFCOMP(g_trac_vpd, ERR_MRK
+                      "IpVpdFacade::validateVtocRecordEccData(): "
+                      "Zero-length record detected for target 0x%08X.",
+                      TARGETING::get_huid(i_target));
+
+            /*@
+             * @errortype
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       VPD::VPD_IPVPD_VALIDATE_RECORD_ECC
+             * @reasoncode     VPD::VPD_INVALID_RECORD_LENGTH
+             * @userdata1      Record length (zero)
+             * @userdata2      Target HUID
+             * @devdesc        VPD record length is zero - undefined behavior
+             * @custdesc       A hardware component contains invalid data
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                VPD::VPD_IPVPD_VALIDATE_RECORD_ECC,
+                VPD::VPD_INVALID_RECORD_LENGTH,
+                l_recordLength,
+                TARGETING::get_huid(i_target),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            l_err->addHwCallout(i_target,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL);
+            break;
+        }
+
+        // Allocate record data buffer on heap
+        // Avoid stack overflow with untrusted EEPROM data
+        std::vector<uint8_t> l_recordData(l_recordLength);
+
+        // Retrieve the record data
+        l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData.data(),
                                     i_target,       i_args.eepromSource);
 
         if ( unlikely(nullptr != l_err) )
@@ -2780,9 +2890,45 @@ IpVpdFacade::validateVtocRecordEccData(
             break;
         }
 
-        // Retrieve the ECC data.
-        uint8_t l_eccData[l_eccLength] = {0};  // Create ECC data buffer
-        l_err = fetchDataFromEeprom(l_eccOffset, l_eccLength, l_eccData,
+        // Validate ECC length
+        if (l_eccLength == 0)
+        {
+            TRACFCOMP(g_trac_vpd, ERR_MRK
+                      "IpVpdFacade::validateVtocRecordEccData(): "
+                      "Zero-length ECC detected for target 0x%08X.",
+                      TARGETING::get_huid(i_target));
+
+            /*@
+             * @errortype
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       VPD::VPD_IPVPD_VALIDATE_RECORD_ECC
+             * @reasoncode     VPD::VPD_INVALID_ECC_LENGTH
+             * @userdata1      ECC length (zero)
+             * @userdata2      Target HUID
+             * @devdesc        VPD ECC length is zero - undefined behavior
+             * @custdesc       A hardware component contains invalid data
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                VPD::VPD_IPVPD_VALIDATE_RECORD_ECC,
+                VPD::VPD_INVALID_ECC_LENGTH,
+                l_eccLength,
+                TARGETING::get_huid(i_target),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            l_err->addHwCallout(i_target,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL);
+            break;
+        }
+
+        // Allocate ECC data buffer on heap
+        // Avoid stack overflow with untrusted EEPROM data
+        std::vector<uint8_t> l_eccData(l_eccLength);
+
+        // Retrieve the ECC data
+        l_err = fetchDataFromEeprom(l_eccOffset, l_eccLength, l_eccData.data(),
                                     i_target,    i_args.eepromSource);
 
         if ( unlikely(nullptr != l_err) )
@@ -2796,8 +2942,8 @@ IpVpdFacade::validateVtocRecordEccData(
         }
 
         // Verify that the retrieved ECC data is as expected.
-        auto l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
-                                            l_eccData,    l_eccLength);
+        auto l_returnCode = vpdeccCheckData(l_recordData.data(), l_recordLength,
+                                            l_eccData.data(),    l_eccLength);
 
         // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
         if ( unlikely(VPD_ECC_OK != l_returnCode) )
@@ -2867,8 +3013,10 @@ IpVpdFacade::validateVtocRecordEccData(
                            VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target),
                            i_args.eepromSource);
 
-                updateRecordData( l_err,        i_target,       VPD_TABLE_OF_CONTENTS_RECORD_NAME,
-                                  l_recordData, l_recordOffset, l_recordLength  );
+                updateRecordData( l_err, i_target,
+                                  VPD_TABLE_OF_CONTENTS_RECORD_NAME,
+                                  l_recordData.data(), l_recordOffset,
+                                  l_recordLength );
                 if (l_err)
                 {
                     TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
@@ -2893,8 +3041,8 @@ IpVpdFacade::validateVtocRecordEccData(
         // The ECC data validation only validates that the ECC data is correct
         // for the record data as a blob. verifyRecordIsValid will check that
         // the record itself is valid in relation to its associated meta data.
-        l_err = verifyRecordIsValid(i_target,     l_recordName,
-                                    l_recordData, l_recordLength);
+        l_err = verifyRecordIsValid(i_target,          l_recordName,
+                                    l_recordData.data(), l_recordLength);
         if (l_err)
         {
             TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
@@ -2958,8 +3106,8 @@ IpVpdFacade::validateAllOtherRecordEccData(
         }
 
         // Pre-allocate the buffers, once, with the largest buffer size needed
-        uint8_t l_recordData[l_maxRecordBufferLength] = {0};
-        uint8_t l_eccData[l_maxEccBufferLength] = {0};
+        std::vector<uint8_t> l_recordData(l_maxRecordBufferLength);
+        std::vector<uint8_t> l_eccData(l_maxEccBufferLength);
 
         // Pre-allocate the record name + 1, for a null terminated string, for pretty tracing
         char l_recordName[RECORD_BYTE_SIZE + 1] = {0};
@@ -2982,7 +3130,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
                         l_recordLength, l_recordOffset, l_eccLength, l_eccOffset);
 
             // Retrieve the record data.
-            l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData,
+            l_err = fetchDataFromEeprom(l_recordOffset, l_recordLength, l_recordData.data(),
                                         i_target,       i_args.eepromSource);
 
             if ( unlikely(nullptr != l_err) )
@@ -2995,7 +3143,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
             }
 
             // Retrieve the ECC data.
-            l_err = fetchDataFromEeprom(l_eccOffset, l_eccLength, l_eccData,
+            l_err = fetchDataFromEeprom(l_eccOffset, l_eccLength, l_eccData.data(),
                                         i_target,    i_args.eepromSource);
 
             if ( unlikely(nullptr != l_err) )
@@ -3009,8 +3157,8 @@ IpVpdFacade::validateAllOtherRecordEccData(
             }
 
             // Verify that the retrieved ECC data is as expected.
-            auto l_returnCode = vpdeccCheckData(l_recordData, l_recordLength,
-                                                l_eccData,    l_eccLength);
+            auto l_returnCode = vpdeccCheckData(l_recordData.data(), l_recordLength,
+                                                l_eccData.data(),    l_eccLength);
 
             // If the return code from the call to vpdeccCheckData is not VPD_ECC_OK, then an error occurred
             if ( unlikely(VPD_ECC_OK != l_returnCode) )
@@ -3080,7 +3228,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
                                l_recordName, TARGETING::get_huid(i_target) );
 
                     updateRecordData( l_err,        i_target,       l_recordName,
-                                      l_recordData, l_recordOffset, l_recordLength  );
+                                      l_recordData.data(), l_recordOffset, l_recordLength  );
                     if (l_err)
                     {
                         TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
@@ -3106,7 +3254,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
             // for the record data as a blob. verifyRecordIsValid will check that
             // the record itself is valid in relation to its associated meta data.
             l_err = verifyRecordIsValid(i_target,     l_recordName,
-                                        l_recordData, l_recordLength);
+                                        l_recordData.data(), l_recordLength);
             if (l_err)
             {
                 TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllOtherRecordEccData(): "
@@ -3118,7 +3266,7 @@ IpVpdFacade::validateAllOtherRecordEccData(
             //  the ECC data between our cache and the hardware seeprom to
             //  detect any external changes.
             l_err = checkForVpdChanges( i_target,    l_recordName,
-                                        l_eccOffset, l_eccLength, l_eccData,
+                                        l_eccOffset, l_eccLength, l_eccData.data(),
                                         l_recordOffset, l_recordLength );
             if( l_err )
             {
@@ -3759,36 +3907,103 @@ IpVpdFacade::checkForVpdChanges( const TARGETING::TargetHandle_t i_target,
     errlHndl_t l_err = nullptr;
 
     do {
-        uint8_t l_eccDataHW[i_eccLength] = {0};
+        const uint32_t l_huid = TARGETING::get_huid(i_target);
+
+        // Validate ECC length
+        if (i_eccLength == 0)
+        {
+            TRACFCOMP(g_trac_vpd, ERR_MRK
+                      "IpVpdFacade::checkForVpdChanges(): "
+                      "Zero-length ECC detected for target 0x%08X.",
+                      l_huid);
+
+            /*@
+             * @errortype
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       VPD::VPD_IPVPD_CHECK_FOR_VPD_CHANGES
+             * @reasoncode     VPD::VPD_INVALID_ECC_LENGTH
+             * @userdata1      ECC length (zero)
+             * @userdata2      Target HUID
+             * @devdesc        VPD ECC length is zero - undefined behavior
+             * @custdesc       A hardware component contains invalid data
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                VPD::VPD_IPVPD_CHECK_FOR_VPD_CHANGES,
+                VPD::VPD_INVALID_ECC_LENGTH,
+                i_eccLength,
+                l_huid,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            l_err->addHwCallout(i_target,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL);
+            break;
+        }
+
+        // Allocate ECC data buffer on heap
+        // Avoid stack overflow with untrusted EEPROM data
+        std::vector<uint8_t> l_eccDataHW(i_eccLength);
 
         // Retrieve the ECC data from the HW.
-        l_err = fetchDataFromEeprom(i_eccOffset, i_eccLength, l_eccDataHW,
+        l_err = fetchDataFromEeprom(i_eccOffset, i_eccLength, l_eccDataHW.data(),
                                     i_target, EEPROM::HARDWARE);
         if ( unlikely(nullptr != l_err) )
         {
             TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::checkForVpdChanges(): fetchDataFromEeprom(HW) failed to retrieve ECC data for record %s with ecc length %d and ecc offset 0x%.4X on target 0x%.8X",
                        i_recordName, i_eccLength,
-                       i_eccOffset, TARGETING::get_huid(i_target) );
+                       i_eccOffset, l_huid );
             break;
         }
 
         // Compare HW and Cache ECC
-        if( 0 == memcmp( l_eccDataHW, i_eccDataCache, i_eccLength ) )
+        if( 0 == memcmp( l_eccDataHW.data(), i_eccDataCache, i_eccLength ) )
         {
-            TRACFCOMP( g_trac_vpd, "ECC matches between HW and cache for record %s",
-                       i_recordName);
             break;
         }
 
-        TRACFCOMP( g_trac_vpd, "ECC does not match between HW and cache for record %s on %.8X",
-                   i_recordName,
-                   TARGETING::get_huid(i_target) );
+        // Validate record length
+        if (i_recordLength == 0)
+        {
+            TRACFCOMP(g_trac_vpd, ERR_MRK
+                      "IpVpdFacade::checkForVpdChanges(): "
+                      "Zero-length record detected for target 0x%08X.",
+                      l_huid);
+
+            /*@
+             * @errortype
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       VPD::VPD_IPVPD_CHECK_FOR_VPD_CHANGES
+             * @reasoncode     VPD::VPD_INVALID_RECORD_LENGTH
+             * @userdata1      Record length (zero)
+             * @userdata2      Target HUID
+             * @devdesc        VPD record length is zero - undefined behavior
+             * @custdesc       A hardware component contains invalid data
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                VPD::VPD_IPVPD_CHECK_FOR_VPD_CHANGES,
+                VPD::VPD_INVALID_RECORD_LENGTH,
+                i_recordLength,
+                l_huid,
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            l_err->addHwCallout(i_target,
+                                HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::NO_DECONFIG,
+                                HWAS::GARD_NULL);
+            break;
+        }
+
+        // Allocate ECC data buffer on heap
+        // Avoid stack overflow with untrusted EEPROM data
+        std::vector<uint8_t> l_recordData(i_recordLength);
 
         // read the record's content from the seeprom so that we can update
         //  our cache
-        uint8_t l_recordData[i_recordLength] = {0};
         l_err = fetchDataFromEeprom(i_recordOffset, i_recordLength,
-                                    l_recordData,
+                                    l_recordData.data(),
                                     i_target,
                                     EEPROM::HARDWARE);
 
@@ -3804,7 +4019,7 @@ IpVpdFacade::checkForVpdChanges( const TARGETING::TargetHandle_t i_target,
         // write the seeprom data into the cache
         l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
                                     i_target,
-                                    l_recordData,
+                                    l_recordData.data(),
                                     i_recordLength,
                                     DEVICE_EEPROM_ADDRESS(
                                        EEPROM::VPD_AUTO,
@@ -3820,7 +4035,7 @@ IpVpdFacade::checkForVpdChanges( const TARGETING::TargetHandle_t i_target,
         // write the seeprom's ecc data into the cache
         l_err = DeviceFW::deviceOp( DeviceFW::WRITE,
                                     i_target,
-                                    l_eccDataHW,
+                                    l_eccDataHW.data(),
                                     i_eccLength,
                                     DEVICE_EEPROM_ADDRESS(
                                        EEPROM::VPD_AUTO,
