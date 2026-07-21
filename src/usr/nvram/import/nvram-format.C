@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2018,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,9 +170,12 @@ int nvram_check(void *nvram_image, const uint32_t nvram_size)
                 offset, h->cksum, chrp_nv_cksum(h));
             goto failed;
         }
-        if (be16_to_cpu(h->len) < 1) {
+
+        // length can't be zero or 1; need a length of at least 2 to account
+        // for the size of the chrp_nvram_hdr itself
+        if (be16_to_cpu(h->len) < 2) {
             prerror("NVRAM: Partition at offset 0x%x"
-                " has incorrect 0 length\n", offset);
+                " has incorrect length of 0x%x\n", offset, be16_to_cpu(h->len));
             goto failed;
         }
 
@@ -225,6 +228,8 @@ int nvram_check(void *nvram_image, const uint32_t nvram_size)
 /*
  * nvram_query() - Searches skiboot NVRAM partition for a key=value pair.
  *
+ * @note: nvram_check() must have already been called to set skiboot_part_hdr
+ *
  * Returns a pointer to a NUL terminated string that contains the value
  * associated with the given key.
  */
@@ -256,11 +261,24 @@ const char *nvram_query(const char *key)
 
     assert(skiboot_part_hdr);
 
+
+    // The end of the skiboot section is from the start of the section
+    // to len * 16 - 1
     part_end = (const char *) skiboot_part_hdr
         + be16_to_cpu(skiboot_part_hdr->len) * 16 - 1;
 
+    // start just past the header
     start = (const char *) skiboot_part_hdr
         + sizeof(*skiboot_part_hdr);
+
+    // To account for sizeof(*skiboot_part_hdr), the len must be at least 2 to
+    // put part_end after start
+    if ((be16_to_cpu(skiboot_part_hdr->len) < 2) ||
+        (start > part_end)) {
+        prlog(PR_WARNING, "NVRAM: skiboot section length 0x%x is too small\n",
+                          be16_to_cpu(skiboot_part_hdr->len));
+        return NULL;
+    }
 
     if (!key_len) {
         prlog(PR_WARNING, "NVRAM: search key is empty!\n");
@@ -273,11 +291,11 @@ const char *nvram_query(const char *key)
     while (start) {
         int remaining = part_end - start;
 
-        prlog(PR_TRACE, "NVRAM: '%s' (%lu)\n",
-            start, strlen(start));
-
         if (key_len + 1 > remaining)
             return NULL;
+
+        prlog(PR_TRACE, "NVRAM: '%s' (%lu)\n",
+            start, strlen(start));
 
         if (!strncmp(key, start, key_len) && start[key_len] == '=') {
             const char *value = &start[key_len + 1];
