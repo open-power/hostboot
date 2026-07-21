@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2026                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -76,6 +76,9 @@ enum vpdModuleId
     VPD_IPVPD_GET_RECORD_META_DATA          = 0x38,
     VPD_IPVPD_VERIFY_VHDR_RECORD_IS_VALID   = 0x39,
     VPD_IPVPD_VERIFY_RECORD_IS_VALID        = 0x3a,
+    VPD_IPVPD_UPDATE_RECORD_ECC             = 0x3b,
+    VPD_IPVPD_VALIDATE_RECORD_ECC           = 0x3c,
+    VPD_IPVPD_CHECK_FOR_VPD_CHANGES         = 0x3d,
 
     // PVPD
     VPD_PVPD_PRESENCEDETECT                 = 0x50,
@@ -205,6 +208,9 @@ enum vpdReasonCode
     VPD_ISDIMM_PROBLEM_READING_SPD_SIZE = VPD_COMP_ID | 0x55,
     VPD_ISDIMM_PROBLEM_READING_SPD      = VPD_COMP_ID | 0x56,
     VPD_ISDIMM_UNSUPPORTED_FN_FOR_CCIN  = VPD_COMP_ID | 0x57,
+    VPD_OCMB_CRC_MISMATCH               = VPD_COMP_ID | 0x58,
+    VPD_INVALID_RECORD_LENGTH           = VPD_COMP_ID | 0x59,
+    VPD_INVALID_ECC_LENGTH              = VPD_COMP_ID | 0x5a,
 };
 
 
