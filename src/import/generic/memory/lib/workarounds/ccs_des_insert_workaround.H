@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,19 @@ namespace ccs
 {
 namespace workarounds
 {
+
+///
+/// @brief Calculate idles at start of CCS based on self refresh support
+/// @param[in] i_port the port target to effect
+/// @param[in] i_mrw_idle_power_ctr_req MRW idle power control request
+/// @param[in] i_mrw_power_ctr_req MRW power control request
+/// @param[in,out] io_delay idle value
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode calculate_idles(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                  const uint8_t i_mrw_idle_power_ctr_req,
+                                  const uint8_t i_mrw_power_ctr_req,
+                                  uint16_t& io_delay);
 
 ///
 /// @brief Workaround for DES command insertion

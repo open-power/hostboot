@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2026                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 /// @file ody_ccs_des_insert_workaround.C
 /// @brief Odyssey workaround for CCS command des insert
 ///
-// *HWP HWP Owner: David Jude Chung <dj.chung@ibm.com>
+// *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
@@ -38,6 +38,7 @@
 #include <generic/memory/lib/ccs/ccs_instruction.H>
 #include <lib/ccs/ody_ccs.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/workarounds/ccs_des_insert_workaround.H>
 
 namespace mss
@@ -46,6 +47,64 @@ namespace ccs
 {
 namespace workarounds
 {
+
+///
+/// @brief Calculate idles at start of CCS based on self refresh support
+/// @param[in] i_port the port target to effect
+/// @param[in] i_mrw_idle_power_ctr_req MRW idle power control request
+/// @param[in] i_mrw_power_ctr_req MRW power control request
+/// @param[in,out] io_delay idle value
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode calculate_idles(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                  const uint8_t i_mrw_idle_power_ctr_req,
+                                  const uint8_t i_mrw_power_ctr_req,
+                                  uint16_t& io_delay)
+{
+    uint64_t l_mem_port_freq = 0;
+
+    constexpr uint16_t IDLE_3200_FREQ = 1024;
+    constexpr uint16_t IDLE_4000_FREQ = 1280;
+    constexpr uint16_t IDLE_4800_FREQ = 1536;
+
+    // If these attributes are set to allow the DIMM to go into STR-self time refresh mode,
+    // we need to add delay before CCS commands to allow the DRAMs to come out of STR
+    if(((i_mrw_idle_power_ctr_req == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_OFF)
+        || (i_mrw_idle_power_ctr_req == fapi2::ENUM_ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED_POWER_DOWN))
+       && ((i_mrw_power_ctr_req == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF)
+           || (i_mrw_power_ctr_req == fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN)))
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC, i_port, io_delay));
+    }
+    else
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_port, l_mem_port_freq));
+
+        switch(l_mem_port_freq)
+        {
+            case mss::ddr_dimm_speeds::DIMM_SPEED_3200:
+                io_delay = IDLE_3200_FREQ;
+                break;
+
+            case mss::ddr_dimm_speeds::DIMM_SPEED_4000:
+                io_delay = IDLE_4000_FREQ;
+                break;
+
+            case mss::ddr_dimm_speeds::DIMM_SPEED_4800:
+                io_delay = IDLE_4800_FREQ;
+                break;
+
+            default:
+                io_delay = IDLE_4800_FREQ;
+                break;
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Workaround for DES command insertion
 /// @param[in] i_target the target to effect
@@ -69,6 +128,8 @@ fapi2::ReturnCode insert_des<mss::mc_type::ODYSSEY>(
 
     mss::ccs::instruction_t<mss::mc_type::ODYSSEY> l_des;
     uint16_t l_delay = 0;
+    uint8_t l_mrw_idle_power_ctr_req = 0;
+    uint8_t l_mrw_power_ctr_req = 0;
 
     // Grab port index and first inst
 
@@ -84,7 +145,12 @@ fapi2::ReturnCode insert_des<mss::mc_type::ODYSSEY>(
     // If first instruction pass delay of trfc, otherwise assume its last and pass delay of 1
     if(io_inst_count == 0)
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC, i_port, l_delay));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_mrw_idle_power_ctr_req));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_mrw_power_ctr_req));
+
+        FAPI_TRY(calculate_idles(i_port, l_mrw_idle_power_ctr_req, l_mrw_power_ctr_req, l_delay));
         l_des =  mss::ccs::des_command<mss::mc_type::ODYSSEY>(l_delay);
         l_des.arr1.template insertFromRight<TT::ARR1_GOTO_CMD, TT::ARR1_GOTO_CMD_LEN>(io_inst_count + 1);
     }
