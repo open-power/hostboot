@@ -724,7 +724,7 @@ hb_startsimics()
         # If '-nre' was passed in as a flag, then do not vexec
         # also, if $POOL is defined, this indicates are already in
         # a vexec shell so do not vexec
-        if [ "$*" = "-nre" ] || [ ! -z ${POOL} ]; then
+        if [ "$*" = "-nre" ] || [ ! -z ${POOL} ] || [[ $(hostname -s) == *pfw* ]]; then
             VEXEC_STR=""
         else
             VEXEC_STR=" vexec"
