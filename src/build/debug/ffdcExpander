@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2025
+# Contributors Listed Below - COPYRIGHT 2013,2026
 # [+] International Business Machines Corp.
 #
 #
@@ -371,7 +371,7 @@ function _extractHbSysDumpFile_()
 
 
     # These variables are required for makedump to function.
-    export CTEPATH=/afs/awd.austin.ibm.com/projects/cte/
+    export CTEPATH=/afs/rchland.ibm.com/projects/cte
     export PYTHONPATH=$CTEPATH/tools/ecmd/rel/x86_64/python
     export LD_LIBRARY_PATH=$CTEPATH/tools/ecmd/rel/x86_64/lib
     . $CTEPATH/tools/ecmd/rel/bin/ecmdaliases.ksh

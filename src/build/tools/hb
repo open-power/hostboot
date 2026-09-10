@@ -739,7 +739,9 @@ hb_startsimics()
         # We use this to find the path to the files vexec used to allow other machines to vexec
         # into them. If the machine is not allowed to vexec we skip it below
         whichLab=$(cat /etc/pfd/site)
-        if [ $whichLab = "rch" ] ; then
+        if [[ $(hostname -s) == *pfw* ]]; then
+            skipVexec=true;
+        elif [ $whichLab = "rch" ] ; then
             if $(grep -q $(hostname -s) /afs/rchland/projects/esw/gfwcs/data/auth*); then
                 skipVexec=false;
             else
